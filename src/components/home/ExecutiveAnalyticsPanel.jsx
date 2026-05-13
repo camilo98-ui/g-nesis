@@ -429,96 +429,112 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
       
 
-      {/* ── ROW 1: Meta del Día Premium ── */}
+      {/* ── ROW 1: Store Rankings ── */}
       <motion.div 
-        className="mb-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}>
-        
-        <div className="relative rounded-2xl overflow-hidden p-0"
-          style={{
-            background: 'linear-gradient(135deg, rgba(30, 30, 50, 0.95) 0%, rgba(45, 35, 65, 0.95) 100%)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 77, 141, 0.2)',
-            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-          }}>
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, staggerChildren: 0.1 }}>
+
+        {/* Ranking de Tiendas por Ventas */}
+        <AnalyticsCard
+          title="Top Tiendas"
+          subtitle="Ranking por ventas últimos 30 días"
+          delay={0.18}>
           
-          {/* Background gradient accent */}
-          <div className="absolute inset-0 opacity-5"
-            style={{
-              background: 'radial-gradient(circle at 30% 50%, #FF4D8D, transparent 70%)'
-            }} />
+          <div className="space-y-3">
+            {[
+              { rank: 1, name: 'BTA 11', sales: 45200000, compliance: 92 },
+              { rank: 2, name: 'BTA 08', sales: 38900000, compliance: 85 },
+              { rank: 3, name: 'BTA 15', sales: 36700000, compliance: 78 }
+            ].map((store, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -15 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25 + i * 0.08 }}
+                className="flex items-center gap-3 p-3 rounded-lg group cursor-pointer"
+                style={{ background: 'rgba(255, 77, 141, 0.04)' }}>
+                
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
+                  style={{
+                    background: i === 0 ? 'linear-gradient(135deg, #FF4D8D, #FF7FA5)' : `rgba(255, 77, 141, ${0.1 + i * 0.05})`,
+                    color: i === 0 ? '#fff' : '#FF4D8D'
+                  }}>
+                  {i + 1}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-semibold text-[#2A2A2A]">{store.name}</p>
+                  <p className="text-[9px] text-[#8F96A3] font-medium">{fmt(store.sales)}</p>
+                </div>
+                
+                <div className="text-right flex-shrink-0">
+                  <p className="text-[10px] font-bold" style={{ color: store.compliance >= 85 ? '#10b981' : store.compliance >= 70 ? '#f59e0b' : '#ef4444' }}>
+                    {store.compliance}%
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </AnalyticsCard>
+
+        {/* Benchmarking de Métricas */}
+        <AnalyticsCard
+          title="Benchmarking"
+          subtitle="Promedios vs objetivo"
+          delay={0.22}>
           
-          <div className="relative z-10 px-8 py-7">
-            {/* Title */}
-            <motion.div 
-              className="mb-6"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}>
-              <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">🎯 Meta del Día</p>
-            </motion.div>
-
-            {/* Main metrics grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-7">
-              {/* PPT del Día */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}>
-                <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-2.5">PPT del Día</p>
-                <div className="flex items-baseline gap-1">
-                  <p className="text-white font-black text-5xl tracking-tight">2.771</p>
-                  <p className="text-slate-400 text-xl">.088</p>
-                </div>
-              </motion.div>
-
-              {/* Brecha del Mes */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}>
-                <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-2.5">📈 Brecha del Mes</p>
-                <div>
-                  <p className="text-emerald-400 font-black text-4xl tracking-tight mb-0.5">+5.824.076</p>
-                  <p className="text-slate-500 text-xs">Sobre meta: 3.5% presupuesto</p>
-                </div>
-              </motion.div>
-
-              {/* Proyección Cierre */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}>
-                <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-2.5">Proyección Cierre</p>
-                <div className="flex items-center gap-3">
-                  <p className="text-white font-black text-5xl tracking-tight">106<span className="text-2xl text-emerald-400">%</span></p>
-                </div>
-                <p className="text-slate-500 text-xs mt-1.5">177.6M / 167.3M</p>
-              </motion.div>
-            </div>
-
-            {/* Progress bar */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}>
-              <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-3">Proyección Cierre Mes</p>
-              <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(255, 77, 141, 0.1)', border: '1px solid rgba(255, 77, 141, 0.2)' }}>
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Ticket Promedio</span>
+                <span className="text-[11px] font-bold text-[#FF4D8D]">$52.4K</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: '106%' }}
-                  transition={{ delay: 0.4, duration: 1.3, ease: 'easeOut' }}
+                  animate={{ width: '78%' }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
                   className="h-full rounded-full"
-                  style={{ 
-                    background: 'linear-gradient(90deg, #FF4D8D 0%, #FF7FA5 50%, #34d399 100%)',
-                    boxShadow: '0 0 20px rgba(255, 77, 141, 0.5)'
-                  }} />
+                  style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
               </div>
-            </motion.div>
+              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: $67K</p>
+            </div>
+            
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Tasa de Conversión</span>
+                <span className="text-[11px] font-bold text-[#FF4D8D]">68%</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '68%' }}
+                  transition={{ delay: 0.35, duration: 0.8 }}
+                  className="h-full rounded-full"
+                  style={{ background: 'linear-gradient(90deg, #FF7FA5, #FFB4C9)' }} />
+              </div>
+              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: 75%</p>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Ventas por Sqm</span>
+                <span className="text-[11px] font-bold text-[#FF4D8D]">$847K</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: '88%' }}
+                  transition={{ delay: 0.4, duration: 0.8 }}
+                  className="h-full rounded-full"
+                  style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
+              </div>
+              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: $960K</p>
+            </div>
           </div>
-        </div>
+        </AnalyticsCard>
       </motion.div>
 
       {/* ── ROW 2: TXN Heatmap + Participación + Cajeros ── */}
