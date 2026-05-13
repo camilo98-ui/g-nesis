@@ -13,7 +13,7 @@ import {
 import { STORES } from '@/components/StoreSelector';
 import StoreSelector from '@/components/StoreSelector';
 import PremiumSparkline from './PremiumSparkline';
-import ExecutiveAnalyticsPanelFuturistic from './ExecutiveAnalyticsPanelFuturistic';
+import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
@@ -447,13 +447,13 @@ export default function HomeWorkspace({
           }
 
           {/* ── EXECUTIVE ANALYTICS ── */}
-           {!isGerente &&
-           <ExecutiveAnalyticsPanelFuturistic
-             todaySales={todaySales}
-             budget={budget}
-             cashiers={cashiers} />
+          {!isGerente &&
+          <ExecutiveAnalyticsPanel
+            todaySales={todaySales}
+            budget={budget}
+            cashiers={cashiers} />
 
-           }
+          }
 
           {/* ── QUICK ACTIONS ── */}
           {!isGerente &&

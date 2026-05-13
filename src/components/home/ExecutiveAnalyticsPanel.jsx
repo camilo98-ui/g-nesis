@@ -60,35 +60,17 @@ function makePremiumTooltip(formatter) {
   return function PremiumTooltip({ active, payload, label }) {
     if (!active || !payload?.length) return null;
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8, y: -10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.8, y: -10 }}
-        transition={{ duration: 0.2 }}
-        className="rounded-xl px-3 py-2.5 shadow-2xl relative"
-        style={{ 
-          background: 'rgba(15,15,20,0.96)', 
-          border: '1px solid rgba(255, 77, 141, 0.3)', 
-          backdropFilter: 'blur(20px)',
-          boxShadow: '0 8px 24px rgba(255, 77, 141, 0.15), inset 0 1px 1px rgba(255, 77, 141, 0.1)'
-        }}>
-         <motion.div className="absolute inset-0 rounded-xl opacity-0 animate-pulse"
-           style={{ boxShadow: 'inset 0 0 12px rgba(255, 77, 141, 0.1)' }} />
-         <p className="text-[10px] font-semibold text-[#FF7FA5] mb-1.5 tracking-wide">{label}</p>
-         {payload.map((p, i) =>
-         <motion.p 
-           key={i} 
-           initial={{ opacity: 0, x: -8 }}
-           animate={{ opacity: 1, x: 0 }}
-           transition={{ delay: i * 0.05 }}
-           className="text-[12px] font-bold" 
-           style={{ color: p.color || '#FF4D8D' }}>
-             {formatter ? formatter(p.value) : p.value}
-           </motion.p>
-         )}
-       </motion.div>);
+      <div className="rounded-xl px-3 py-2 shadow-lg"
+      style={{ background: 'rgba(15,15,20,0.92)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)' }}>
+        <p className="text-[10px] font-medium text-slate-400 mb-1">{label}</p>
+        {payload.map((p, i) =>
+        <p key={i} className="text-[12px] font-bold" style={{ color: p.color || '#fff' }}>
+            {formatter ? formatter(p.value) : p.value}
+          </p>
+        )}
+      </div>);
 
-   };
+  };
 }
 
 const SalesTooltip = makePremiumTooltip(fmt);
@@ -124,16 +106,15 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
         }}
       />
       
-      {/* Enhanced animated border with glow pulse */}
+      {/* Animated border glow */}
       <motion.div
         className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 pointer-events-none"
-        animate={isHovered ? { opacity: [0.3, 0.6, 0.3] } : { opacity: 0 }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        animate={isHovered ? { opacity: 0.5 } : { opacity: 0 }}
+        transition={{ duration: 0.4 }}
         style={{
-          background: 'linear-gradient(90deg, rgba(255, 77, 141, 0.1), rgba(255, 182, 201, 0.2), rgba(255, 77, 141, 0.1))',
-          backgroundSize: '200% 100%',
-          boxShadow: 'inset 0 0 20px rgba(255, 77, 141, 0.1), 0 0 24px rgba(255, 77, 141, 0.15)',
-          border: '1px solid rgba(255, 77, 141, 0.2)'
+          background: 'linear-gradient(135deg, rgba(255, 77, 141, 0.2), rgba(255, 182, 201, 0.1))',
+          boxShadow: '0 0 20px rgba(255, 77, 141, 0.2), inset 0 0 20px rgba(255, 77, 141, 0.08)',
+          filter: 'blur(1px)'
         }}
       />
       
@@ -408,16 +389,10 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
       {/* ── ROW 1: Sales Trend + EBITDA ── */}
       <motion.div 
-        className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6 pb-6 relative"
+        className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, staggerChildren: 0.1 }}
-        style={{
-          backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255, 77, 141, 0.08) 50%, transparent 100%)',
-          backgroundPosition: 'bottom',
-          backgroundSize: '100% 1px',
-          backgroundRepeat: 'no-repeat'
-        }}>
+        transition={{ duration: 0.3, staggerChildren: 0.1 }}>
 
         {/* Sales vs Projection chart */}
         <AnalyticsCard
