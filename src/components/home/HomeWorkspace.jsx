@@ -434,11 +434,9 @@ export default function HomeWorkspace({
                 </div>
               }
             </div>
-            {!isGerente &&
             <div className="w-full max-w-xs">
                 <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
               </div>
-            }
           </motion.div>
 
           {/* ── DAILY METRICS ── */}
