@@ -52,77 +52,73 @@ function ChartTooltip({ active, payload, label }) {
 }
 
 // ── Gauge de PPT ─────────────────────────────────────────────────────────────
-function PPTRing({ pct, label, sublabel }) {
+// Paleta pastel Popsy
+const PASTEL = {
+  pink:   { bg: '#FFF0F6', border: '#F9C8DE', text: '#C21875', ring: '#E8779A' },
+  lavender: { bg: '#F5F3FF', border: '#DDD6FE', text: '#7C3AED', ring: '#A78BFA' },
+  peach:  { bg: '#FFF7ED', border: '#FDDCB5', text: '#C2601B', ring: '#FDBA74' },
+  mint:   { bg: '#F0FDF4', border: '#BBF7D0', text: '#15803D', ring: '#6EE7B7' },
+  sky:    { bg: '#F0F9FF', border: '#BAE6FD', text: '#0369A1', ring: '#7DD3FC' },
+  neutral:{ bg: '#F8FAFC', border: '#E2E8F0', text: '#64748B', ring: '#CBD5E1' },
+};
+
+function PPTRing({ pct }) {
   const clamped = Math.min(100, Math.max(0, pct ?? 0));
-  const color = clamped >= 95 ? '#10b981' : clamped >= 75 ? '#f59e0b' : clamped >= 50 ? '#f97316' : '#e11d48';
-  const r = 28, cx = 34, cy = 34;
+  const palette = clamped >= 90 ? PASTEL.mint : clamped >= 70 ? PASTEL.peach : PASTEL.pink;
+  const r = 26, cx = 32, cy = 32;
   const circ = 2 * Math.PI * r;
   const dash = (clamped / 100) * circ;
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="relative" style={{ width: 68, height: 68 }}>
-        <svg width="68" height="68">
-          <circle cx={cx} cy={cy} r={r} fill="none" strokeWidth="5"
-            stroke="rgba(0,0,0,0.07)" />
-          <circle cx={cx} cy={cy} r={r} fill="none" strokeWidth="5"
-            stroke={color}
-            strokeDasharray={`${dash} ${circ - dash}`}
-            strokeLinecap="round"
-            transform={`rotate(-90 ${cx} ${cy})`}
-            style={{ transition: 'stroke-dasharray 1s ease' }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[16px] font-black tabular-nums leading-none" style={{ color }}>
-            {pct != null ? `${clamped}` : '—'}
-          </span>
-          <span className="text-[7px] font-semibold text-slate-300">%</span>
-        </div>
+    <div className="relative flex-shrink-0" style={{ width: 64, height: 64 }}>
+      <svg width="64" height="64">
+        <circle cx={cx} cy={cy} r={r} fill="none" strokeWidth="5" stroke={palette.border} />
+        <circle cx={cx} cy={cy} r={r} fill="none" strokeWidth="5"
+          stroke={palette.ring}
+          strokeDasharray={`${dash} ${circ - dash}`}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${cx} ${cy})`}
+          style={{ transition: 'stroke-dasharray 1.2s cubic-bezier(0.23,1,0.32,1)' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-[15px] font-black tabular-nums leading-none" style={{ color: palette.text }}>
+          {pct != null ? clamped : '—'}
+        </span>
+        <span className="text-[7px] font-bold" style={{ color: palette.ring }}>%</span>
       </div>
-      <p className="text-[9.5px] font-bold text-slate-600 text-center leading-tight">{label}</p>
-      {sublabel && <p className="text-[8.5px] text-slate-300 font-medium text-center">{sublabel}</p>}
     </div>
   );
 }
 
 // ── Stat card compacta ────────────────────────────────────────────────────────
-function StatCard({ label, value, sublabel, delta, color, icon: Icon, children, delay = 0, fullWidth = false }) {
+function StatCard({ label, value, sublabel, delta, color, icon: Icon, children, delay = 0, pastel }) {
+  const bg = pastel?.bg ?? '#FFFFFF';
+  const border = pastel?.border ?? '#E2E8F0';
+  const textColor = pastel?.text ?? '#64748B';
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-      className={`relative rounded-2xl p-4 overflow-hidden ${fullWidth ? 'col-span-2' : ''}`}
-      style={{
-        background: 'rgba(255,255,255,0.9)',
-        border: '1px solid rgba(0,0,0,0.06)',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.03)',
-        backdropFilter: 'blur(20px)',
-      }}
+      className="relative rounded-2xl p-4 overflow-hidden"
+      style={{ background: bg, border: `1px solid ${border}`, boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}
     >
-      <div className="absolute inset-x-0 top-0 h-px"
-        style={{ background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.9),transparent)' }} />
-
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-1.5">
           {Icon && (
             <div className="w-5 h-5 rounded-lg flex items-center justify-center"
-              style={{ background: `${color}12` }}>
+              style={{ background: `${color}22` }}>
               <Icon style={{ width: 10, height: 10, color }} />
             </div>
           )}
-          <p className="text-[9.5px] font-semibold text-slate-400 uppercase tracking-[0.12em]">{label}</p>
+          <p className="text-[9.5px] font-bold uppercase tracking-[0.12em]" style={{ color: textColor }}>{label}</p>
         </div>
         {delta != null && <Delta val={delta} />}
       </div>
-
       <p className="text-[22px] font-black tabular-nums leading-none text-slate-800 mb-0.5">{value}</p>
-      {sublabel && <p className="text-[10px] text-slate-400 font-medium mb-2">{sublabel}</p>}
+      {sublabel && <p className="text-[10px] font-medium mb-2" style={{ color: textColor }}>{sublabel}</p>}
       {children}
-
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-2xl"
-        style={{ background: `linear-gradient(90deg, transparent, ${color}25, transparent)` }} />
     </motion.div>
   );
 }
@@ -147,11 +143,20 @@ export default function ExecutiveKPIStrip({
     [budget, currentMonth, currentYear]
   );
 
+  // PPT mensual base del excel
   const salesBudgetMonthly = activeBudget?.sales_budget ?? null;
-  const dailyPPT = salesBudgetMonthly ? salesBudgetMonthly / daysInMonth : null;
+
+  // Meta diaria REAL: PPT mensual ÷ días del mes
+  // Si el budget tiene sales_gap (diferencial vs PPT del excel), lo incluimos
+  const salesGap = activeBudget?.sales_gap ?? 0;
+  const adjustedMonthlyBudget = salesBudgetMonthly
+    ? salesBudgetMonthly + (salesGap || 0)
+    : null;
+  const dailyPPT = adjustedMonthlyBudget ? Math.round(adjustedMonthlyBudget / daysInMonth) : null;
+
   const todaySalesRaw = latest?.total_sales ?? null;
 
-  // PPT del día: ventas hoy vs meta diaria
+  // PPT del día: ventas hoy vs meta diaria real
   const todayPPTPct = dailyPPT && todaySalesRaw != null
     ? Math.round((todaySalesRaw / dailyPPT) * 100) : null;
 
@@ -180,17 +185,21 @@ export default function ExecutiveKPIStrip({
   );
 
   const acumMes = thisMonthRecords.reduce((s, d) => s + (d.total_sales || 0), 0);
-  const pptMensualpct = salesBudgetMonthly
-    ? Math.round((acumMes / salesBudgetMonthly) * 100) : null;
+  // Avance vs presupuesto ajustado (con gap del excel)
+  const pptMensualpct = adjustedMonthlyBudget
+    ? Math.round((acumMes / adjustedMonthlyBudget) * 100) : null;
 
   // ── Proyección fin de mes ──
-  const avgDailyThisMonth = thisMonthRecords.length > 0
-    ? acumMes / thisMonthRecords.length : null;
+  // Promedio basado solo en días CON datos reales (días transcurridos con registro)
+  const daysWithData = thisMonthRecords.filter(d => (d.total_sales || 0) > 0).length;
+  const avgDailyThisMonth = daysWithData > 0 ? acumMes / daysWithData : null;
   const remainingDays = daysInMonth - currentDay;
+  // Proyección = acumulado + (promedio * días restantes)
   const projection = avgDailyThisMonth != null
     ? Math.round(acumMes + avgDailyThisMonth * remainingDays) : null;
-  const projectionPct = salesBudgetMonthly && projection
-    ? Math.round((projection / salesBudgetMonthly) * 100) : null;
+  // Proyección vs presupuesto ajustado (con gap)
+  const projectionPct = adjustedMonthlyBudget && projection
+    ? Math.round((projection / adjustedMonthlyBudget) * 100) : null;
 
   // ── Mejor día histórico ──
   const bestDay = useMemo(() => {
@@ -244,168 +253,135 @@ export default function ExecutiveKPIStrip({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.04, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="relative rounded-2xl overflow-hidden"
-        style={{
-          background: 'rgba(255,255,255,0.93)',
-          border: '1px solid rgba(194,24,117,0.1)',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.04), 0 12px 40px rgba(194,24,117,0.05)',
-          backdropFilter: 'blur(24px)',
-        }}
+        style={{ background: '#FFFFFF', border: '1px solid #F3E8EF', boxShadow: '0 2px 16px rgba(194,24,117,0.06)' }}
       >
-        {/* Top accent bar */}
-        <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #C21875, #9333ea, #6366f1)' }} />
+        {/* Accent strip */}
+        <div className="h-[3px] w-full" style={{ background: 'linear-gradient(90deg,#E8779A,#C4A3D4,#93C5FD)' }} />
 
         <div className="p-5">
-          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full pointer-events-none"
-            style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.05) 0%, transparent 70%)' }} />
-
-          {/* ── Header label ── */}
-          <div className="flex items-center justify-between mb-4">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#C21875' }} />
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.18em]">
-                Panel del día · {now.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })}
+              <div className="w-2 h-2 rounded-full" style={{ background: '#E8779A', boxShadow: '0 0 6px #E8779A88' }} />
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: '#9B7B8E' }}>
+                {now.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' })}
               </p>
             </div>
             {acumMes > 0 && (
-              <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
-                style={{ background: 'rgba(99,102,241,0.07)', color: '#6366f1', border: '1px solid rgba(99,102,241,0.15)' }}>
-                Acumulado mes: {fmt(acumMes)}
+              <span className="text-[9px] font-semibold px-2.5 py-1 rounded-full"
+                style={{ background: PASTEL.lavender.bg, color: PASTEL.lavender.text, border: `1px solid ${PASTEL.lavender.border}` }}>
+                Acumulado: {fmt(acumMes)}
               </span>
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
 
-            {/* ── BLOQUE 1: PPT del día HOY ── */}
-            <div className="flex items-center gap-4">
-              <div className="flex-shrink-0">
-                <PPTRing pct={todayPPTPct} label="" sublabel="" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[8.5px] font-bold text-slate-400 uppercase tracking-[0.14em] mb-0.5">
-                  Presupuesto HOY
-                </p>
-                <p className="text-[26px] font-black tabular-nums leading-none tracking-tight mb-1"
-                  style={{ color: todayPPTPct == null ? '#1e293b' : todayPPTPct >= 95 ? '#059669' : todayPPTPct >= 75 ? '#d97706' : '#dc2626' }}>
-                  {salesVal}
-                </p>
-                <div className="flex items-center gap-2 mb-2">
+            {/* ── BLOQUE 1: Ventas hoy vs PPT ── */}
+            <div className="rounded-xl p-4" style={{ background: PASTEL.pink.bg, border: `1px solid ${PASTEL.pink.border}` }}>
+              <p className="text-[9px] font-bold uppercase tracking-[0.13em] mb-3" style={{ color: PASTEL.pink.text }}>
+                Meta del día
+              </p>
+              <div className="flex items-center gap-3 mb-3">
+                <PPTRing pct={todayPPTPct} />
+                <div>
+                  <p className="text-[24px] font-black tabular-nums leading-none" style={{ color: '#1e293b' }}>
+                    {salesVal}
+                  </p>
                   {dailyPPT && (
-                    <span className="text-[11px] font-semibold text-slate-500">
-                      meta <span className="font-black text-slate-700">{fmt(dailyPPT)}</span>
-                    </span>
-                  )}
-                  {todayPPTPct != null && (
-                    <span className="text-[11px] font-black px-1.5 py-0.5 rounded-lg"
-                      style={{
-                        background: todayPPTPct >= 95 ? 'rgba(5,150,105,0.1)' : todayPPTPct >= 75 ? 'rgba(217,119,6,0.1)' : 'rgba(220,38,38,0.1)',
-                        color: todayPPTPct >= 95 ? '#059669' : todayPPTPct >= 75 ? '#d97706' : '#dc2626',
-                      }}>
-                      {todayPPTPct}% del PPT
-                    </span>
+                    <p className="text-[10px] font-semibold mt-0.5" style={{ color: '#9B7B8E' }}>
+                      meta <span className="font-black" style={{ color: PASTEL.pink.text }}>{fmt(dailyPPT)}</span>
+                    </p>
                   )}
                 </div>
-                {/* Barra PPT día */}
-                {todayPPTPct != null && (
-                  <div>
-                    <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(todayPPTPct, 100)}%` }}
-                        transition={{ delay: 0.3, duration: 1.1, ease: [0.23, 1, 0.32, 1] }}
-                        className="h-full rounded-full"
-                        style={{
-                          background: todayPPTPct >= 95
-                            ? 'linear-gradient(90deg,#059669,#10b981)'
-                            : todayPPTPct >= 75
-                            ? 'linear-gradient(90deg,#d97706,#f59e0b)'
-                            : 'linear-gradient(90deg,#dc2626,#f43f5e)',
-                        }}
-                      />
-                    </div>
-                    {dailyPPT && todaySalesRaw != null && (
-                      <p className="text-[8px] text-slate-300 font-medium mt-0.5">
-                        {todayPPTPct >= 100
-                          ? `✓ Superaste la meta en ${fmt(todaySalesRaw - dailyPPT)}`
-                          : `Faltan ${fmt(dailyPPT - todaySalesRaw)} para cumplir`}
-                      </p>
-                    )}
-                  </div>
-                )}
               </div>
-            </div>
-
-            {/* ── BLOQUE 2: Proyección cierre de mes ── */}
-            <div className="sm:border-l sm:pl-5" style={{ borderColor: 'rgba(0,0,0,0.07)' }}>
-              <p className="text-[8.5px] font-bold text-slate-400 uppercase tracking-[0.14em] mb-1">
-                Proyección cierre mes
-              </p>
-              <p className="text-[26px] font-black tabular-nums leading-none tracking-tight text-slate-800 mb-1">
-                {fmt(projection)}
-              </p>
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                {projectionPct != null && (
-                  <span className="text-[11px] font-black px-1.5 py-0.5 rounded-lg"
-                    style={{
-                      background: projectionPct >= 100 ? 'rgba(5,150,105,0.1)' : projectionPct >= 85 ? 'rgba(217,119,6,0.1)' : 'rgba(220,38,38,0.1)',
-                      color: projectionPct >= 100 ? '#059669' : projectionPct >= 85 ? '#d97706' : '#dc2626',
-                    }}>
-                    {projectionPct}% del PPT
-                  </span>
-                )}
-                {salesBudgetMonthly && (
-                  <span className="text-[10px] text-slate-400 font-medium">
-                    vs {fmt(salesBudgetMonthly)} meta
-                  </span>
-                )}
-              </div>
-              {projectionPct != null && (
-                <div>
-                  <div className="h-2 rounded-full overflow-hidden mb-0.5" style={{ background: 'rgba(0,0,0,0.06)' }}>
+              {/* Barra */}
+              {todayPPTPct != null && (
+                <>
+                  <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: PASTEL.pink.border }}>
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(projectionPct, 100)}%` }}
-                      transition={{ delay: 0.45, duration: 1.1, ease: [0.23, 1, 0.32, 1] }}
+                      animate={{ width: `${Math.min(todayPPTPct, 100)}%` }}
+                      transition={{ delay: 0.3, duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
                       className="h-full rounded-full"
-                      style={{
-                        background: projectionPct >= 100
-                          ? 'linear-gradient(90deg,#059669,#10b981)'
-                          : projectionPct >= 85
-                          ? 'linear-gradient(90deg,#d97706,#f59e0b)'
-                          : 'linear-gradient(90deg,#6366f1,#8b5cf6)',
-                      }}
+                      style={{ background: PASTEL.pink.ring }}
                     />
                   </div>
-                  <p className="text-[8px] text-slate-300 font-medium">
-                    Prom. {fmt(avgDailyThisMonth)}/día · {remainingDays} días restantes
+                  <p className="text-[8.5px] font-medium" style={{ color: '#B8829E' }}>
+                    {todayPPTPct >= 100
+                      ? `✓ Superaste en ${fmt(todaySalesRaw - dailyPPT)}`
+                      : `Faltan ${fmt(dailyPPT - todaySalesRaw)}`}
                   </p>
-                </div>
+                </>
               )}
             </div>
 
-            {/* ── BLOQUE 3: Stats adicionales ── */}
-            <div className="sm:border-l sm:pl-5 grid grid-cols-2 gap-x-4 gap-y-3" style={{ borderColor: 'rgba(0,0,0,0.07)' }}>
-              {[
-                { l: 'Transacciones hoy', v: txnVal, d: txnChange },
-                { l: 'Ticket prom. hoy', v: ticketVal, d: null },
-                { l: 'PPT mes', v: pptMensualpct != null ? `${pptMensualpct}%` : '—', sub: fmt(salesBudgetMonthly) },
-                {
-                  l: `vs ${new Date(now.getFullYear(), currentMonth === 1 ? 11 : currentMonth - 2, 1).toLocaleDateString('es', { month: 'short' })} mismo día`,
-                  v: diffVsLastMonth != null ? `${diffVsLastMonth >= 0 ? '+' : ''}${diffVsLastMonth}%` : '—',
-                  color: diffVsLastMonth == null ? '#94a3b8' : diffVsLastMonth >= 0 ? '#10b981' : '#f43f5e',
-                },
-              ].map(s => (
-                <div key={s.l}>
-                  <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-[0.1em] leading-tight mb-0.5">{s.l}</p>
-                  <p className="text-[14px] font-black tabular-nums leading-none"
-                    style={{ color: s.color || '#1e293b' }}>
-                    {s.v}
-                  </p>
-                  {s.d != null && <Delta val={s.d} />}
-                  {s.sub && <p className="text-[8px] text-slate-300 font-medium">{s.sub}</p>}
-                </div>
-              ))}
+            {/* ── BLOQUE 2: Proyección cierre ── */}
+            <div className="rounded-xl p-4" style={{ background: PASTEL.lavender.bg, border: `1px solid ${PASTEL.lavender.border}` }}>
+              <p className="text-[9px] font-bold uppercase tracking-[0.13em] mb-3" style={{ color: PASTEL.lavender.text }}>
+                Proyección cierre mes
+              </p>
+              <p className="text-[24px] font-black tabular-nums leading-none mb-1" style={{ color: '#1e293b' }}>
+                {fmt(projection)}
+              </p>
+              {adjustedMonthlyBudget && (
+                <p className="text-[10px] font-semibold mb-3" style={{ color: '#9B8EC4' }}>
+                  meta <span className="font-black" style={{ color: PASTEL.lavender.text }}>{fmt(adjustedMonthlyBudget)}</span>
+                </p>
+              )}
+              {projectionPct != null && (
+                <>
+                  <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: PASTEL.lavender.border }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(projectionPct, 100)}%` }}
+                      transition={{ delay: 0.45, duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
+                      className="h-full rounded-full"
+                      style={{ background: PASTEL.lavender.ring }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[8.5px] font-medium" style={{ color: '#9B8EC4' }}>
+                      {remainingDays} días · prom {fmt(avgDailyThisMonth)}/día
+                    </p>
+                    <span className="text-[11px] font-black" style={{ color: PASTEL.lavender.text }}>
+                      {projectionPct}%
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
+
+            {/* ── BLOQUE 3: Stats 2×2 ── */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Transacciones */}
+              <div className="rounded-xl p-3" style={{ background: PASTEL.sky.bg, border: `1px solid ${PASTEL.sky.border}` }}>
+                <p className="text-[8px] font-bold uppercase tracking-[0.1em] mb-1" style={{ color: PASTEL.sky.text }}>Transacc.</p>
+                <p className="text-[16px] font-black tabular-nums leading-none" style={{ color: '#1e293b' }}>{txnVal}</p>
+                {txnChange != null && <Delta val={txnChange} />}
+              </div>
+              {/* Ticket hoy */}
+              <div className="rounded-xl p-3" style={{ background: PASTEL.peach.bg, border: `1px solid ${PASTEL.peach.border}` }}>
+                <p className="text-[8px] font-bold uppercase tracking-[0.1em] mb-1" style={{ color: PASTEL.peach.text }}>Ticket hoy</p>
+                <p className="text-[16px] font-black tabular-nums leading-none" style={{ color: '#1e293b' }}>{ticketVal}</p>
+              </div>
+              {/* Avance PPT mes */}
+              <div className="rounded-xl p-3" style={{ background: pptMensualpct != null && pptMensualpct >= 90 ? PASTEL.mint.bg : PASTEL.pink.bg, border: `1px solid ${pptMensualpct != null && pptMensualpct >= 90 ? PASTEL.mint.border : PASTEL.pink.border}` }}>
+                <p className="text-[8px] font-bold uppercase tracking-[0.1em] mb-1" style={{ color: pptMensualpct != null && pptMensualpct >= 90 ? PASTEL.mint.text : PASTEL.pink.text }}>Avance mes</p>
+                <p className="text-[16px] font-black tabular-nums leading-none" style={{ color: '#1e293b' }}>
+                  {pptMensualpct != null ? `${pptMensualpct}%` : '—'}
+                </p>
+              </div>
+              {/* vs mismo día mes pasado */}
+              <div className="rounded-xl p-3" style={{ background: diffVsLastMonth != null && diffVsLastMonth >= 0 ? PASTEL.mint.bg : PASTEL.neutral.bg, border: `1px solid ${diffVsLastMonth != null && diffVsLastMonth >= 0 ? PASTEL.mint.border : PASTEL.neutral.border}` }}>
+                <p className="text-[8px] font-bold uppercase tracking-[0.1em] mb-1" style={{ color: '#9B7B8E' }}>vs mes ant.</p>
+                <p className="text-[16px] font-black tabular-nums leading-none"
+                  style={{ color: diffVsLastMonth == null ? '#94a3b8' : diffVsLastMonth >= 0 ? PASTEL.mint.text : '#e11d48' }}>
+                  {diffVsLastMonth != null ? `${diffVsLastMonth >= 0 ? '+' : ''}${diffVsLastMonth}%` : '—'}
+                </p>
+              </div>
+            </div>
+
           </div>
         </div>
       </motion.div>
@@ -414,105 +390,74 @@ export default function ExecutiveKPIStrip({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
 
         {/* Proyección fin de mes */}
-        <StatCard
-          label="Proyección Mes"
-          value={fmt(projection)}
-          sublabel={projectionPct != null ? `${projectionPct}% del PPT` : 'Basado en promedio diario'}
-          color="#6366f1"
-          icon={TrendingUp}
-          delay={0.08}
-        >
-          {projection != null && salesBudgetMonthly != null && (
+        {/* Proyección Mes */}
+        <StatCard label="Proyección Mes" value={fmt(projection)}
+          sublabel={projectionPct != null ? `${projectionPct}% del PPT` : '—'}
+          color={PASTEL.lavender.ring} icon={TrendingUp} delay={0.08}
+          pastel={PASTEL.lavender}>
+          {projection != null && adjustedMonthlyBudget != null && (
             <div className="mt-2">
-              <div className="flex justify-between text-[8.5px] text-slate-300 font-medium mb-1">
-                <span>Proyección vs PPT</span>
-                <span style={{ color: projectionPct >= 100 ? '#10b981' : '#f59e0b' }}>
-                  {projectionPct}%
-                </span>
-              </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(projectionPct, 100)}%` }}
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: PASTEL.lavender.border }}>
+                <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(projectionPct, 100)}%` }}
                   transition={{ delay: 0.5, duration: 1, ease: [0.23, 1, 0.32, 1] }}
-                  className="h-full rounded-full"
-                  style={{
-                    background: projectionPct >= 100
-                      ? 'linear-gradient(90deg,#059669,#10b981)'
-                      : 'linear-gradient(90deg,#6366f1,#8b5cf6)',
-                  }}
-                />
+                  className="h-full rounded-full" style={{ background: PASTEL.lavender.ring }} />
               </div>
-              <p className="text-[8px] text-slate-300 mt-1">
-                Quedan {remainingDays} días · prom {fmt(avgDailyThisMonth)}/día
+              <p className="text-[8px] mt-1 font-medium" style={{ color: PASTEL.lavender.text }}>
+                {remainingDays} días · {fmt(avgDailyThisMonth)}/día
               </p>
             </div>
           )}
         </StatCard>
 
         {/* Mejor día */}
-        <StatCard
-          label="Mejor Día Histórico"
-          value={fmt(bestDay?.total_sales)}
-          sublabel={bestDayFmt ?? '—'}
-          color="#f59e0b"
-          icon={Trophy}
-          delay={0.12}
-        >
+        <StatCard label="Mejor Día Histórico" value={fmt(bestDay?.total_sales)}
+          sublabel={bestDayFmt ?? '—'} color={PASTEL.peach.ring} icon={Trophy} delay={0.12}
+          pastel={PASTEL.peach}>
           {bestDay && todaySalesRaw != null && (
             <div className="mt-2">
-              <div className="flex items-center gap-1 mt-1">
-                <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${Math.min(100, Math.round((todaySalesRaw / bestDay.total_sales) * 100))}%`,
-                      background: 'linear-gradient(90deg,#d97706,#f59e0b)',
-                    }}
-                  />
+              <div className="flex items-center gap-1.5">
+                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: PASTEL.peach.border }}>
+                  <div className="h-full rounded-full" style={{
+                    width: `${Math.min(100, Math.round((todaySalesRaw / bestDay.total_sales) * 100))}%`,
+                    background: PASTEL.peach.ring,
+                  }} />
                 </div>
-                <span className="text-[9px] font-bold text-amber-500 tabular-nums">
+                <span className="text-[9px] font-bold tabular-nums" style={{ color: PASTEL.peach.text }}>
                   {Math.round((todaySalesRaw / bestDay.total_sales) * 100)}%
                 </span>
               </div>
-              <p className="text-[8px] text-slate-300 mt-0.5">de tu récord</p>
+              <p className="text-[8px] mt-0.5 font-medium" style={{ color: PASTEL.peach.text }}>del récord</p>
             </div>
           )}
         </StatCard>
 
         {/* Ticket promedio del mes */}
-        <StatCard
-          label="Ticket Prom. del Mes"
-          value={fmt(avgTicketMes)}
-          sublabel={`${totalTxnMes} transacciones este mes`}
-          color="#0ea5e9"
-          icon={BarChart2}
-          delay={0.16}
-        >
+        <StatCard label="Ticket Prom. Mes" value={fmt(avgTicketMes)}
+          sublabel={`${totalTxnMes} txn este mes`} color={PASTEL.sky.ring} icon={BarChart2} delay={0.16}
+          pastel={PASTEL.sky}>
           <div className="mt-2">
             <PremiumSparkline
               data={thisMonthRecords.slice(-8).map(d =>
                 d.total_transactions > 0 ? Math.round(d.total_sales / d.total_transactions) : 0
               )}
-              color="#0ea5e9" width={90} height={22}
+              color={PASTEL.sky.ring} width={90} height={22}
             />
           </div>
         </StatCard>
 
-        {/* Diferencial vs mes pasado mismo día */}
-        <StatCard
-          label="vs Mes Pasado (hoy)"
+        {/* Diferencial vs mes pasado */}
+        <StatCard label="vs Mes Pasado (hoy)"
           value={diffVsLastMonthAbs != null ? fmt(Math.abs(diffVsLastMonthAbs)) : '—'}
-          sublabel={sameDayLastMonth ? `Mes pasado: ${fmt(sameDayLastMonth.total_sales)}` : 'Sin dato del mes pasado'}
+          sublabel={sameDayLastMonth ? `Ant: ${fmt(sameDayLastMonth.total_sales)}` : 'Sin dato'}
           delta={diffVsLastMonth}
-          color={diffVsLastMonth == null ? '#94a3b8' : diffVsLastMonth >= 0 ? '#10b981' : '#f43f5e'}
+          color={diffVsLastMonth == null ? PASTEL.neutral.ring : diffVsLastMonth >= 0 ? PASTEL.mint.ring : '#F9A8C2'}
           icon={diffVsLastMonth == null || diffVsLastMonth >= 0 ? TrendingUp : TrendingDown}
           delay={0.2}
-        >
+          pastel={diffVsLastMonth == null ? PASTEL.neutral : diffVsLastMonth >= 0 ? PASTEL.mint : PASTEL.pink}>
           {diffVsLastMonth != null && (
             <p className="text-[9px] font-medium mt-2"
-              style={{ color: diffVsLastMonth >= 0 ? '#059669' : '#dc2626' }}>
-              {diffVsLastMonth >= 0 ? '▲ Por encima' : '▼ Por debajo'} del mismo día del mes anterior
+              style={{ color: diffVsLastMonth >= 0 ? PASTEL.mint.text : PASTEL.pink.text }}>
+              {diffVsLastMonth >= 0 ? '▲ Por encima' : '▼ Por debajo'} del mes anterior
             </p>
           )}
         </StatCard>
@@ -564,12 +509,12 @@ export default function ExecutiveKPIStrip({
             <BarChart data={chartData} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barSize={16}>
               <defs>
                 <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#C21875" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#C21875" stopOpacity="0.4" />
+                  <stop offset="0%" stopColor="#E8779A" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#F9C8DE" stopOpacity="0.8" />
                 </linearGradient>
                 <linearGradient id="barGradFail" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#94a3b8" stopOpacity="0.5" />
-                  <stop offset="100%" stopColor="#94a3b8" stopOpacity="0.2" />
+                  <stop offset="0%" stopColor="#CBD5E1" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#E2E8F0" stopOpacity="0.4" />
                 </linearGradient>
               </defs>
               <XAxis dataKey="day" tick={{ fontSize: 8, fill: '#94a3b8', fontWeight: 500 }}
@@ -579,7 +524,7 @@ export default function ExecutiveKPIStrip({
               {dailyPPT && (
                 <ReferenceLine
                   y={dailyPPT}
-                  stroke="rgba(194,24,117,0.35)"
+                  stroke="#E8779A"
                   strokeDasharray="5 3"
                   strokeWidth={1.5}
                   label={{ value: `PPT ${fmt(dailyPPT)}`, position: 'insideTopRight', fontSize: 7.5, fill: '#C21875', fontWeight: 700 }}
@@ -596,20 +541,20 @@ export default function ExecutiveKPIStrip({
             </BarChart>
           </ResponsiveContainer>
 
-          {/* Leyenda limpia */}
-          <div className="flex items-center gap-5 mt-3 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+          {/* Leyenda */}
+          <div className="flex items-center gap-5 mt-3 pt-3" style={{ borderTop: `1px solid ${PASTEL.pink.border}` }}>
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#C21875', opacity: 0.75 }} />
-              <span className="text-[9px] text-slate-400 font-medium">Cumplió PPT</span>
+              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#E8779A' }} />
+              <span className="text-[9px] font-semibold" style={{ color: '#9B7B8E' }}>Cumplió meta</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#94a3b8', opacity: 0.4 }} />
-              <span className="text-[9px] text-slate-400 font-medium">Bajo PPT</span>
+              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#CBD5E1' }} />
+              <span className="text-[9px] font-semibold" style={{ color: '#9B7B8E' }}>Bajo meta</span>
             </div>
             {dailyPPT && (
               <div className="flex items-center gap-1.5">
-                <div className="w-4 border-t border-dashed" style={{ borderColor: 'rgba(194,24,117,0.4)' }} />
-                <span className="text-[9px] text-slate-400 font-medium">Línea PPT {fmt(dailyPPT)}</span>
+                <div className="w-4 border-t-2 border-dashed" style={{ borderColor: '#E8779A' }} />
+                <span className="text-[9px] font-semibold" style={{ color: '#9B7B8E' }}>Meta {fmt(dailyPPT)}/día</span>
               </div>
             )}
           </div>
