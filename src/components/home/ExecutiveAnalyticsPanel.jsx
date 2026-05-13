@@ -429,145 +429,103 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
       
 
-      {/* ── ROW 1: Store Rankings ── */}
+      {/* ── ROW 1: Meta del Día Premium ── */}
       <motion.div 
-        className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, staggerChildren: 0.1 }}>
-
-        {/* Ranking de Tiendas - Presupuesto y Ticket */}
-        <AnalyticsCard
-          title="Desempeño vs Objetivo"
-          subtitle="Cumplimiento presupuesto y ticket promedio"
-          delay={0.18}>
+        className="mb-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}>
+        
+        <div className="relative rounded-3xl overflow-hidden p-8"
+          style={{
+            background: 'linear-gradient(135deg, #FF4D8D 0%, #FF7FA5 50%, #FFB4C9 100%)',
+            boxShadow: '0 20px 60px rgba(255, 77, 141, 0.25)'
+          }}>
           
-          <div className="space-y-4">
-            {/* Cumplimiento Presupuesto */}
-            <div>
-              <p className="text-[9px] font-semibold text-[#8F96A3] uppercase mb-2.5">CUMPLIMIENTO PRESUPUESTO</p>
-              <div className="space-y-2">
-                {[
-                  { name: 'BTA 11', value: 92, target: 100 },
-                  { name: 'BTA 08', value: 85, target: 100 },
-                  { name: 'BTA 15', value: 78, target: 100 }
-                ].map((store, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.25 + i * 0.06 }}>
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[9px] font-medium text-[#2A2A2A]">{store.name}</span>
-                      <span className="text-[9px] font-bold" style={{ color: store.value >= 90 ? '#10b981' : store.value >= 75 ? '#f59e0b' : '#ef4444' }}>
-                        {store.value}%
-                      </span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${store.value}%` }}
-                        transition={{ delay: 0.3 + i * 0.08, duration: 0.7 }}
-                        className="h-full rounded-full"
-                        style={{ 
-                          background: store.value >= 90 ? '#10b981' : store.value >= 75 ? '#f59e0b' : '#ef4444'
-                        }} />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Ticket Promedio */}
-            <div style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)', paddingTop: '1rem' }}>
-              <p className="text-[9px] font-semibold text-[#8F96A3] uppercase mb-2.5">TICKET PROMEDIO</p>
-              <div className="space-y-2">
-                {[
-                  { name: 'BTA 11', value: 58.2, target: 67 },
-                  { name: 'BTA 08', value: 54.8, target: 67 },
-                  { name: 'BTA 15', value: 52.1, target: 67 }
-                ].map((store, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.32 + i * 0.06 }}>
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[9px] font-medium text-[#2A2A2A]">{store.name}</span>
-                      <span className="text-[9px] font-bold text-[#FF4D8D]">${store.value}K</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(store.value / store.target) * 100}%` }}
-                        transition={{ delay: 0.35 + i * 0.08, duration: 0.7 }}
-                        className="h-full rounded-full"
-                        style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
-                    </div>
-                    <p className="text-[8px] text-[#8F96A3] mt-0.5">vs ${store.target}K meta</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </AnalyticsCard>
-
-        {/* Benchmarking - Métricas Operacionales */}
-        <AnalyticsCard
-          title="Métricas Operacionales"
-          subtitle="Estado actual vs meta del mes"
-          delay={0.22}>
+          {/* Decorative elements */}
+          <motion.div 
+            className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.5), transparent)' }}
+          />
           
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Transacciones/Día</span>
-                <span className="text-[11px] font-bold text-[#FF4D8D]">287</span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: '76%' }}
-                  transition={{ delay: 0.3, duration: 0.8 }}
-                  className="h-full rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
-              </div>
-              <p className="text-[8px] text-[#8F96A3] mt-1">Meta: 378 txn/día</p>
-            </div>
-            
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Venta Promedio por Txn</span>
-                <span className="text-[11px] font-bold text-[#FF4D8D]">$54.2K</span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: '81%' }}
-                  transition={{ delay: 0.35, duration: 0.8 }}
-                  className="h-full rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #FF7FA5, #FFB4C9)' }} />
-              </div>
-              <p className="text-[8px] text-[#8F96A3] mt-1">Meta: $67K por txn</p>
+          <div className="relative z-10">
+            {/* Header */}
+            <div className="mb-8">
+              <motion.p 
+                className="text-white/80 text-xs font-semibold uppercase tracking-widest mb-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}>
+                🎯 Meta del Día
+              </motion.p>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Cumplimiento Mensual</span>
-                <span className="text-[11px] font-bold text-[#FF4D8D]">87%</span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+            {/* Main metrics grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* PPT del Día */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}>
+                <p className="text-white/70 text-xs font-medium mb-2">PPT del Día</p>
+                <p className="text-white font-black text-4xl tabular-nums">$2.771.088</p>
+              </motion.div>
+
+              {/* Brecha del Mes */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}>
+                <p className="text-white/70 text-xs font-medium mb-2 flex items-center gap-1.5">
+                  📈 Brecha del Mes
+                </p>
+                <div>
+                  <p className="text-white font-black text-3xl tabular-nums mb-1">+$5.824.076</p>
+                  <p className="text-white/80 text-xs font-medium">Sobre meta: 3.5% del presupuesto</p>
+                </div>
+              </motion.div>
+
+              {/* Proyección Cierre */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}>
+                <p className="text-white/70 text-xs font-medium mb-2">Proyección Cierre Mes</p>
+                <p className="text-white font-black text-4xl tabular-nums mb-1">106%</p>
+                <p className="text-white/80 text-xs font-medium">$ 177.606.326 / $ 167.327.000</p>
+              </motion.div>
+            </div>
+
+            {/* Progress bar */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}>
+              <p className="text-white/60 text-xs font-medium mb-2.5">Proyección Cierre Mes</p>
+              <div className="h-3 rounded-full bg-white/20 overflow-hidden backdrop-blur-sm">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: '87%' }}
-                  transition={{ delay: 0.4, duration: 0.8 }}
+                  animate={{ width: '106%' }}
+                  transition={{ delay: 0.4, duration: 1.2, ease: 'easeOut' }}
                   className="h-full rounded-full"
-                  style={{ background: '#f59e0b' }} />
+                  style={{ background: 'linear-gradient(90deg, #10b981, #34d399)' }} />
               </div>
-              <p className="text-[8px] text-[#8F96A3] mt-1">Meta: 100% presupuesto</p>
-            </div>
+            </motion.div>
+
+            {/* Footer */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-6 pt-4 border-t border-white/20 flex justify-center">
+              <button className="text-white/70 hover:text-white text-xs font-medium transition-colors flex items-center gap-2">
+                ↓ Ver más detalles
+              </button>
+            </motion.div>
           </div>
-        </AnalyticsCard>
+        </div>
       </motion.div>
 
       {/* ── ROW 2: TXN Heatmap + Participación + Cajeros ── */}
