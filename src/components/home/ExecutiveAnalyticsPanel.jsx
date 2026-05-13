@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, BarChart, Bar
+  PieChart, Pie, Cell
 } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 function fmt(n) {
@@ -31,20 +31,25 @@ function Delta({ val }) {
 }
 
 // ── CUSTOM TOOLTIP ────────────────────────────────────────────────────────────
-function PremiumTooltip({ active, payload, label, formatter }) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-xl px-3 py-2 shadow-lg"
-      style={{ background: 'rgba(15,15,20,0.92)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)' }}>
-      <p className="text-[10px] font-medium text-slate-400 mb-1">{label}</p>
-      {payload.map((p, i) => (
-        <p key={i} className="text-[12px] font-bold" style={{ color: p.color || '#fff' }}>
-          {formatter ? formatter(p.value) : p.value}
-        </p>
-      ))}
-    </div>
-  );
+function makePremiumTooltip(formatter) {
+  return function PremiumTooltip({ active, payload, label }) {
+    if (!active || !payload?.length) return null;
+    return (
+      <div className="rounded-xl px-3 py-2 shadow-lg"
+        style={{ background: 'rgba(15,15,20,0.92)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)' }}>
+        <p className="text-[10px] font-medium text-slate-400 mb-1">{label}</p>
+        {payload.map((p, i) => (
+          <p key={i} className="text-[12px] font-bold" style={{ color: p.color || '#fff' }}>
+            {formatter ? formatter(p.value) : p.value}
+          </p>
+        ))}
+      </div>
+    );
+  };
 }
+
+const SalesTooltip = makePremiumTooltip(fmt);
+const EbitdaTooltip = makePremiumTooltip(fmt);
 
 // Card wrapper
 function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
@@ -286,7 +291,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis hide />
-                <Tooltip content={<PremiumTooltip formatter={fmt} />} />
+                <Tooltip content={<SalesTooltip />} />
                 <Area type="monotone" dataKey="ventas" stroke="#C21875" strokeWidth={1.5}
                   fill="url(#salesGrad)" dot={false} activeDot={{ r: 3, strokeWidth: 0, fill: '#C21875' }} />
               </AreaChart>
@@ -324,7 +329,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 500 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis hide />
-                <Tooltip content={<PremiumTooltip formatter={fmt} />} />
+                <Tooltip content={<EbitdaTooltip />} />
                 <Area type="monotone" dataKey="ebitda" stroke="#6366f1" strokeWidth={1.5}
                   fill="url(#ebitdaGrad)" dot={false} activeDot={{ r: 3, strokeWidth: 0, fill: '#6366f1' }} />
               </AreaChart>
