@@ -1169,6 +1169,20 @@ export default function SalesReportView() {
                 );
               };
 
+              // Depto líder
+              const topDeptCurrent = hierarchy[0];
+              const topDeptPrev = prevHierarchy?.[0];
+
+              // Variación general
+              const globalDeltaPct = prevTotal2 > 0 ? ((summary.totalSales - prevTotal2) / prevTotal2) * 100 : null;
+              const deltaPositive = globalDeltaPct !== null && globalDeltaPct >= 0;
+
+              // Concentración top 5 productos
+              const top5Sales = [...allProducts].sort((a,b) => b.total_sales - a.total_sales).slice(0,5).reduce((s,p) => s + p.total_sales, 0);
+              const concPct = summary.totalSales > 0 ? (top5Sales / summary.totalSales) * 100 : 0;
+              const prevTop5Sales = Object.values(prevProductMap2).sort((a,b) => b.total_sales - a.total_sales).slice(0,5).reduce((s,p) => s + p.total_sales, 0);
+              const prevConcPct = prevTotal2 > 0 ? (prevTop5Sales / prevTotal2) * 100 : 0;
+
               const cards = [
                 {
                   label: 'Venta Total',
@@ -1180,30 +1194,33 @@ export default function SalesReportView() {
                     : null,
                 },
                 {
-                  label: 'Productos Activos',
-                  value: `${summary.totalProducts}`,
-                  prevValue: prevTotalProducts > 0 ? `${prevTotalProducts}` : null,
+                  label: 'Depto. Líder',
+                  value: topDeptCurrent ? `${topDeptCurrent.deptPart.toFixed(1)}%` : '—',
+                  subLabel: topDeptCurrent ? topDeptCurrent.dept : '—',
+                  prevValue: topDeptPrev ? `${topDeptPrev.deptPart.toFixed(1)}%` : null,
                   color: '#22c55e',
-                  sparkValues: prevTotalProducts > 0
-                    ? [prevTotalProducts * 0.7, prevTotalProducts * 0.8, prevTotalProducts * 0.85, prevTotalProducts * 0.9, prevTotalProducts, prevTotalProducts * 1.02, summary.totalProducts * 0.95, summary.totalProducts * 0.98, summary.totalProducts]
-                    : null,
-                },
-                {
-                  label: 'Departamentos',
-                  value: `${summary.totalDepts}`,
-                  prevValue: prevTotalDepts > 0 ? `${prevTotalDepts}` : null,
-                  color: '#f97316',
-                  sparkValues: prevTotalDepts > 0
-                    ? [prevTotalDepts * 0.6, prevTotalDepts * 0.75, prevTotalDepts * 0.8, prevTotalDepts * 0.85, prevTotalDepts, prevTotalDepts * 1.0, summary.totalDepts * 0.9, summary.totalDepts * 0.95, summary.totalDepts]
+                  sparkValues: topDeptCurrent && topDeptPrev
+                    ? [topDeptPrev.deptPart * 0.7, topDeptPrev.deptPart * 0.8, topDeptPrev.deptPart * 0.85, topDeptPrev.deptPart * 0.9, topDeptPrev.deptPart, topDeptPrev.deptPart * 1.02, topDeptCurrent.deptPart * 0.95, topDeptCurrent.deptPart * 0.98, topDeptCurrent.deptPart]
                     : null,
                 },
                 {
                   label: 'Top Producto',
                   value: summary.topProduct ? formatCurrency(summary.topProduct.total_sales) : '—',
+                  subLabel: summary.topProduct ? (summary.topProduct.product?.length > 18 ? summary.topProduct.product.slice(0,18)+'…' : summary.topProduct.product) : null,
                   prevValue: prevTopProduct ? formatCurrency(prevTopProduct.total_sales) : null,
-                  color: '#a855f7',
+                  color: '#f97316',
                   sparkValues: prevTopProduct && summary.topProduct
                     ? [prevTopProduct.total_sales * 0.65, prevTopProduct.total_sales * 0.75, prevTopProduct.total_sales * 0.8, prevTopProduct.total_sales * 0.9, prevTopProduct.total_sales, prevTopProduct.total_sales * 1.05, summary.topProduct.total_sales * 0.9, summary.topProduct.total_sales * 0.95, summary.topProduct.total_sales]
+                    : null,
+                },
+                {
+                  label: 'Variación Total',
+                  value: globalDeltaPct !== null ? `${deltaPositive ? '+' : ''}${globalDeltaPct.toFixed(1)}%` : '—',
+                  subLabel: globalDeltaPct !== null ? (deltaPositive ? 'Crecimiento' : 'Caída') : 'Sin comparativo',
+                  prevValue: prevTotal2 > 0 ? `vs ${prevMonthLabel}` : null,
+                  color: globalDeltaPct === null ? '#a855f7' : deltaPositive ? '#10b981' : '#ef4444',
+                  sparkValues: prevTotal2 > 0
+                    ? [prevTotal2 * 0.75, prevTotal2 * 0.82, prevTotal2 * 0.88, prevTotal2 * 0.92, prevTotal2 * 0.96, prevTotal2, prevTotal2 * 1.02, summary.totalSales * 0.94, summary.totalSales * 0.97, summary.totalSales]
                     : null,
                 },
               ];
@@ -1220,8 +1237,11 @@ export default function SalesReportView() {
                       <div className="pl-5 pr-4 pt-4 pb-2">
                         <p className="text-sm font-medium mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>{card.label}</p>
                         <p className="text-3xl font-bold leading-none mb-1" style={{ color: '#ffffff' }}>{card.value}</p>
+                        {card.subLabel && (
+                          <p className="text-xs font-semibold mb-0.5 truncate" style={{ color: card.color }}>{card.subLabel}</p>
+                        )}
                         {card.prevValue ? (
-                          <p className="text-base font-normal line-through" style={{ color: 'rgba(255,255,255,0.3)' }}>{card.prevValue}</p>
+                          <p className="text-sm font-normal line-through" style={{ color: 'rgba(255,255,255,0.3)' }}>{card.prevValue}</p>
                         ) : (
                           <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Sin comparativo</p>
                         )}
