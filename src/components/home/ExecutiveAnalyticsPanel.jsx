@@ -304,22 +304,30 @@ function DonutChart({ data }) {
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], cashiers = [] }) {
-  // Build 30-day sales trend from todaySales with projection
+  const [trendViewMode, setTrendViewMode] = useState('compliance'); // 'compliance' | 'acceleration'
+
+  // Build 30-day sales trend from todaySales
   const sorted30 = useMemo(() => {
     const daily = [...todaySales].
     sort((a, b) => new Date(a.date) - new Date(b.date)).
     slice(-30);
 
-    const baseSales = daily.length > 0 ? daily[0].total_sales || 2000000 : 2000000;
-    const growthRate = 0.015; // 1.5% daily growth
-
-    return daily.map((d, i) => ({
-      date: new Date(d.date).toLocaleDateString('es', { day: 'numeric', month: 'short' }),
-      ventas: d.total_sales || baseSales,
-      proyeccion: Math.round(baseSales * Math.pow(1 + growthRate, i)),
-      txn: d.total_transactions || 0
-    }));
-  }, [todaySales]);
+    return daily.map((d, i) => {
+      const ventas = d.total_sales || 0;
+      // Acceleration: day-over-day growth %
+      const prevVentas = i > 0 ? (daily[i-1].total_sales || 0) : ventas;
+      const acceleration = prevVentas > 0 ? Math.round(((ventas - prevVentas) / prevVentas) * 100) : 0;
+      
+      return {
+        date: new Date(d.date).toLocaleDateString('es', { day: 'numeric', month: 'short' }),
+        ventas: ventas,
+        presupuesto: (budget[0]?.sales_budget || 0) / 30,
+        cumplimiento: ((ventas / ((budget[0]?.sales_budget || 0) / 30)) * 100),
+        aceleracion: acceleration,
+        txn: d.total_transactions || 0
+      };
+    });
+  }, [todaySales, budget]);
 
   // EBITDA por mes (agrupado)
   const ebitdaData = useMemo(() => {
@@ -375,10 +383,17 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
   const hasSalesData = sorted30.length > 0;
   
-  // Projection EOD today
-  const todayEODProjection = today ? Math.round(today.total_sales * 1.15) : 0;
-  const todayCompliancePercent = activeBudget?.sales_budget ? Math.round((today?.total_sales / activeBudget.sales_budget) * 100) : 0;
-  const todayProjectedCompliancePercent = activeBudget?.sales_budget ? Math.round((todayEODProjection / activeBudget.sales_budget) * 100) : 0;
+  // Average daily sales
+  const avgDailySales = hasSalesData 
+    ? Math.round(todaySales.reduce((s, d) => s + (d.total_sales || 0), 0) / todaySales.length)
+    : 0;
+  
+  // Month-end projection (based on avg daily sales * remaining days)
+  const currentDate = new Date();
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  const daysRemaining = daysInMonth - currentDate.getDate();
+  const monthSalesProjection = totalSales + (avgDailySales * daysRemaining);
+  const monthProjectionPercent = activeBudget?.sales_budget ? Math.round((monthSalesProjection / activeBudget.sales_budget) * 100) : 0;
   
   // EBITDA with proper calculation
   const ebitdaDataEnhanced = useMemo(() => {
@@ -436,10 +451,10 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, staggerChildren: 0.1 }}>
 
-        {/* Tendencia de Ventas con Proyección y Cierre Mes */}
+        {/* Tendencia de Ventas - Compliance vs Aceleración */}
         <AnalyticsCard
-          title="Tendencia & Proyección"
-          subtitle="Últimos 30 días + proyección al cierre del mes"
+          title="Tendencia & Análisis"
+          subtitle={trendViewMode === 'compliance' ? 'Venta Real vs Presupuesto Diario' : 'Velocidad de Crecimiento Diario'}
           delay={0.18}
           colSpan="lg:col-span-3">
           
@@ -453,13 +468,11 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                   className="p-3 rounded-xl group relative overflow-hidden"
                   style={{ background: 'linear-gradient(135deg, rgba(255, 77, 141, 0.08), rgba(255, 182, 201, 0.04))' }}>
                   
-                  <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Proyección EOD</p>
+                  <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Promedio Diario</p>
                   <p className="text-[18px] font-black text-[#FF4D8D] mb-1" style={{ lineHeight: '1' }}>
-                    {fmt(todayEODProjection)}
+                    {fmt(avgDailySales)}
                   </p>
-                  <p className="text-[9px] font-bold" style={{ color: todayProjectedCompliancePercent >= 80 ? '#10b981' : '#f59e0b' }}>
-                    {todayProjectedCompliancePercent}% de PPT hoy
-                  </p>
+                  <p className="text-[9px] font-bold text-[#8F96A3]">período actual</p>
                 </motion.div>
                 
                 <motion.div
@@ -471,12 +484,33 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                   
                   <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Proyección Mes</p>
                   <p className="text-[18px] font-black text-[#FF7FA5] mb-1" style={{ lineHeight: '1' }}>
-                    {fmt(todayEODProjection * 28)}
+                    {fmt(monthSalesProjection)}
                   </p>
-                  <p className="text-[9px] font-bold" style={{ color: Math.round((todayEODProjection * 28 / (activeBudget?.sales_budget || 1)) * 100) >= 100 ? '#10b981' : '#f59e0b' }}>
-                    {Math.round((todayEODProjection * 28 / (activeBudget?.sales_budget || 1)) * 100)}% de PPT mes
+                  <p className="text-[9px] font-bold" style={{ color: monthProjectionPercent >= 100 ? '#10b981' : monthProjectionPercent >= 80 ? '#f59e0b' : '#ef4444' }}>
+                    {monthProjectionPercent}% de PPT
                   </p>
                 </motion.div>
+              </div>
+
+              <div className="flex gap-2 mb-3">
+                <button
+                  onClick={() => setTrendViewMode('compliance')}
+                  className={`flex-1 py-1.5 text-[8px] font-bold rounded-lg transition-all ${
+                    trendViewMode === 'compliance' 
+                      ? 'bg-[#FF4D8D] text-white' 
+                      : 'bg-slate-100 text-[#8F96A3]'
+                  }`}>
+                  Real vs PPT
+                </button>
+                <button
+                  onClick={() => setTrendViewMode('acceleration')}
+                  className={`flex-1 py-1.5 text-[8px] font-bold rounded-lg transition-all ${
+                    trendViewMode === 'acceleration' 
+                      ? 'bg-[#FF4D8D] text-white' 
+                      : 'bg-slate-100 text-[#8F96A3]'
+                  }`}>
+                  Aceleración
+                </button>
               </div>
 
               <ResponsiveContainer width="100%" height={140}>
@@ -491,20 +525,35 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                   <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
                   <YAxis hide />
                   <Tooltip content={<SalesTooltip />} />
-                  <Area type="monotone" dataKey="ventas" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ventasGrad)" dot={false} />
-                  <Line type="monotone" dataKey="proyeccion" stroke="#FFB4C9" strokeWidth={2.5} strokeDasharray="5,5" dot={false} name="Proyección" />
+                  {trendViewMode === 'compliance' ? (
+                    <>
+                      <Area type="monotone" dataKey="ventas" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ventasGrad)" dot={false} name="Venta Real" />
+                      <Line type="monotone" dataKey="presupuesto" stroke="#FFB4C9" strokeWidth={2.5} strokeDasharray="5,5" dot={false} name="PPT Diario" />
+                    </>
+                  ) : (
+                    <Line type="monotone" dataKey="aceleracion" stroke="#FF4D8D" strokeWidth={2.5} dot={{ fill: '#FF4D8D', r: 3 }} name="Aceleración %" />
+                  )}
                 </ComposedChart>
               </ResponsiveContainer>
               
               <div className="flex gap-6 mt-3 text-[10px]">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4D8D' }} />
-                  <span className="text-[#8F96A3]">Ventas Real</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FFB4C9' }} />
-                  <span className="text-[#8F96A3]">Proyección Diaria</span>
-                </div>
+                {trendViewMode === 'compliance' ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4D8D' }} />
+                      <span className="text-[#8F96A3]">Venta Real</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FFB4C9' }} />
+                      <span className="text-[#8F96A3]">PPT Diario</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4D8D' }} />
+                    <span className="text-[#8F96A3]">% Crecimiento Día a Día</span>
+                  </div>
+                )}
               </div>
             </>
           ) : (
@@ -514,46 +563,50 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           )}
         </AnalyticsCard>
 
-        {/* Desempeño de Tiendas - Gráfico Comparativo */}
+        {/* EBITDA % Mensual */}
         <AnalyticsCard
-          title="Performance Stores"
-          subtitle="Análisis comparativo en tiempo real"
+          title="EBITDA Mensual"
+          subtitle="Tendencia % de margen bruto por mes"
           delay={0.22}
           colSpan="lg:col-span-2">
           
-          <ResponsiveContainer width="100%" height={140}>
-            <ComposedChart data={[
-              { name: 'BTA 11', sales: 92, ticket: 88, avg: 90 },
-              { name: 'BTA 08', sales: 85, ticket: 79, avg: 82 },
-              { name: 'BTA 15', sales: 78, ticket: 74, avg: 76 }
-            ]} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-              <defs>
-                <linearGradient id="storeGrad1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0.1" />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
-              <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
-              <YAxis hide domain={[0, 100]} />
-              <Tooltip content={makePremiumTooltip((val) => `${val}%`)} />
-              <Bar dataKey="sales" fill="#FF4D8D" radius={[4, 4, 0, 0]} />
-              <Line type="monotone" dataKey="avg" stroke="#FFB4C9" strokeWidth={2.5} dot={{ fill: '#FFB4C9', r: 4 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
-          
-          <div className="grid grid-cols-3 gap-2 mt-3">
-            {[
-              { store: 'BTA 11', status: '✓ Líder', color: '#10b981' },
-              { store: 'BTA 08', status: '⚡ Activo', color: '#f59e0b' },
-              { store: 'BTA 15', status: '⚠ Alerta', color: '#ef4444' }
-            ].map((s, i) => (
-              <div key={i} className="text-center">
-                <p className="text-[9px] font-semibold text-[#2A2A2A]">{s.store}</p>
-                <p className="text-[8px] font-bold mt-1" style={{ color: s.color }}>{s.status}</p>
+          {ebitdaDataWithAvg && ebitdaDataWithAvg.length > 0 ? (
+            <>
+              <ResponsiveContainer width="100%" height={140}>
+                <LineChart data={ebitdaDataWithAvg} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
+                  <YAxis hide domain={[0, 50]} />
+                  <Tooltip content={<EbitdaTooltip />} />
+                  <Line type="monotone" dataKey="margen" stroke="#FF4D8D" strokeWidth={2.5} dot={{ fill: '#FF4D8D', r: 4 }} name="EBITDA %" />
+                  <Line type="linear" dataKey="promedio" stroke="#FFB4C9" strokeWidth={2} strokeDasharray="4,4" dot={false} name="Promedio" />
+                </LineChart>
+              </ResponsiveContainer>
+              
+              <div className="mt-3 pt-2 border-t border-slate-100">
+                <div className="grid grid-cols-2 gap-2 text-[9px]">
+                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
+                    <p className="text-[#8F96A3] font-medium mb-1">Actual</p>
+                    <p className="text-[14px] font-black text-[#FF4D8D]">{ebitdaDataWithAvg[ebitdaDataWithAvg.length - 1]?.margen || 0}%</p>
+                  </div>
+                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
+                    <p className="text-[#8F96A3] font-medium mb-1">Promedio</p>
+                    <p className="text-[14px] font-black text-[#FFB4C9]">{avgMargin}%</p>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div className="h-[180px] flex items-center justify-center">
+              <p className="text-[11px] text-[#8F96A3]">Sin datos de EBITDA</p>
+            </div>
+          )}
         </AnalyticsCard>
       </motion.div>
 
@@ -565,7 +618,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         transition={{ duration: 0.3, staggerChildren: 0.1, delayChildren: 0.2 }}>
 
         {/* Hourly heatmap */}
-        <AnalyticsCard title="Tráfico por Hora" subtitle="Transacciones · patrón semanal" delay={0.26}>
+         <AnalyticsCard title="Tráfico por Hora" subtitle="Transacciones · patrón semanal" delay={0.26}>
           <HourlyHeatmap data={heatmapData} />
           <div className="flex items-center justify-between mt-2.5">
             <span className="text-[8px] text-[#8F96A3] font-semibold uppercase">Bajo</span>
@@ -577,16 +630,16 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
             </div>
             <span className="text-[8px] text-[#8F96A3] font-semibold uppercase">Alto</span>
           </div>
-          
+
           <div className="mt-3 pt-2.5 border-t border-slate-100">
-            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Peak Hours</p>
+            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">KPI Adicionales</p>
             <div className="grid grid-cols-2 gap-2">
               <div className="p-1.5 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
-                <p className="text-[8px] text-[#8F96A3] font-medium">Mañana</p>
-                <p className="text-[10px] font-bold text-[#FF4D8D]">9am-11am</p>
+                <p className="text-[8px] text-[#8F96A3] font-medium">Promedio Txn</p>
+                <p className="text-[10px] font-bold text-[#FF4D8D]">{Math.round(sorted30.reduce((s, d) => s + (d.txn || 0), 0) / (sorted30.length || 1))}</p>
               </div>
               <div className="p-1.5 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
-                <p className="text-[8px] text-[#8F96A3] font-medium">Tarde</p>
+                <p className="text-[8px] text-[#8F96A3] font-medium">Peak Hours</p>
                 <p className="text-[10px] font-bold text-[#FF4D8D]">1pm-3pm</p>
               </div>
             </div>
@@ -594,28 +647,15 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         </AnalyticsCard>
 
         {/* Participación */}
-        <AnalyticsCard title="Participación" subtitle="Mix del negocio por categoría" delay={0.3}>
+         <AnalyticsCard title="Participación" subtitle="Mix del negocio por categoría" delay={0.3}>
           <DonutChart data={PARTICIPATION_SEGMENTS} />
           <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Top 2 Categorías</p>
-            <div className="space-y-1.5">
-              {[
-                { cat: 'Helados', pct: 42, growth: '+8%' },
-                { cat: 'Bebidas', pct: 23, growth: '+2%' }
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex-1 h-1.5 rounded-full bg-slate-100 mr-2">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${item.pct}%` }}
-                      transition={{ delay: 0.35 + i * 0.1, duration: 0.7 }}
-                      className="h-full rounded-full"
-                      style={{ background: PARTICIPATION_COLORS[i] }} />
-                  </div>
-                  <span className="text-[8px] font-bold text-[#2A2A2A] w-12 text-right">{item.pct}%</span>
-                  <span className="text-[8px] font-bold text-emerald-600 w-8 text-right">{item.growth}</span>
-                </div>
-              ))}
+            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Ticket Promedio</p>
+            <div className="p-2 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
+              <p className="text-[9px] text-[#8F96A3] font-medium">Período Actual</p>
+              <p className="text-[13px] font-black text-[#FF4D8D] mt-1">
+                {fmt((todaySales.reduce((s, d) => s + (d.total_sales || 0), 0) / Math.max(todaySales.reduce((s, d) => s + (d.total_tickets || 1), 0), 1)))}
+              </p>
             </div>
           </div>
         </AnalyticsCard>
