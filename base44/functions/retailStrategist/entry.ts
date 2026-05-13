@@ -110,7 +110,20 @@ function analyzeStoreMetrics(salesData, budgetData, shiftsData, cashierData) {
   };
 }
 
-function generateNOVAAnalysis(metrics, prompt) {
+function detectQueryType(prompt) {
+  const lower = prompt.toLowerCase();
+  
+  if (lower.match(/hoy|actual|ahora|status|cómo va/)) return 'dailyStatus';
+  if (lower.match(/mejor|top|ranking|líder|ganador|peor|bajo/)) return 'ranking';
+  if (lower.match(/presupuesto|meta|cumplimiento|brecha|gap/)) return 'budget';
+  if (lower.match(/sugerido|venta cruzada|cross|upsell|ticket/)) return 'suggestedSales';
+  if (lower.match(/tendencia|trend|proyección|forecast|próximos|semana|mes/)) return 'trend';
+  if (lower.match(/transacción|tráfico|flujo|comprador/)) return 'traffic';
+  
+  return 'general';
+}
+
+function generateNOVAAnalysis(metrics, prompt, queryType) {
   if (metrics.error) {
     return metrics.error;
   }
@@ -122,52 +135,60 @@ function generateNOVAAnalysis(metrics, prompt) {
 
   let analysis = '';
 
-  // Abertura crítica
-  if (Math.abs(v.delta) > 10) {
-    analysis += `🚨 CRÍTICO: Ventas ${v.delta > 0 ? '+' : ''}${v.delta}% vs ayer\n`;
-  } else if (Math.abs(v.delta) > 5) {
-    analysis += `⚠️ ALERTA: Ventas ${v.delta > 0 ? '+' : ''}${v.delta}% vs ayer\n`;
-  } else {
-    analysis += `✅ Ventas ${v.delta > 0 ? '+' : ''}${v.delta}% vs ayer\n`;
+  // Respuesta contextual según tipo de pregunta
+  if (queryType === 'dailyStatus') {
+    analysis += `📊 ESTADO ACTUAL TIENDA:\n\n`;
+    analysis += `💰 Ventas: $${(v.hoy/1000000).toFixed(2)}M (${v.delta > 0 ? '+' : ''}${v.delta}% vs ayer)\n`;
+    analysis += `🛒 Transacciones: ${tr.hoy} (${tr.delta > 0 ? '+' : ''}${tr.delta}%)\n`;
+    analysis += `💳 Ticket: $${(t.promedio/1000).toFixed(1)}K (${t.delta > 0 ? '+' : ''}${t.delta}%)\n`;
+    analysis += `⭐ Sugeridos: ${tr.tasaSugeridos}%\n`;
+  } else if (queryType === 'budget') {
+    analysis += `📋 ANÁLISIS PRESUPUESTO:\n\n`;
+    analysis += `Target: 30d promedio $${(v.promedio30d/1000000).toFixed(2)}M\n`;
+    analysis += `Hoy: $${(v.hoy/1000000).toFixed(2)}M\n`;
+    analysis += `Tendencia 30d: ${v.deltaTendencia30d > 0 ? '+' : ''}${v.deltaTendencia30d}% vs promedio\n`;
+  } else if (queryType === 'suggestedSales') {
+    analysis += `⭐ ANÁLISIS SUGERIDOS:\n\n`;
+    analysis += `Tasa actual: ${tr.tasaSugeridos}%\n`;
+    analysis += `Benchmark esperado: 20-28%\n`;
+    if (tr.tasaSugeridos < 15) {
+      analysis += `Estado: ⚠️ CRÍTICO - ${15 - tr.tasaSugeridos}pp por debajo del mínimo\n`;
+      analysis += `Oportunidad: +${Math.round((v.hoy * 0.03) / 1000000)}M si alcanza 25%\n`;
+    }
+  } else if (queryType === 'trend') {
+    analysis += `📈 PROYECCIÓN Y TENDENCIA:\n\n`;
+    analysis += `7 días: Promedio $${(v.promedio7d/1000000).toFixed(2)}M\n`;
+    analysis += `Hoy vs 7d: ${v.deltaTendencia30d > 0 ? '+' : ''}${v.deltaTendencia30d}%\n`;
+    analysis += `Forecast 7d: $${(v.forecast7d/1000000).toFixed(2)}M\n`;
+    analysis += `Dirección: ${v.forecast7d > v.promedio7d ? '📈 Positiva' : '📉 Negativa'}\n`;
   }
 
-  // Desglose de variables
-  analysis += `\n📊 DESGLOSE CAUSAL:\n`;
-  analysis += `• Transacciones: ${v.delta > 0 && tr.delta < 0 ? '↓' : v.delta > 0 && tr.delta > 0 ? '↑' : '→'} ${tr.delta > 0 ? '+' : ''}${tr.delta}% (${tr.hoy} txn)\n`;
-  analysis += `• Ticket promedio: ${t.delta > 0 ? '↑' : t.delta < 0 ? '↓' : '→'} ${t.delta > 0 ? '+' : ''}${t.delta}% ($${(t.promedio/1000).toFixed(1)}K vs benchmark $${(BENCHMARKS.ticketPromedio.std/1000).toFixed(0)}K)\n`;
-  analysis += `• Sugeridos: ${tr.tasaSugeridos}% de tasa de venta\n`;
-
-  // Anomalías
+  // Siempre agregar anomalías críticas
   if (e.anomalias.length > 0) {
-    analysis += `\n⚡ ANOMALÍAS DETECTADAS:\n`;
+    analysis += `\n⚡ ALERTAS:\n`;
     e.anomalias.forEach(a => analysis += `• ${a}\n`);
   }
 
-  // Tendencia
-  analysis += `\n📈 TENDENCIA:\n`;
-  analysis += `• Últimos 7d: Promedio $${(v.promedio7d/1000000).toFixed(2)}M (${v.deltaTendencia30d > 0 ? '+' : ''}${v.deltaTendencia30d}% vs mes)\n`;
-  analysis += `• Z-score: ${e.zscore} ${Math.abs(parseFloat(e.zscore)) > 2 ? '(EXTREMO)' : '(Normal)'}\n`;
-  analysis += `• Forecast 7d: $${(v.forecast7d/1000000).toFixed(2)}M ${v.forecast7d > v.promedio7d ? '↑' : '↓'}\n`;
+  // Z-score crítico
+  if (Math.abs(parseFloat(e.zscore)) > 2.5) {
+    analysis += `\n🔴 VARIACIÓN EXTREMA DETECTADA: Z-score ${e.zscore}\n`;
+  }
 
-  // Recomendaciones
-  analysis += `\n💡 RECOMENDACIONES:\n`;
-  if (tr.tasaSugeridos < 15) {
-    analysis += `• Tasa sugeridos baja (${tr.tasaSugeridos}%). Impacto potencial: +3.2-4.8% ventas si aumenta a 25%\n`;
+  // Recomendaciones contextuales
+  analysis += `\n💡 ACCIÓN:\n`;
+  if (tr.tasaSugeridos < 20 && queryType !== 'ranking') {
+    analysis += `• Refuerza sugeridos: impacto +2.5-4% en ticket\n`;
   }
   if (t.vs_benchmark.bajo) {
-    analysis += `• Ticket bajo. Acciones: upsell, combos, premium. ROI esperado: +$${Math.round(t.promedio * 0.12 * tr.hoy / 1000000)}M\n`;
+    analysis += `• Ticket bajo: implementa combos premium\n`;
   }
-  if (Math.abs(parseFloat(e.zscore)) > 2) {
-    analysis += `• Investigar causa de variación extrema. Patrón no esperado.\n`;
+  if (v.delta < -5) {
+    analysis += `• Ventas en retroceso: intensifica tráfico o upsell\n`;
   }
 
   if (metrics.budget) {
-    analysis += `\n📋 PRESUPUESTO:\n• ${metrics.budget}\n`;
+    analysis += `\n📊 ${metrics.budget}\n`;
   }
-
-  // Probabilidad de éxito
-  const probExito = Math.min(95, Math.max(60, 70 + (v.delta * 0.5) + (t.delta * 0.3)));
-  analysis += `\n✓ Probabilidad de cumplimiento con acciones: ${probExito.toFixed(0)}%\n`;
 
   return analysis;
 }
@@ -187,26 +208,33 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Prompt requerido' }, { status: 400 });
     }
 
-    let analysis = '';
-    
-    if (selectedStore) {
-      const [salesData, budgetData, cashierData] = await Promise.all([
-        base44.entities.DailySales.filter({ store_id: selectedStore }).catch(() => []),
-        base44.entities.Budget.filter({ store_id: selectedStore }).catch(() => []),
-        base44.entities.Cashier.filter({ store_id: selectedStore }).catch(() => [])
-      ]);
-
-      // Análisis local puro
-      const metrics = analyzeStoreMetrics(salesData, budgetData, null, cashierData);
-      analysis = generateNOVAAnalysis(metrics, prompt);
-    } else {
-      analysis = `NOVA requiere tienda seleccionada para análisis. Selecciona una tienda para comenzar.`;
+    if (!selectedStore) {
+      return Response.json({
+        error: 'Tienda requerida',
+        success: false
+      }, { status: 400 });
     }
+
+    // Nova busca automáticamente los datos que necesita
+    const [salesData, budgetData, cashierData, shiftData] = await Promise.all([
+      base44.entities.DailySales.filter({ store_id: selectedStore }).catch(() => []),
+      base44.entities.Budget.filter({ store_id: selectedStore }).catch(() => []),
+      base44.entities.Cashier.filter({ store_id: selectedStore }).catch(() => []),
+      base44.entities.Shift.filter({ store_id: selectedStore }).catch(() => [])
+    ]);
+
+    // Detecta tipo de pregunta
+    const queryType = detectQueryType(prompt);
+
+    // Análisis local inteligente
+    const metrics = analyzeStoreMetrics(salesData, budgetData, shiftData, cashierData);
+    const analysis = generateNOVAAnalysis(metrics, prompt, queryType);
     
     return Response.json({
       success: true,
       response: analysis,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      queryType: queryType
     });
 
   } catch (error) {
