@@ -413,11 +413,16 @@ export default function HomeWorkspace({
             transition={{ duration: 0.4 }}
             className="mb-7">
             
-            <div className="flex items-center gap-2 mb-3">
-              <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
-              <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
-                {greeting.text}
-              </h1>
+            <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
+              <div className="flex items-center gap-2">
+                <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
+                <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
+                  {greeting.text}
+                </h1>
+              </div>
+              <div className="w-full sm:w-auto max-w-xs">
+                <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
+              </div>
               {isGerente &&
               <div className="hidden sm:flex items-center gap-1.5 ml-auto">
                   {[
@@ -434,9 +439,6 @@ export default function HomeWorkspace({
                 </div>
               }
             </div>
-            <div className="w-full max-w-xs">
-                <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
-              </div>
           </motion.div>
 
           {/* ── DAILY METRICS ── */}
