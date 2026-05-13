@@ -48,7 +48,7 @@ async function invokeGemini(prompt, context = '') {
       ? `${SYSTEM_PROMPT}\n\nDATOS TIENDA:\n${context}\n\nANÁLISIS: ${prompt}`
       : `${SYSTEM_PROMPT}\n\nPREGUNTA: ${prompt}\n\nUSA BENCHMARKS RETAIL COLOMBIA si no hay datos específicos.`;
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
