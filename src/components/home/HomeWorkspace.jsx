@@ -13,6 +13,7 @@ import {
 import { STORES } from '@/components/StoreSelector';
 import StoreSelector from '@/components/StoreSelector';
 import PremiumSparkline from './PremiumSparkline';
+import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -449,68 +450,37 @@ export default function HomeWorkspace({
             </div>
           )}
 
-          {/* ── INTELLIGENCE + QUICK ACTIONS ── */}
+          {/* ── EXECUTIVE ANALYTICS ── */}
           {!isGerente && (
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-7">
+            <ExecutiveAnalyticsPanel
+              todaySales={todaySales}
+              budget={budget}
+              cashiers={cashiers}
+            />
+          )}
 
-              {/* Intelligence feed */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                className="lg:col-span-3 rounded-2xl p-5"
-                style={{
-                  background: 'rgba(255,255,255,0.8)',
-                  backdropFilter: 'blur(24px)',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                }}
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-                    style={{ boxShadow: '0 0 5px rgba(52,211,153,0.8)' }} />
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.14em]">Inteligencia operacional</p>
-                  <span className="text-[9px] text-slate-300 ml-auto font-medium">ahora</span>
-                </div>
-                <div>
-                  {intelItems.map((item, i) => (
-                    <IntelRow key={i} {...item} delay={0.24 + i * 0.05} />
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Quick actions */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.26, duration: 0.5 }}
-                className="lg:col-span-2 rounded-2xl p-5 flex flex-col gap-2"
-                style={{
-                  background: 'rgba(255,255,255,0.8)',
-                  backdropFilter: 'blur(24px)',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                }}
-              >
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.14em] mb-2">Acciones rápidas</p>
-                {[
-                  { label: 'Registrar Ventas',    icon: TrendingUp, onClick: onShowStoreSales },
-                  { label: 'Presupuesto Mensual', icon: Target,     onClick: onShowBudgetDashboard },
-                  { label: 'Informe Gerencial',   icon: FileText,   onClick: onShowReport },
-                ].map(({ label, icon: I, onClick }) => (
-                  <button key={label} onClick={onClick}
-                    className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-[11.5px] font-medium text-slate-600 hover:text-slate-900 hover:bg-black/[0.03] transition-all text-left w-full group"
-                    style={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-                    <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'rgba(0,0,0,0.03)' }}>
-                      <I style={{ width: 12, height: 12, color: '#9ca3af' }} className="group-hover:text-slate-600 transition-colors" />
-                    </div>
-                    {label}
-                    <ChevronRight className="w-3 h-3 ml-auto text-slate-300 group-hover:text-slate-500 transition-colors" />
-                  </button>
-                ))}
-              </motion.div>
-            </div>
+          {/* ── QUICK ACTIONS ── */}
+          {!isGerente && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.45 }}
+              className="flex flex-wrap gap-2 mb-7"
+            >
+              {[
+                { label: 'Registrar Ventas',    icon: TrendingUp, onClick: onShowStoreSales },
+                { label: 'Presupuesto Mensual', icon: Target,     onClick: onShowBudgetDashboard },
+                { label: 'Informe Gerencial',   icon: FileText,   onClick: onShowReport },
+              ].map(({ label, icon: I, onClick }) => (
+                <button key={label} onClick={onClick}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11.5px] font-medium text-slate-600 hover:text-slate-900 hover:bg-black/[0.03] transition-all group"
+                  style={{ border: '1px solid rgba(0,0,0,0.07)', background: 'rgba(255,255,255,0.7)' }}>
+                  <I style={{ width: 12, height: 12, color: '#9ca3af' }} />
+                  {label}
+                  <ChevronRight className="w-3 h-3 text-slate-200 group-hover:text-slate-400 transition-colors" />
+                </button>
+              ))}
+            </motion.div>
           )}
 
           {/* ── MODULE GRID ── */}
