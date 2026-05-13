@@ -1,7 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Suspense } from 'react';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import PopsyRainingIcons from '@/components/PopsyRainingIcons';
@@ -1600,7 +1599,6 @@ export default function Home() {
           onClose={() => setShowPYGModal(false)} />
         }
       </AnimatePresence>
-      )}
-    </>
-  );
-}
+      </>
+      );
+      }
