@@ -5,6 +5,7 @@ import {
   PieChart, Pie, Cell, ComposedChart
 } from 'recharts';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import ProjectionCard from './ProjectionCard';
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 function fmt(n) {
@@ -83,12 +84,12 @@ const DAYS  = ['L','M','X','J','V','S','D'];
 
 function HeatmapCell({ value, max }) {
   const intensity = max > 0 ? value / max : 0;
-  // From pearl white → Popsy pink
-  const alpha = 0.06 + intensity * 0.88;
+  // From pearl white → soft pastel pink
+  const alpha = 0.08 + intensity * 0.78;
   return (
     <div
       className="rounded-md w-full aspect-square"
-      style={{ background: `rgba(194, 24, 117, ${alpha})` }}
+      style={{ background: `rgba(245, 168, 160, ${alpha})` }}
       title={`${value} txn`}
     />
   );
@@ -185,19 +186,25 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
     }));
   }, [todaySales]);
 
-  // EBITDA acumulado trend
+  // EBITDA por mes (agrupado)
   const ebitdaData = useMemo(() => {
-    let accumulated = 0;
-    return sorted30.map(d => {
-      accumulated += Math.round(d.ventas * 0.34);
-      return {
-        date: d.date,
-        ebitda: accumulated,
-        margen: d.ventas > 0 ? 34 : 0,
-        dailyEbitda: Math.round(d.ventas * 0.34),
-      };
+    const monthlyMap = {};
+    todaySales.forEach(d => {
+      const date = new Date(d.date);
+      const monthKey = date.toLocaleDateString('es', { month: 'short', year: '2-digit' });
+      if (!monthlyMap[monthKey]) {
+        monthlyMap[monthKey] = { sales: 0, count: 0 };
+      }
+      monthlyMap[monthKey].sales += d.total_sales || 0;
+      monthlyMap[monthKey].count += 1;
     });
-  }, [sorted30]);
+    
+    return Object.entries(monthlyMap).map(([month, data]) => ({
+      date: month,
+      ebitda: Math.round(data.sales * 0.34),
+      margen: 34,
+    }));
+  }, [todaySales]);
 
   // Hourly heatmap data — mock realistic pattern
   const heatmapData = useMemo(() => {
@@ -246,29 +253,28 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.06), transparent)' }} />
       </div>
 
-      {/* ── ROW 1: Sales Trend + EBITDA ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
+      {/* ── ROW 1: Sales Trend + EBITDA + Projection ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 mb-4">
 
         {/* Sales vs Projection chart */}
         <AnalyticsCard
           title="Ventas vs Proyección"
           subtitle={hasSalesData ? `Últimos ${sorted30.length} registros` : 'Sin datos aún'}
           delay={0.18}
-          colSpan="lg:col-span-3"
+          colSpan="lg:col-span-2"
         >
-          <div className="flex items-center gap-6 mb-4 relative">
-            <div>
-              <p className="text-[22px] font-black text-slate-800 tabular-nums tracking-tight leading-none">
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="p-3 rounded-xl" style={{ background: '#FAE8E6' }}>
+              <p className="text-[10px] text-gray-500 font-medium mb-1">Ventas actuales</p>
+              <p className="text-[20px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#F5A8A0' }}>
                 {fmt(today?.total_sales)}
               </p>
-              <p className="text-[11px] text-slate-400 mt-1 font-medium">Ventas actuales</p>
             </div>
-            <div className="h-8 w-px bg-slate-100" />
-            <div>
-              <p className="text-[16px] font-bold text-slate-500 tabular-nums leading-none">
+            <div className="p-3 rounded-xl" style={{ background: '#F3F3F3' }}>
+              <p className="text-[10px] text-gray-500 font-medium mb-1">Proyección EOD</p>
+              <p className="text-[20px] font-bold tabular-nums leading-none text-gray-600">
                 {fmt(Math.round(today?.total_sales * 1.05) || 0)}
               </p>
-              <p className="text-[11px] text-slate-400 mt-1 font-medium">Proyección EOD</p>
             </div>
           </div>
 
@@ -277,19 +283,19 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
               <ComposedChart data={sorted30} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#C21875" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="#C21875" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#F5A8A0" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#F5A8A0" stopOpacity="0" />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#cbd5e1', fontWeight: 400 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#999', fontWeight: 400 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis hide />
                 <Tooltip content={<SalesTooltip />} />
                 {/* Ventas real (solid) */}
-                <Area type="monotone" dataKey="ventas" stroke="#C21875" strokeWidth={2.5}
+                <Area type="monotone" dataKey="ventas" stroke="#F5A8A0" strokeWidth={2.5}
                   fill="url(#salesGrad)" dot={false} isAnimationActive={false} />
                 {/* Proyección (dashed) */}
-                <Line type="monotone" dataKey="proyeccion" stroke="#b0b8c0" strokeWidth={2} strokeDasharray="5 5"
+                <Line type="monotone" dataKey="proyeccion" stroke="#CCCCCC" strokeWidth={2} strokeDasharray="5 5"
                   dot={false} isAnimationActive={false} />
               </ComposedChart>
             </ResponsiveContainer>
@@ -302,46 +308,45 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           {/* Legend */}
           <div className="flex items-center gap-4 mt-3 text-[10px]">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#C21875' }} />
-              <span className="text-slate-500 font-medium">Ventas</span>
+              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#F5A8A0' }} />
+              <span className="text-gray-500 font-medium">Ventas</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#b0b8c0', backgroundImage: 'repeating-linear-gradient(90deg, #b0b8c0 0px, #b0b8c0 5px, transparent 5px, transparent 10px)' }} />
-              <span className="text-slate-500 font-medium">Proyección</span>
+              <div className="w-2.5 h-0.5 rounded-full" style={{ background: '#CCCCCC', backgroundImage: 'repeating-linear-gradient(90deg, #CCCCCC 0px, #CCCCCC 5px, transparent 5px, transparent 10px)' }} />
+              <span className="text-gray-500 font-medium">Proyección</span>
             </div>
           </div>
         </AnalyticsCard>
 
-        {/* EBITDA Acumulado */}
+        {/* EBITDA por Mes */}
         <AnalyticsCard
-          title="EBITDA (Acumulado)"
+          title="EBITDA Por Mes"
           subtitle="Margen operativo ~34%"
           delay={0.22}
-          colSpan="lg:col-span-2"
+          colSpan="lg:col-span-1"
         >
           <div className="mb-4">
-            <p className="text-[22px] font-black text-slate-800 tabular-nums tracking-tight leading-none">
+            <p className="text-[22px] font-black tabular-nums tracking-tight leading-none" style={{ color: '#F5D5D1' }}>
               {fmt(ebitdaData[ebitdaData.length - 1]?.ebitda || 0)}
             </p>
-            <p className="text-[10px] text-slate-300 mt-1">acumulado período · 34% margen</p>
+            <p className="text-[10px] text-slate-400 mt-1">mes actual · 34% margen</p>
           </div>
 
-          {hasSalesData ? (
+          {ebitdaData.length > 0 ? (
             <ResponsiveContainer width="100%" height={100}>
               <AreaChart data={ebitdaData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#F5D5D1" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#F5D5D1" stopOpacity="0" />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#cbd5e1', fontWeight: 400 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#999', fontWeight: 400 }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip content={<EbitdaTooltip />} />
-                <Area type="monotone" dataKey="ebitda" stroke="#6366f1" strokeWidth={2.5}
-                  fill="url(#ebitdaGrad)" dot={false} isAnimationActive={false}
-                  activeDot={{ r: 5, strokeWidth: 0, fill: '#6366f1' }} />
+                <Area type="monotone" dataKey="ebitda" stroke="#F5A8A0" strokeWidth={2.5}
+                  fill="url(#ebitdaGrad)" dot={false} isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -350,6 +355,13 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
             </div>
           )}
         </AnalyticsCard>
+
+        {/* Projection Card */}
+        <ProjectionCard
+          currentSales={today?.total_sales || 1700000}
+          targetSales={1800000}
+          delay={0.26}
+        />
       </div>
 
       {/* ── ROW 2: TXN Heatmap + Participación + Cajeros ── */}
@@ -359,14 +371,14 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         <AnalyticsCard title="Tráfico por Hora" subtitle="Transacciones · patrón semanal" delay={0.26}>
           <HourlyHeatmap data={heatmapData} />
           <div className="flex items-center justify-between mt-3">
-            <span className="text-[9px] text-slate-300 font-medium">Bajo</span>
+            <span className="text-[9px] text-gray-400 font-medium">Bajo</span>
             <div className="flex gap-1 flex-1 mx-3">
-              {[0.06, 0.2, 0.4, 0.6, 0.8, 0.94].map((a, i) => (
+              {[0.08, 0.22, 0.38, 0.54, 0.70, 0.86].map((a, i) => (
                 <div key={i} className="flex-1 h-1.5 rounded-sm"
-                  style={{ background: `rgba(194,24,117,${a})` }} />
+                  style={{ background: `rgba(245,168,160,${a})` }} />
               ))}
             </div>
-            <span className="text-[9px] text-slate-300 font-medium">Alto</span>
+            <span className="text-[9px] text-gray-400 font-medium">Alto</span>
           </div>
         </AnalyticsCard>
 
