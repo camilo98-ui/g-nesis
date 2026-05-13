@@ -436,102 +436,135 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, staggerChildren: 0.1 }}>
 
-        {/* Ranking de Tiendas por Ventas */}
+        {/* Ranking de Tiendas - Presupuesto y Ticket */}
         <AnalyticsCard
-          title="Top Tiendas"
-          subtitle="Ranking por ventas últimos 30 días"
+          title="Desempeño vs Objetivo"
+          subtitle="Cumplimiento presupuesto y ticket promedio"
           delay={0.18}>
           
-          <div className="space-y-3">
-            {[
-              { rank: 1, name: 'BTA 11', sales: 45200000, compliance: 92 },
-              { rank: 2, name: 'BTA 08', sales: 38900000, compliance: 85 },
-              { rank: 3, name: 'BTA 15', sales: 36700000, compliance: 78 }
-            ].map((store, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -15 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.25 + i * 0.08 }}
-                className="flex items-center gap-3 p-3 rounded-lg group cursor-pointer"
-                style={{ background: 'rgba(255, 77, 141, 0.04)' }}>
-                
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
-                  style={{
-                    background: i === 0 ? 'linear-gradient(135deg, #FF4D8D, #FF7FA5)' : `rgba(255, 77, 141, ${0.1 + i * 0.05})`,
-                    color: i === 0 ? '#fff' : '#FF4D8D'
-                  }}>
-                  {i + 1}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-semibold text-[#2A2A2A]">{store.name}</p>
-                  <p className="text-[9px] text-[#8F96A3] font-medium">{fmt(store.sales)}</p>
-                </div>
-                
-                <div className="text-right flex-shrink-0">
-                  <p className="text-[10px] font-bold" style={{ color: store.compliance >= 85 ? '#10b981' : store.compliance >= 70 ? '#f59e0b' : '#ef4444' }}>
-                    {store.compliance}%
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+          <div className="space-y-4">
+            {/* Cumplimiento Presupuesto */}
+            <div>
+              <p className="text-[9px] font-semibold text-[#8F96A3] uppercase mb-2.5">CUMPLIMIENTO PRESUPUESTO</p>
+              <div className="space-y-2">
+                {[
+                  { name: 'BTA 11', value: 92, target: 100 },
+                  { name: 'BTA 08', value: 85, target: 100 },
+                  { name: 'BTA 15', value: 78, target: 100 }
+                ].map((store, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.25 + i * 0.06 }}>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[9px] font-medium text-[#2A2A2A]">{store.name}</span>
+                      <span className="text-[9px] font-bold" style={{ color: store.value >= 90 ? '#10b981' : store.value >= 75 ? '#f59e0b' : '#ef4444' }}>
+                        {store.value}%
+                      </span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${store.value}%` }}
+                        transition={{ delay: 0.3 + i * 0.08, duration: 0.7 }}
+                        className="h-full rounded-full"
+                        style={{ 
+                          background: store.value >= 90 ? '#10b981' : store.value >= 75 ? '#f59e0b' : '#ef4444'
+                        }} />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Ticket Promedio */}
+            <div style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)', paddingTop: '1rem' }}>
+              <p className="text-[9px] font-semibold text-[#8F96A3] uppercase mb-2.5">TICKET PROMEDIO</p>
+              <div className="space-y-2">
+                {[
+                  { name: 'BTA 11', value: 58.2, target: 67 },
+                  { name: 'BTA 08', value: 54.8, target: 67 },
+                  { name: 'BTA 15', value: 52.1, target: 67 }
+                ].map((store, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.32 + i * 0.06 }}>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[9px] font-medium text-[#2A2A2A]">{store.name}</span>
+                      <span className="text-[9px] font-bold text-[#FF4D8D]">${store.value}K</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(store.value / store.target) * 100}%` }}
+                        transition={{ delay: 0.35 + i * 0.08, duration: 0.7 }}
+                        className="h-full rounded-full"
+                        style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
+                    </div>
+                    <p className="text-[8px] text-[#8F96A3] mt-0.5">vs ${store.target}K meta</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
           </div>
         </AnalyticsCard>
 
-        {/* Benchmarking de Métricas */}
+        {/* Benchmarking - Métricas Operacionales */}
         <AnalyticsCard
-          title="Benchmarking"
-          subtitle="Promedios vs objetivo"
+          title="Métricas Operacionales"
+          subtitle="Estado actual vs meta del mes"
           delay={0.22}>
           
           <div className="space-y-4">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Ticket Promedio</span>
-                <span className="text-[11px] font-bold text-[#FF4D8D]">$52.4K</span>
+                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Transacciones/Día</span>
+                <span className="text-[11px] font-bold text-[#FF4D8D]">287</span>
               </div>
               <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: '78%' }}
+                  animate={{ width: '76%' }}
                   transition={{ delay: 0.3, duration: 0.8 }}
                   className="h-full rounded-full"
                   style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
               </div>
-              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: $67K</p>
+              <p className="text-[8px] text-[#8F96A3] mt-1">Meta: 378 txn/día</p>
             </div>
             
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Tasa de Conversión</span>
-                <span className="text-[11px] font-bold text-[#FF4D8D]">68%</span>
+                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Venta Promedio por Txn</span>
+                <span className="text-[11px] font-bold text-[#FF4D8D]">$54.2K</span>
               </div>
               <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: '68%' }}
+                  animate={{ width: '81%' }}
                   transition={{ delay: 0.35, duration: 0.8 }}
                   className="h-full rounded-full"
                   style={{ background: 'linear-gradient(90deg, #FF7FA5, #FFB4C9)' }} />
               </div>
-              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: 75%</p>
+              <p className="text-[8px] text-[#8F96A3] mt-1">Meta: $67K por txn</p>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Ventas por Sqm</span>
-                <span className="text-[11px] font-bold text-[#FF4D8D]">$847K</span>
+                <span className="text-[9px] font-semibold text-[#8F96A3] uppercase">Cumplimiento Mensual</span>
+                <span className="text-[11px] font-bold text-[#FF4D8D]">87%</span>
               </div>
               <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: '88%' }}
+                  animate={{ width: '87%' }}
                   transition={{ delay: 0.4, duration: 0.8 }}
                   className="h-full rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' }} />
+                  style={{ background: '#f59e0b' }} />
               </div>
-              <p className="text-[8px] text-[#8F96A3] mt-1">Objetivo: $960K</p>
+              <p className="text-[8px] text-[#8F96A3] mt-1">Meta: 100% presupuesto</p>
             </div>
           </div>
         </AnalyticsCard>
