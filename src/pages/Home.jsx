@@ -20,6 +20,7 @@ const ShiftRecordForm = lazy(() => import('@/components/forms/ShiftRecordForm'))
 const MonthlyBudgetDashboard = lazy(() => import('@/components/budget/MonthlyBudgetDashboard'));
 import GerenteHomePanel from '@/components/executive/GerenteHomePanel.jsx';
 import HomeWorkspace from '@/components/home/HomeWorkspace.jsx';
+import PremiumDashboard from '@/components/premium/PremiumDashboard.jsx';
 import {
   LayoutDashboard, Users, TrendingUp, Activity,
   Award, Target, Bell, Phone, Download, FileText,
@@ -994,52 +995,61 @@ export default function Home() {
 
   }
 
+  // Use new premium dashboard
   return (
     <>
-    <HomeWorkspace
+    <PremiumDashboard
       selectedStore={selectedStore}
-      selectedRole={selectedRole}
-      selectedStoreName={selectedStoreName}
-      onLogout={handleLogout}
       onStoreChange={handleStoreChange}
-      onShowReport={() => setShowReport(true)}
-      onShowStoreSales={() => setShowStoreSales(true)}
-      onShowBudgetDashboard={() => setShowBudgetDashboard(true)}
-      onShowBudgetImporter={() => setShowBudgetImporter(true)}
-      onShowKpisUploader={() => setShowKpisUploader(true)}
-      onShowAggregatorsUploader={() => setShowAggregatorsUploader(true)}
-      onShowPYGUploader={() => setShowPYGUploader(true)}
-      onShowPYGModal={() => setShowPYGModal(true)}
-      onShowExperiencia={() => setShowExperienciaPopsy(true)}
-      onShowCustomerExperience={() => setShowCustomerExperience(true)}
-      backupLoading={backupLoading}
-      onBackup={async () => {
-        setBackupLoading(true);
-        try {
-          const response = await base44.functions.invoke('backupToGoogleDrive', {});
-          if (response.data.success) {
-            const backupBlob = new Blob([JSON.stringify(response.data.full_backup, null, 2)], { type: 'application/json' });
-            const url = window.URL.createObjectURL(backupBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = response.data.file_name;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
-            toast.success(`✅ ${response.data.message}`, { duration: 8000 });
-          } else {
-            toast.error(`❌ ${response.data.error}`, { duration: 10000 });
-          }
-        } catch (error) {
-          toast.error(`❌ Error: ${error.message}`, { duration: 8000 });
-        }
-        setBackupLoading(false);
-      }}
-    />
+      onLogout={handleLogout}
+      storeName={selectedStoreName}
+      userName="Camila"
+    >
+      {/* Modales */}
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {showReport && <ManagerialReportModal storeId={selectedStore} storeName={selectedStoreName} storeCode={selectedStore} onClose={() => setShowReport(false)} />}
+        </AnimatePresence>
+        {showBudgetDashboard && <MonthlyBudgetDashboard storeId={selectedStore} storeName={selectedStoreName} isOpen={showBudgetDashboard} onClose={() => setShowBudgetDashboard(false)} />}
+        {showStoreSales && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowStoreSales(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()} className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border-2 border-white/60">
+              <div className="bg-gradient-to-r from-fuchsia-500 via-pink-500 to-violet-500 p-5 text-white text-center relative">
+                <button onClick={() => setShowStoreSales(false)} className="absolute top-4 right-4 text-white/80 hover:text-white"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+                <TrendingUp className="w-10 h-10 mx-auto mb-2" />
+                <h2 className="text-xl font-black">Registrar Ventas</h2>
+              </div>
+              <div className="p-6 max-h-[70vh] overflow-y-auto">
+                <DailySalesForm storeId={selectedStore} onSuccess={() => setShowStoreSales(false)} />
+              </div>
+            </motion.div>
+          </div>
+        )}
+        {showExperienciaPopsy && <ExperienciaPopsyModal onClose={() => setShowExperienciaPopsy(false)} storeId={selectedStore} userId="temp_user" userName="Usuario" userRole={selectedRole} />}
+        {showCustomerExperience && <CustomerExperienceModal onClose={() => setShowCustomerExperience(false)} storeId={selectedStore} userRole={selectedRole} />}
+      </Suspense>
+      <AnimatePresence>
+        {showBudgetImporter && <BudgetExcelImporter onClose={() => setShowBudgetImporter(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showKpisUploader && <KpisReportUploader onClose={() => setShowKpisUploader(false)} onSuccess={() => setShowKpisUploader(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showAggregatorsUploader && <AggregatorsUploader onClose={() => setShowAggregatorsUploader(false)} onSuccess={() => setShowAggregatorsUploader(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showPYGUploader && <PYGUploader onClose={() => setShowPYGUploader(false)} onSuccess={() => setShowPYGUploader(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showPYGModal && <PYGModal storeId={selectedStore} onClose={() => setShowPYGModal(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showSalesReportUploader && <SalesReportUploader onClose={() => setShowSalesReportUploader(false)} onSuccess={() => setShowSalesReportUploader(false)} />}
+      </AnimatePresence>
+    </PremiumDashboard>
 
-    {/* ── OLD DASHBOARD REMOVED ── */}
-    {false && <div>
+    {/* ── Modales ── */}
+    <Suspense fallback={null}>
         {/* Silueta principal superior derecha - relieve sofisticado */}
         <motion.div
             animate={{
@@ -1441,8 +1451,6 @@ export default function Home() {
         </div>
         }
       </div>
-
-      {/* Modales con Lazy Loading */}
       <Suspense fallback={null}>
         <AnimatePresence>
           {showNotifications &&
@@ -1600,13 +1608,6 @@ export default function Home() {
           onClose={() => setShowPYGModal(false)} />
         }
       </AnimatePresence>
-
-
-
-
-    </div>}
-
-    {/* ── MODALES ACTIVOS (fuera del div hidden) ── */}
     <Suspense fallback={null}>
       <AnimatePresence>
         {showNotifications && <NotificationSetup storeId={selectedStore} isOpen={showNotifications} onClose={() => setShowNotifications(false)} />}
