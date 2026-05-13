@@ -299,17 +299,29 @@ export default function HomeWorkspace({
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  function sendMessage(text) {
+  async function sendMessage(text) {
     if (!text.trim()) return;
     setMessages((prev) => [...prev, { role: 'user', text: text.trim() }]);
     setInputVal('');
     setIsTyping(true);
-    setTimeout(() => {
-      const reply = AI_RESPONSES[text.trim()] ||
-      `Revisando datos de ${storeName || 'tu tienda'} para: "${text.trim()}"... Dame un momento.`;
+    
+    try {
+      const response = await base44.functions.invoke('retailStrategist', {
+        prompt: text.trim(),
+        selectedStore,
+        selectedRole
+      });
+      
       setIsTyping(false);
-      setMessages((prev) => [...prev, { role: 'nova', text: reply }]);
-    }, 1200 + Math.random() * 600);
+      if (response.data?.success) {
+        setMessages((prev) => [...prev, { role: 'nova', text: response.data.response }]);
+      } else {
+        setMessages((prev) => [...prev, { role: 'nova', text: 'Hubo un error procesando tu solicitud. Intenta nuevamente.' }]);
+      }
+    } catch (error) {
+      setIsTyping(false);
+      setMessages((prev) => [...prev, { role: 'nova', text: 'Error de conexión. Verifica tu pregunta e intenta de nuevo.' }]);
+    }
   }
 
   const QUICK_MODULES = [
