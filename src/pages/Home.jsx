@@ -184,6 +184,39 @@ const MENU_ITEMS = [
   textColor: 'text-emerald-700',
   isSpecialAction: true,
   specialAction: 'verPYG'
+},
+{
+  name: 'Informe',
+  page: '',
+  icon: FileText,
+  description: 'Reporte gerencial',
+  bgColor: 'bg-gradient-to-br from-rose-100/90 to-pink-100/80',
+  iconBg: 'bg-rose-200/60',
+  iconColor: 'text-rose-500',
+  textColor: 'text-rose-700',
+  isSpecialAction: true,
+  specialAction: 'informe',
+  notForGerente: true,
+},
+{
+  name: 'Txn por Hora',
+  page: 'HourlyTransactions',
+  icon: Clock,
+  description: 'Transacciones por hora',
+  bgColor: 'bg-gradient-to-br from-violet-100/90 to-purple-100/80',
+  iconBg: 'bg-violet-200/60',
+  iconColor: 'text-violet-500',
+  textColor: 'text-violet-700',
+},
+{
+  name: 'Participación',
+  page: 'SalesReportView',
+  icon: BarChart3,
+  description: 'Mix del negocio',
+  bgColor: 'bg-gradient-to-br from-indigo-100/90 to-blue-100/80',
+  iconBg: 'bg-indigo-200/60',
+  iconColor: 'text-indigo-600',
+  textColor: 'text-indigo-700',
 }];
 
 
@@ -1221,17 +1254,7 @@ export default function Home() {
               </Button>
           }
 
-            {selectedRole !== 'gerente' && selectedStore &&
-            <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.location.href = '/SalesReportView'}
-            className="text-gray-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all text-xs">
 
-               <BarChart3 className="w-3.5 h-3.5 mr-1" />
-               Participación del negocio
-             </Button>
-            }
 
 
 
@@ -1242,26 +1265,6 @@ export default function Home() {
 
 
           
-            {selectedRole !== 'gerente' &&
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowReport(true)}
-            className="text-gray-400 hover:text-rose-500 hover:bg-rose-50/50 transition-all text-xs">
-            
-                <FileText className="w-3.5 h-3.5 mr-1" />
-                Informe
-              </Button>
-          }
-
-            <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.location.href = '/HourlyTransactions'}
-            className="text-gray-400 hover:text-violet-600 hover:bg-violet-50/50 transition-all text-xs">
-              <Clock className="w-3.5 h-3.5 mr-1" />
-              Txn por Hora
-            </Button>
           </div>
         }
 
@@ -1274,6 +1277,7 @@ export default function Home() {
             const needsStore = item.page !== 'ExecutiveDashboard';
             if (needsStore && !selectedStore && item.requiredRole !== 'gerente') return false;
             if (item.requiredRole && selectedRole !== item.requiredRole) return false;
+            if (item.notForGerente && selectedRole === 'gerente') return false;
 
             // Restricción de tiendas específicas para Experiencia Popsy
             if (item.restrictedStores && !item.restrictedStores.includes(selectedStore)) return false;
@@ -1371,6 +1375,8 @@ export default function Home() {
                       setShowCustomerExperience(true);
                     } else if (item.specialAction === 'verPYG') {
                       setShowPYGModal(true);
+                    } else if (item.specialAction === 'informe') {
+                      setShowReport(true);
                     } else {
                       setShowStoreSales(true);
                     }
@@ -1394,7 +1400,9 @@ export default function Home() {
                   </div>
                   </div> :
 
-                <Link to={createPageUrl(item.page)}>
+                <div
+                  onClick={() => { window.location.href = `/${item.page}`; }}
+                  className="cursor-pointer">
                   <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 h-full shadow-lg hover:shadow-2xl hover:bg-white/15 transition-all duration-300 group relative overflow-hidden border border-white/20">
                     {/* Icon centered */}
                     <div className="flex flex-col items-center justify-center text-center relative z-10">
@@ -1407,7 +1415,7 @@ export default function Home() {
                       <p className="text-[10px] text-gray-500 mt-0.5">{item.description}</p>
                     </div>
                   </div>
-                </Link>
+                </div>
                 }
               </div>);
 
@@ -1487,43 +1495,8 @@ export default function Home() {
                 <h2 className="text-xl font-black">Registrar Ventas</h2>
               </div>
 
-              <div className="flex border-b-2 border-pink-200/50 bg-gradient-to-r from-pink-50/50 to-violet-50/50 backdrop-blur-sm">
-                <button
-                onClick={() => setSalesTab('tienda')}
-                className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
-                salesTab === 'tienda' ? 'text-pink-600' : 'text-gray-500'}`
-                }>
-                
-                  🏪 Venta de Tienda
-                  {salesTab === 'tienda' &&
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-pink-500 to-fuchsia-500 rounded-t-full" />
-
-                }
-                </button>
-                <button
-                onClick={() => setSalesTab('cajero')}
-                className={`flex-1 py-4 px-6 font-bold text-sm transition-all relative ${
-                salesTab === 'cajero' ? 'text-violet-600' : 'text-gray-500'}`
-                }>
-                
-                  👤 Venta de Cajero
-                  {salesTab === 'cajero' &&
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500 rounded-t-full" />
-
-                }
-                </button>
-              </div>
-
               <div className="p-6 max-h-[70vh] overflow-y-auto">
-                {salesTab === 'tienda' ?
-              <DailySalesForm storeId={selectedStore} onSuccess={() => setShowStoreSales(false)} /> :
-
-              <ShiftRecordForm storeId={selectedStore} onSuccess={() => {}} />
-              }
+                <DailySalesForm storeId={selectedStore} onSuccess={() => setShowStoreSales(false)} />
               </div>
             </motion.div>
           </div>
