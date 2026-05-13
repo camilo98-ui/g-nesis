@@ -40,8 +40,8 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
 
   React.useEffect(() => {
     if (storeCode) {
-      const lider = rolePasswords.find(p => p.store_code === storeCode && p.role === 'lider');
-      const embajador = rolePasswords.find(p => p.store_code === storeCode && p.role === 'embajador');
+      const lider = rolePasswords.find((p) => p.store_code === storeCode && p.role === 'lider');
+      const embajador = rolePasswords.find((p) => p.store_code === storeCode && p.role === 'embajador');
       setLiderPassword(lider?.password || '');
       setEmbajadorPassword(embajador?.password || '');
     }
@@ -49,7 +49,7 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
 
   const saveMutation = useMutation({
     mutationFn: async ({ role, password }) => {
-      const existing = rolePasswords.find(p => p.store_code === storeCode && p.role === role);
+      const existing = rolePasswords.find((p) => p.store_code === storeCode && p.role === role);
       if (password) {
         if (existing) {
           return base44.entities.RolePassword.update(existing.id, { password });
@@ -81,8 +81,8 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
             placeholder="Contraseña para líderes"
             value={liderPassword}
             onChange={(e) => setLiderPassword(e.target.value)}
-            className="pr-20"
-          />
+            className="pr-20" />
+          
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
             <button
               type="button"
@@ -94,8 +94,8 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
               size="sm"
               onClick={() => saveMutation.mutate({ role: 'lider', password: liderPassword })}
               disabled={saveMutation.isPending}
-              className="h-7 px-2 text-xs"
-            >
+              className="h-7 px-2 text-xs">
+              
               {saveMutation.isPending ? '...' : 'Guardar'}
             </Button>
           </div>
@@ -113,8 +113,8 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
             placeholder="Contraseña para embajadores"
             value={embajadorPassword}
             onChange={(e) => setEmbajadorPassword(e.target.value)}
-            className="pr-20"
-          />
+            className="pr-20" />
+          
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
             <button
               type="button"
@@ -126,15 +126,15 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
               size="sm"
               onClick={() => saveMutation.mutate({ role: 'embajador', password: embajadorPassword })}
               disabled={saveMutation.isPending}
-              className="h-7 px-2 text-xs"
-            >
+              className="h-7 px-2 text-xs">
+              
               {saveMutation.isPending ? '...' : 'Guardar'}
             </Button>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export default function StoreSelector({ selectedStore, onStoreChange }) {
@@ -154,13 +154,13 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   const [customStores, setCustomStores] = useState([]);
 
   useEffect(() => {
-    base44.auth.me().then(user => {
+    base44.auth.me().then((user) => {
       if (user?.store_config) setStoreConfig(user.store_config);
     }).catch(() => {});
     // Leer tiendas custom desde entidad compartida (excluir las que ya están en BASE_STORES)
-    base44.entities.Store.list().then(stores => {
-      const baseCodes = new Set(STORES.map(s => s.code));
-      setCustomStores(stores.filter(s => !baseCodes.has(s.code)).map(s => ({ code: s.code, name: s.name, displayName: s.name })));
+    base44.entities.Store.list().then((stores) => {
+      const baseCodes = new Set(STORES.map((s) => s.code));
+      setCustomStores(stores.filter((s) => !baseCodes.has(s.code)).map((s) => ({ code: s.code, name: s.name, displayName: s.name })));
     }).catch(() => {});
   }, []);
 
@@ -200,8 +200,8 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     // Las tiendas de BASE_STORES que no están en activeStoreCodes se consideran "nuevas"
     // y se incluyen automáticamente para que no queden ocultas al agregar tiendas al sistema
     const configured = new Set(storeConfig.activeStoreCodes);
-    const customCodes = new Set(customStores.map(s => s.code));
-    return allStores.filter(s => {
+    const customCodes = new Set(customStores.map((s) => s.code));
+    return allStores.filter((s) => {
       if (configured.has(s.code)) return true; // activa explícitamente
       if (customCodes.has(s.code)) return false; // custom no activada = oculta
       return true; // BASE_STORES nueva (no estaba cuando se configuró) = mostrar siempre
@@ -223,9 +223,9 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
         displayName.includes(term) ||
         codeNumber.includes(term) ||
         // Buscar por iniciales de palabras (ej: "pi" -> "PLAZA IMPERIAL")
-        name.split(' ').some(word => word.toLowerCase().startsWith(term)) ||
-        displayName.split(' ').some(word => word.toLowerCase().startsWith(term))
-      );
+        name.split(' ').some((word) => word.toLowerCase().startsWith(term)) ||
+        displayName.split(' ').some((word) => word.toLowerCase().startsWith(term)));
+
     });
   }, [search, activeStores]);
 
@@ -273,14 +273,14 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
       <div className="relative">
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <button
-            onClick={() => { setOpen(!open); setSearch(''); }}
-            className="w-full min-w-[200px] h-11 bg-white border-2 border-rose-200 hover:border-pink-400 transition-all shadow-md hover:shadow-lg rounded-2xl flex items-center justify-between px-4"
-          >
+            onClick={() => {setOpen(!open);setSearch('');}}
+            className="w-full min-w-[200px] h-11 bg-white border-2 border-rose-200 hover:border-pink-400 transition-all shadow-md hover:shadow-lg rounded-2xl flex items-center justify-between px-4 hidden">
+            
             <div className="flex items-center gap-2.5">
               <MapPin className="w-4 h-4 text-pink-500" />
-              {selectedStore
-                ? <span className="text-pink-700 font-semibold truncate">{getDisplayName(selectedStore)}</span>
-                : <span className="text-gray-500 font-medium">Selecciona una tienda</span>
+              {selectedStore ?
+              <span className="text-pink-700 font-semibold truncate">{getDisplayName(selectedStore)}</span> :
+              <span className="text-gray-500 font-medium">Selecciona una tienda</span>
               }
             </div>
             <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,72 +289,72 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
           </button>
         </motion.div>
 
-        {open && (
-          <>
+        {open &&
+        <>
             {/* Overlay para cerrar al hacer click fuera */}
-            <div className="fixed inset-0 z-40" onClick={() => { setOpen(false); setSearch(''); }} />
+            <div className="fixed inset-0 z-40" onClick={() => {setOpen(false);setSearch('');}} />
             <div className="absolute z-50 mt-2 w-full min-w-[300px] bg-white rounded-2xl shadow-2xl border border-pink-100 p-3">
               <div className="relative mb-3">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-400" />
                 <input
-                  autoFocus
-                  placeholder="Buscar tienda..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-3 h-10 text-sm bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 focus:border-pink-400 focus:outline-none rounded-xl placeholder:text-gray-400 font-medium"
-                />
+                autoFocus
+                placeholder="Buscar tienda..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-10 pr-3 h-10 text-sm bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 focus:border-pink-400 focus:outline-none rounded-xl placeholder:text-gray-400 font-medium" />
+              
               </div>
               <div className="max-h-[300px] overflow-y-auto space-y-1.5">
-                {filteredStores.map((store) => (
-                  <div
-                    key={store.code}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer ${
-                      selectedStore === store.code
-                        ? 'bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 border-2 border-pink-300 shadow-lg'
-                        : 'bg-gradient-to-r from-white to-pink-50/50 hover:from-pink-50 hover:to-rose-50 border-2 border-transparent hover:border-pink-200'
-                    }`}
-                  >
+                {filteredStores.map((store) =>
+              <div
+                key={store.code}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer ${
+                selectedStore === store.code ?
+                'bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 border-2 border-pink-300 shadow-lg' :
+                'bg-gradient-to-r from-white to-pink-50/50 hover:from-pink-50 hover:to-rose-50 border-2 border-transparent hover:border-pink-200'}`
+                }>
+                
                     <button
-                      onClick={() => handleStoreClick(store)}
-                      className="flex-1 flex items-center gap-3 text-left"
-                    >
+                  onClick={() => handleStoreClick(store)}
+                  className="flex-1 flex items-center gap-3 text-left">
+                  
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ${
-                        selectedStore === store.code ? 'bg-white/30' : 'bg-gradient-to-br from-pink-100 to-rose-100'
-                      }`}>
+                  selectedStore === store.code ? 'bg-white/30' : 'bg-gradient-to-br from-pink-100 to-rose-100'}`
+                  }>
                         <MapPin className={`w-4 h-4 ${selectedStore === store.code ? 'text-white' : 'text-pink-500'}`} />
                       </div>
                       <span className={`text-sm font-bold flex-1 ${selectedStore === store.code ? 'text-white' : 'text-gray-800'}`}>
                         {store.displayName}
                       </span>
-                      {hasPassword(store.code) && (
-                        <Lock className={`w-3 h-3 ${selectedStore === store.code ? 'text-white/80' : 'text-amber-500'}`} />
-                      )}
+                      {hasPassword(store.code) &&
+                  <Lock className={`w-3 h-3 ${selectedStore === store.code ? 'text-white/80' : 'text-amber-500'}`} />
+                  }
                     </button>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditPasswordDialog({ open: true, store });
-                        setNewPassword(storePasswords.find((p) => p.store_code === store.code)?.password || '');
-                      }}
-                      className={`p-1.5 rounded-lg transition-colors ${
-                        selectedStore === store.code ? 'hover:bg-white/20' : 'hover:bg-pink-200/50'
-                      }`}
-                      title="Configurar contraseña"
-                    >
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditPasswordDialog({ open: true, store });
+                    setNewPassword(storePasswords.find((p) => p.store_code === store.code)?.password || '');
+                  }}
+                  className={`p-1.5 rounded-lg transition-colors ${
+                  selectedStore === store.code ? 'hover:bg-white/20' : 'hover:bg-pink-200/50'}`
+                  }
+                  title="Configurar contraseña">
+                  
                       <Settings className={`w-3.5 h-3.5 ${selectedStore === store.code ? 'text-white/80' : 'text-pink-400'}`} />
                     </button>
                   </div>
-                ))}
+              )}
 
-                {filteredStores.length === 0 && search.trim() && (
-                  <div className="text-center py-8">
+                {filteredStores.length === 0 && search.trim() &&
+              <div className="text-center py-8">
                     <p className="text-gray-400 text-sm">No se encontró "{search}"</p>
                   </div>
-                )}
+              }
               </div>
             </div>
           </>
-        )}
+        }
       </div>
       
 
@@ -396,11 +396,11 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
             </div>
 
             {/* Contraseñas por Rol */}
-            <RolePasswordsEditor 
+            <RolePasswordsEditor
               storeCode={editPasswordDialog.store?.code}
               rolePasswords={rolePasswords}
-              onUpdate={() => queryClient.invalidateQueries({ queryKey: ['rolePasswords'] })}
-            />
+              onUpdate={() => queryClient.invalidateQueries({ queryKey: ['rolePasswords'] })} />
+            
 
             <p className="text-xs text-gray-400">
               💡 Las contraseñas por rol tienen prioridad sobre la contraseña general

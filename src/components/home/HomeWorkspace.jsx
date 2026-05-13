@@ -8,8 +8,8 @@ import {
   Download, FileText, Lock, Receipt, Snowflake, Settings as SettingsIcon,
   CalendarDays, LogOut, Sparkles, Trophy, FileSpreadsheet, BarChart3, Clock,
   ChevronRight, Zap, BarChart2, ArrowUpRight, ArrowDownRight, Minus,
-  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown
-} from 'lucide-react';
+  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown } from
+'lucide-react';
 import { STORES } from '@/components/StoreSelector';
 import StoreSelector from '@/components/StoreSelector';
 import PremiumSparkline from './PremiumSparkline';
@@ -27,14 +27,14 @@ function getGreeting() {
 }
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Tienda',        path: 'Dashboard',          color: '#C21875', roles: ['lider','embajador','gerente'] },
-  { icon: TrendingUp,      label: 'P&G',           path: 'PYGDashboard',       color: '#374151', roles: ['gerente'] },
-  { icon: TrendingUp,      label: 'P&G Tienda',    path: null,                 color: '#374151', onClick: 'onShowPYGModal', roles: ['lider','embajador'] },
-  { icon: FileText,        label: 'Informe',        path: 'SalesReportView',    color: '#374151', roles: ['lider','embajador','gerente'] },
-  { icon: Clock,           label: 'Txn por hora',  path: 'HourlyTransactions', color: '#374151', roles: ['lider','embajador','gerente'] },
-  { icon: BarChart3,       label: 'Participación', path: 'SalesReportView',    color: '#374151', roles: ['lider','embajador','gerente'] },
-  { icon: Snowflake,       label: 'Mapa Nevera',   path: 'FreezerMap',         color: '#374151', roles: ['lider','embajador','gerente'] },
-];
+{ icon: LayoutDashboard, label: 'Tienda', path: 'Dashboard', color: '#C21875', roles: ['lider', 'embajador', 'gerente'] },
+{ icon: TrendingUp, label: 'P&G', path: 'PYGDashboard', color: '#374151', roles: ['gerente'] },
+{ icon: TrendingUp, label: 'P&G Tienda', path: null, color: '#374151', onClick: 'onShowPYGModal', roles: ['lider', 'embajador'] },
+{ icon: FileText, label: 'Informe', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
+{ icon: Clock, label: 'Txn por hora', path: 'HourlyTransactions', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
+{ icon: BarChart3, label: 'Participación', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
+{ icon: Snowflake, label: 'Mapa Nevera', path: 'FreezerMap', color: '#374151', roles: ['lider', 'embajador', 'gerente'] }];
+
 
 // ── PREMIUM KPI CARD ─────────────────────────────────────────────────────────
 function KPICard({ label, value, change, icon: Icon, color, chartData, delay = 0 }) {
@@ -53,20 +53,20 @@ function KPICard({ label, value, change, icon: Icon, color, chartData, delay = 0
         background: 'rgba(255,255,255,0.82)',
         backdropFilter: 'blur(24px)',
         border: '1px solid rgba(0,0,0,0.06)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)',
-      }}
-    >
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
+      }}>
+      
       {/* Top row: icon + delta */}
       <div className="flex items-center justify-between mb-3">
         <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-          style={{ background: `${color}0f` }}>
+        style={{ background: `${color}0f` }}>
           <Icon style={{ color, width: 15, height: 15, opacity: 0.85 }} />
         </div>
         <span className={`flex items-center gap-0.5 text-[11px] font-semibold tabular-nums ${
-          isNeutral ? 'text-slate-400' : isPos ? 'text-emerald-500' : 'text-rose-400'
-        }`}>
+        isNeutral ? 'text-slate-400' : isPos ? 'text-emerald-500' : 'text-rose-400'}`
+        }>
           {isNeutral ? <Minus className="w-2.5 h-2.5" /> :
-           isPos ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+          isPos ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
           {Math.abs(change)}%
         </span>
       </div>
@@ -77,14 +77,14 @@ function KPICard({ label, value, change, icon: Icon, color, chartData, delay = 0
 
       {/* Sparkline */}
       <div className="opacity-90">
-        <PremiumSparkline data={chartData || [3,4,4,5,4,6,5,7]} color={sparkColor} width={80} height={24} />
+        <PremiumSparkline data={chartData || [3, 4, 4, 5, 4, 6, 5, 7]} color={sparkColor} width={80} height={24} />
       </div>
 
       {/* Subtle bottom accent */}
       <div className="absolute bottom-0 left-0 right-0 h-px rounded-b-2xl"
-        style={{ background: `linear-gradient(90deg, transparent, ${color}30, transparent)` }} />
-    </motion.div>
-  );
+      style={{ background: `linear-gradient(90deg, transparent, ${color}30, transparent)` }} />
+    </motion.div>);
+
 }
 
 // ── SIDEBAR NAV ITEM ─────────────────────────────────────────────────────────
@@ -98,24 +98,24 @@ function NavItem({ item, isActive, onClick }) {
       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-colors"
       style={isActive ? {
         background: 'rgba(194,24,117,0.07)',
-        border: '1px solid rgba(194,24,117,0.12)',
-      } : { background: 'transparent', border: '1px solid transparent' }}
-    >
+        border: '1px solid rgba(194,24,117,0.12)'
+      } : { background: 'transparent', border: '1px solid transparent' }}>
+      
       <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={isActive
-          ? { background: 'rgba(194,24,117,0.1)' }
-          : { background: 'rgba(0,0,0,0.03)' }}>
+      style={isActive ?
+      { background: 'rgba(194,24,117,0.1)' } :
+      { background: 'rgba(0,0,0,0.03)' }}>
         <Icon style={{ color: isActive ? '#C21875' : '#9ca3af', width: 13, height: 13 }} />
       </div>
       <span className="text-xs font-medium flex-1 truncate"
-        style={{ color: isActive ? '#C21875' : '#6b7280' }}>
+      style={{ color: isActive ? '#C21875' : '#6b7280' }}>
         {item.label}
       </span>
-      {isActive && (
-        <div className="w-1 h-3 rounded-full flex-shrink-0" style={{ background: '#C21875' }} />
-      )}
-    </motion.button>
-  );
+      {isActive &&
+      <div className="w-1 h-3 rounded-full flex-shrink-0" style={{ background: '#C21875' }} />
+      }
+    </motion.button>);
+
 }
 
 // ── CHAT MESSAGE ─────────────────────────────────────────────────────────────
@@ -126,24 +126,24 @@ function ChatMessage({ msg, index }) {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.28 }}
-      className={`flex gap-2 ${isNova ? '' : 'flex-row-reverse'}`}
-    >
-      {isNova && (
-        <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 mt-0.5 ring-1 ring-black/5">
+      className={`flex gap-2 ${isNova ? '' : 'flex-row-reverse'}`}>
+      
+      {isNova &&
+      <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 mt-0.5 ring-1 ring-black/5">
           <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
         </div>
-      )}
+      }
       <div className={`max-w-[84%] px-3 py-2 rounded-2xl text-[11.5px] leading-relaxed font-medium ${
-        isNova ? 'rounded-tl-sm text-slate-600' : 'rounded-tr-sm text-white'
-      }`}
-        style={isNova
-          ? { background: 'rgba(248,248,250,0.96)', border: '1px solid rgba(0,0,0,0.06)' }
-          : { background: 'linear-gradient(135deg, #be185d, #9333ea)', boxShadow: '0 4px 14px rgba(190,24,93,0.2)' }
-        }>
+      isNova ? 'rounded-tl-sm text-slate-600' : 'rounded-tr-sm text-white'}`
+      }
+      style={isNova ?
+      { background: 'rgba(248,248,250,0.96)', border: '1px solid rgba(0,0,0,0.06)' } :
+      { background: 'linear-gradient(135deg, #be185d, #9333ea)', boxShadow: '0 4px 14px rgba(190,24,93,0.2)' }
+      }>
         {msg.text}
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
 
 // ── AI CHIP ──────────────────────────────────────────────────────────────────
@@ -156,13 +156,13 @@ function AIChip({ label, icon: Icon, onClick }) {
       className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] font-medium text-slate-500 transition-colors hover:text-slate-700"
       style={{
         background: 'rgba(0,0,0,0.03)',
-        border: '1px solid rgba(0,0,0,0.07)',
-      }}
-    >
+        border: '1px solid rgba(0,0,0,0.07)'
+      }}>
+      
       {Icon && <Icon style={{ width: 10, height: 10 }} />}
       {label}
-    </motion.button>
-  );
+    </motion.button>);
+
 }
 
 // ── INTEL ROW ────────────────────────────────────────────────────────────────
@@ -174,16 +174,16 @@ function IntelRow({ emoji, text, type, delay }) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay }}
       className="flex items-start gap-3 py-2.5 px-0"
-      style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}
-    >
+      style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+      
       <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 text-[11px]"
-        style={{ background: `${accent}0d` }}>
+      style={{ background: `${accent}0d` }}>
         {emoji}
       </div>
       <p className="text-[11.5px] font-medium text-slate-500 leading-snug flex-1">{text}</p>
       <div className="w-1 h-1 rounded-full mt-2 flex-shrink-0" style={{ background: accent, opacity: 0.5 }} />
-    </motion.div>
-  );
+    </motion.div>);
+
 }
 
 // ── MODULE CARD ──────────────────────────────────────────────────────────────
@@ -192,45 +192,45 @@ function ModuleCard({ m, i }) {
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 + i * 0.04, duration: 0.4, ease: [0.23,1,0.32,1] }}
+      transition={{ delay: 0.1 + i * 0.04, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
       whileHover={{ y: -2, transition: { duration: 0.14 } }}
-      whileTap={{ scale: 0.97 }}
-    >
+      whileTap={{ scale: 0.97 }}>
+      
       <Link to={`/${m.path}`}>
         <div className="relative rounded-2xl p-3 text-center cursor-pointer group"
-          style={{
-            background: 'rgba(255,255,255,0.8)',
-            border: '1px solid rgba(0,0,0,0.06)',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          }}>
+        style={{
+          background: 'rgba(255,255,255,0.8)',
+          border: '1px solid rgba(0,0,0,0.06)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+        }}>
           <div className="w-8 h-8 rounded-xl flex items-center justify-center mx-auto mb-2"
-            style={{ background: 'rgba(0,0,0,0.03)' }}>
+          style={{ background: 'rgba(0,0,0,0.03)' }}>
             <m.icon style={{ color: '#64748b', width: 15, height: 15 }} className="group-hover:text-slate-800 transition-colors" />
           </div>
           <p className="text-[10.5px] font-semibold text-slate-600 leading-tight">{m.label}</p>
           <p className="text-[9px] text-slate-300 mt-0.5 hidden sm:block font-medium">{m.sublabel}</p>
           {/* Hover accent */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-px w-0 group-hover:w-8 transition-all duration-300 rounded-full"
-            style={{ background: '#C21875' }} />
+          style={{ background: '#C21875' }} />
         </div>
       </Link>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
 
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
 const INITIAL_MESSAGES = [
-  { role: 'nova', text: '¡Hola! Soy Nova, tu copiloto de operaciones Popsy. ¿En qué te puedo ayudar hoy?' }
-];
+{ role: 'nova', text: '¡Hola! Soy Nova, tu copiloto de operaciones Popsy. ¿En qué te puedo ayudar hoy?' }];
+
 
 const QUICK_ACTIONS = [
-  { label: 'Ventas hoy',    icon: TrendingUp, prompt: 'Muéstrame el resumen de ventas de hoy' },
-  { label: 'Top cajeros',   icon: Users,      prompt: 'Cuáles son los cajeros con mejor rendimiento?' },
-  { label: 'vs ayer',       icon: BarChart2,  prompt: 'Compara las ventas de hoy vs ayer' },
-  { label: 'Stock crítico', icon: Snowflake,  prompt: 'Qué productos tienen stock crítico en la nevera?' },
-  { label: 'Insights',      icon: Brain,      prompt: 'Dame los insights más importantes de esta semana' },
-  { label: 'Alertas',       icon: Bell,       prompt: 'Hay alguna alerta operacional que deba saber?' },
-];
+{ label: 'Ventas hoy', icon: TrendingUp, prompt: 'Muéstrame el resumen de ventas de hoy' },
+{ label: 'Top cajeros', icon: Users, prompt: 'Cuáles son los cajeros con mejor rendimiento?' },
+{ label: 'vs ayer', icon: BarChart2, prompt: 'Compara las ventas de hoy vs ayer' },
+{ label: 'Stock crítico', icon: Snowflake, prompt: 'Qué productos tienen stock crítico en la nevera?' },
+{ label: 'Insights', icon: Brain, prompt: 'Dame los insights más importantes de esta semana' },
+{ label: 'Alertas', icon: Bell, prompt: 'Hay alguna alerta operacional que deba saber?' }];
+
 
 const AI_RESPONSES = {
   'Muéstrame el resumen de ventas de hoy': '📊 Hoy llevan **$4.2M** en ventas, con 87 transacciones y ticket promedio de **$48K**. Estás un **+12%** sobre ayer. ¡Buen ritmo!',
@@ -238,7 +238,7 @@ const AI_RESPONSES = {
   'Compara las ventas de hoy vs ayer': '📈 Hoy: **$4.2M** | Ayer: **$3.75M**\nDiferencia: **+$450K (+12%)**\nLas horas pico fueron 12pm–2pm.',
   'Qué productos tienen stock crítico en la nevera?': '⚠️ **2 sabores en crítico:**\n• Arequipe Doble — Solo 8% restante\n• Fresa con Crema — 15% restante',
   'Dame los insights más importantes de esta semana': '✨ **Top insights:**\n• Combos aumentaron ticket promedio +18%\n• Horario pico extendido 30min vs sem. anterior\n• Cajero Caja 3 con 94% satisfacción',
-  'Hay alguna alerta operacional que deba saber?': '🔔 **3 alertas activas:**\n• Stock crítico en 2 sabores\n• Caja 2: conversión -8% esta semana\n• Turno tarde con 1 cajero menos',
+  'Hay alguna alerta operacional que deba saber?': '🔔 **3 alertas activas:**\n• Stock crítico en 2 sabores\n• Caja 2: conversión -8% esta semana\n• Turno tarde con 1 cajero menos'
 };
 
 // ── MAIN COMPONENT ───────────────────────────────────────────────────────────
@@ -248,7 +248,7 @@ export default function HomeWorkspace({
   onShowReport, onShowStoreSales, onShowBudgetDashboard,
   onShowBudgetImporter, onShowKpisUploader, onShowAggregatorsUploader,
   onShowPYGUploader, onShowPYGModal, onShowExperiencia, onShowCustomerExperience,
-  backupLoading, onBackup,
+  backupLoading, onBackup
 }) {
   const greeting = getGreeting();
   const GreetIcon = greeting.icon;
@@ -258,26 +258,26 @@ export default function HomeWorkspace({
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
 
-  const storeName = selectedStoreName || STORES.find(s => s.code === selectedStore)?.name || 'Tu Tienda';
+  const storeName = selectedStoreName || STORES.find((s) => s.code === selectedStore)?.name || 'Tu Tienda';
   const isGerente = selectedRole === 'gerente';
 
   const { data: todaySales = [] } = useQuery({
     queryKey: ['home-today-sales', selectedStore],
     queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }),
     enabled: !!selectedStore,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000
   });
   const { data: budget = [] } = useQuery({
     queryKey: ['home-budget', selectedStore],
     queryFn: () => base44.entities.Budget.filter({ store_id: selectedStore }),
     enabled: !!selectedStore,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000
   });
   const { data: cashiers = [] } = useQuery({
     queryKey: ['home-cashiers', selectedStore],
     queryFn: () => base44.entities.Cashier.filter({ store_id: selectedStore, is_active: true }),
     enabled: !!selectedStore,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 10 * 60 * 1000
   });
 
   const sorted = [...todaySales].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -285,15 +285,15 @@ export default function HomeWorkspace({
   const prev = sorted[1];
   const salesVal = latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(1)}M` : '—';
   const txnVal = latest?.total_transactions ? String(latest.total_transactions) : '—';
-  const ticketVal = latest?.total_sales && latest?.total_transactions
-    ? `$${Math.round(latest.total_sales / latest.total_transactions / 1000)}K` : '—';
-  const salesChange = latest && prev
-    ? Math.round(((latest.total_sales - prev.total_sales) / prev.total_sales) * 100) : 0;
+  const ticketVal = latest?.total_sales && latest?.total_transactions ?
+  `$${Math.round(latest.total_sales / latest.total_transactions / 1000)}K` : '—';
+  const salesChange = latest && prev ?
+  Math.round((latest.total_sales - prev.total_sales) / prev.total_sales * 100) : 0;
 
-  const sparkSales = sorted.slice(0, 8).reverse().map(d => d.total_sales || 0);
-  const sparkTxn   = sorted.slice(0, 8).reverse().map(d => d.total_transactions || 0);
+  const sparkSales = sorted.slice(0, 8).reverse().map((d) => d.total_sales || 0);
+  const sparkTxn = sorted.slice(0, 8).reverse().map((d) => d.total_transactions || 0);
 
-  const filteredNav = NAV_ITEMS.filter(n => n.roles.includes(selectedRole));
+  const filteredNav = NAV_ITEMS.filter((n) => n.roles.includes(selectedRole));
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -301,38 +301,38 @@ export default function HomeWorkspace({
 
   function sendMessage(text) {
     if (!text.trim()) return;
-    setMessages(prev => [...prev, { role: 'user', text: text.trim() }]);
+    setMessages((prev) => [...prev, { role: 'user', text: text.trim() }]);
     setInputVal('');
     setIsTyping(true);
     setTimeout(() => {
       const reply = AI_RESPONSES[text.trim()] ||
-        `Revisando datos de ${storeName || 'tu tienda'} para: "${text.trim()}"... Dame un momento.`;
+      `Revisando datos de ${storeName || 'tu tienda'} para: "${text.trim()}"... Dame un momento.`;
       setIsTyping(false);
-      setMessages(prev => [...prev, { role: 'nova', text: reply }]);
+      setMessages((prev) => [...prev, { role: 'nova', text: reply }]);
     }, 1200 + Math.random() * 600);
   }
 
   const QUICK_MODULES = [
-    { icon: LayoutDashboard, label: 'Dashboard',   sublabel: 'Ventas diarias',   color: '#C21875', path: 'Dashboard' },
-    { icon: Users,           label: 'Cajeros',     sublabel: 'Equipo',           color: '#64748b', path: 'CashiersDashboard' },
-    { icon: Target,          label: 'Presupuesto', sublabel: 'Metas',            color: '#64748b', path: 'Budget' },
-    { icon: Snowflake,       label: 'Nevera',      sublabel: 'Inventario',       color: '#64748b', path: 'FreezerMap' },
-    { icon: Clock,           label: 'Horarios',    sublabel: 'Txn / hora',       color: '#64748b', path: 'HourlyTransactions' },
-    { icon: BarChart3,       label: 'Rankings',    sublabel: 'Top performers',   color: '#64748b', path: 'Rankings' },
-  ];
+  { icon: LayoutDashboard, label: 'Dashboard', sublabel: 'Ventas diarias', color: '#C21875', path: 'Dashboard' },
+  { icon: Users, label: 'Cajeros', sublabel: 'Equipo', color: '#64748b', path: 'CashiersDashboard' },
+  { icon: Target, label: 'Presupuesto', sublabel: 'Metas', color: '#64748b', path: 'Budget' },
+  { icon: Snowflake, label: 'Nevera', sublabel: 'Inventario', color: '#64748b', path: 'FreezerMap' },
+  { icon: Clock, label: 'Horarios', sublabel: 'Txn / hora', color: '#64748b', path: 'HourlyTransactions' },
+  { icon: BarChart3, label: 'Rankings', sublabel: 'Top performers', color: '#64748b', path: 'Rankings' }];
+
 
   const intelItems = [
-    { emoji: '↑', text: salesVal !== '—' ? `Ventas hoy: ${salesVal}${salesChange > 0 ? ` · +${salesChange}% vs ayer` : salesChange < 0 ? ` · ${salesChange}% vs ayer` : ''}` : 'Sin datos de ventas aún hoy', type: salesChange >= 0 ? 'good' : 'warn' },
-    { emoji: '≡', text: txnVal !== '—' ? `${txnVal} transacciones registradas hoy` : 'Sin transacciones registradas hoy', type: 'info' },
-    { emoji: '◎', text: `${cashiers.length} cajeros activos en tienda`, type: 'info' },
-    { emoji: '◈', text: ticketVal !== '—' ? `Ticket promedio: ${ticketVal} por transacción` : 'Ingresa ventas para calcular el ticket promedio', type: 'good' },
-    { emoji: '!', text: 'Verifica el nivel de stock en la nevera', type: 'warn' },
-    { emoji: '+', text: 'Registra las ventas del turno actual', type: 'action' },
-  ];
+  { emoji: '↑', text: salesVal !== '—' ? `Ventas hoy: ${salesVal}${salesChange > 0 ? ` · +${salesChange}% vs ayer` : salesChange < 0 ? ` · ${salesChange}% vs ayer` : ''}` : 'Sin datos de ventas aún hoy', type: salesChange >= 0 ? 'good' : 'warn' },
+  { emoji: '≡', text: txnVal !== '—' ? `${txnVal} transacciones registradas hoy` : 'Sin transacciones registradas hoy', type: 'info' },
+  { emoji: '◎', text: `${cashiers.length} cajeros activos en tienda`, type: 'info' },
+  { emoji: '◈', text: ticketVal !== '—' ? `Ticket promedio: ${ticketVal} por transacción` : 'Ingresa ventas para calcular el ticket promedio', type: 'good' },
+  { emoji: '!', text: 'Verifica el nivel de stock en la nevera', type: 'warn' },
+  { emoji: '+', text: 'Registra las ventas del turno actual', type: 'action' }];
+
 
   return (
     <div className="min-h-screen flex"
-      style={{ background: 'linear-gradient(155deg, #FAFBFF 0%, #FFFFFF 45%, #F8F8FC 100%)' }}>
+    style={{ background: 'linear-gradient(155deg, #FAFBFF 0%, #FFFFFF 45%, #F8F8FC 100%)' }}>
 
       {/* ── LEFT SIDEBAR ── */}
       <motion.aside
@@ -343,26 +343,26 @@ export default function HomeWorkspace({
         style={{
           background: 'rgba(255,255,255,0.75)',
           backdropFilter: 'blur(32px)',
-          borderRight: '1px solid rgba(0,0,0,0.05)',
-        }}
-      >
+          borderRight: '1px solid rgba(0,0,0,0.05)'
+        }}>
+        
         {/* Logo */}
         <div className="px-4 pt-5 pb-4">
           <img src={LOGO_URL} alt="Popsy" className="h-8 object-contain mb-5" />
-          {!isGerente && selectedStore && (
-            <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl"
-              style={{ background: 'rgba(194,24,117,0.05)', border: '1px solid rgba(194,24,117,0.09)' }}>
+          {!isGerente && selectedStore &&
+          <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl"
+          style={{ background: 'rgba(194,24,117,0.05)', border: '1px solid rgba(194,24,117,0.09)' }}>
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0"
-                style={{ boxShadow: '0 0 5px rgba(52,211,153,0.7)' }} />
+            style={{ boxShadow: '0 0 5px rgba(52,211,153,0.7)' }} />
               <span className="text-[10.5px] font-semibold text-slate-500 truncate">{storeName}</span>
             </div>
-          )}
+          }
         </div>
 
         {/* Nav */}
         <div className="flex-1 px-2.5 space-y-px overflow-y-auto pb-2">
           <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.14em] px-3 mb-2">Navegación</p>
-          {filteredNav.map(item => {
+          {filteredNav.map((item) => {
             const handleClick = () => {
               if (!item.path) {
                 if (item.onClick === 'onShowPYGModal') onShowPYGModal?.();
@@ -372,15 +372,15 @@ export default function HomeWorkspace({
               window.location.href = `/${item.path}`;
             };
             return (
-              <NavItem key={item.label} item={item} isActive={activeNav === item.path} onClick={handleClick} />
-            );
+              <NavItem key={item.label} item={item} isActive={activeNav === item.path} onClick={handleClick} />);
+
           })}
         </div>
 
         {/* Footer */}
         <div className="p-3 border-t border-black/5">
           <div className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl mb-2"
-            style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}>
+          style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}>
             <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
               <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
             </div>
@@ -393,7 +393,7 @@ export default function HomeWorkspace({
             </div>
           </div>
           <button onClick={onLogout}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[10.5px] font-medium text-slate-400 hover:text-slate-600 hover:bg-black/[0.03] transition-all">
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[10.5px] font-medium text-slate-400 hover:text-slate-600 hover:bg-black/[0.03] transition-all">
             <LogOut className="w-3 h-3" />
             Cerrar sesión
           </button>
@@ -411,73 +411,73 @@ export default function HomeWorkspace({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="mb-7"
-          >
+            className="mb-7">
+            
             <div className="flex items-center gap-2 mb-3">
               <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
               <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
                 {greeting.text}
               </h1>
-              {isGerente && (
-                <div className="hidden sm:flex items-center gap-1.5 ml-auto">
+              {isGerente &&
+              <div className="hidden sm:flex items-center gap-1.5 ml-auto">
                   {[
-                    { label: 'PPT',  icon: FileSpreadsheet, onClick: onShowBudgetImporter },
-                    { label: 'KPIs', icon: BarChart3,       onClick: onShowKpisUploader },
-                    { label: 'P&G',  icon: TrendingUp,      onClick: onShowPYGUploader },
-                  ].map(({ label, icon: I, onClick }) => (
-                    <button key={label} onClick={onClick}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-700 hover:bg-black/[0.04] transition-all"
-                      style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+                { label: 'PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter },
+                { label: 'KPIs', icon: BarChart3, onClick: onShowKpisUploader },
+                { label: 'P&G', icon: TrendingUp, onClick: onShowPYGUploader }].
+                map(({ label, icon: I, onClick }) =>
+                <button key={label} onClick={onClick}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-700 hover:bg-black/[0.04] transition-all"
+                style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
                       <I style={{ width: 11, height: 11 }} />{label}
                     </button>
-                  ))}
+                )}
                 </div>
-              )}
+              }
             </div>
-            {!isGerente && (
-              <div className="w-full max-w-xs">
+            {!isGerente &&
+            <div className="w-full max-w-xs">
                 <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
               </div>
-            )}
+            }
           </motion.div>
 
           {/* ── DAILY METRICS ── */}
-           {!isGerente && (
-             <DailyMetricsPanel todaySales={todaySales} budget={budget} />
-           )}
+           {!isGerente &&
+          <DailyMetricsPanel todaySales={todaySales} budget={budget} />
+          }
 
           {/* ── EXECUTIVE ANALYTICS ── */}
-          {!isGerente && (
-            <ExecutiveAnalyticsPanel
-              todaySales={todaySales}
-              budget={budget}
-              cashiers={cashiers}
-            />
-          )}
+          {!isGerente &&
+          <ExecutiveAnalyticsPanel
+            todaySales={todaySales}
+            budget={budget}
+            cashiers={cashiers} />
+
+          }
 
           {/* ── QUICK ACTIONS ── */}
-          {!isGerente && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.45 }}
-              className="flex flex-wrap gap-2 mb-7"
-            >
+          {!isGerente &&
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.45 }}
+            className="flex flex-wrap gap-2 mb-7">
+            
               {[
-                { label: 'Registrar Ventas',    icon: TrendingUp, onClick: onShowStoreSales },
-                { label: 'Presupuesto Mensual', icon: Target,     onClick: onShowBudgetDashboard },
-                { label: 'Informe Gerencial',   icon: FileText,   onClick: onShowReport },
-              ].map(({ label, icon: I, onClick }) => (
-                <button key={label} onClick={onClick}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11.5px] font-medium text-slate-600 hover:text-slate-900 hover:bg-black/[0.03] transition-all group"
-                  style={{ border: '1px solid rgba(0,0,0,0.07)', background: 'rgba(255,255,255,0.7)' }}>
+            { label: 'Registrar Ventas', icon: TrendingUp, onClick: onShowStoreSales },
+            { label: 'Presupuesto Mensual', icon: Target, onClick: onShowBudgetDashboard },
+            { label: 'Informe Gerencial', icon: FileText, onClick: onShowReport }].
+            map(({ label, icon: I, onClick }) =>
+            <button key={label} onClick={onClick}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11.5px] font-medium text-slate-600 hover:text-slate-900 hover:bg-black/[0.03] transition-all group hidden"
+            style={{ border: '1px solid rgba(0,0,0,0.07)', background: 'rgba(255,255,255,0.7)' }}>
                   <I style={{ width: 12, height: 12, color: '#9ca3af' }} />
                   {label}
                   <ChevronRight className="w-3 h-3 text-slate-200 group-hover:text-slate-400 transition-colors" />
                 </button>
-              ))}
+            )}
             </motion.div>
-          )}
+          }
 
           {/* ── MODULE GRID ── */}
           <div className="mb-7">
@@ -488,36 +488,36 @@ export default function HomeWorkspace({
           </div>
 
           {/* ── GERENTE PANEL ── */}
-          {isGerente && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mb-7">
+          {isGerente &&
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mb-7">
               <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.14em] mb-3">Panel ejecutivo</p>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 mb-4">
                 {[
-                  { icon: Activity,     label: 'CMD Center',    sublabel: 'Global',       path: 'GenesisCommandCenter' },
-                  { icon: TrendingUp,   label: 'P&G',           sublabel: 'Rentabilidad', path: 'PYGDashboard' },
-                  { icon: Trophy,       label: 'Ruleta',        sublabel: 'Premios',      path: 'RoulettePopsy' },
-                  { icon: BarChart3,    label: 'Participación', sublabel: 'Mix negocio',  path: 'SalesReportView' },
-                  { icon: SettingsIcon, label: 'Config',        sublabel: 'Ajustes',      path: 'Settings' },
-                ].map((m, i) => <ModuleCard key={m.label} m={m} i={i} />)}
+              { icon: Activity, label: 'CMD Center', sublabel: 'Global', path: 'GenesisCommandCenter' },
+              { icon: TrendingUp, label: 'P&G', sublabel: 'Rentabilidad', path: 'PYGDashboard' },
+              { icon: Trophy, label: 'Ruleta', sublabel: 'Premios', path: 'RoulettePopsy' },
+              { icon: BarChart3, label: 'Participación', sublabel: 'Mix negocio', path: 'SalesReportView' },
+              { icon: SettingsIcon, label: 'Config', sublabel: 'Ajustes', path: 'Settings' }].
+              map((m, i) => <ModuleCard key={m.label} m={m} i={i} />)}
               </div>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { label: 'Importar PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter },
-                  { label: 'Subir KPIs',   icon: BarChart3,       onClick: onShowKpisUploader },
-                  { label: 'Agregadores',  icon: FileSpreadsheet, onClick: onShowAggregatorsUploader },
-                  { label: 'Subir P&G',    icon: TrendingUp,      onClick: onShowPYGUploader },
-                  { label: 'Ver P&G',      icon: TrendingUp,      onClick: onShowPYGModal },
-                  { label: 'Backup',       icon: Download,        onClick: onBackup },
-                ].map(({ label, icon: I, onClick }) => (
-                  <button key={label} onClick={onClick}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-700 hover:bg-black/[0.04] transition-all"
-                    style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+              { label: 'Importar PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter },
+              { label: 'Subir KPIs', icon: BarChart3, onClick: onShowKpisUploader },
+              { label: 'Agregadores', icon: FileSpreadsheet, onClick: onShowAggregatorsUploader },
+              { label: 'Subir P&G', icon: TrendingUp, onClick: onShowPYGUploader },
+              { label: 'Ver P&G', icon: TrendingUp, onClick: onShowPYGModal },
+              { label: 'Backup', icon: Download, onClick: onBackup }].
+              map(({ label, icon: I, onClick }) =>
+              <button key={label} onClick={onClick}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-700 hover:bg-black/[0.04] transition-all"
+              style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
                     <I style={{ width: 11, height: 11 }} />{label}
                   </button>
-                ))}
+              )}
               </div>
             </motion.div>
-          )}
+          }
 
           <p className="text-center text-[9px] font-medium tracking-widest uppercase mt-6 mb-2 text-slate-200">
             Popsy AI Workspace
@@ -536,22 +536,22 @@ export default function HomeWorkspace({
             top: 0,
             background: 'rgba(255,255,255,0.7)',
             backdropFilter: 'blur(40px)',
-            borderLeft: '1px solid rgba(0,0,0,0.05)',
-          }}
-        >
+            borderLeft: '1px solid rgba(0,0,0,0.05)'
+          }}>
+          
           {/* Panel header */}
           <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
             <div className="flex items-center gap-3">
               <motion.div
                 animate={{ y: [0, -3, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="relative flex-shrink-0"
-              >
+                className="relative flex-shrink-0">
+                
                 <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-black/5">
                   <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-white"
-                  style={{ boxShadow: '0 0 6px rgba(52,211,153,0.6)' }} />
+                style={{ boxShadow: '0 0 6px rgba(52,211,153,0.6)' }} />
               </motion.div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -568,73 +568,73 @@ export default function HomeWorkspace({
           <div className="px-3 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
             <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.12em] mb-2">Preguntas rápidas</p>
             <div className="flex flex-wrap gap-1.5">
-              {QUICK_ACTIONS.map(a => (
-                <AIChip key={a.label} label={a.label} icon={a.icon}
-                  onClick={() => sendMessage(a.prompt)} />
-              ))}
+              {QUICK_ACTIONS.map((a) =>
+              <AIChip key={a.label} label={a.label} icon={a.icon}
+              onClick={() => sendMessage(a.prompt)} />
+              )}
             </div>
           </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2.5">
             <AnimatePresence initial={false}>
-              {messages.map((msg, i) => (
-                <ChatMessage key={i} msg={msg} index={i} />
-              ))}
+              {messages.map((msg, i) =>
+              <ChatMessage key={i} msg={msg} index={i} />
+              )}
             </AnimatePresence>
-            {isTyping && (
-              <motion.div
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="flex gap-2 items-end"
-              >
+            {isTyping &&
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex gap-2 items-end">
+              
                 <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-black/5">
                   <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
                 </div>
                 <div className="px-3 py-2 rounded-2xl rounded-tl-sm"
-                  style={{ background: 'rgba(248,248,250,0.96)', border: '1px solid rgba(0,0,0,0.06)' }}>
+              style={{ background: 'rgba(248,248,250,0.96)', border: '1px solid rgba(0,0,0,0.06)' }}>
                   <div className="flex gap-1 items-center h-3">
-                    {[0, 0.15, 0.3].map((d, i) => (
-                      <motion.div key={i}
-                        animate={{ y: [0, -3, 0] }}
-                        transition={{ duration: 0.55, repeat: Infinity, delay: d }}
-                        className="w-1 h-1 rounded-full bg-slate-300" />
-                    ))}
+                    {[0, 0.15, 0.3].map((d, i) =>
+                  <motion.div key={i}
+                  animate={{ y: [0, -3, 0] }}
+                  transition={{ duration: 0.55, repeat: Infinity, delay: d }}
+                  className="w-1 h-1 rounded-full bg-slate-300" />
+                  )}
                   </div>
                 </div>
               </motion.div>
-            )}
+            }
             <div ref={chatEndRef} />
           </div>
 
           {/* Input */}
           <div className="p-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
-              style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.07)' }}>
+            style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.07)' }}>
               <input
                 type="text"
                 value={inputVal}
-                onChange={e => setInputVal(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && sendMessage(inputVal)}
+                onChange={(e) => setInputVal(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage(inputVal)}
                 placeholder="Pregunta algo a Nova..."
-                className="flex-1 bg-transparent text-[11.5px] text-slate-600 placeholder-slate-300 outline-none font-medium"
-              />
+                className="flex-1 bg-transparent text-[11.5px] text-slate-600 placeholder-slate-300 outline-none font-medium" />
+              
               <motion.button
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.92 }}
                 onClick={() => sendMessage(inputVal)}
                 className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors"
                 style={{
-                  background: inputVal.trim() ? 'linear-gradient(135deg, #be185d, #9333ea)' : 'rgba(0,0,0,0.05)',
-                }}
-              >
+                  background: inputVal.trim() ? 'linear-gradient(135deg, #be185d, #9333ea)' : 'rgba(0,0,0,0.05)'
+                }}>
+                
                 <Send style={{ width: 10, height: 10, color: inputVal.trim() ? 'white' : '#94a3b8' }} />
               </motion.button>
             </div>
           </div>
         </motion.aside>
       </main>
-    </div>
-  );
+    </div>);
+
 }
