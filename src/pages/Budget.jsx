@@ -234,27 +234,22 @@ export default function Budget() {
               </motion.div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Form */}
+            {/* Budget Form and Configuration */}
             <BudgetForm storeId={selectedStore} editingBudget={editingBudget} onClearEdit={() => setEditingBudget(null)} />
 
-            {/* Existing Budgets */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card className="bg-white/80 backdrop-blur-lg border-orange-100 shadow-xl h-full">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-gray-800">
-                    <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl text-white">
-                      <Calendar className="w-5 h-5" />
-                    </div>
-                    Presupuestos Configurados
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {sortedBudgets.length > 0 ? (
+            {/* Existing Budgets List */}
+            {sortedBudgets.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                <Card className="bg-white/80 backdrop-blur-lg border-orange-100 shadow-xl">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-3 text-gray-800">
+                      <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl text-white">
+                        <Calendar className="w-5 h-5" />
+                      </div>
+                      Presupuestos Configurados
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
                       {sortedBudgets.map((budget, index) => {
                         const isCurrent = budget.month === currentMonth && budget.year === currentYear;
@@ -332,17 +327,10 @@ export default function Budget() {
                         );
                       })}
                     </div>
-                  ) : (
-                    <div className="text-center py-12 text-gray-400">
-                      <Target className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p>No hay presupuestos configurados</p>
-                      <p className="text-sm">Configura el primer presupuesto</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-            </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
           </div>
         ) : (
           <div className="text-center py-20">
