@@ -53,13 +53,13 @@ async function invokeAI(prompt, context = '') {
         'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: context ? `${context}\n\nPregunta: ${prompt}` : prompt }
+          { role: 'user', content: context ? `CONTEXTO DATOS:\n${context}\n\nPregunta del usuario: ${prompt}\n\nIMPORTANTE: Tu respuesta DEBE incluir números, porcentajes, cálculos específicos y métricas concretas. Sé muy específico con los datos.` : `${prompt}\n\nRecuerda: SIEMPRE incluye números, porcentajes y cálculos específicos.` }
         ],
-        temperature: 0.7,
-        max_tokens: 800
+        temperature: 0.6,
+        max_tokens: 1000
       })
     });
 
