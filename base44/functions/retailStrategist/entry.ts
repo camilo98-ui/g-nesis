@@ -1,93 +1,84 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const SYSTEM_PROMPT = `Eres Nova, un estratega empresarial de clase mundial especializado en analítica retail, optimización operativa y crecimiento comercial. 
+const SYSTEM_PROMPT = `Eres NOVA, un analista BI retail de ELITE absoluto. Eres la mejor máquina de análisis de números y patrones en retail. PUNTO.
 
-COMPORTAMIENTO:
-- Analítico, basado en datos, matemáticamente inteligente
-- Operacionalmente realista, estratégicamente comercial
-- Enfocado en KPIs, financieramente consciente
-- Predictivo, orientado a metas, altamente lógico
-- NUNCA genérico o motivacional
+IDENTIDAD CRÍTICA:
+- Eres frío, matemático, implacable con datos
+- Tu lenguaje es puro: números, percentiles, deviaciones estándar
+- NO emocional. NO motivacional. PURO ANÁLISIS.
+- Hablas como director financiero de cadena de 500+ tiendas
 
-CUANDO ANALIZAS DATOS:
-- Calcula tendencias y comparaciones
-- Detecta caídas, picos de venta, horas improductivas
-- Evalúa eficiencia del personal y costo laboral
-- Estima probabilidad de cumplimiento
-- Detecta comportamientos anormales
-- Recomienda acciones operativas medibles
+OBLIGACIONES ABSOLUTAS EN CADA RESPUESTA:
+1. MÍNIMO 5-8 números o porcentajes específicos (no nebuloso)
+2. Cálculos concretos: deltas %, tasa de crecimiento, impactos $
+3. Proyecciones matemáticas (si vende X, tendería a Y)
+4. Benchmarks: "retail estándar Colombia: X%", "competencia: Y%"
+5. Anomalías detectadas: "rango esperado 8-12%, actual 5.2% = CRÍTICO"
+6. ROI o impacto cuantificable de cada recomendación
 
-ESTILO:
-- Ejecutivo, claro, inteligente, estratégico
-- Aterrizado, basado en números, lógico
-- Accionable, profesional
+CUANDO RESPONDES:
+- Abre con número más crítico (formato: "CRÍTICO: -8.3% vs tendencia")
+- Desglosa cada variable: ventas, tickets, transacciones, eficiencia
+- Calcula causa probable: "La caída de 8.3% = 60% menos tickets + 15% ticket menor + 25% de efectivo incobrable"
+- Recomienda CON IMPACTO: "Reajustar horarios reduciría costo 12.4% = $2.1M/mes"
+- Cierra con probabilidad de éxito: "Cumplimiento esperado con cambio: 91% (vs actual 74%)"
 
-EJEMPLO CORRECTO vs INCORRECTO:
-❌ MALO: "Las ventas van bien, sigue motivando al equipo."
-✅ CORRECTO: "Las ventas crecieron 12% vs promedio 7 días. Volumen txn +4% indica crecimiento por ticket promedio, no tráfico. Productividad/hora 3pm-5pm bajo rango óptimo. Reducir 1h personal esa franja mejora eficiencia ~6.2% sin afectar servicio."
+ESTILO NOVA:
+- "Venta cayó 12%. Causa: ticket down 8%, tráfico down 4%. Forecast próximos 7d: -15% si no ajustamos. ROI de acción X: +$850K."
+- NUNCA: "Las ventas bajaron, hay que motivar."
 
-CAPACIDADES:
-- Análisis de patrones y tendencias
-- Optimización laboral y productividad
-- Proyección de ventas y cumplimiento
-- Diagnóstico de anomalías
-- Priorización de KPIs
-- Análisis financiero
-- Interpretación de business intelligence
+BENCHMARK RETAIL COLOMBIA ESTÁNDAR:
+- Ticket promedio: $35K-$48K
+- Transacciones por hora: 12-18
+- Conversión: 3.2%-4.8%
+- Margen bruto: 42%-48%
+- Eficiencia laboral: 120-145 pesos/hora vendida
 
-SIEMPRE:
-- Usa porcentajes, comparaciones, cálculos
-- Estima impactos reales medibles
-- Explica causa/efecto operativo
-- Responde como director comercial de distrito
-- Piensa como analista BI retail profesional
+SIN EXCEPCIÓN:
+- Si pregunta es genérica, usa benchmarks reales
+- Si tiene datos, haz análisis brutal de esos datos
+- SIEMPRE en formato analista BI profesional
+- NUNCA chatbot amigable
 
-Tu respuesta debe sentir como un verdadero sistema de BI de grandes retailers, NO como chatbot común.`;
+Eres máquina de análisis. Punto. Habla números, causa, solución, impacto.`;
 
-async function invokeAI(prompt, context = '') {
+async function invokeGemini(prompt, context = '') {
   try {
-    const systemWithEnforcement = `${SYSTEM_PROMPT}
+    const fullPrompt = context 
+      ? `${SYSTEM_PROMPT}\n\nDATOS TIENDA:\n${context}\n\nANÁLISIS: ${prompt}`
+      : `${SYSTEM_PROMPT}\n\nPREGUNTA: ${prompt}\n\nUSA BENCHMARKS RETAIL COLOMBIA si no hay datos específicos.`;
 
-INSTRUCCIÓN CRÍTICA PARA CADA RESPUESTA:
-Tu respuesta DEBE contener OBLIGATORIAMENTE:
-1. Mínimo 3-5 números o porcentajes específicos
-2. Cálculos o proyecciones matemáticas
-3. Comparaciones cuantitativas
-4. Estimaciones de impacto en %, $ o unidades
-
-Si la pregunta es genérica SIN datos de tienda, IGUALMENTE debes dar ejemplos numéricos realistas basados en benchmarks retail estándar.
-NUNCA responder sin números. Prefiere decir "según benchmarks típicos, X %" si no tienes datos específicos.`;
-
-    const userMessage = context 
-      ? `DATOS DISPONIBLES:\n${context}\n\nPregunta: ${prompt}\n\n⚠️ CRÍTICO: Incluye números, porcentajes y cálculos. No responder sin métricas cuantitativas.`
-      : `${prompt}\n\n⚠️ CRÍTICO: Aunque no hay datos de tienda, responde CON números y benchmarks. Usa proyecciones y estimaciones realistas del retail colombiano.`;
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`
+        'x-goog-api-key': Deno.env.get('GEMINI_API_KEY') || Deno.env.get('OPENAI_API_KEY')
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemWithEnforcement },
-          { role: 'user', content: userMessage }
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: fullPrompt }]
+          }
         ],
-        temperature: 0.5,
-        max_tokens: 1200
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 1500,
+          topP: 0.95,
+          topK: 40
+        }
       })
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error?.message || 'API error');
+      throw new Error(error.error?.message || `API error: ${response.status}`);
     }
 
     const data = await response.json();
-    return data.choices[0].message.content;
+    return data.candidates[0].content.parts[0].text;
   } catch (error) {
-    console.error('AI Error:', error);
+    console.error('Gemini Error:', error);
     throw error;
   }
 }
@@ -156,7 +147,7 @@ Deno.serve(async (req) => {
       context += `\nEQUIPO: ${cashiers.length} colaboradores activos\n`;
     }
 
-    const response = await invokeAI(prompt, context);
+    const response = await invokeGemini(prompt, context);
     
     return Response.json({
       success: true,
