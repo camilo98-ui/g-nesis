@@ -1,86 +1,175 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const SYSTEM_PROMPT = `Eres NOVA, un analista BI retail de ELITE absoluto. Eres la mejor máquina de análisis de números y patrones en retail. PUNTO.
+// Benchmarks retail Colombia
+const BENCHMARKS = {
+  ticketPromedio: { min: 35000, max: 48000, std: 41000 },
+  transaccionesHora: { min: 12, max: 18, std: 15 },
+  conversion: { min: 0.032, max: 0.048, std: 0.04 },
+  margenBruto: { min: 0.42, max: 0.48, std: 0.45 },
+  eficienciaLaboral: { min: 120, max: 145, std: 132 }
+};
 
-IDENTIDAD CRÍTICA:
-- Eres frío, matemático, implacable con datos
-- Tu lenguaje es puro: números, percentiles, deviaciones estándar
-- NO emocional. NO motivacional. PURO ANÁLISIS.
-- Hablas como director financiero de cadena de 500+ tiendas
-
-OBLIGACIONES ABSOLUTAS EN CADA RESPUESTA:
-1. MÍNIMO 5-8 números o porcentajes específicos (no nebuloso)
-2. Cálculos concretos: deltas %, tasa de crecimiento, impactos $
-3. Proyecciones matemáticas (si vende X, tendería a Y)
-4. Benchmarks: "retail estándar Colombia: X%", "competencia: Y%"
-5. Anomalías detectadas: "rango esperado 8-12%, actual 5.2% = CRÍTICO"
-6. ROI o impacto cuantificable de cada recomendación
-
-CUANDO RESPONDES:
-- Abre con número más crítico (formato: "CRÍTICO: -8.3% vs tendencia")
-- Desglosa cada variable: ventas, tickets, transacciones, eficiencia
-- Calcula causa probable: "La caída de 8.3% = 60% menos tickets + 15% ticket menor + 25% de efectivo incobrable"
-- Recomienda CON IMPACTO: "Reajustar horarios reduciría costo 12.4% = $2.1M/mes"
-- Cierra con probabilidad de éxito: "Cumplimiento esperado con cambio: 91% (vs actual 74%)"
-
-ESTILO NOVA:
-- "Venta cayó 12%. Causa: ticket down 8%, tráfico down 4%. Forecast próximos 7d: -15% si no ajustamos. ROI de acción X: +$850K."
-- NUNCA: "Las ventas bajaron, hay que motivar."
-
-BENCHMARK RETAIL COLOMBIA ESTÁNDAR:
-- Ticket promedio: $35K-$48K
-- Transacciones por hora: 12-18
-- Conversión: 3.2%-4.8%
-- Margen bruto: 42%-48%
-- Eficiencia laboral: 120-145 pesos/hora vendida
-
-SIN EXCEPCIÓN:
-- Si pregunta es genérica, usa benchmarks reales
-- Si tiene datos, haz análisis brutal de esos datos
-- SIEMPRE en formato analista BI profesional
-- NUNCA chatbot amigable
-
-Eres máquina de análisis. Punto. Habla números, causa, solución, impacto.`;
-
-async function invokeGemini(prompt, context = '') {
-  try {
-    const fullPrompt = context 
-      ? `${SYSTEM_PROMPT}\n\nDATOS TIENDA:\n${context}\n\nANÁLISIS: ${prompt}`
-      : `${SYSTEM_PROMPT}\n\nPREGUNTA: ${prompt}\n\nUSA BENCHMARKS RETAIL COLOMBIA si no hay datos específicos.`;
-
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': Deno.env.get('GEMINI_API_KEY') || Deno.env.get('OPENAI_API_KEY')
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: fullPrompt }]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 1500,
-          topP: 0.95,
-          topK: 40
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || `API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
-  } catch (error) {
-    console.error('Gemini Error:', error);
-    throw error;
+// Análisis locales sin API
+function analyzeStoreMetrics(salesData, budgetData, shiftsData, cashierData) {
+  if (!salesData || salesData.length === 0) {
+    return { error: 'Sin datos de ventas para analizar' };
   }
+
+  const sorted = [...salesData].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const hoy = sorted[0];
+  const ayer = sorted[1] || hoy;
+  const ultimos7 = sorted.slice(0, 7);
+  const ultimos30 = sorted.slice(0, 30);
+
+  // Cálculos críticos
+  const ventasHoy = hoy.total_sales || 0;
+  const ventasAyer = ayer.total_sales || hoy.total_sales;
+  const deltaVentas = Math.round(((ventasHoy - ventasAyer) / ventasAyer) * 100);
+
+  const ticketHoy = hoy.total_transactions > 0 ? ventasHoy / hoy.total_transactions : 0;
+  const ticketAyer = ayer.total_transactions > 0 ? ventasAyer / ayer.total_transactions : 0;
+  const deltaTicket = Math.round(((ticketHoy - ticketAyer) / ticketAyer) * 100);
+
+  const transaccionesHoy = hoy.total_transactions || 0;
+  const transaccionesAyer = ayer.total_transactions || 0;
+  const deltaTransacciones = Math.round(((transaccionesHoy - transaccionesAyer) / transaccionesAyer) * 100);
+
+  // Promedios 7 días
+  const promedio7 = ultimos7.reduce((sum, d) => sum + d.total_sales, 0) / ultimos7.length;
+  const desvio7 = Math.sqrt(
+    ultimos7.reduce((sum, d) => sum + Math.pow(d.total_sales - promedio7, 2), 0) / ultimos7.length
+  );
+  const zscore = (ventasHoy - promedio7) / desvio7;
+
+  // Promedios 30 días
+  const promedio30 = ultimos30.reduce((sum, d) => sum + d.total_sales, 0) / ultimos30.length;
+  const deltaTendencia30 = Math.round(((ventasHoy - promedio30) / promedio30) * 100);
+
+  // Análisis de sugeridos
+  const sugeridosHoy = hoy.total_suggested || 0;
+  const tasaSugeridos = transaccionesHoy > 0 ? (sugeridosHoy / transaccionesHoy * 100).toFixed(1) : 0;
+
+  // Detección de anomalías
+  const anomalias = [];
+  if (Math.abs(zscore) > 2) {
+    anomalias.push(`Z-score extremo: ${zscore.toFixed(2)} (${zscore > 0 ? 'MUY ALTO' : 'MUY BAJO'})`);
+  }
+  if (ticketHoy > BENCHMARKS.ticketPromedio.max * 1.2) {
+    anomalias.push(`Ticket ${((ticketHoy / BENCHMARKS.ticketPromedio.max) * 100).toFixed(0)}% por encima del máximo benchmark`);
+  }
+  if (ticketHoy < BENCHMARKS.ticketPromedio.min * 0.8) {
+    anomalias.push(`Ticket ${((ticketHoy / BENCHMARKS.ticketPromedio.min) * 100).toFixed(0)}% por debajo del mínimo benchmark`);
+  }
+
+  // Forecast 7 días
+  const trendRate = (ventasHoy - promedio30) / promedio30;
+  const forecast7 = Math.round(promedio30 * (1 + trendRate * 0.85));
+
+  // Impacto en budget
+  let impactoBudget = '';
+  if (budgetData && budgetData.length > 0) {
+    const activeBudget = budgetData.find(b => b.is_active);
+    if (activeBudget) {
+      const cumplimiento = (ventasHoy / (activeBudget.sales_budget / 30)) * 100;
+      impactoBudget = `Cumplimiento diario: ${cumplimiento.toFixed(1)}% (Meta: $${(activeBudget.sales_budget / 1000000).toFixed(2)}M)`;
+    }
+  }
+
+  return {
+    ventas: {
+      hoy: ventasHoy,
+      delta: deltaVentas,
+      promedio7d: Math.round(promedio7),
+      promedio30d: Math.round(promedio30),
+      deltaTendencia30d: deltaTendencia30,
+      forecast7d: forecast7
+    },
+    tickets: {
+      promedio: Math.round(ticketHoy),
+      delta: deltaTicket,
+      vs_benchmark: {
+        bajo: ticketHoy < BENCHMARKS.ticketPromedio.min ? true : false,
+        alto: ticketHoy > BENCHMARKS.ticketPromedio.max ? true : false,
+        percentil: ((ticketHoy - BENCHMARKS.ticketPromedio.min) / (BENCHMARKS.ticketPromedio.max - BENCHMARKS.ticketPromedio.min) * 100).toFixed(0)
+      }
+    },
+    transacciones: {
+      hoy: transaccionesHoy,
+      delta: deltaTransacciones,
+      tasaSugeridos: tasaSugeridos
+    },
+    estadisticas: {
+      zscore: zscore.toFixed(2),
+      desvio: Math.round(desvio7),
+      anomalias: anomalias
+    },
+    budget: impactoBudget,
+    team: {
+      activos: cashierData ? cashierData.filter(c => c.is_active).length : 0
+    }
+  };
+}
+
+function generateNOVAAnalysis(metrics, prompt) {
+  if (metrics.error) {
+    return metrics.error;
+  }
+
+  const v = metrics.ventas;
+  const t = metrics.tickets;
+  const tr = metrics.transacciones;
+  const e = metrics.estadisticas;
+
+  let analysis = '';
+
+  // Abertura crítica
+  if (Math.abs(v.delta) > 10) {
+    analysis += `🚨 CRÍTICO: Ventas ${v.delta > 0 ? '+' : ''}${v.delta}% vs ayer\n`;
+  } else if (Math.abs(v.delta) > 5) {
+    analysis += `⚠️ ALERTA: Ventas ${v.delta > 0 ? '+' : ''}${v.delta}% vs ayer\n`;
+  } else {
+    analysis += `✅ Ventas ${v.delta > 0 ? '+' : ''}${v.delta}% vs ayer\n`;
+  }
+
+  // Desglose de variables
+  analysis += `\n📊 DESGLOSE CAUSAL:\n`;
+  analysis += `• Transacciones: ${v.delta > 0 && tr.delta < 0 ? '↓' : v.delta > 0 && tr.delta > 0 ? '↑' : '→'} ${tr.delta > 0 ? '+' : ''}${tr.delta}% (${tr.hoy} txn)\n`;
+  analysis += `• Ticket promedio: ${t.delta > 0 ? '↑' : t.delta < 0 ? '↓' : '→'} ${t.delta > 0 ? '+' : ''}${t.delta}% ($${(t.promedio/1000).toFixed(1)}K vs benchmark $${(BENCHMARKS.ticketPromedio.std/1000).toFixed(0)}K)\n`;
+  analysis += `• Sugeridos: ${tr.tasaSugeridos}% de tasa de venta\n`;
+
+  // Anomalías
+  if (e.anomalias.length > 0) {
+    analysis += `\n⚡ ANOMALÍAS DETECTADAS:\n`;
+    e.anomalias.forEach(a => analysis += `• ${a}\n`);
+  }
+
+  // Tendencia
+  analysis += `\n📈 TENDENCIA:\n`;
+  analysis += `• Últimos 7d: Promedio $${(v.promedio7d/1000000).toFixed(2)}M (${v.deltaTendencia30d > 0 ? '+' : ''}${v.deltaTendencia30d}% vs mes)\n`;
+  analysis += `• Z-score: ${e.zscore} ${Math.abs(parseFloat(e.zscore)) > 2 ? '(EXTREMO)' : '(Normal)'}\n`;
+  analysis += `• Forecast 7d: $${(v.forecast7d/1000000).toFixed(2)}M ${v.forecast7d > v.promedio7d ? '↑' : '↓'}\n`;
+
+  // Recomendaciones
+  analysis += `\n💡 RECOMENDACIONES:\n`;
+  if (tr.tasaSugeridos < 15) {
+    analysis += `• Tasa sugeridos baja (${tr.tasaSugeridos}%). Impacto potencial: +3.2-4.8% ventas si aumenta a 25%\n`;
+  }
+  if (t.vs_benchmark.bajo) {
+    analysis += `• Ticket bajo. Acciones: upsell, combos, premium. ROI esperado: +$${Math.round(t.promedio * 0.12 * tr.hoy / 1000000)}M\n`;
+  }
+  if (Math.abs(parseFloat(e.zscore)) > 2) {
+    analysis += `• Investigar causa de variación extrema. Patrón no esperado.\n`;
+  }
+
+  if (metrics.budget) {
+    analysis += `\n📋 PRESUPUESTO:\n• ${metrics.budget}\n`;
+  }
+
+  // Probabilidad de éxito
+  const probExito = Math.min(95, Math.max(60, 70 + (v.delta * 0.5) + (t.delta * 0.3)));
+  analysis += `\n✓ Probabilidad de cumplimiento con acciones: ${probExito.toFixed(0)}%\n`;
+
+  return analysis;
 }
 
 Deno.serve(async (req) => {
@@ -92,73 +181,38 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { prompt, selectedStore, selectedRole } = await req.json();
+    const { prompt, selectedStore } = await req.json();
 
     if (!prompt || !prompt.trim()) {
       return Response.json({ error: 'Prompt requerido' }, { status: 400 });
     }
 
-    // Construir contexto de datos si hay tienda seleccionada
-    let context = '';
+    let analysis = '';
     
     if (selectedStore) {
-      const [todaySales, budget, cashiers, shifts] = await Promise.all([
+      const [salesData, budgetData, cashierData] = await Promise.all([
         base44.entities.DailySales.filter({ store_id: selectedStore }).catch(() => []),
         base44.entities.Budget.filter({ store_id: selectedStore }).catch(() => []),
-        base44.entities.Cashier.filter({ store_id: selectedStore, is_active: true }).catch(() => []),
-        base44.entities.Shift.filter({ store_id: selectedStore }).catch(() => [])
+        base44.entities.Cashier.filter({ store_id: selectedStore }).catch(() => [])
       ]);
 
-      // Construir contexto inteligente
-      if (todaySales.length > 0) {
-        const sorted = todaySales.sort((a, b) => new Date(b.date) - new Date(a.date));
-        const latest = sorted[0];
-        const prev = sorted[1];
-        
-        if (latest) {
-          const salesChange = prev ? 
-            Math.round((latest.total_sales - prev.total_sales) / prev.total_sales * 100) : 0;
-          const ticketAvg = latest.total_transactions > 0 ?
-            Math.round(latest.total_sales / latest.total_transactions) : 0;
-          
-          context += `DATOS ACTUALES TIENDA:\n`;
-          context += `- Ventas hoy: $${(latest.total_sales / 1000000).toFixed(2)}M\n`;
-          context += `- Cambio vs ayer: ${salesChange > 0 ? '+' : ''}${salesChange}%\n`;
-          context += `- Transacciones: ${latest.total_transactions}\n`;
-          context += `- Ticket promedio: $${(ticketAvg / 1000).toFixed(1)}K\n`;
-          
-          if (sorted.length > 1) {
-            const avg7d = sorted.slice(0, 7).reduce((s, d) => s + d.total_sales, 0) / Math.min(7, sorted.length);
-            const trend = latest.total_sales > avg7d ? 'POSITIVA' : 'NEGATIVA';
-            context += `- Tendencia 7d: ${trend} (promedio: $${(avg7d / 1000000).toFixed(2)}M)\n`;
-          }
-        }
-      }
-
-      if (budget.length > 0) {
-        const activeBudget = budget.find(b => b.is_active);
-        if (activeBudget) {
-          context += `\nPRESUPUESTO ACTIVO:\n`;
-          context += `- Meta ventas: $${(activeBudget.sales_budget / 1000000).toFixed(2)}M\n`;
-          context += `- Brecha actual: $${(activeBudget.sales_gap / 1000000).toFixed(2)}M\n`;
-        }
-      }
-
-      context += `\nEQUIPO: ${cashiers.length} colaboradores activos\n`;
+      // Análisis local puro
+      const metrics = analyzeStoreMetrics(salesData, budgetData, null, cashierData);
+      analysis = generateNOVAAnalysis(metrics, prompt);
+    } else {
+      analysis = `NOVA requiere tienda seleccionada para análisis. Selecciona una tienda para comenzar.`;
     }
-
-    const response = await invokeGemini(prompt, context);
     
     return Response.json({
       success: true,
-      response: response,
+      response: analysis,
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('Error:', error);
     return Response.json({
-      error: error.message || 'Error procesando solicitud',
+      error: error.message || 'Error procesando análisis',
       success: false
     }, { status: 500 });
   }
