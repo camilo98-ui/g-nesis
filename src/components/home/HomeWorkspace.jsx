@@ -454,6 +454,7 @@ export default function HomeWorkspace({
               budget={budget}
               sparkSales={sparkSales}
               sparkTxn={sparkTxn}
+              todaySales={todaySales}
             />
           )}
 
