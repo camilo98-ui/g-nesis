@@ -1124,116 +1124,72 @@ export default function SalesReportView() {
           </motion.div>
         ) : (
           <>
-            {/* KPI Cards con mini-gráficas */}
+            {/* KPI Cards con mini-gráficas comparativo actual vs anterior */}
             {(() => {
-              // Datos para mini gráficas
-              const topDepts = hierarchy.filter(h => h.deptSales > 0).slice(0, 6);
-              const top5Products = [...allProducts].sort((a,b) => b.total_sales - a.total_sales).slice(0, 5);
               const prevProductMap2 = {};
               prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevProductMap2[p.product] = p; })));
               const prevTotal2 = prevHierarchy?.reduce((s, h) => s + (h.deptSales || 0), 0) || 0;
+              const prevTotalProducts = Object.keys(prevProductMap2).length;
+              const prevTotalDepts = prevHierarchy?.length || 0;
+              const prevTopProduct = Object.values(prevProductMap2).sort((a,b) => b.total_sales - a.total_sales)[0];
               const globalDelta = prevTotal2 > 0 ? ((summary.totalSales - prevTotal2) / prevTotal2) * 100 : null;
-              const concentracionPct2 = summary.totalSales > 0 ? (top5Products.reduce((s,p)=>s+p.total_sales,0) / summary.totalSales) * 100 : 0;
 
-              // Sparkline SVG helper
-              const Sparkline = ({ values, color, height = 36, width = 80 }) => {
-                if (!values || values.length < 2) return null;
-                const max = Math.max(...values); const min = Math.min(...values);
-                const range = max - min || 1;
-                const pts = values.map((v, i) => {
-                  const x = (i / (values.length - 1)) * width;
-                  const y = height - ((v - min) / range) * (height - 4) - 2;
-                  return `${x},${y}`;
-                }).join(' ');
+              // Mini comparativo: 2 barras (actual vs anterior)
+              const CompareBar = ({ current, prev, colorA, colorB, label1, label2 }) => {
+                const max = Math.max(current, prev, 1);
+                const hA = Math.max(4, (current / max) * 44);
+                const hB = Math.max(4, (prev / max) * 44);
                 return (
-                  <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-                    <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={pts} />
-                    <circle cx={pts.split(' ').pop().split(',')[0]} cy={pts.split(' ').pop().split(',')[1]} r="3" fill={color} />
+                  <svg width={52} height={52} viewBox="0 0 52 52">
+                    {/* Barras */}
+                    <rect x={4} y={48 - hA} width={18} height={hA} rx={3} fill={colorA} />
+                    <rect x={28} y={48 - hB} width={18} height={hB} rx={3} fill={colorB} opacity={0.45} />
+                    {/* Etiquetas */}
+                    <text x={13} y={51} textAnchor="middle" fill={colorA} fontSize="6" fontWeight="bold">{label1}</text>
+                    <text x={37} y={51} textAnchor="middle" fill={colorB} fontSize="6" opacity={0.7}>{label2}</text>
                   </svg>
                 );
               };
 
-              // Mini Donut SVG
-              const MiniDonut = ({ pct, color }) => {
-                const r = 18; const circ = 2 * Math.PI * r;
-                const dash = (pct / 100) * circ;
-                return (
-                  <svg width={44} height={44} viewBox="0 0 44 44">
-                    <circle cx={22} cy={22} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={5} />
-                    <circle cx={22} cy={22} r={r} fill="none" stroke={color} strokeWidth={5}
-                      strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
-                      transform="rotate(-90 22 22)" />
-                    <text x={22} y={26} textAnchor="middle" fill={color} fontSize="9" fontWeight="bold">{Math.round(pct)}%</text>
-                  </svg>
-                );
-              };
-
-              // Mini Bar chart SVG
-              const MiniBars = ({ data, colorFn, height = 36, width = 80 }) => {
-                if (!data || data.length === 0) return null;
-                const max = Math.max(...data.map(d => d.val)) || 1;
-                const barW = (width / data.length) - 2;
-                return (
-                  <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-                    {data.map((d, i) => {
-                      const bh = Math.max(3, ((d.val / max) * (height - 4)));
-                      return (
-                        <rect key={i} x={i * (barW + 2)} y={height - bh} width={barW} height={bh}
-                          rx={2} fill={colorFn(i, d)} opacity={0.85} />
-                      );
-                    })}
-                  </svg>
-                );
-              };
+              const shortMonthLabel = (label) => label ? label.split(' ')[0].slice(0,3) : 'ant';
 
               const cards = [
                 {
                   label: 'Venta Total',
                   value: formatCurrency(summary.totalSales),
-                  sub: globalDelta !== null ? `${globalDelta >= 0 ? '+' : ''}${globalDelta.toFixed(1)}% vs ant.` : `${summary.totalProducts} productos`,
+                  delta: globalDelta,
+                  sub: prevTotal2 > 0 ? formatCurrency(prevTotal2) : 'Sin comparativo',
                   subColor: globalDelta === null ? EXEC.textMuted : globalDelta >= 0 ? '#10b981' : '#ef4444',
-                  accent: EXEC.accent1,
-                  grad: EXEC.grad1,
-                  chart: (
-                    <MiniBars
-                      data={topDepts.map(h => ({ val: h.deptSales, dept: h.dept }))}
-                      colorFn={(i) => COLORS[i % COLORS.length]}
-                      width={84} height={38}
-                    />
-                  ),
+                  accent: EXEC.accent1, grad: EXEC.grad1,
+                  chart: <CompareBar current={summary.totalSales} prev={prevTotal2} colorA={EXEC.accent1} colorB="#475569"
+                    label1={currentMonthLabel.split(' ')[0].slice(0,3)} label2={shortMonthLabel(prevMonthLabel)} />,
                 },
                 {
-                  label: 'Mix Departamentos',
-                  value: `${summary.totalDepts} deptos.`,
-                  sub: topDepts[0] ? `Líder: ${topDepts[0].dept.length > 14 ? topDepts[0].dept.slice(0,14)+'…' : topDepts[0].dept}` : '—',
-                  subColor: EXEC.accent3,
-                  accent: EXEC.accent3,
-                  grad: EXEC.grad3,
-                  chart: <MiniDonut pct={topDepts[0]?.deptPart || 0} color={EXEC.accent3} />,
+                  label: 'Productos Activos',
+                  value: `${summary.totalProducts}`,
+                  delta: prevTotalProducts > 0 ? ((summary.totalProducts - prevTotalProducts) / prevTotalProducts) * 100 : null,
+                  sub: prevTotalProducts > 0 ? `Antes: ${prevTotalProducts}` : 'Sin comparativo',
+                  subColor: EXEC.accent3, accent: EXEC.accent3, grad: EXEC.grad2,
+                  chart: <CompareBar current={summary.totalProducts} prev={prevTotalProducts} colorA={EXEC.accent3} colorB="#475569"
+                    label1={currentMonthLabel.split(' ')[0].slice(0,3)} label2={shortMonthLabel(prevMonthLabel)} />,
                 },
                 {
-                  label: 'Concentración Top 5',
-                  value: `${concentracionPct2.toFixed(1)}%`,
-                  sub: concentracionPct2 > 60 ? '⚠ Alta concentración' : '✓ Mix balanceado',
-                  subColor: concentracionPct2 > 60 ? EXEC.accent5 : EXEC.accent4,
-                  accent: concentracionPct2 > 60 ? EXEC.accent5 : EXEC.accent4,
-                  grad: concentracionPct2 > 60 ? EXEC.grad4 : EXEC.grad3,
-                  chart: <MiniDonut pct={concentracionPct2} color={concentracionPct2 > 60 ? EXEC.accent5 : EXEC.accent4} />,
+                  label: 'Departamentos',
+                  value: `${summary.totalDepts}`,
+                  delta: prevTotalDepts > 0 ? ((summary.totalDepts - prevTotalDepts) / prevTotalDepts) * 100 : null,
+                  sub: prevTotalDepts > 0 ? `Antes: ${prevTotalDepts}` : 'Sin comparativo',
+                  subColor: EXEC.accent4, accent: EXEC.accent4, grad: EXEC.grad3,
+                  chart: <CompareBar current={summary.totalDepts} prev={prevTotalDepts} colorA={EXEC.accent4} colorB="#475569"
+                    label1={currentMonthLabel.split(' ')[0].slice(0,3)} label2={shortMonthLabel(prevMonthLabel)} />,
                 },
                 {
                   label: 'Top Producto',
                   value: summary.topProduct?.product ? (summary.topProduct.product.length > 16 ? summary.topProduct.product.slice(0,16)+'…' : summary.topProduct.product) : '—',
-                  sub: summary.topProduct ? formatCurrency(summary.topProduct.total_sales) : '—',
-                  subColor: EXEC.accent5,
-                  accent: EXEC.accent5,
-                  grad: EXEC.grad4,
-                  chart: (
-                    <MiniBars
-                      data={top5Products.map(p => ({ val: p.total_sales }))}
-                      colorFn={(i) => i === 0 ? EXEC.accent5 : `rgba(245,158,11,${0.35 + (4-i)*0.1})`}
-                      width={84} height={38}
-                    />
-                  ),
+                  delta: prevTopProduct && prevTopProduct.total_sales > 0 && summary.topProduct ? ((summary.topProduct.total_sales - prevTopProduct.total_sales) / prevTopProduct.total_sales) * 100 : null,
+                  sub: prevTopProduct ? formatCurrency(prevTopProduct.total_sales) : 'Sin comparativo',
+                  subColor: EXEC.accent5, accent: EXEC.accent5, grad: EXEC.grad4,
+                  chart: <CompareBar current={summary.topProduct?.total_sales || 0} prev={prevTopProduct?.total_sales || 0} colorA={EXEC.accent5} colorB="#475569"
+                    label1={currentMonthLabel.split(' ')[0].slice(0,3)} label2={shortMonthLabel(prevMonthLabel)} />,
                 },
               ];
 
@@ -1243,18 +1199,19 @@ export default function SalesReportView() {
                     <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                       className="rounded-2xl p-4 overflow-hidden relative hover:scale-[1.02] transition-transform cursor-default"
                       style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
-                      {/* Glow top-right */}
                       <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-xl opacity-20 pointer-events-none" style={{ background: card.grad }} />
-                      {/* Label + chart en fila */}
-                      <div className="flex items-start justify-between mb-2">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.13em] leading-tight" style={{ color: EXEC.textMuted }}>{card.label}</p>
-                        <div className="flex-shrink-0 ml-1">{card.chart}</div>
+                      <div className="flex items-start justify-between mb-1">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: EXEC.textMuted }}>{card.label}</p>
+                        <div className="flex-shrink-0">{card.chart}</div>
                       </div>
-                      {/* Valor principal */}
-                      <p className={`font-black leading-tight mb-1 ${card.value.length > 14 ? 'text-xs' : 'text-lg'}`} style={{ color: EXEC.textPrimary }}>{card.value}</p>
-                      {/* Sub */}
-                      <p className="text-[10px] font-semibold truncate" style={{ color: card.subColor }}>{card.sub}</p>
-                      {/* Accent bar bottom */}
+                      <p className={`font-black leading-tight mb-0.5 ${card.value.length > 14 ? 'text-xs' : 'text-lg'}`} style={{ color: EXEC.textPrimary }}>{card.value}</p>
+                      {card.delta !== null && (
+                        <span className={`text-[10px] font-black flex items-center gap-0.5 mb-0.5 ${card.delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {card.delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                          {card.delta >= 0 ? '+' : ''}{card.delta.toFixed(1)}% vs {prevMonthLabel}
+                        </span>
+                      )}
+                      <p className="text-[10px] truncate" style={{ color: EXEC.textMuted }}>{card.sub}</p>
                       <div className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-2xl" style={{ background: card.grad }} />
                     </motion.div>
                   ))}
