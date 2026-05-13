@@ -6,6 +6,7 @@ import {
 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
+import ClosureProjectionPanel from '@/components/analytics/ClosureProjectionPanel';
 
 // ── ANIMATED COUNTER ──────────────────────────────────────────────────────────
 function AnimatedCounter({ value, format = (v) => v, delay = 0, duration = 2 }) {
@@ -423,11 +424,11 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       transition={{ delay: 0.15, duration: 0.5 }}
       className="mb-7">
       
-      {/* Section header */}
+      {/* Closure Projection Panel - PREMIUM */}
+      <ClosureProjectionPanel todaySales={todaySales} budget={budget} cashiers={cashiers} />
       
-
-
-      
+      {/* Spacer */}
+      <div className="h-8" />
 
       {/* ── ROW 1: Store Rankings ── */}
       <motion.div 
