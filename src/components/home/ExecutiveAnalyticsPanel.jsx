@@ -5,7 +5,7 @@ import {
 } from
 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Trophy } from 'lucide-react';
 import { AnimatedChartWrapper, AnimatedProgressBar } from '@/components/dashboard/AnimatedChartWrapper';
 
 // ── ANIMATED COUNTER ──────────────────────────────────────────────────────────
@@ -682,9 +682,13 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                     const maxSales = top3[0]?.total_sales || 1;
                     return top3.map((prod, i) => {
                       const pct = (prod.total_sales / maxSales) * 100;
+                      const medals = ['🥇', '🥈', '🥉'];
                       return (
                         <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
                           className="p-2.5 rounded-lg text-center" style={{ background: `${PARTICIPATION_COLORS[i]}15` }}>
+                          <div className="flex items-center justify-center mb-1">
+                            <span className="text-[14px]">{medals[i]}</span>
+                          </div>
                           <p className="text-[9px] text-[#8F96A3] font-semibold uppercase mb-1.5 line-clamp-2 min-h-6 break-words">{prod.product}</p>
                           <p className="text-[12px] font-black" style={{ color: PARTICIPATION_COLORS[i] }} className="mb-1.5">{fmt(prod.total_sales)}</p>
                           <div className="h-1 rounded-full mx-auto w-12" style={{ background: 'rgba(0,0,0,0.08)' }}>
