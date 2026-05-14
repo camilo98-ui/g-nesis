@@ -26,7 +26,8 @@ export default function WeatherSalesImpact() {
     queryKey: ['weatherData'],
     queryFn: async () => {
       const response = await base44.functions.invoke('getWeatherDataForBogota', {});
-      return response.data || [];
+      const data = response.data;
+      return Array.isArray(data) ? data : (data?.records || []);
     }
   });
 
