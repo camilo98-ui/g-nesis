@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { LiveGraphContainer, AnimatedLineWrapper } from '@/components/animations/LiveGraphicAnimation';
+import { LiveChartContainer, ShimmerLine } from '@/components/animations/LiveDashboardAnimations';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -34,17 +34,9 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function SalesChart({ data, title, showBudget = true }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      whileHover={{ y: -2, transition: { duration: 0.3 } }}
-      className="bg-white rounded-2xl shadow-lg border border-orange-100 p-6 hover:shadow-xl transition-all"
-    >
-      <h3 className="text-lg font-semibold text-gray-800 mb-6">{title}</h3>
-      
+    <LiveChartContainer title={title}>
       <div className="h-[300px] md:h-[350px]">
-        <AnimatedLineWrapper duration={4}>
+        <ShimmerLine color="#f97316">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
@@ -57,14 +49,27 @@ export default function SalesChart({ data, title, showBudget = true }) {
                   <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
                 </linearGradient>
                 <filter id="glowVentas">
-                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feFlood floodColor="#f97316" floodOpacity="0.3" result="coloredBlur2"/>
+                  <feComposite in="coloredBlur2" in2="coloredBlur" operator="in" result="coloredBlur3"/>
                   <feMerge>
-                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="coloredBlur3"/>
                     <feMergeNode in="SourceGraphic"/>
                   </feMerge>
                 </filter>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+              <motion.g
+                animate={{
+                  opacity: [0.4, 0.6, 0.4],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+              </motion.g>
               <XAxis 
                 dataKey="date" 
                 tick={{ fill: '#64748b', fontSize: 12 }}
@@ -91,6 +96,8 @@ export default function SalesChart({ data, title, showBudget = true }) {
                 fillOpacity={1}
                 fill="url(#colorVentas)"
                 filter="url(#glowVentas)"
+                dot={false}
+                isAnimationActive={true}
               />
               {showBudget && (
                 <Area
@@ -102,12 +109,14 @@ export default function SalesChart({ data, title, showBudget = true }) {
                   strokeDasharray="5 5"
                   fillOpacity={1}
                   fill="url(#colorPresupuesto)"
+                  dot={false}
+                  isAnimationActive={true}
                 />
               )}
             </AreaChart>
           </ResponsiveContainer>
-        </AnimatedLineWrapper>
+        </ShimmerLine>
       </div>
-    </motion.div>
+    </LiveChartContainer>
   );
 }

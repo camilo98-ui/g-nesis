@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useAnimatedNumber } from '@/components/animations/LiveGraphicAnimation';
+import { useInfinitePulse, useBreathingGlow } from '@/components/animations/LiveDashboardAnimations';
 
 export default function StatsCard({ 
   title, 
@@ -68,16 +69,17 @@ export default function StatsCard({
     >
       {/* Animated background decoration */}
       <motion.div 
+        className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${colorClasses[color].bg} rounded-full blur-2xl`}
+        {...useInfinitePulse(5, 0.12)}
         animate={{
-          opacity: [0.08, 0.15, 0.08],
-          scale: [0.95, 1.05, 0.95],
+          ...useInfinitePulse(5, 0.12).animate,
+          scale: [0.93, 1.08, 0.93],
         }}
         transition={{
-          duration: 4,
+          duration: 5,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${colorClasses[color].bg} rounded-full blur-2xl`} 
       />
       
       <div className="relative">
@@ -107,9 +109,12 @@ export default function StatsCard({
         </div>
         
         <p className="text-sm text-gray-500 mb-1">{title}</p>
-        <p className="text-2xl md:text-3xl font-bold text-gray-800">
+        <motion.p 
+          className="text-2xl md:text-3xl font-bold text-gray-800"
+          {...useInfinitePulse(6, 0.05)}
+        >
           {formatValue(animatedValue)}
-        </p>
+        </motion.p>
         
         {budget > 0 && (
           <div className="mt-4">
@@ -127,24 +132,37 @@ export default function StatsCard({
                   isNeutral ? 'from-yellow-400 to-yellow-500' : 
                   'from-red-400 to-red-500'
                 }`}
+              />
+              {/* Glow pulsante */}
+              <motion.div 
+                className="absolute inset-0 rounded-full"
                 style={{
-                  boxShadow: isPositive ? '0 0 16px rgba(34,197,94,0.4)' : 
-                            isNeutral ? '0 0 16px rgba(234,179,8,0.4)' : 
-                            '0 0 16px rgba(239,68,68,0.4)',
+                  background: isPositive ? 'linear-gradient(90deg, transparent, rgba(34,197,94,0.5), transparent)' : 
+                            isNeutral ? 'linear-gradient(90deg, transparent, rgba(234,179,8,0.5), transparent)' : 
+                            'linear-gradient(90deg, transparent, rgba(239,68,68,0.5), transparent)',
+                }}
+                animate={{
+                  opacity: [0.4, 0.8, 0.4],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
                 }}
               />
+              {/* Shimmer line */}
               <motion.div 
                 className="absolute inset-0 rounded-full"
                 style={{
                   background: 'linear-gradient(90deg, transparent, white, transparent)',
-                  opacity: 0.3,
-                  width: '40%',
+                  opacity: 0.4,
+                  width: '30%',
                 }}
                 animate={{
-                  x: ['-100%', '300%'],
+                  x: ['-100%', '400%'],
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 2.5,
                   repeat: Infinity,
                   ease: 'linear',
                 }}
