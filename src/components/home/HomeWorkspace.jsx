@@ -291,6 +291,12 @@ export default function HomeWorkspace({
     enabled: !!selectedStore,
     staleTime: 5 * 60 * 1000
   });
+  const { data: dailyBudgets = [] } = useQuery({
+    queryKey: ['home-daily-budgets', selectedStore],
+    queryFn: () => base44.entities.DailyBudget.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore,
+    staleTime: 5 * 60 * 1000
+  });
   const { data: cashiers = [] } = useQuery({
     queryKey: ['home-cashiers', selectedStore],
     queryFn: () => base44.entities.Cashier.filter({ store_id: selectedStore, is_active: true }),
@@ -632,7 +638,7 @@ export default function HomeWorkspace({
               const now = new Date();
               return Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear();
             }) : null}
-            dailyBudgets={[]}
+            dailyBudgets={dailyBudgets}
           />
           }
 
