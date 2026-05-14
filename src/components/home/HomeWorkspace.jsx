@@ -362,24 +362,38 @@ export default function HomeWorkspace({
     try {
       // Crear conversación si no existe
       if (!conversationRef.current) {
-        conversationRef.current = await base44.agents.createConversation({
+        const storeEntity = storeEntities.find(s => s.code === selectedStore);
+        const conv = await base44.agents.createConversation({
           agent_name: 'nova',
           metadata: { store: selectedStore, role: selectedRole }
         });
+        conversationRef.current = conv;
+
+        // Inyectar contexto de tienda como primer mensaje de sistema
+        const storeContext = `CONTEXTO DE SESIÓN: El usuario es un ${selectedRole} de la tienda "${storeName}" (código: ${selectedStore}, ID: ${storeEntityId}). Cuando consultes entidades, filtra siempre por store_id="${storeEntityId}" o store_code="${selectedStore}". Fecha actual: ${new Date().toISOString().split('T')[0]}.`;
+
+        await base44.agents.addMessage(conv, {
+          role: 'user',
+          content: storeContext
+        });
+
         // Suscribirse a updates en tiempo real
-        base44.agents.subscribeToConversation(conversationRef.current.id, (data) => {
-          const agentMessages = (data.messages || [])
-            .filter(m => m.role === 'assistant' || m.role === 'user')
-            .map(m => ({ role: m.role === 'assistant' ? 'nova' : 'user', text: m.content }));
-          if (agentMessages.length > 1) {
-            setMessages([INITIAL_MESSAGES[0], ...agentMessages]);
+        base44.agents.subscribeToConversation(conv.id, (data) => {
+          const allMsgs = data.messages || [];
+          // Filtrar: saltar el primer mensaje de contexto (índice 0 user) y su respuesta (índice 1 assistant)
+          const visibleMsgs = allMsgs.slice(2).filter(m => m.role === 'assistant' || m.role === 'user');
+          const mapped = visibleMsgs.map(m => ({ role: m.role === 'assistant' ? 'nova' : 'user', text: m.content }));
+          if (mapped.length > 0) {
+            setMessages([INITIAL_MESSAGES[0], ...mapped]);
           }
-          // Detectar si el agente terminó de responder
-          const lastMsg = data.messages?.[data.messages.length - 1];
+          const lastMsg = allMsgs[allMsgs.length - 1];
           if (lastMsg?.role === 'assistant') {
             setIsTyping(false);
           }
         });
+
+        // Esperar respuesta al contexto antes de enviar el mensaje real
+        await new Promise(r => setTimeout(r, 1500));
       }
 
       await base44.agents.addMessage(conversationRef.current, {
