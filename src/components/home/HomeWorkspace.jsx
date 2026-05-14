@@ -867,29 +867,29 @@ export default function HomeWorkspace({
               </div>
             </motion.div>
 
-            {/* Premium KPI Cards Grid */}
+            {/* Premium KPI Cards Grid - 4 Tarjetas principales */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 
-              {/* Meta del Día - Desde RetailWeekBudgetCard */}
+              {/* 1. PPT del Día */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">Meta del día</p>
+                <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
                 <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
                   {budgetData?.adjustedDailyBudget ? 
-                    budgetData.adjustedDailyBudget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                    `$${(budgetData.adjustedDailyBudget / 1000000).toFixed(2)}M`
                     : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
-                  <span className="text-[10px] text-slate-400 text-center flex-1">del 01 - 31 may</span>
+                  <span className="text-[10px] text-slate-400 text-center flex-1">del 01 - {new Date().getDate()} may</span>
                 </div>
                 <PremiumSparkline data={sparkSales} color="#ef4444" width={100} height="24" />
               </div>
 
-              {/* Brecha del Mes - Desde RetailWeekBudgetCard */}
+              {/* 2. Brecha del Mes */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
@@ -899,15 +899,16 @@ export default function HomeWorkspace({
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
                 <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
                   {(() => {
-                    const monthGap = budgetData?.salesUntilYesterday - budgetData?.budgetUntilYesterday || 0;
-                    return monthGap >= 0 ? `+${monthGap.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : monthGap.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                    const monthGap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
+                    const sign = monthGap >= 0 ? '+' : '-';
+                    return `${sign}$${(Math.abs(monthGap) / 1000000).toFixed(2)}M`;
                   })()}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-400 text-center flex-1">
                     Sobre meta: {budgetData?.monthlyBudget ? 
                       (() => {
-                        const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
+                        const monthGap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
                         return `${Math.round((monthGap / budgetData.monthlyBudget) * 100)}%`;
                       })()
                       : '0%'}
@@ -916,7 +917,7 @@ export default function HomeWorkspace({
                 <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
               </div>
 
-              {/* Proyección Cierre Mes - Desde RetailWeekBudgetCard */}
+              {/* 3. Proyección Cierre Mes */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
@@ -929,15 +930,15 @@ export default function HomeWorkspace({
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-500 text-center flex-1">
-                    {budgetData?.monthProjection ? 
-                      `${budgetData.monthProjection.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })} / ${budgetData.monthlyBudget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                    {budgetData?.monthProjection && budgetData?.monthlyBudget ? 
+                      `$${(budgetData.monthProjection / 1000000).toFixed(2)}M / $${(budgetData.monthlyBudget / 1000000).toFixed(2)}M`
                       : ''}
                   </span>
                 </div>
                 <PremiumSparkline data={sparkSales} color="#3b82f6" width={100} height="24" />
               </div>
 
-              {/* Venta del Día */}
+              {/* 4. Venta del Día */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
@@ -947,7 +948,7 @@ export default function HomeWorkspace({
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Venta del día</p>
                 <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
                   {latest?.total_sales ? 
-                    latest.total_sales.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                    `$${(latest.total_sales / 1000000).toFixed(2)}M`
                     : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
