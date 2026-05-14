@@ -763,105 +763,105 @@ export default function HomeWorkspace({
             </motion.div>
 
             {/* Premium KPI Cards Grid - 4 Tarjetas principales */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 hidden">
-
-              {/* 1. PPT del Día */}
-              <div className="rounded-2xl p-4" style={{
-                background: 'rgba(255,255,255,0.82)',
-                backdropFilter: 'blur(24px)',
-                border: '1px solid rgba(0,0,0,0.06)',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
-              }}>
-                <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
-                
-
-
-
-                
-                <div className="flex items-center gap-1 mb-3">
-                  <span className="text-[10px] text-slate-400 text-center flex-1">del 01 - {new Date().getDate()} may</span>
-                </div>
-                <PremiumSparkline data={sparkSales} color="#ef4444" width={100} height="24" />
-              </div>
-
-              {/* 2. Brecha del Mes */}
-              <div className="rounded-2xl p-4" style={{
-                background: 'rgba(255,255,255,0.82)',
-                backdropFilter: 'blur(24px)',
-                border: '1px solid rgba(0,0,0,0.06)',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
-              }}>
-                <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
-                
+            
 
 
 
 
 
-                
-                <div className="flex items-center gap-1 mb-3">
-                  <span className="text-[10px] text-slate-400 text-center flex-1">
-                    Sobre meta: {budgetData?.monthlyBudget ?
-                    (() => {
-                      const monthGap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
-                      return `${Math.abs(Math.round(monthGap / budgetData.monthlyBudget * 100))}%`;
-                    })() :
-                    '0%'}
-                  </span>
-                </div>
-                <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
-              </div>
-
-              {/* 3. Proyección Cierre Mes */}
-              <div className="rounded-2xl p-4" style={{
-                background: 'rgba(255,255,255,0.82)',
-                backdropFilter: 'blur(24px)',
-                border: '1px solid rgba(0,0,0,0.06)',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
-              }}>
-                <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
-                
-
-                
-                <div className="flex items-center gap-1 mb-3">
-                  <span className="text-[10px] text-slate-500 text-center flex-1">
-                    {budgetData?.monthProjection && budgetData?.monthlyBudget ?
-                    `$${Math.round(budgetData.monthProjection).toLocaleString('es-CO')} / $${Math.round(budgetData.monthlyBudget).toLocaleString('es-CO')}` :
-                    ''}
-                  </span>
-                </div>
-                <PremiumSparkline data={sparkSales} color="#3b82f6" width={100} height="24" />
-              </div>
-
-              {/* 4. Venta del Día */}
-              <div className="rounded-2xl p-4" style={{
-                background: 'rgba(255,255,255,0.82)',
-                backdropFilter: 'blur(24px)',
-                border: '1px solid rgba(0,0,0,0.06)',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
-              }}>
-                <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Venta del día</p>
-                
 
 
 
-                
-                <div className="flex items-center gap-1 mb-3">
-                  {latest && prev ?
-                  <>
-                      <span className={`text-[11px] font-semibold ${salesChange >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {salesChange >= 0 ? '↑' : '↓'} {Math.abs(salesChange)}%
-                      </span>
-                      <span className="text-[10px] text-slate-400">vs ayer</span>
-                    </> :
 
-                  <span className="text-[10px] text-slate-400 flex-1 text-center">Sin comparación</span>
-                  }
-                </div>
-                <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
-              </div>
 
-            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
           </motion.div>
           }
 
