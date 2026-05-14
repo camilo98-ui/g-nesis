@@ -516,45 +516,113 @@ export default function HomeWorkspace({
             </motion.div>
           }
 
-          {/* ── MODULE GRID ── */}
-          <div className="mb-7">
-            <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.14em] mb-3">Módulos</p>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-              {QUICK_MODULES.map((m, i) => <ModuleCard key={m.label} m={m} i={i} />)}
-            </div>
-          </div>
+          {/* ── QUICK ACCESS BANNER ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            className="mb-7 rounded-2xl overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #ffd6e7 0%, #ffb3d1 40%, #ffc8d8 70%, #ffe0ec 100%)',
+              boxShadow: '0 2px 16px rgba(255,77,141,0.15)'
+            }}>
+            <div className="flex divide-x divide-pink-200/60">
 
-          {/* ── GERENTE PANEL ── */}
-          {isGerente &&
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mb-7">
-              <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.14em] mb-3">Panel ejecutivo</p>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 mb-4">
-                {[
-              { icon: Activity, label: 'CMD Center', sublabel: 'Global', path: 'GenesisCommandCenter' },
-              { icon: TrendingUp, label: 'P&G', sublabel: 'Rentabilidad', path: 'PYGDashboard' },
-              { icon: Trophy, label: 'Ruleta', sublabel: 'Premios', path: 'RoulettePopsy' },
-              { icon: BarChart3, label: 'Participación', sublabel: 'Mix negocio', path: 'SalesReportView' },
-              { icon: SettingsIcon, label: 'Config', sublabel: 'Ajustes', path: 'Settings' }].
-              map((m, i) => <ModuleCard key={m.label} m={m} i={i} />)}
+              {/* SECCIÓN 1 — Módulos */}
+              <div className="flex-1 p-4">
+                <p className="text-[9px] font-bold text-pink-800/60 uppercase tracking-[0.14em] mb-3">Módulos</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {QUICK_MODULES.map((m, i) => (
+                    <Link key={m.label} to={`/${m.path}`}>
+                      <motion.div
+                        whileHover={{ y: -2, transition: { duration: 0.14 } }}
+                        whileTap={{ scale: 0.96 }}
+                        className="flex flex-col items-center gap-1.5 p-2 rounded-xl cursor-pointer group"
+                        style={{
+                          background: 'rgba(255,255,255,0.65)',
+                          backdropFilter: 'blur(12px)',
+                          border: '1px solid rgba(255,255,255,0.8)'
+                        }}>
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+                          style={{ background: 'rgba(255,255,255,0.7)' }}>
+                          <m.icon style={{ width: 14, height: 14, color: '#be185d' }} />
+                        </div>
+                        <p className="text-[9.5px] font-semibold text-pink-900/80 text-center leading-tight">{m.label}</p>
+                      </motion.div>
+                    </Link>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {[
-              { label: 'Importar PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter },
-              { label: 'Subir KPIs', icon: BarChart3, onClick: onShowKpisUploader },
-              { label: 'Agregadores', icon: FileSpreadsheet, onClick: onShowAggregatorsUploader },
-              { label: 'Subir P&G', icon: TrendingUp, onClick: onShowPYGUploader },
-              { label: 'Ver P&G', icon: TrendingUp, onClick: onShowPYGModal },
-              { label: 'Backup', icon: Download, onClick: onBackup }].
-              map(({ label, icon: I, onClick }) =>
-              <button key={label} onClick={onClick}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-700 hover:bg-black/[0.04] transition-all"
-              style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
-                    <I style={{ width: 11, height: 11 }} />{label}
-                  </button>
-              )}
+
+              {/* SECCIÓN 2 — Panel ejecutivo */}
+              <div className="flex-[1.4] p-4">
+                <p className="text-[9px] font-bold text-pink-800/60 uppercase tracking-[0.14em] mb-3">Panel ejecutivo</p>
+                <div className="flex gap-3 mb-3 flex-wrap">
+                  {[
+                    { icon: Activity, label: 'CMD Center', path: 'GenesisCommandCenter' },
+                    { icon: TrendingUp, label: 'P&G', path: 'PYGDashboard' },
+                    { icon: Trophy, label: 'Ruleta', path: 'RoulettePopsy' },
+                    { icon: BarChart3, label: 'Participación', path: 'SalesReportView' },
+                    { icon: SettingsIcon, label: 'Config', path: 'Settings' }
+                  ].map((m) => (
+                    <Link key={m.label} to={`/${m.path}`}>
+                      <motion.div
+                        whileHover={{ y: -2, scale: 1.05, transition: { duration: 0.14 } }}
+                        className="flex flex-col items-center gap-1 cursor-pointer">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                          style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)' }}>
+                          <m.icon style={{ width: 16, height: 16, color: '#be185d' }} />
+                        </div>
+                        <p className="text-[9px] font-medium text-pink-900/70">{m.label}</p>
+                      </motion.div>
+                    </Link>
+                  ))}
+                </div>
+                {/* Links rápidos gerente */}
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { label: 'Importar PPT', onClick: onShowBudgetImporter },
+                    { label: 'Subir KPIs', onClick: onShowKpisUploader },
+                    { label: 'Agregadores', onClick: onShowAggregatorsUploader },
+                    { label: 'Subir P&G', onClick: onShowPYGUploader },
+                    { label: 'Ver P&G', onClick: onShowPYGModal },
+                    { label: 'Backup', onClick: onBackup }
+                  ].map(({ label, onClick }) => (
+                    <button key={label} onClick={onClick}
+                      className="px-2.5 py-1 rounded-full text-[10px] font-semibold text-pink-900/70 hover:text-pink-900 transition-colors"
+                      style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.8)' }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </motion.div>
-          }
+
+              {/* SECCIÓN 3 — Mini sparkline ventas */}
+              <div className="w-52 p-4 flex flex-col">
+                <p className="text-[9px] font-bold text-pink-800/60 uppercase tracking-[0.14em] mb-2">Tendencia ventas</p>
+                <div className="flex-1 flex items-center justify-center rounded-xl overflow-hidden"
+                  style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.8)', minHeight: 80 }}>
+                  <PremiumSparkline
+                    data={sparkSales.length > 0 ? sparkSales : [3,4,4,5,4,6,5,7]}
+                    color="#be185d"
+                    width={160}
+                    height={70}
+                  />
+                </div>
+                <div className="flex justify-between mt-2">
+                  <div>
+                    <p className="text-[8px] text-pink-800/50 font-medium">Último día</p>
+                    <p className="text-[12px] font-black text-pink-900">{salesVal}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[8px] text-pink-800/50 font-medium">Txn</p>
+                    <p className="text-[12px] font-black text-pink-900">{txnVal}</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </motion.div>
 
           <p className="text-center text-[9px] font-medium tracking-widest uppercase mt-6 mb-2 text-slate-200">
             Popsy AI Workspace
