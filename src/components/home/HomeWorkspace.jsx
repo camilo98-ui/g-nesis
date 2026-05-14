@@ -15,7 +15,6 @@ import StoreSelector from '@/components/StoreSelector';
 import PremiumSparkline from './PremiumSparkline';
 import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
-import HeroProjectionCard from './HeroProjectionCard';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -406,8 +405,9 @@ export default function HomeWorkspace({
         transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
         className="hidden lg:flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20"
         style={{
-          background: '#ffffff',
-          borderRight: '1px solid rgba(255,79,147,0.08)'
+          background: 'rgba(255,255,255,0.75)',
+          backdropFilter: 'blur(32px)',
+          borderRight: '1px solid rgba(0,0,0,0.05)'
         }}>
         
         {/* Logo */}
@@ -465,186 +465,214 @@ export default function HomeWorkspace({
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh', background: '#f7f7f9' }}>
+      <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh' }}>
 
         {/* CENTER — scrollable */}
-        <div className="flex-1 min-w-0 overflow-y-auto px-6 py-8 lg:px-10 lg:py-10">
+        <div className="flex-1 min-w-0 overflow-y-auto p-4 lg:p-7">
 
-          {/* ── PREMIUM HEADER ── */}
+          {/* TOP BAR */}
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="flex items-center justify-between mb-10">
-
-            {/* LEFT — saludo */}
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(255,79,147,0.08)', border: '1px solid rgba(255,79,147,0.12)' }}>
-                <GreetIcon style={{ width: 16, height: 16, color: '#ff4f93' }} />
+            transition={{ duration: 0.4 }}
+            className="mb-7">
+            
+            <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
+              <div className="flex items-center gap-2">
+                <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
+                <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
+                  {greeting.text}
+                </h1>
               </div>
-              <div>
-                <p className="text-[11px] font-medium" style={{ color: '#8b95a7' }}>{greeting.text}</p>
-                <p className="text-[15px] font-bold leading-tight" style={{ color: '#1f2937' }}>{storeName}</p>
-              </div>
-            </div>
-
-            {/* RIGHT — store selector + acciones gerente */}
-            <div className="flex items-center gap-2 flex-wrap justify-end">
               <div className="w-full sm:w-auto max-w-xs">
                 <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
               </div>
-              {isGerente && (
-                <div className="hidden sm:flex items-center gap-1.5">
+              {isGerente &&
+              <div className="hidden sm:flex items-center gap-1.5 ml-auto">
                   {[
-                    { label: 'PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter },
-                    { label: 'KPIs', icon: BarChart3, onClick: onShowKpisUploader },
-                    { label: 'P&G', icon: TrendingUp, onClick: onShowPYGUploader },
-                  ].map(({ label, icon: I, onClick }) => (
-                    <button key={label} onClick={onClick}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all"
-                      style={{
-                        color: '#8b95a7',
-                        background: '#ffffff',
-                        border: '1px solid rgba(255,79,147,0.12)',
-                      }}>
+                { label: 'PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter },
+                { label: 'KPIs', icon: BarChart3, onClick: onShowKpisUploader },
+                { label: 'P&G', icon: TrendingUp, onClick: onShowPYGUploader }].
+                map(({ label, icon: I, onClick }) =>
+                <button key={label} onClick={onClick}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-700 hover:bg-black/[0.04] transition-all"
+                style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
                       <I style={{ width: 11, height: 11 }} />{label}
                     </button>
-                  ))}
+                )}
                 </div>
-              )}
+              }
             </div>
           </motion.div>
 
-          {/* ── HERO CARD ── */}
-          {!isGerente && (
-            <HeroProjectionCard
-              todaySales={todaySales}
-              budget={budget}
-              salesChange={salesChange}
-            />
-          )}
-
           {/* ── DAILY METRICS ── */}
-          {!isGerente && (
-            <DailyMetricsPanel todaySales={todaySales} budget={budget} />
-          )}
+           {!isGerente &&
+          <DailyMetricsPanel todaySales={todaySales} budget={budget} />
+          }
 
           {/* ── EXECUTIVE ANALYTICS ── */}
-          {!isGerente && (
-            <ExecutiveAnalyticsPanel
-              todaySales={todaySales}
-              budget={budget}
-              cashiers={cashiers}
-              pygReports={pygReports}
-              shiftRecords={shiftRecords} />
-          )}
+          {!isGerente &&
+          <ExecutiveAnalyticsPanel
+            todaySales={todaySales}
+            budget={budget}
+            cashiers={cashiers}
+            pygReports={pygReports}
+            shiftRecords={shiftRecords} />
+
+          }
+
+          {/* ── QUICK ACTIONS ── */}
+          {!isGerente &&
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.45 }}
+            className="flex flex-wrap gap-2 mb-7">
+            
+              {[
+            { label: 'Registrar Ventas', icon: TrendingUp, onClick: onShowStoreSales },
+            { label: 'Presupuesto Mensual', icon: Target, onClick: onShowBudgetDashboard },
+            { label: 'Informe Gerencial', icon: FileText, onClick: onShowReport }].
+            map(({ label, icon: I, onClick }) =>
+            <button key={label} onClick={onClick}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11.5px] font-medium text-slate-600 hover:text-slate-900 hover:bg-black/[0.03] transition-all group hidden"
+            style={{ border: '1px solid rgba(0,0,0,0.07)', background: 'rgba(255,255,255,0.7)' }}>
+                  <I style={{ width: 12, height: 12, color: '#9ca3af' }} />
+                  {label}
+                  <ChevronRight className="w-3 h-3 text-slate-200 group-hover:text-slate-400 transition-colors" />
+                </button>
+            )}
+            </motion.div>
+          }
 
           {/* ── CLIMA BANNER ── */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-            className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            className="mb-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-            {/* Card 1 — Temperatura */}
+            {/* Card 1 — Temperatura del día + tendencia 7 días (barras) */}
             {(() => {
               const tempData = weatherLast7.map(d => d.temperature_mean || d.temperature_max || 0);
+              const maxTemp = Math.max(...tempData, 1);
               const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
               const tempMax = latestWeather?.temperature_max;
               const tempMin = latestWeather?.temperature_min;
-              const isHot = temp > 24;
-              const accent = isHot ? '#f97316' : '#38bdf8';
+              const isHot = temp > 26;
+              const accentColor = isHot ? '#f97316' : '#38bdf8';
               return (
-                <div className="rounded-3xl p-6" style={{ background: '#ffffff', border: '1px solid rgba(255,79,147,0.10)', boxShadow: '0 1px 16px rgba(0,0,0,0.04)' }}>
-                  <p className="text-[10px] font-semibold tracking-[0.16em] uppercase mb-4" style={{ color: '#8b95a7' }}>Temperatura · 7 días</p>
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-[32px] font-black leading-none" style={{ color: '#1f2937' }}>{temp != null ? `${Math.round(temp)}°C` : '—'}</span>
+                <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Temperatura · 7 días</p>
+                    <span className="text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : '🌤 Fresco'}</span>
                   </div>
-                  {tempMax != null && tempMin != null && (
-                    <p className="text-[11px] font-medium mb-4" style={{ color: '#8b95a7' }}>↑{Math.round(tempMax)}° · ↓{Math.round(tempMin)}°</p>
-                  )}
-                  <div className="flex items-end gap-1.5 h-12 mt-3">
-                    {(tempData.length > 0 ? tempData : [18,20,19,22,21,23,22]).map((v, i, arr) => {
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <p className="text-[22px] font-black text-slate-800 leading-none">{temp != null ? `${Math.round(temp)}°` : '—'}</p>
+                    {tempMax != null && tempMin != null && (
+                      <p className="text-[10px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</p>
+                    )}
+                  </div>
+                  <div className="flex items-end gap-1 h-11 mt-2">
+                    {(tempData.length > 0 ? tempData : [20,22,21,24,23,25,24]).map((v, i, arr) => {
                       const pct = Math.max((v / Math.max(...arr, 1)) * 100, 8);
                       const isLast = i === arr.length - 1;
-                      return <div key={i} className="flex-1 rounded-t-lg" style={{ height: `${pct}%`, background: isLast ? accent : `${accent}22` }} />;
+                      return (
+                        <div key={i} className="flex-1 rounded-t-md"
+                          style={{ height: `${pct}%`, background: isLast ? accentColor : `${accentColor}28` }} />
+                      );
                     })}
                   </div>
-                  <p className="text-[10px] mt-3" style={{ color: '#8b95a7' }}>{isHot ? '☀️ Cálido' : '🌤 Fresco'} · Bogotá</p>
+                  <p className="text-[9px] text-slate-300 mt-1.5 font-medium">Últimos 7 días · °C</p>
                 </div>
               );
             })()}
 
-            {/* Card 2 — Lluvia */}
+            {/* Card 2 — Precipitación (barras) últimos 7 días */}
             {(() => {
               const rainData = weatherLast7.map(d => d.precipitation || 0);
               const totalRain = rainData.reduce((s, v) => s + v, 0);
+              const maxRain = Math.max(...rainData, 1);
               const todayRain = latestWeather?.precipitation ?? 0;
               const rainLevel = totalRain > 20 ? 'Alta' : totalRain > 5 ? 'Moderada' : 'Baja';
-              const accent = totalRain > 20 ? '#818cf8' : totalRain > 5 ? '#38bdf8' : '#94a3b8';
+              const rainColor = totalRain > 20 ? '#6366f1' : totalRain > 5 ? '#38bdf8' : '#94a3b8';
               return (
-                <div className="rounded-3xl p-6" style={{ background: '#ffffff', border: '1px solid rgba(255,79,147,0.10)', boxShadow: '0 1px 16px rgba(0,0,0,0.04)' }}>
-                  <p className="text-[10px] font-semibold tracking-[0.16em] uppercase mb-4" style={{ color: '#8b95a7' }}>Precipitación · 7 días</p>
-                  <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-[32px] font-black leading-none" style={{ color: '#1f2937' }}>{todayRain.toFixed(1)}</span>
-                    <span className="text-[14px] font-semibold" style={{ color: '#8b95a7' }}>mm</span>
+                <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Lluvia · 7 días</p>
+                    <span className="text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
                   </div>
-                  <p className="text-[11px] font-medium mb-4" style={{ color: accent }}>🌧 {rainLevel} · {totalRain.toFixed(1)} mm semana</p>
-                  <div className="flex items-end gap-1.5 h-12 mt-3">
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <p className="text-[22px] font-black text-slate-800 leading-none">{todayRain > 0 ? `${todayRain.toFixed(1)}` : '0'}<span className="text-[12px] font-semibold text-slate-400">mm</span></p>
+                    <p className="text-[10px] text-slate-400 font-medium ml-1">hoy</p>
+                  </div>
+                  <div className="flex items-end gap-1 h-11 mt-2">
                     {(rainData.length > 0 ? rainData : [0,2,1,5,3,8,4]).map((v, i, arr) => {
                       const pct = Math.max((v / Math.max(...arr, 0.1)) * 100, 4);
                       const isLast = i === arr.length - 1;
-                      return <div key={i} className="flex-1 rounded-t-lg" style={{ height: `${pct}%`, background: isLast ? accent : `${accent}28` }} />;
+                      return (
+                        <div key={i} className="flex-1 rounded-t-md"
+                          style={{ height: `${pct}%`, background: isLast ? rainColor : `${rainColor}30` }} />
+                      );
                     })}
                   </div>
-                  <p className="text-[10px] mt-3" style={{ color: '#8b95a7' }}>Últimos 7 días</p>
+                  <p className="text-[9px] text-slate-300 mt-1.5 font-medium">Total semana: {totalRain.toFixed(1)} mm</p>
                 </div>
               );
             })()}
 
-            {/* Card 3 — Condición donut */}
+            {/* Card 3 — Donut condición climática + humedad */}
             {(() => {
+              const humidity = latestWeather?.humidity ?? 0;
+              const precip = latestWeather?.precipitation ?? 0;
               const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max ?? 0;
+              // Classify days of last 7 as sunny/cloudy/rainy
               const sunny = weatherLast7.filter(d => (d.precipitation || 0) < 1).length;
               const rainy = weatherLast7.filter(d => (d.precipitation || 0) >= 5).length;
-              const cloudy = Math.max(0, weatherLast7.length - sunny - rainy);
+              const cloudy = weatherLast7.length - sunny - rainy;
               const total = Math.max(weatherLast7.length, 1);
-              const segs = [
+              const segments = [
                 { label: 'Soleado', color: '#f97316', val: sunny },
                 { label: 'Nublado', color: '#94a3b8', val: cloudy },
-                { label: 'Lluvioso', color: '#818cf8', val: rainy },
+                { label: 'Lluvioso', color: '#6366f1', val: rainy },
               ];
-              const r = 18; const circ = 2 * Math.PI * r;
-              let cum = 0;
+              const circ = 2 * Math.PI * 16;
+              let cumulative = 0;
               return (
-                <div className="rounded-3xl p-6 flex flex-col" style={{ background: '#ffffff', border: '1px solid rgba(255,79,147,0.10)', boxShadow: '0 1px 16px rgba(0,0,0,0.04)' }}>
-                  <p className="text-[10px] font-semibold tracking-[0.16em] uppercase mb-4" style={{ color: '#8b95a7' }}>Condición · semana</p>
-                  <div className="flex items-center gap-5 flex-1">
-                    <svg width="56" height="56" viewBox="0 0 56 56" className="flex-shrink-0">
-                      <circle cx="28" cy="28" r={r} fill="none" stroke="#f1f5f9" strokeWidth="7" />
-                      {segs.map(({ color, val }) => {
+                <div className="rounded-2xl p-4 flex flex-col" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Condición · semana</p>
+                  </div>
+                  <p className="text-[18px] font-black text-slate-800 leading-none mb-2">{humidity > 0 ? `${Math.round(humidity)}% 💧` : '—'}</p>
+                  <div className="flex items-center gap-3 flex-1">
+                    <svg width="48" height="48" viewBox="0 0 48 48" className="flex-shrink-0">
+                      <circle cx="24" cy="24" r="16" fill="none" stroke="#f1f5f9" strokeWidth="6" />
+                      {segments.map(({ color, val }) => {
                         const pct = val / total;
                         const dash = pct * circ;
-                        const off = -cum * circ;
-                        cum += pct;
-                        return <circle key={color} cx="28" cy="28" r={r} fill="none"
-                          stroke={color} strokeWidth="7"
-                          strokeDasharray={`${dash} ${circ}`}
-                          strokeDashoffset={off}
-                          strokeLinecap="butt"
-                          transform="rotate(-90 28 28)" />;
+                        const offset = -cumulative * circ;
+                        cumulative += pct;
+                        return (
+                          <circle key={color} cx="24" cy="24" r="16" fill="none"
+                            stroke={color} strokeWidth="6"
+                            strokeDasharray={`${dash} ${circ}`}
+                            strokeDashoffset={offset}
+                            strokeLinecap="butt"
+                            transform="rotate(-90 24 24)" />
+                        );
                       })}
                     </svg>
-                    <div className="flex flex-col gap-2">
-                      {segs.map(({ label, color, val }) => (
-                        <div key={label} className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
-                          <span className="text-[10px] font-medium" style={{ color: '#8b95a7' }}>{label}</span>
-                          <span className="text-[10px] font-bold ml-auto pl-2" style={{ color: '#1f2937' }}>{val}d</span>
+                    <div className="flex flex-col gap-1">
+                      {segments.map(({ label, color, val }) => (
+                        <div key={label} className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
+                          <span className="text-[9px] text-slate-400 font-medium">{label}</span>
+                          <span className="text-[9px] font-bold text-slate-600 ml-auto pl-1">{val}d</span>
                         </div>
                       ))}
-                      {temp > 0 && <p className="text-[10px] mt-1" style={{ color: '#8b95a7' }}>Prom: {Math.round(temp)}°C</p>}
+                      {temp > 0 && (
+                        <p className="text-[9px] text-slate-300 mt-0.5">Temp prom: {Math.round(temp)}°C</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -653,8 +681,8 @@ export default function HomeWorkspace({
 
           </motion.div>
 
-          <p className="text-center text-[9px] font-medium tracking-widest uppercase mt-10 mb-2" style={{ color: '#d1d5db' }}>
-            Popsy · Sistema de Gestión
+          <p className="text-center text-[9px] font-medium tracking-widest uppercase mt-6 mb-2 text-slate-200">
+            Popsy AI Workspace
           </p>
         </div>
 
@@ -668,8 +696,9 @@ export default function HomeWorkspace({
             height: '100vh',
             position: 'sticky',
             top: 0,
-            background: '#ffffff',
-            borderLeft: '1px solid rgba(255,79,147,0.08)'
+            background: 'rgba(255,255,255,0.7)',
+            backdropFilter: 'blur(40px)',
+            borderLeft: '1px solid rgba(0,0,0,0.05)'
           }}>
           
           {/* Panel header */}
