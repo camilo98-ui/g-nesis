@@ -401,13 +401,14 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
   const dayOfMonth = currentDate.getDate(); // días transcurridos (incluye hoy)
 
   // Ventas solo del mes actual
-  const currentMonthSales = todaySales.filter(d => {
-    const dd = new Date(d.date);
-    return dd.getMonth() === currentMonth && dd.getFullYear() === currentYear;
-  });
-  const currentMonthTotal = currentMonthSales.reduce((s, d) => s + (d.total_sales || 0), 0);
-  const daysWithData = currentMonthSales.length || 1;
-  const avgDailySales = Math.round(currentMonthTotal / daysWithData);
+   const currentMonthSales = todaySales.filter(d => {
+     const dd = new Date(d.date);
+     return dd.getMonth() === currentMonth && dd.getFullYear() === currentYear;
+   });
+   const currentMonthTotal = currentMonthSales.reduce((s, d) => s + (d.total_sales || 0), 0);
+   const currentMonthTickets = currentMonthSales.reduce((s, d) => s + (d.total_tickets || 0), 0);
+   const daysWithData = currentMonthSales.length || 1;
+   const avgDailySales = Math.round(currentMonthTotal / daysWithData);
 
   // Proyección: lo ya acumulado + promedio diario × días restantes
   const daysRemaining = Math.max(daysInMonth - dayOfMonth, 0);
@@ -650,9 +651,9 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
             <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Ticket Promedio</p>
             <div className="p-2 rounded-lg mb-3" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
-              <p className="text-[9px] text-[#8F96A3] font-medium">Período Actual</p>
+              <p className="text-[9px] text-[#8F96A3] font-medium">Mes Actual</p>
               <p className="text-[13px] font-black text-[#FF4D8D] mt-1">
-                {fmt((todaySales.reduce((s, d) => s + (d.total_sales || 0), 0) / Math.max(todaySales.reduce((s, d) => s + (d.total_tickets || 1), 0), 1)))}
+                {fmt((currentMonthTotal / Math.max(currentMonthTickets, 1)))}
               </p>
             </div>
             {/* Mini sparkline de ticket promedio diario */}
