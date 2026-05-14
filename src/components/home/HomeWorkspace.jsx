@@ -638,33 +638,108 @@ export default function HomeWorkspace({
             transition={{ duration: 0.6 }}
             className="mb-6 space-y-3">
 
-            {/* Nova AI Strip */}
+            {/* Nova AI Strip — Premium Executive Copilot */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative overflow-hidden rounded-2xl p-4"
+              className="relative overflow-hidden rounded-3xl"
               style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.75) 100%)',
-                backdropFilter: 'blur(32px)',
-                border: '1px solid rgba(0,0,0,0.06)',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.04)'
+                background: 'rgba(255, 255, 255, 0.88)',
+                backdropFilter: 'blur(40px)',
+                border: '1px solid rgba(194, 24, 117, 0.08)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(194, 24, 117, 0.04)'
               }}>
-
-              <div className="absolute inset-0 opacity-30 blur-3xl" style={{ background: 'linear-gradient(135deg, #ec489320, transparent 70%)', pointerEvents: 'none' }} />
-
-              <div className="relative flex items-start gap-3">
-                <div className="text-3xl flex-shrink-0 mt-0.5">✨</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-semibold text-slate-700">Nova · Insight Ejecutivo</span>
+              
+              <div className="flex items-center h-32 px-6 gap-6">
+                
+                {/* ZONA 1 — Avatar IA */}
+                <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                  <motion.div
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                    className="relative w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%)',
+                      border: '2px solid rgba(194, 24, 117, 0.2)',
+                      boxShadow: '0 0 24px rgba(194, 24, 117, 0.15), inset 0 1px 2px rgba(255,255,255,0.8)'
+                    }}>
+                    
+                    {/* Glow pulsante */}
+                    <motion.div
+                      animate={{ opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: 'radial-gradient(circle, rgba(194, 24, 117, 0.2), transparent)', filter: 'blur(8px)' }} />
+                    
+                    {/* Avatar Robot Premium */}
+                    <svg width="48" height="48" viewBox="0 0 48 48" className="relative z-10">
+                      <defs>
+                        <linearGradient id="novaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#C21875" />
+                          <stop offset="100%" stopColor="#9333EA" />
+                        </linearGradient>
+                      </defs>
+                      {/* Head */}
+                      <rect x="12" y="8" width="24" height="20" rx="3" fill="url(#novaGrad)" opacity="0.9" />
+                      {/* Eyes */}
+                      <circle cx="17" cy="15" r="2.5" fill="#FFFFFF" opacity="0.8" />
+                      <circle cx="31" cy="15" r="2.5" fill="#FFFFFF" opacity="0.8" />
+                      {/* Accent line */}
+                      <line x1="14" y1="23" x2="34" y2="23" stroke="url(#novaGrad)" strokeWidth="1.5" opacity="0.6" />
+                      {/* Body */}
+                      <rect x="16" y="28" width="16" height="12" rx="2" fill="url(#novaGrad)" opacity="0.7" />
+                      {/* Accent shine */}
+                      <circle cx="24" cy="12" r="1.5" fill="white" opacity="0.5" />
+                    </svg>
+                  </motion.div>
+                  
+                  <div className="text-center">
+                    <p className="text-[9px] font-medium text-slate-400 tracking-wide uppercase">Insight del día</p>
+                    <p className="text-xs font-bold text-slate-800 mt-0.5">Nova AI</p>
                   </div>
-                  <p className="text-[13px] text-slate-600 leading-relaxed font-medium">
+                </div>
+
+                {/* SEPARADOR — Línea vertical */}
+                <div className="w-px h-20 bg-gradient-to-b from-transparent via-slate-200 to-transparent opacity-40" />
+
+                {/* ZONA 2 — Insight Central */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm leading-relaxed font-medium text-slate-700">
                     {latest?.total_sales > 0 
-                      ? `Hoy van ${(latest.total_sales / 1000000).toFixed(1)}M en ventas. Proyección de cierre: ${((latest.total_sales / new Date().getHours()) * 24 / 1000000).toFixed(1)}M. Ticket: ${((latest.total_sales / latest.total_transactions) / 1000).toFixed(0)}K`
-                      : 'Sin datos de ventas aún. Comienza a registrar para ver insights ejecutivos.'}
+                      ? (() => {
+                          const salesM = (latest.total_sales / 1000000).toFixed(1);
+                          const projection = ((latest.total_sales / new Date().getHours()) * 24 / 1000000).toFixed(1);
+                          const ticket = ((latest.total_sales / latest.total_transactions) / 1000).toFixed(0);
+                          return (
+                            <>
+                              Excelente ritmo hoy. Las ventas van en{' '}
+                              <span style={{ color: '#C21875', fontWeight: 700 }}>${salesM}M</span>
+                              {' '}y la proyección de cierre es{' '}
+                              <span style={{ color: '#C21875', fontWeight: 700 }}>${projection}M</span>
+                              {' '}con ticket promedio de{' '}
+                              <span style={{ color: '#C21875', fontWeight: 700 }}>${ticket}K</span>.
+                            </>
+                          );
+                        })()
+                      : 'Sin datos de ventas aún. Comienza a registrar para ver insights ejecutivos personalizados.'}
                   </p>
                 </div>
+
+                {/* ZONA 3 — Botón Premium */}
+                <motion.button
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-semibold text-white flex-shrink-0 transition-all"
+                  style={{
+                    background: 'linear-gradient(135deg, #C21875 0%, #A855F7 100%)',
+                    boxShadow: '0 4px 12px rgba(194, 24, 117, 0.25)',
+                    border: '1px solid rgba(255,255,255,0.2)'
+                  }}>
+                  Ver análisis
+                  <span style={{ fontSize: '11px' }}>✨</span>
+                </motion.button>
+
               </div>
             </motion.div>
 
