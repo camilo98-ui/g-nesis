@@ -8,22 +8,37 @@ export function useAnimatedNumber(value, duration = 0.8) {
   const [displayValue, setDisplayValue] = useState(value);
 
   useEffect(() => {
-    if (!value || typeof value !== 'number') return;
+    if (value === null || value === undefined || typeof value !== 'number') return;
 
-    const start = displayValue;
-    const difference = value - start;
-    const steps = 60;
-    const stepValue = difference / steps;
-    let current = 0;
+    let isMounted = true;
+    const startValue = displayValue;
+    const difference = value - startValue;
+    
+    if (difference === 0) return;
+    
+    const steps = Math.max(30, Math.ceil(duration * 60));
+    const stepDuration = (duration * 1000) / steps;
+    let currentStep = 0;
 
     const timer = setInterval(() => {
-      current++;
-      setDisplayValue(Math.round(start + stepValue * current));
-      if (current === steps) clearInterval(timer);
-    }, (duration * 1000) / steps);
+      if (!isMounted) return;
+      currentStep++;
+      const progress = Math.min(currentStep / steps, 1);
+      const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+      const newValue = Math.round(startValue + difference * easeOutQuad);
+      setDisplayValue(newValue);
+      
+      if (currentStep >= steps) {
+        clearInterval(timer);
+        setDisplayValue(value);
+      }
+    }, stepDuration);
 
-    return () => clearInterval(timer);
-  }, [value]);
+    return () => {
+      isMounted = false;
+      clearInterval(timer);
+    };
+  }, [value, duration, displayValue]);
 
   return displayValue;
 }
