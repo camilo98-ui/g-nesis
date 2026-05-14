@@ -280,6 +280,29 @@ export default function HomeWorkspace({
     staleTime: 10 * 60 * 1000
   });
 
+  // selectedStore is the store code (e.g. "BTA 11")
+  const { data: pygReports = [] } = useQuery({
+    queryKey: ['home-pyg', selectedStore],
+    queryFn: () => base44.entities.PYGReport.filter({ store_code: selectedStore }),
+    enabled: !!selectedStore,
+    staleTime: 10 * 60 * 1000
+  });
+
+  // For ShiftRecord we need store_id — find from Store entity
+  const { data: storeEntities = [] } = useQuery({
+    queryKey: ['all-stores'],
+    queryFn: () => base44.entities.Store.list(),
+    staleTime: 60 * 60 * 1000
+  });
+  const storeEntityId = storeEntities.find(s => s.code === selectedStore)?.id || selectedStore;
+
+  const { data: shiftRecords = [] } = useQuery({
+    queryKey: ['home-shifts', storeEntityId],
+    queryFn: () => base44.entities.ShiftRecord.filter({ store_id: storeEntityId }),
+    enabled: !!storeEntityId,
+    staleTime: 10 * 60 * 1000
+  });
+
   const sorted = [...todaySales].sort((a, b) => new Date(b.date) - new Date(a.date));
   const latest = sorted[0];
   const prev = sorted[1];
@@ -463,7 +486,9 @@ export default function HomeWorkspace({
           <ExecutiveAnalyticsPanel
             todaySales={todaySales}
             budget={budget}
-            cashiers={cashiers} />
+            cashiers={cashiers}
+            pygReports={pygReports}
+            shiftRecords={shiftRecords} />
 
           }
 

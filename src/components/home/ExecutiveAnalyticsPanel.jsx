@@ -303,7 +303,7 @@ function DonutChart({ data }) {
 }
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
-export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], cashiers = [] }) {
+export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], cashiers = [], pygReports = [], shiftRecords = [] }) {
   const [trendViewMode, setTrendViewMode] = useState('compliance'); // 'compliance' | 'acceleration'
 
   // Build 30-day sales trend from todaySales
@@ -329,43 +329,44 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
     });
   }, [todaySales, budget]);
 
-  // EBITDA por mes (agrupado)
-  const ebitdaData = useMemo(() => {
-    const monthlyMap = {};
-    todaySales.forEach((d) => {
-      const date = new Date(d.date);
-      const monthKey = date.toLocaleDateString('es', { month: 'short', year: '2-digit' });
-      if (!monthlyMap[monthKey]) {
-        monthlyMap[monthKey] = { sales: 0, count: 0 };
-      }
-      monthlyMap[monthKey].sales += d.total_sales || 0;
-      monthlyMap[monthKey].count += 1;
-    });
+  // EBITDA real desde PYGReports — ordenado por año/mes
+  const ebitdaDataEnhancedFromPYG = useMemo(() => {
+    if (!pygReports.length) return [];
+    const monthNames = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return [...pygReports]
+      .sort((a, b) => a.year !== b.year ? a.year - b.year : a.month - b.month)
+      .map(r => ({
+        date: `${monthNames[r.month]} ${String(r.year).slice(2)}`,
+        margen: r.margen_ebitda != null ? Math.round(r.margen_ebitda * 100) : null,
+        sales: r.total_sales || 0
+      }))
+      .filter(d => d.margen !== null);
+  }, [pygReports]);
 
-    return Object.entries(monthlyMap).map(([month, data]) => ({
-      date: month,
-      ebitda: Math.round(data.sales * 0.34),
-      margen: 34
-    }));
-  }, [todaySales]);
-
-  // Hourly heatmap data — mock realistic pattern
+  // Hourly heatmap data — desde ShiftRecords reales
   const heatmapData = useMemo(() => {
-    const pattern = [2, 3, 5, 8, 14, 18, 16, 14, 12, 10, 8, 6, 5, 3];
-    const result = [];
-    DAYS.forEach((_, di) => {
-      HOURS.forEach((_, hi) => {
-        const base = pattern[hi] || 0;
-        const weekendBoost = di >= 5 ? 1.4 : 1;
-        const lunchBoost = hi >= 4 && hi <= 6 ? 1.3 : 1;
-        result.push({
-          day: di, hour: hi,
-          value: Math.round(base * weekendBoost * lunchBoost * (0.7 + Math.random() * 0.6))
-        });
-      });
+    if (!shiftRecords.length) {
+      // fallback vacío si no hay datos
+      return DAYS.flatMap((_, di) => HOURS.map((_, hi) => ({ day: di, hour: hi, value: 0 })));
+    }
+    const shiftToStartHour = { morning: 8, afternoon: 13, night: 18 };
+    const dayMap = {};
+    shiftRecords.forEach(r => {
+      const date = new Date(r.date);
+      const dayOfWeek = (date.getDay() + 6) % 7; // 0=Lun...6=Dom
+      const startHour = shiftToStartHour[r.shift] || 8;
+      const hourIndex = startHour - 8; // offset from 8am
+      const key = `${dayOfWeek}-${hourIndex}`;
+      if (!dayMap[key]) dayMap[key] = 0;
+      dayMap[key] += r.transactions || r.tickets || 0;
     });
-    return result;
-  }, []);
+    return DAYS.flatMap((_, di) =>
+      HOURS.map((_, hi) => ({
+        day: di, hour: hi,
+        value: dayMap[`${di}-${hi}`] || 0
+      }))
+    );
+  }, [shiftRecords]);
 
   // Budget compliance
   const activeBudget = budget.find((b) => b.is_active) || budget[0];
@@ -395,38 +396,12 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
   const monthSalesProjection = totalSales + (avgDailySales * daysRemaining);
   const monthProjectionPercent = activeBudget?.sales_budget ? Math.round((monthSalesProjection / activeBudget.sales_budget) * 100) : 0;
   
-  // EBITDA with proper calculation
-  const ebitdaDataEnhanced = useMemo(() => {
-    const monthlyMap = {};
-    todaySales.forEach((d) => {
-      const date = new Date(d.date);
-      const monthKey = date.toLocaleDateString('es', { month: 'short', year: '2-digit' });
-      if (!monthlyMap[monthKey]) {
-        monthlyMap[monthKey] = { sales: 0, count: 0, ebitda: 0 };
-      }
-      monthlyMap[monthKey].sales += d.total_sales || 0;
-      monthlyMap[monthKey].count += 1;
-    });
+  // Average margin from real PYG data
+  const avgMargin = ebitdaDataEnhancedFromPYG.length > 0
+    ? Math.round(ebitdaDataEnhancedFromPYG.reduce((sum, d) => sum + d.margen, 0) / ebitdaDataEnhancedFromPYG.length)
+    : 0;
 
-    const data = Object.entries(monthlyMap).map(([month, data]) => {
-      const margenPercent = 34; // 34% EBITDA margin
-      return {
-        date: month,
-        ebitda: Math.round(data.sales * (margenPercent / 100)),
-        margen: margenPercent,
-        sales: data.sales
-      };
-    });
-    
-    return data;
-  }, [todaySales]);
-  
-  // Average margin line
-  const avgMargin = ebitdaDataEnhanced.length > 0 
-    ? Math.round(ebitdaDataEnhanced.reduce((sum, d) => sum + d.margen, 0) / ebitdaDataEnhanced.length)
-    : 34;
-  
-  const ebitdaDataWithAvg = ebitdaDataEnhanced.map(d => ({
+  const ebitdaDataWithAvg = ebitdaDataEnhancedFromPYG.map(d => ({
     ...d,
     promedio: avgMargin
   }));
