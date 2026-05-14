@@ -668,7 +668,7 @@ export default function HomeWorkspace({
                 
                 {/* Avatar Nova Mascota */}
                 <motion.div
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.02, 1]
                   }}
                   transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
@@ -684,18 +684,18 @@ export default function HomeWorkspace({
                     animate={{ opacity: [0.2, 0.4, 0.2] }}
                     transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                     className="absolute inset-0 rounded-full"
-                    style={{ 
+                    style={{
                       background: 'radial-gradient(circle, rgba(194, 24, 117, 0.25), transparent 70%)',
                       filter: 'blur(10px)',
                       zIndex: 1
                     }} />
                   
                   {/* Imagen mascota Nova */}
-                  <img 
-                    src="https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png" 
-                    alt="Nova" 
-                    className="w-full h-full object-contain scale-[1.4] relative z-10"
-                  />
+                  <img
+                    src="https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png"
+                    alt="Nova"
+                    className="w-full h-full object-contain scale-[1.4] relative z-10" />
+                  
                 </motion.div>
 
                 {/* Separador elegante */}
@@ -703,37 +703,37 @@ export default function HomeWorkspace({
 
                 {/* Insight Premium Horizontal */}
                 <div className="flex-1 min-w-0 flex items-center">
-                  <motion.p 
+                  <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.6 }}
                     className="text-[12.5px] leading-relaxed font-medium text-slate-700"
                     style={{ letterSpacing: '0.3px' }}>
-                    {latest?.total_sales > 0 
-                      ? (() => {
-                          const salesM = (latest.total_sales / 1000000).toFixed(1);
-                          const projection = ((latest.total_sales / new Date().getHours()) * 24 / 1000000).toFixed(1);
-                          return (
-                            <>
+                    {latest?.total_sales > 0 ?
+                    (() => {
+                      const salesM = (latest.total_sales / 1000000).toFixed(1);
+                      const projection = (latest.total_sales / new Date().getHours() * 24 / 1000000).toFixed(1);
+                      return (
+                        <>
                               <span className="text-slate-600">Ritmo excelente · </span>
                               <span className="text-slate-700">ventas </span>
-                              <span style={{ 
-                                color: '#C21875', 
-                                fontWeight: 800,
-                                fontSize: '13px',
-                                letterSpacing: '-0.3px'
-                              }}>${salesM}M</span>
+                              <span style={{
+                            color: '#C21875',
+                            fontWeight: 800,
+                            fontSize: '13px',
+                            letterSpacing: '-0.3px'
+                          }}>${salesM}M</span>
                               <span className="text-slate-600"> → proyección </span>
-                              <span style={{ 
-                                color: '#C21875', 
-                                fontWeight: 800,
-                                fontSize: '13px',
-                                letterSpacing: '-0.3px'
-                              }}>${projection}M</span>
-                            </>
-                          );
-                        })()
-                      : <span className="text-slate-500">Registra ventas para ver insights personalizados</span>}
+                              <span style={{
+                            color: '#C21875',
+                            fontWeight: 800,
+                            fontSize: '13px',
+                            letterSpacing: '-0.3px'
+                          }}>${projection}M</span>
+                            </>);
+
+                    })() :
+                    <span className="text-slate-500">Registra ventas para ver insights personalizados</span>}
                   </motion.p>
                 </div>
 
@@ -752,7 +752,7 @@ export default function HomeWorkspace({
                     animate={{ opacity: [0.3, 0.6, 0.3] }}
                     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                     className="absolute inset-0 rounded-lg"
-                    style={{ 
+                    style={{
                       background: 'radial-gradient(circle at center, rgba(194, 24, 117, 0.08), transparent)',
                       zIndex: -1
                     }} />
@@ -773,10 +773,10 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
-                <p className="text-[18px] font-bold text-rose-500 leading-none mb-2">
-                  {budgetData?.excelBudgetForToday ? 
-                    `$${Math.round(budgetData.excelBudgetForToday).toLocaleString('es-CO')}`
-                    : '$0'}
+                <p className="text-[18px] font-bold text-rose-500 leading-none mb-2 hidden">
+                  {budgetData?.excelBudgetForToday ?
+                  `$${Math.round(budgetData.excelBudgetForToday).toLocaleString('es-CO')}` :
+                  '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-400 text-center flex-1">del 01 - {new Date().getDate()} may</span>
@@ -792,7 +792,7 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
-                <p className="text-[18px] font-bold text-emerald-500 leading-none mb-2">
+                <p className="text-[18px] font-bold text-emerald-500 leading-none mb-2 hidden">
                   {(() => {
                     const monthGap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
                     const sign = monthGap >= 0 ? '+' : '-';
@@ -801,12 +801,12 @@ export default function HomeWorkspace({
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-400 text-center flex-1">
-                    Sobre meta: {budgetData?.monthlyBudget ? 
-                      (() => {
-                        const monthGap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
-                        return `${Math.abs(Math.round((monthGap / budgetData.monthlyBudget) * 100))}%`;
-                      })()
-                      : '0%'}
+                    Sobre meta: {budgetData?.monthlyBudget ?
+                    (() => {
+                      const monthGap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
+                      return `${Math.abs(Math.round(monthGap / budgetData.monthlyBudget * 100))}%`;
+                    })() :
+                    '0%'}
                   </span>
                 </div>
                 <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
@@ -820,14 +820,14 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
-                <p className="text-[18px] font-bold text-blue-500 leading-none mb-2">
+                <p className="text-[18px] font-bold text-blue-500 leading-none mb-2 hidden">
                   {budgetData?.monthProjectionCompliance ? `${budgetData.monthProjectionCompliance.toFixed(0)}%` : '0%'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-500 text-center flex-1">
-                    {budgetData?.monthProjection && budgetData?.monthlyBudget ? 
-                      `$${Math.round(budgetData.monthProjection).toLocaleString('es-CO')} / $${Math.round(budgetData.monthlyBudget).toLocaleString('es-CO')}`
-                      : ''}
+                    {budgetData?.monthProjection && budgetData?.monthlyBudget ?
+                    `$${Math.round(budgetData.monthProjection).toLocaleString('es-CO')} / $${Math.round(budgetData.monthlyBudget).toLocaleString('es-CO')}` :
+                    ''}
                   </span>
                 </div>
                 <PremiumSparkline data={sparkSales} color="#3b82f6" width={100} height="24" />
@@ -841,22 +841,22 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Venta del día</p>
-                <p className="text-[18px] font-bold text-emerald-500 leading-none mb-2">
-                  {latest?.total_sales ? 
-                    `$${Math.round(latest.total_sales).toLocaleString('es-CO')}`
-                    : '$0'}
+                <p className="text-[18px] font-bold text-emerald-500 leading-none mb-2 hidden">
+                  {latest?.total_sales ?
+                  `$${Math.round(latest.total_sales).toLocaleString('es-CO')}` :
+                  '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
-                  {latest && prev ? (
-                    <>
+                  {latest && prev ?
+                  <>
                       <span className={`text-[11px] font-semibold ${salesChange >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                         {salesChange >= 0 ? '↑' : '↓'} {Math.abs(salesChange)}%
                       </span>
                       <span className="text-[10px] text-slate-400">vs ayer</span>
-                    </>
-                  ) : (
-                    <span className="text-[10px] text-slate-400 flex-1 text-center">Sin comparación</span>
-                  )}
+                    </> :
+
+                  <span className="text-[10px] text-slate-400 flex-1 text-center">Sin comparación</span>
+                  }
                 </div>
                 <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
               </div>
@@ -867,7 +867,7 @@ export default function HomeWorkspace({
 
           {/* ── PREMIUM MAIN CHART ── */}
            {!isGerente &&
-           <PremiumMainChart
+          <PremiumMainChart
             dailySales={todaySales}
             activeBudget={budget.length > 0 ? budget.find((b) => {
               const now = new Date();

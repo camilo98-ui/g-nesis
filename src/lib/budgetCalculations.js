@@ -1,10 +1,11 @@
 import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO, isWithinInterval } from 'date-fns';
 
 export function calculateBudgetData(activeBudget, dailySales, dailyBudgets = [], storeId = null) {
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+  const monthEnd = endOfMonth(now);
+  
   if (!activeBudget?.sales_budget) {
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
     const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
     const currentWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
     const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
@@ -12,7 +13,17 @@ export function calculateBudgetData(activeBudget, dailySales, dailyBudgets = [],
       const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
       return isWithinInterval(currentWeekStart, { start: w, end: weekEnd });
     }) + 1;
-    return { noBudget: true, currentWeekNumber, totalWeeks: weeks.length, remainingDays: eachDayOfInterval({ start: now, end: monthEnd }).length, currentWeekStart, currentWeekEnd, monthStart, monthEnd };
+    return { 
+      noBudget: true, 
+      currentWeekNumber, 
+      totalWeeks: weeks.length, 
+      remainingDays: eachDayOfInterval({ start: now, end: monthEnd }).length, 
+      currentWeekStart, 
+      currentWeekEnd, 
+      monthStart, 
+      monthEnd,
+      excelBudgetForToday: 0
+    };
   }
 
   const now = new Date();
