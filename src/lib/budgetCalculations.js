@@ -26,9 +26,6 @@ export function calculateBudgetData(activeBudget, dailySales, dailyBudgets = [],
     };
   }
 
-  const now = new Date();
-  const monthStart = startOfMonth(now);
-  const monthEnd = endOfMonth(now);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
 
   let filteredSales = storeId ? dailySales.filter((s) => s.store_id === storeId) : dailySales;
