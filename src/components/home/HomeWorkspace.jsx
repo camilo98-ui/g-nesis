@@ -15,6 +15,7 @@ import StoreSelector from '@/components/StoreSelector';
 import PremiumSparkline from './PremiumSparkline';
 import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
+import SalesVsBudgetChart from './SalesVsBudgetChart';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -330,6 +331,7 @@ export default function HomeWorkspace({
 
   const sorted = [...todaySales].sort((a, b) => new Date(b.date) - new Date(a.date));
   const latest = sorted[0];
+  const useRef = React.useRef;
   const prev = sorted[1];
   const salesVal = latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(1)}M` : '—';
   const txnVal = latest?.total_transactions ? String(latest.total_transactions) : '—';
@@ -622,6 +624,16 @@ export default function HomeWorkspace({
               }
             </div>
           </motion.div>
+
+          {/* ── SALES VS BUDGET CHART ── */}
+          {!isGerente &&
+          <SalesVsBudgetChart 
+            todaySales={latest?.total_sales || 0}
+            budget={budget[0] || {}}
+            dailySales={todaySales}
+            shiftRecords={shiftRecords}
+          />
+          }
 
           {/* ── DAILY METRICS ── */}
            {!isGerente &&
