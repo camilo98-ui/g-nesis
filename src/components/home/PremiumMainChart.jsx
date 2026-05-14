@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Bar } from 'recharts';
+import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, AreaChart } from 'recharts';
 import { motion } from 'framer-motion';
-import { TrendingUp, Target, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, Target, ArrowUpRight, TrendingDown, Zap } from 'lucide-react';
 
 const COLORS = {
   primary: '#ec4899',
@@ -9,18 +9,29 @@ const COLORS = {
   accent: '#06b6d4',
   success: '#10b981',
   warning: '#f59e0b',
-  lightBg: 'rgba(255,255,255,0.95)'
+  danger: '#ef4444',
+  lightBg: 'rgba(255,255,255,0.95)',
+  budget: '#cbd5e1'
 };
 
-// Datos de cumplimiento histórico (últimos 30 días)
+// Datos realistas: ventas reales vs presupuesto/meta
 const generateComplianceData = () => {
+  const dailyBudget = 1500000;
   const days = Array.from({ length: 30 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (29 - i));
+    const actualSales = dailyBudget + (Math.random() - 0.4) * 500000;
+    const variance = actualSales - dailyBudget;
+    const compliancePercent = ((actualSales / dailyBudget) * 100);
+    
     return {
       date: `${date.getDate()}`,
-      compliance: 85 + Math.random() * 20,
-      target: 100
+      day: date.toLocaleDateString('es-CO', { weekday: 'short' }).substring(0, 3),
+      actualSales: Math.max(0, actualSales),
+      budget: dailyBudget,
+      variance: variance,
+      compliance: compliancePercent,
+      isSurplus: variance > 0
     };
   });
   return days;
@@ -40,24 +51,55 @@ const generateDailyVsSalesData = () => {
   }));
 };
 
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
+const CustomComplianceTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length > 0) {
+    const data = payload[0].payload;
+    const compliance = ((data.actualSales / data.budget) * 100).toFixed(1);
+    const variance = data.actualSales - data.budget;
+    const variancePercent = ((variance / data.budget) * 100).toFixed(1);
+    
     return (
-      <div className="px-3 py-2 rounded-xl backdrop-blur-md"
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="px-4 py-3 rounded-xl backdrop-blur-xl"
         style={{
-          background: 'rgba(15, 23, 42, 0.95)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+          background: 'rgba(15, 23, 42, 0.96)',
+          border: '1px solid rgba(236, 72, 153, 0.2)',
+          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)'
         }}>
-        <p className="text-[10px] font-semibold text-white mb-1">
-          {payload[0].payload.date || `Día ${payload[0].payload.day}`}
+        <p className="text-xs font-bold text-white mb-2.5">
+          Día {data.date} ({data.day})
         </p>
-        {payload.map((p, i) => (
-          <p key={i} className="text-[10px]" style={{ color: p.color }}>
-            {p.name}: {p.value > 100 ? `$${(p.value / 1000000).toFixed(2)}M` : p.value.toFixed(1) + '%'}
-          </p>
-        ))}
-      </div>
+        <div className="space-y-1.5 text-xs">
+          <div className="flex justify-between gap-4">
+            <span className="text-slate-400">Venta Real:</span>
+            <span className="font-semibold" style={{ color: COLORS.primary }}>
+              ${(data.actualSales / 1000000).toFixed(2)}M
+            </span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-slate-400">Presupuesto:</span>
+            <span className="font-semibold" style={{ color: COLORS.budget }}>
+              ${(data.budget / 1000000).toFixed(2)}M
+            </span>
+          </div>
+          <div className="border-t border-slate-700 pt-1.5 mt-1.5">
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-400">Diferencia:</span>
+              <span className="font-semibold" style={{ color: variance > 0 ? COLORS.success : COLORS.danger }}>
+                {variance > 0 ? '+' : ''} ${(variance / 1000000).toFixed(2)}M ({variancePercent}%)
+              </span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-400">Cumplimiento:</span>
+              <span className="font-semibold" style={{ color: compliance > 100 ? COLORS.success : COLORS.warning }}>
+                {compliance}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     );
   }
   return null;
@@ -68,12 +110,42 @@ export default function PremiumMainChart() {
   const dailyVsProjectionData = useMemo(() => generateDailyVsSalesData(), []);
 
   const complianceMetrics = useMemo(() => {
-    const lastCompliance = complianceData[complianceData.length - 1];
-    const avgCompliance = (complianceData.reduce((s, d) => s + d.compliance, 0) / complianceData.length).toFixed(1);
+    const totalActualSales = complianceData.reduce((s, d) => s + d.actualSales, 0);
+    const totalBudget = complianceData.reduce((s, d) => s + d.budget, 0);
+    const variance = totalActualSales - totalBudget;
+    const compliancePercent = ((totalActualSales / totalBudget) * 100).toFixed(1);
+    const daysAboveBudget = complianceData.filter(d => d.actualSales >= d.budget).length;
+    const daysBelow = complianceData.filter(d => d.actualSales < d.budget).length;
+    const bestDay = complianceData.reduce((max, d) => d.compliance > max.compliance ? d : max);
+    const monthlyProjection = (totalActualSales / 14) * 30; // Proyectando a 30 días
+    const monthlyVariancePercent = (((monthlyProjection - totalBudget) / totalBudget) * 100).toFixed(1);
+    const avgDailyCompliance = (complianceData.reduce((s, d) => s + d.compliance, 0) / complianceData.length).toFixed(1);
+    
+    // IA Insights
+    let insight = '';
+    if (daysAboveBudget >= 5 && daysAboveBudget <= 7) {
+      insight = `Las ventas superaron la meta ${daysAboveBudget} de los últimos 7 días`;
+    } else if (daysBelow >= 5) {
+      insight = 'Existe una tendencia de bajo cumplimiento esta semana';
+    } else if (monthlyVariancePercent > 0) {
+      insight = `La proyección indica un cierre al ${Math.min(100 + parseFloat(monthlyVariancePercent), 100)}%`;
+    } else {
+      insight = 'Vendimia estable, mantener el ritmo actual';
+    }
+    
     return {
-      current: lastCompliance.compliance.toFixed(1),
-      average: avgCompliance,
-      trend: lastCompliance.compliance > 95 ? 'Excelente' : lastCompliance.compliance > 85 ? 'Bueno' : 'En mejora'
+      current: compliancePercent,
+      accumulated: totalActualSales,
+      budget: totalBudget,
+      variance: variance,
+      variancePercent: ((variance / totalBudget) * 100).toFixed(1),
+      daysAbove: daysAboveBudget,
+      daysBelow: daysBelow,
+      bestDay: bestDay,
+      monthlyProjection: monthlyProjection,
+      monthlyVariancePercent: monthlyVariancePercent,
+      avgCompliance: avgDailyCompliance,
+      insight: insight
     };
   }, [complianceData]);
 
@@ -93,104 +165,261 @@ export default function PremiumMainChart() {
 
   return (
     <div className="mb-7 grid grid-cols-1 lg:grid-cols-2 gap-5">
-      {/* Gráfica 1: Cumplimiento */}
+      {/* Gráfica 1: Cumplimiento vs Presupuesto - REDISEÑO PREMIUM */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="rounded-2xl overflow-hidden"
+        transition={{ duration: 0.6 }}
+        className="rounded-3xl overflow-hidden"
         style={{
-          background: `linear-gradient(135deg, ${COLORS.lightBg} 0%, rgba(236, 72, 153, 0.02) 100%)`,
-          border: '1px solid rgba(236, 72, 153, 0.1)',
-          boxShadow: '0 4px 20px rgba(236, 72, 153, 0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
-          backdropFilter: 'blur(20px)'
+          background: `linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 50%, rgba(236, 72, 153, 0.01) 100%)`,
+          border: '1px solid rgba(236, 72, 153, 0.15)',
+          boxShadow: '0 8px 32px rgba(236, 72, 153, 0.1), 0 0 1px rgba(236, 72, 153, 0.2) inset',
+          backdropFilter: 'blur(30px)'
         }}>
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-5">
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="p-2 rounded-lg" style={{ background: 'rgba(236, 72, 153, 0.1)' }}>
-                  <TrendingUp className="w-4 h-4" style={{ color: COLORS.primary }} />
+        {/* Encabezado Premium */}
+        <div className="p-7 pb-5">
+          <div className="flex items-start justify-between mb-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2.5 rounded-xl" style={{ background: 'rgba(236, 72, 153, 0.08)', border: '1px solid rgba(236, 72, 153, 0.15)' }}>
+                  <Target className="w-5 h-5" style={{ color: COLORS.primary }} />
                 </div>
-                <h3 className="text-base font-bold text-slate-900">Cumplimiento vs Presupuesto</h3>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">Cumplimiento vs Presupuesto</h3>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">Análisis diario de ventas reales vs meta</p>
+                </div>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">Últimos 30 días</p>
             </div>
             <div className="text-right">
-              <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-black" style={{ color: COLORS.primary }}>
+              <div className="flex items-baseline justify-end gap-2 mb-1">
+                <p className="text-4xl font-black" style={{ color: COLORS.primary }}>
                   {complianceMetrics.current}%
                 </p>
-                <ArrowUpRight className="w-4 h-4" style={{ color: COLORS.success }} />
+                <motion.div
+                  animate={{ y: [0, -2, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  {complianceMetrics.variancePercent > 0 ? (
+                    <ArrowUpRight className="w-5 h-5" style={{ color: COLORS.success }} />
+                  ) : (
+                    <TrendingDown className="w-5 h-5" style={{ color: COLORS.danger }} />
+                  )}
+                </motion.div>
               </div>
-              <p className="text-[10px] text-slate-400 mt-1 font-semibold">{complianceMetrics.trend}</p>
+              <p className="text-xs font-semibold text-slate-400">
+                {complianceMetrics.variancePercent > 0 ? '+' : ''}{complianceMetrics.variancePercent}% vs meta
+              </p>
             </div>
           </div>
 
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={complianceData} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
-                <defs>
-                  <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={COLORS.primary} stopOpacity={0.25} />
-                    <stop offset="100%" stopColor={COLORS.primary} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0.03)" vertical={false} />
-                <XAxis dataKey="date" stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} />
-                <YAxis stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} domain={[70, 120]} tickFormatter={v => `${v}%`} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area 
-                  type="natural" 
-                  dataKey="compliance" 
-                  stroke={COLORS.primary} 
-                  strokeWidth={2}
-                  fill="url(#grad1)"
-                  dot={false}
-                  isAnimationActive={true}
-                  animationDuration={1000} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {/* AI Insight */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="p-3 rounded-xl flex items-start gap-2.5"
+            style={{
+              background: 'rgba(139, 92, 246, 0.05)',
+              border: '1px solid rgba(139, 92, 246, 0.1)'
+            }}>
+            <Zap className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: COLORS.secondary }} />
+            <p className="text-xs text-slate-700 font-medium leading-relaxed">
+              {complianceMetrics.insight}
+            </p>
+          </motion.div>
+        </div>
 
-          <div className="grid grid-cols-3 gap-2 mt-5">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="p-2.5 rounded-lg text-center"
-              style={{
-                background: 'rgba(236, 72, 153, 0.06)',
-                border: '1px solid rgba(236, 72, 153, 0.12)'
-              }}>
-              <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Hoy</p>
-              <p className="text-sm font-black" style={{ color: COLORS.primary }}>{complianceMetrics.current}%</p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.25 }}
-              className="p-2.5 rounded-lg text-center"
-              style={{
-                background: 'rgba(139, 92, 246, 0.06)',
-                border: '1px solid rgba(139, 92, 246, 0.12)'
-              }}>
-              <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Prom 30d</p>
-              <p className="text-sm font-black" style={{ color: COLORS.secondary }}>{complianceMetrics.average}%</p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-              className="p-2.5 rounded-lg text-center"
-              style={{
-                background: 'rgba(6, 182, 212, 0.06)',
-                border: '1px solid rgba(6, 182, 212, 0.12)'
-              }}>
-              <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Estado</p>
-              <p className="text-xs font-bold" style={{ color: COLORS.accent }}>Bueno</p>
-            </motion.div>
-          </div>
+        {/* Gráfica - ComposedChart con dos líneas */}
+        <div className="h-56 px-7 pb-6">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={complianceData}
+              margin={{ top: 10, right: 10, left: -10, bottom: 10 }}
+              isAnimationActive={true}
+            >
+              <defs>
+                <linearGradient id="complianceFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={COLORS.primary} stopOpacity={0.2} />
+                  <stop offset="100%" stopColor={COLORS.primary} stopOpacity={0.01} />
+                </linearGradient>
+                <linearGradient id="surplusGlow" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={COLORS.success} stopOpacity={0.15} />
+                  <stop offset="100%" stopColor={COLORS.success} stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="deficitGlow" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={COLORS.danger} stopOpacity={0.1} />
+                  <stop offset="100%" stopColor={COLORS.danger} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              
+              <CartesianGrid
+                strokeDasharray="0"
+                stroke="rgba(100,116,139,0.08)"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="date"
+                stroke="rgba(100,116,139,0.3)"
+                style={{ fontSize: '11px' }}
+                tick={{ fill: 'rgba(100,116,139,0.6)' }}
+              />
+              <YAxis
+                stroke="rgba(100,116,139,0.3)"
+                style={{ fontSize: '11px' }}
+                tick={{ fill: 'rgba(100,116,139,0.6)' }}
+                label={{ value: 'Pesos ($)', angle: -90, position: 'insideLeft' }}
+              />
+              
+              <Tooltip content={<CustomComplianceTooltip />} cursor={{ stroke: 'rgba(236, 72, 153, 0.2)', strokeWidth: 1 }} />
+              
+              {/* Área suave debajo de ventas */}
+              <Area
+                type="monotone"
+                dataKey="actualSales"
+                fill="url(#complianceFill)"
+                stroke="none"
+                isAnimationActive={true}
+              />
+              
+              {/* Línea de Ventas Reales - Rosa brillante */}
+              <Line
+                type="monotone"
+                dataKey="actualSales"
+                stroke={COLORS.primary}
+                strokeWidth={3}
+                dot={{ fill: COLORS.primary, r: 4, strokeWidth: 2, stroke: 'white' }}
+                activeDot={{ r: 6, strokeWidth: 3 }}
+                isAnimationActive={true}
+                animationDuration={1200}
+                name="Ventas Reales"
+              />
+              
+              {/* Línea de Presupuesto - Gris/Morado tenue */}
+              <Line
+                type="monotone"
+                dataKey="budget"
+                stroke={COLORS.budget}
+                strokeWidth={2}
+                strokeDasharray="6 4"
+                dot={false}
+                isAnimationActive={true}
+                animationDuration={1200}
+                name="Presupuesto"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Métricas Detalladas - Grid 2x3 */}
+        <div className="px-7 pb-7 grid grid-cols-2 lg:grid-cols-3 gap-3">
+          {/* Venta Acumulada */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="p-4 rounded-xl"
+            style={{
+              background: 'rgba(236, 72, 153, 0.06)',
+              border: '1px solid rgba(236, 72, 153, 0.12)',
+              boxShadow: '0 2px 8px rgba(236, 72, 153, 0.04)'
+            }}>
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Acumulado Venta</p>
+            <p className="text-lg font-black" style={{ color: COLORS.primary }}>
+              ${(complianceMetrics.accumulated / 1000000).toFixed(1)}M
+            </p>
+            <p className="text-[9px] text-slate-400 font-medium mt-1">14 días procesados</p>
+          </motion.div>
+
+          {/* Presupuesto Acumulado */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="p-4 rounded-xl"
+            style={{
+              background: 'rgba(100,116,139,0.05)',
+              border: '1px solid rgba(100,116,139,0.12)',
+              boxShadow: '0 2px 8px rgba(100,116,139,0.04)'
+            }}>
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Presupuesto</p>
+            <p className="text-lg font-black" style={{ color: COLORS.budget }}>
+              ${(complianceMetrics.budget / 1000000).toFixed(1)}M
+            </p>
+            <p className="text-[9px] text-slate-400 font-medium mt-1">Meta del período</p>
+          </motion.div>
+
+          {/* Diferencia */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="p-4 rounded-xl"
+            style={{
+              background: `rgba(${complianceMetrics.variance > 0 ? '16, 185, 129' : '239, 68, 68'}, 0.06)`,
+              border: `1px solid rgba(${complianceMetrics.variance > 0 ? '16, 185, 129' : '239, 68, 68'}, 0.12)`,
+              boxShadow: `0 2px 8px rgba(${complianceMetrics.variance > 0 ? '16, 185, 129' : '239, 68, 68'}, 0.04)`
+            }}>
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Diferencia</p>
+            <p className="text-lg font-black" style={{ color: complianceMetrics.variance > 0 ? COLORS.success : COLORS.danger }}>
+              {complianceMetrics.variance > 0 ? '+' : ''} ${(complianceMetrics.variance / 1000000).toFixed(2)}M
+            </p>
+            <p className="text-[9px] text-slate-400 font-medium mt-1">vs presupuesto</p>
+          </motion.div>
+
+          {/* Mejor Día */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="p-4 rounded-xl"
+            style={{
+              background: 'rgba(139, 92, 246, 0.06)',
+              border: '1px solid rgba(139, 92, 246, 0.12)',
+              boxShadow: '0 2px 8px rgba(139, 92, 246, 0.04)'
+            }}>
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Mejor Día</p>
+            <p className="text-lg font-black" style={{ color: COLORS.secondary }}>
+              {complianceMetrics.bestDay.compliance.toFixed(1)}%
+            </p>
+            <p className="text-[9px] text-slate-400 font-medium mt-1">Día {complianceMetrics.bestDay.date}</p>
+          </motion.div>
+
+          {/* Proyección Mensual */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="p-4 rounded-xl"
+            style={{
+              background: 'rgba(6, 182, 212, 0.06)',
+              border: '1px solid rgba(6, 182, 212, 0.12)',
+              boxShadow: '0 2px 8px rgba(6, 182, 212, 0.04)'
+            }}>
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Proyección</p>
+            <p className="text-lg font-black" style={{ color: COLORS.accent }}>
+              ${(complianceMetrics.monthlyProjection / 1000000).toFixed(1)}M
+            </p>
+            <p className="text-[9px] text-slate-400 font-medium mt-1">Estimado cierre</p>
+          </motion.div>
+
+          {/* Cumplimiento Promedio */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="p-4 rounded-xl"
+            style={{
+              background: complianceMetrics.avgCompliance > 95 ? 'rgba(16, 185, 129, 0.06)' : 'rgba(245, 158, 11, 0.06)',
+              border: complianceMetrics.avgCompliance > 95 ? '1px solid rgba(16, 185, 129, 0.12)' : '1px solid rgba(245, 158, 11, 0.12)',
+              boxShadow: complianceMetrics.avgCompliance > 95 ? '0 2px 8px rgba(16, 185, 129, 0.04)' : '0 2px 8px rgba(245, 158, 11, 0.04)'
+            }}>
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Cumplimiento Prom</p>
+            <p className="text-lg font-black" style={{ color: complianceMetrics.avgCompliance > 95 ? COLORS.success : COLORS.warning }}>
+              {complianceMetrics.avgCompliance}%
+            </p>
+            <p className="text-[9px] text-slate-400 font-medium mt-1">14 días</p>
+          </motion.div>
         </div>
       </motion.div>
 
@@ -240,7 +469,7 @@ export default function PremiumMainChart() {
                 <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0.03)" vertical={false} />
                 <XAxis dataKey="day" stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} />
                 <YAxis stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} tickFormatter={v => `${(v / 1000000).toFixed(0)}M`} />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<CustomComplianceTooltip />} />
                 <Line 
                   type="natural" 
                   dataKey="dailySales" 
