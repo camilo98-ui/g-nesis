@@ -762,8 +762,73 @@ export default function HomeWorkspace({
               </div>
             </motion.div>
 
-            {/* Premium KPI Cards Grid - 4 Tarjetas principales */}
-            
+            {/* Premium KPI Cards Grid - 3 Tarjetas principales */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* 1. PPT del Día */}
+              <div className="rounded-2xl p-4" style={{
+                background: 'rgba(255,255,255,0.82)',
+                backdropFilter: 'blur(24px)',
+                border: '1px solid rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
+              }}>
+                <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
+                <p className="text-xl font-black text-slate-900 mb-2">
+                  {budgetData?.excelBudgetForToday > 0 
+                    ? `$${Math.round(budgetData.excelBudgetForToday).toLocaleString('es-CO')}`
+                    : `$${budgetData?.monthlyBudget ? Math.round(budgetData.monthlyBudget / 30).toLocaleString('es-CO') : '0'}`}
+                </p>
+                <div className="flex items-center gap-1 mb-3">
+                  <span className="text-[10px] text-slate-400 text-center flex-1">vs ppt</span>
+                </div>
+                <PremiumSparkline data={sparkSales} color="#ef4444" width={100} height="24" />
+              </div>
+
+              {/* 2. Brecha del Mes */}
+              <div className="rounded-2xl p-4" style={{
+                background: 'rgba(255,255,255,0.82)',
+                backdropFilter: 'blur(24px)',
+                border: '1px solid rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
+              }}>
+                <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
+                <p className="text-xl font-black text-slate-900 mb-2">
+                  {(() => {
+                    const monthGap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
+                    return `$${Math.abs(Math.round(monthGap)).toLocaleString('es-CO')}`;
+                  })()}
+                </p>
+                <div className="flex items-center gap-1 mb-3">
+                  <span className="text-[10px] text-slate-400 text-center flex-1">
+                    {(() => {
+                      const monthGap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
+                      return monthGap >= 0 ? 'Sobre meta' : 'Bajo meta';
+                    })()}
+                  </span>
+                </div>
+                <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
+              </div>
+
+              {/* 3. Proyección Cierre Mes */}
+              <div className="rounded-2xl p-4" style={{
+                background: 'rgba(255,255,255,0.82)',
+                backdropFilter: 'blur(24px)',
+                border: '1px solid rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
+              }}>
+                <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
+                <p className="text-xl font-black text-slate-900 mb-2">
+                  {budgetData?.monthProjectionCompliance ? budgetData.monthProjectionCompliance.toFixed(0) : '0'}%
+                </p>
+                <div className="flex items-center gap-1 mb-3">
+                  <span className="text-[10px] text-slate-500 text-center flex-1">
+                    {budgetData?.monthProjection && budgetData?.monthlyBudget ?
+                    `$${Math.round(budgetData.monthProjection).toLocaleString('es-CO')}` :
+                    '—'}
+                  </span>
+                </div>
+                <PremiumSparkline data={sparkSales} color="#3b82f6" width={100} height="24" />
+              </div>
+            </div>
 
 
 
