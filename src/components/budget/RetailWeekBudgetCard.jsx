@@ -306,7 +306,12 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <p className="text-2xl font-black text-white leading-none mb-1">
                     {formatCurrency(budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : (budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0))}
                   </p>
-                  <p className="text-[10px] text-white/60">vs ppt</p>
+                  <p className="text-[10px] text-white/60">
+                    {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 ?
+                      `+${budgetData.incrementPct}% para recuperar` :
+                      'vs ppt'
+                    }
+                  </p>
                 </motion.div>
 
                 {/* Card 2: Brecha del Mes */}
@@ -319,13 +324,17 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <p className="text-2xl font-black text-white leading-none mb-1">
                     {(() => {
                       const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
-                      return formatCurrency(monthGap);
+                      return `${monthGap >= 0 ? '📈' : '📉'} ${formatCurrency(monthGap)}`;
                     })()}
                   </p>
-                  <p className="text-[10px] text-white/60">{(() => {
-                    const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
-                    return monthGap >= 0 ? 'Sobre meta' : 'Bajo meta';
-                  })()}</p>
+                  <p className="text-[10px] text-white/60">
+                    {budgetData.monthlyBudget > 0 &&
+                      (() => {
+                        const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
+                        return `${monthGap >= 0 ? 'Sobre meta: ' : 'Bajo meta: '}${Math.abs((monthGap / budgetData.monthlyBudget * 100)).toFixed(0)}%`;
+                      })()
+                    }
+                  </p>
                 </motion.div>
 
                 {/* Card 3: Proyección Cierre Mes */}
@@ -338,7 +347,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                   <p className="text-2xl font-black text-white leading-none mb-1">
                     {budgetData.monthProjectionCompliance.toFixed(0)}%
                   </p>
-                  <p className="text-[10px] text-white/60">{formatCurrency(budgetData.monthProjection)}</p>
+                  <p className="text-[10px] text-white/60">{formatCurrency(budgetData.monthProjection)} / {formatCurrency(budgetData.monthlyBudget)}</p>
                 </motion.div>
               </div>
 
