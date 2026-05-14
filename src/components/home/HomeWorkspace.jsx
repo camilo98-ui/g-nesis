@@ -755,7 +755,11 @@ export default function HomeWorkspace({
                 <motion.button
                   whileHover={{ scale: 1.04, y: -0.5 }}
                   whileTap={{ scale: 0.96 }}
-                  className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold flex-shrink-0 backdrop-blur-md transition-all duration-300 relative overflow-hidden group"
+                  onClick={() => {
+                    const climaSection = document.getElementById('climate-section');
+                    if (climaSection) climaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold flex-shrink-0 backdrop-blur-md transition-all duration-300 relative overflow-hidden group cursor-pointer"
                   style={{
                     background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%)',
                     border: '1.5px solid rgba(194, 24, 117, 0.15)',
@@ -934,6 +938,7 @@ export default function HomeWorkspace({
 
           {/* ── CLIMA BANNER ── */}
           <motion.div
+            id="climate-section"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
