@@ -681,7 +681,7 @@ export default function HomeWorkspace({
                   <img 
                     src="https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png" 
                     alt="Nova" 
-                    className="w-full h-full object-contain scale-[1.4] relative z-10"
+                    className="w-full h-full object-cover relative z-10"
                   />
                 </motion.div>
 
@@ -703,6 +703,9 @@ export default function HomeWorkspace({
                           const salesM = (latest.total_sales / 1000000).toFixed(1);
                           const projection = ((latest.total_sales / hours) * 24 / 1000000).toFixed(1);
                           const ticket = ((latest.total_sales / latest.total_transactions) / 1000).toFixed(0);
+                          const dailyBudgetData = dailyBudgets?.find(d => new Date(d.date).toDateString() === new Date().toDateString());
+                          const budgetSales = dailyBudgetData?.sales_budget || 0;
+                          const compliance = budgetSales > 0 ? ((latest.total_sales / budgetSales) * 100).toFixed(0) : 0;
                           
                           return (
                             <>
@@ -715,6 +718,7 @@ export default function HomeWorkspace({
                                 fontWeight: 800,
                                 fontSize: '13px'
                               }}>${salesM}M</span>
+                              <span className="text-slate-600"> ({compliance}% cumpl)</span>
                               
                               <span className="text-slate-400 mx-1.5">·</span>
                               
