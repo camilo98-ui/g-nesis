@@ -473,8 +473,19 @@ export default function HomeWorkspace({
 
 
   return (
-    <div className="min-h-screen flex"
-    style={{ background: 'linear-gradient(155deg, #FAFBFF 0%, #FFFFFF 45%, #F8F8FC 100%)' }}>
+    <motion.div className="min-h-screen flex"
+    animate={{
+      backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
+    }}
+    transition={{
+      duration: 12,
+      repeat: Infinity,
+      ease: 'easeInOut',
+    }}
+    style={{ 
+      background: 'linear-gradient(155deg, #FAFBFF 0%, #FFFFFF 45%, #F8F8FC 100%)',
+      backgroundSize: '200% 200%',
+    }}>
 
       {/* ── LEFT SIDEBAR ── */}
       <motion.aside
@@ -895,7 +906,7 @@ export default function HomeWorkspace({
             </div>
           </div>
         </motion.aside>
-      </main>
-    </div>);
+        </main>
+        </motion.div>);
 
-}
+        }
