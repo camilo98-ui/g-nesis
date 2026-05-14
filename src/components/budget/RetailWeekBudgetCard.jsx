@@ -172,14 +172,15 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     const weekProjection = blendedDailyAvg * totalDaysInWeek;
     const projectionCompliance = weeklyBudget > 0 ? weekProjection / weeklyBudget * 100 : 0;
 
-    const dailyTrendData = fullDisplayWeekDays.map((day) => {
+    // Daily trend data: ONLY days from current month
+    const dailyTrendData = eachDayOfInterval({ start: monthStart, end: monthEnd }).map((day) => {
       const sale = dailySales.find((s) => { try { return isSameDay(parseISO(s.date), day); } catch { return false; } });
       const ventasDelDia = sale ? sale.total_sales || 0 : 0;
       const dayStr = format(day, 'yyyy-MM-dd');
       const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
       const excelAmount = excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day);
       const presupuestoDia = excelAmount;
-      return { date: format(day, 'dd MMM', { locale: es }), fullDate: format(day, 'EEEE dd MMM', { locale: es }), ventas: ventasDelDia, presupuesto: presupuestoDia, cumplimiento: presupuestoDia > 0 ? ventasDelDia / presupuestoDia * 100 : 0 };
+      return { date: format(day, 'dd/MM', { locale: es }), fullDate: format(day, 'EEEE dd/MM', { locale: es }), ventas: ventasDelDia, presupuesto: presupuestoDia, cumplimiento: presupuestoDia > 0 ? ventasDelDia / presupuestoDia * 100 : 0 };
     });
 
     const displayWeeks = eachWeekOfInterval({ start: displayWeekStart, end: displayWeekEnd }, { weekStartsOn: 1 });
