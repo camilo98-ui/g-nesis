@@ -660,8 +660,8 @@ export default function HomeWorkspace({
                     <span className="text-sm font-semibold text-slate-700">Nova · Insight Ejecutivo</span>
                   </div>
                   <p className="text-[13px] text-slate-600 leading-relaxed font-medium">
-                    {todaySales?.total_sales > 0 
-                      ? `Hoy van ${(todaySales.total_sales / 1000000).toFixed(1)}M en ventas. Proyección de cierre: ${((todaySales.total_sales / new Date().getHours()) * 24 / 1000000).toFixed(1)}M. Ticket: ${((todaySales.total_sales / todaySales.total_transactions) / 1000).toFixed(0)}K`
+                    {latest?.total_sales > 0 
+                      ? `Hoy van ${(latest.total_sales / 1000000).toFixed(1)}M en ventas. Proyección de cierre: ${((latest.total_sales / new Date().getHours()) * 24 / 1000000).toFixed(1)}M. Ticket: ${((latest.total_sales / latest.total_transactions) / 1000).toFixed(0)}K`
                       : 'Sin datos de ventas aún. Comienza a registrar para ver insights ejecutivos.'}
                   </p>
                 </div>
@@ -683,7 +683,7 @@ export default function HomeWorkspace({
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 12%</span>
                 </div>
                 <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
-                  {todaySales?.total_sales ? `${(todaySales.total_sales / 1000000).toFixed(1)}M` : '—'}
+                  {latest?.total_sales ? `${(latest.total_sales / 1000000).toFixed(1)}M` : '—'}
                 </p>
                 <p className="text-[11px] font-medium text-slate-400 tracking-wide">Ventas Totales</p>
               </div>
@@ -700,7 +700,7 @@ export default function HomeWorkspace({
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 8%</span>
                 </div>
                 <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
-                  {todaySales?.total_transactions > 0 ? `${((todaySales.total_sales / todaySales.total_transactions) / 1000).toFixed(0)}K` : '—'}
+                  {latest?.total_transactions > 0 ? `${((latest.total_sales / latest.total_transactions) / 1000).toFixed(0)}K` : '—'}
                 </p>
                 <p className="text-[11px] font-medium text-slate-400 tracking-wide">Ticket Promedio</p>
               </div>
@@ -717,7 +717,7 @@ export default function HomeWorkspace({
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 5%</span>
                 </div>
                 <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
-                  {todaySales?.total_transactions ? todaySales.total_transactions : '—'}
+                  {latest?.total_transactions ? latest.total_transactions : '—'}
                 </p>
                 <p className="text-[11px] font-medium text-slate-400 tracking-wide">Transacciones</p>
               </div>
@@ -734,7 +734,7 @@ export default function HomeWorkspace({
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 3%</span>
                 </div>
                 <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
-                  {todaySales?.total_suggested ? todaySales.total_suggested : '—'}
+                  {latest?.total_suggested ? latest.total_suggested : '—'}
                 </p>
                 <p className="text-[11px] font-medium text-slate-400 tracking-wide">Sugeridos</p>
               </div>
