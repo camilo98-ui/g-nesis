@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, AreaChart, Legend } from 'recharts';
 import { motion } from 'framer-motion';
 import { TrendingUp, Target, ArrowUpRight, TrendingDown, Zap } from 'lucide-react';
+import SalesOptimizationStrategies from './SalesOptimizationStrategies';
 
 const COLORS = {
   primary: '#ec4899',
@@ -266,6 +267,9 @@ export default function PremiumMainChart({ dailySales = [], activeBudget = null,
 
   return (
     <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Estrategias de Crecimiento */}
+      <SalesOptimizationStrategies />
+
       {/* Gráfica 1: Cumplimiento vs Presupuesto - REDISEÑO PREMIUM */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
