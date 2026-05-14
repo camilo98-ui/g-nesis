@@ -325,7 +325,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                         initial={{ scale: 1.2, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
-                        {formatCurrency(budgetData.excelBudgetForToday || 0)}
+                        {formatCurrency(budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : (budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0))}
                       </motion.p>
                       <div className="space-y-1">
                         {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 &&
