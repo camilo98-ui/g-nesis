@@ -701,13 +701,13 @@ export default function HomeWorkspace({
                 {/* Separador elegante */}
                 <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-250 to-transparent opacity-25" />
 
-                {/* Insight Premium Horizontal */}
-                <div className="flex-1 min-w-0 flex items-center">
+                {/* Insight Premium Horizontal + KPI Buttons */}
+                <div className="flex-1 min-w-0 flex items-center gap-3">
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.6 }}
-                    className="text-[12.5px] leading-relaxed font-medium text-slate-700"
+                    className="text-[12.5px] leading-relaxed font-medium text-slate-700 flex-1"
                     style={{ letterSpacing: '0.3px' }}>
                     {latestWeather ?
                     (() => {
@@ -749,6 +749,30 @@ export default function HomeWorkspace({
                     })() :
                     <span className="text-slate-500">Cargando datos del clima...</span>}
                   </motion.p>
+
+                  {/* Subtle KPI Navigation Buttons */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {[
+                      { label: 'PPT del Día', icon: '📊' },
+                      { label: 'Proyección', icon: '📈' },
+                      { label: 'Cmp Día', icon: '✓' }
+                    ].map((item) => (
+                      <motion.button
+                        key={item.label}
+                        whileHover={{ scale: 1.03, y: -0.5 }}
+                        whileTap={{ scale: 0.97 }}
+                        className="flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-medium whitespace-nowrap transition-all duration-300"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.08) 0%, rgba(168, 85, 247, 0.06) 100%)',
+                          border: '1px solid rgba(194, 24, 117, 0.12)',
+                          color: '#64748b',
+                          boxShadow: '0 2px 6px rgba(194, 24, 117, 0.04)'
+                        }}>
+                        <span className="text-[8px]">{item.icon}</span>
+                        <span className="hidden sm:inline">{item.label}</span>
+                      </motion.button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Botón Premium SaaS */}
@@ -775,34 +799,6 @@ export default function HomeWorkspace({
                 </motion.button>
 
               </div>
-            </motion.div>
-
-            {/* Subtle KPI Navigation Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="flex items-center gap-2 px-6 mb-6 overflow-x-auto pb-2">
-              {[
-                { label: 'PPT del Día', icon: '📊' },
-                { label: 'Proyección', icon: '📈' },
-                { label: 'Cmp Día', icon: '✓' }
-              ].map((item) => (
-                <motion.button
-                  key={item.label}
-                  whileHover={{ scale: 1.03, y: -1 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium whitespace-nowrap flex-shrink-0 transition-all duration-300"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.08) 0%, rgba(168, 85, 247, 0.06) 100%)',
-                    border: '1px solid rgba(194, 24, 117, 0.12)',
-                    color: '#64748b',
-                    boxShadow: '0 2px 8px rgba(194, 24, 117, 0.05)'
-                  }}>
-                  <span className="text-[9px] sm:text-[10px]">{item.icon}</span>
-                  <span>{item.label}</span>
-                </motion.button>
-              ))}
             </motion.div>
 
             {/* Premium KPI Cards Grid - 4 Tarjetas principales */}
