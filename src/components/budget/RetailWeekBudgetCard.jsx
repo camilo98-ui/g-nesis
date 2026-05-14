@@ -196,13 +196,25 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
     });
 
     const totalMonthSales = salesUntilYesterday + todayActualSales;
-    const daysElapsed = eachDayOfInterval({ start: monthStart, end: now }).length;
-    const monthAvgDailySales = daysElapsed > 0 ? totalMonthSales / daysElapsed : 0;
-    const monthProjection = monthAvgDailySales * daysInMonth;
+    // Usar solo días con ventas reales para el promedio (evita dividir entre días sin data)
+    const daysWithSales = dailySales.filter(s => {
+      try {
+        const sd = parseISO(s.date);
+        return sd >= monthStart && sd <= now && (s.total_sales || 0) > 0;
+      } catch { return false; }
+    }).length;
+    const daysElapsedCalendar = eachDayOfInterval({ start: monthStart, end: now }).length;
+    // Promedio basado en días con datos (más preciso); fallback a días calendario
+    const effectiveDays = daysWithSales > 0 ? daysWithSales : daysElapsedCalendar;
+    const monthAvgDailySales = effectiveDays > 0 ? totalMonthSales / effectiveDays : 0;
+    // Proyección = acumulado + promedio × días restantes (no días totales)
+    const daysRemainingMonth = daysInMonth - daysElapsedCalendar;
+    const monthProjection = totalMonthSales + (monthAvgDailySales * Math.max(daysRemainingMonth, 0));
     const monthProjectionCompliance = adjustedMonthlyBudget > 0 ? monthProjection / adjustedMonthlyBudget * 100 : 0;
 
     return {
       dailyBaseBudget, adjustedDailyBudget, todayActualSales, historicalAvgToday, accumulatedGap, remainingDays, remainingBudget, salesUntilYesterday, budgetUntilYesterday, incrementPct,
+      daysElapsed: daysElapsedCalendar,
       compliance: budgetUntilYesterday > 0 ? salesUntilYesterday / budgetUntilYesterday * 100 : 0,
       todayCompliance: adjustedDailyBudget > 0 ? todayActualSales / adjustedDailyBudget * 100 : 0,
       currentWeekNumber, totalWeeks: weeks.length, currentWeekSales, weeklyBudget,
