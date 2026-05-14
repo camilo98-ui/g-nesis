@@ -189,22 +189,15 @@ export default function MascotWidget() {
     }
   }, [path]);
 
-  // Micro insights — frases cortas y discretas
-  const MICRO_INSIGHTS = {
-    '/':              ["Operación estable", "+8% vs ayer", "Ritmo saludable", "Sin alertas"],
-    '/Budget':        ["Proyección positiva", "En meta", "Ritmo normal", "Brecha controlada"],
-    '/Sales':         ["Ventas activas", "Ticket promedio +", "Tendencia positiva", "Ritmo constante"],
-    '/Rankings':      ["Equipo equilibrado", "Desempeño bueno", "Sin anomalías", "Variación normal"],
-    default:          ["Operación activa", "Sin alertas", "Sistema estable", "Todo en orden"],
-  };
+  // Estados minimalistas — solo 1-2 palabras
+  const STATES = ["Hola", "Nova activa", "En línea", "Lista", "Nova AI"];
 
   useEffect(() => {
-    // Mostrar micro insight después de 8 segundos
+    // Mostrar estado minimalista después de 12 segundos
     const t = setTimeout(() => {
-      const insights = MICRO_INSIGHTS[path] || MICRO_INSIGHTS.default;
-      setBubbleMsg(insights[Math.floor(Math.random() * insights.length)]);
+      setBubbleMsg(STATES[Math.floor(Math.random() * STATES.length)]);
       setShowBubble(true);
-    }, 8000);
+    }, 12000);
     return () => clearTimeout(t);
   }, [path]);
 
@@ -249,7 +242,7 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto �
   };
 
   return (
-    <div className="fixed bottom-5 right-4 z-[9999] flex flex-col items-end gap-2.5">
+    <div className="fixed bottom-5 right-4 z-[9999] flex flex-col items-end gap-1.5">
 
       {/* ── Chat Panel ── */}
       <AnimatePresence>
@@ -374,25 +367,25 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto �
         )}
       </AnimatePresence>
 
-      {/* Micro Insight — Elegante y discreto */}
+      {/* Estado minimalista — ultra discreto */}
       <AnimatePresence>
         {showBubble && !isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="px-2.5 py-1.5 rounded-lg cursor-pointer"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            className="px-2 py-1 rounded-md cursor-pointer"
             style={{
-              background: 'rgba(255,255,255,0.6)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              border: '1px solid rgba(190,24,93,0.08)',
-              boxShadow: '0 1px 8px rgba(190,24,93,0.06), 0 1px 2px rgba(0,0,0,0.03)',
+              background: 'rgba(255,255,255,0.45)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(190,24,93,0.06)',
+              boxShadow: '0 0.5px 4px rgba(0,0,0,0.02)',
             }}
             onClick={() => { setIsOpen(true); setShowBubble(false); }}
           >
-            <p className="text-[11px] font-medium text-slate-600 tracking-tight whitespace-nowrap">{bubbleMsg}</p>
+            <p className="text-[10px] font-medium text-slate-500 tracking-tight whitespace-nowrap">{bubbleMsg}</p>
           </motion.div>
         )}
       </AnimatePresence>
