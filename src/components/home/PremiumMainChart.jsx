@@ -105,6 +105,42 @@ const CustomComplianceTooltip = ({ active, payload }) => {
   return null;
 };
 
+const ProjectionTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length > 0) {
+    const data = payload[0].payload;
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="px-3 py-2 rounded-lg backdrop-blur-xl"
+        style={{
+          background: 'rgba(15, 23, 42, 0.96)',
+          border: '1px solid rgba(139, 92, 246, 0.2)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)'
+        }}>
+        <p className="text-xs font-bold text-white mb-1">Día {data.day}</p>
+        <div className="space-y-1 text-xs">
+          {data.dailySales && (
+            <div className="flex justify-between gap-3">
+              <span className="text-slate-400">Venta Real:</span>
+              <span className="font-semibold" style={{ color: COLORS.primary }}>
+                ${(data.dailySales / 1000000).toFixed(2)}M
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between gap-3">
+            <span className="text-slate-400">Proyección:</span>
+            <span className="font-semibold" style={{ color: COLORS.secondary }}>
+              ${(data.projection / 1000000).toFixed(2)}M
+            </span>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+  return null;
+};
+
 export default function PremiumMainChart() {
   const complianceData = useMemo(() => generateComplianceData(), []);
   const dailyVsProjectionData = useMemo(() => generateDailyVsSalesData(), []);
@@ -469,7 +505,7 @@ export default function PremiumMainChart() {
                 <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0.03)" vertical={false} />
                 <XAxis dataKey="day" stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} />
                 <YAxis stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} tickFormatter={v => `${(v / 1000000).toFixed(0)}M`} />
-                <Tooltip content={<CustomComplianceTooltip />} />
+                <Tooltip content={<ProjectionTooltip />} />
                 <Line 
                   type="natural" 
                   dataKey="dailySales" 
