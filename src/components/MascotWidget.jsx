@@ -404,11 +404,9 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto â€
           style={{ background: 'radial-gradient(circle, rgba(190,24,93,0.15) 0%, transparent 70%)' }}
         />
         
-        {/* Avatar - Mascota completa sin esfera */}
-        <div className="relative w-14 h-14 flex items-center justify-center">
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain"
-            style={{ objectPosition: 'center center' }} />
-        </div>
+        {/* Avatar - Mascota completa sin contenedor */}
+        <img src={MASCOT_IMG} alt="Nova" className="w-16 h-16 object-contain"
+          style={{ objectPosition: 'center center' }} />
       </motion.button>
     </div>
   );
