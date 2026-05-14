@@ -669,26 +669,19 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 </AreaChart>
                 </ResponsiveContainer>
 
-                {/* Top 3 Categorías de Participación */}
-                <div className="mt-4 pt-3 space-y-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+                {/* Top 3 Categorías - Cards Compactas */}
+                <div className="mt-4 pt-3 grid grid-cols-3 gap-2" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
                   {PARTICIPATION_SEGMENTS.slice(0, 3).map((cat, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
-                      className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <div className="text-[10px] font-black text-white rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ background: PARTICIPATION_COLORS[i] }}>
-                          {i + 1}
-                        </div>
-                        <p className="text-[10px] font-bold text-[#2A2A2A] flex-1">{cat.name}</p>
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-[9px] font-black tabular-nums" style={{ color: PARTICIPATION_COLORS[i] }}>{cat.value}%</p>
-                        </div>
-                      </div>
-                      <div className="h-1.5 rounded-full ml-7" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                    <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
+                      className="p-2.5 rounded-lg text-center" style={{ background: `${PARTICIPATION_COLORS[i]}15` }}>
+                      <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1.5">{cat.name}</p>
+                      <p className="text-[14px] font-black" style={{ color: PARTICIPATION_COLORS[i] }} className="mb-1.5">{cat.value}%</p>
+                      <div className="h-1 rounded-full mx-auto w-12" style={{ background: 'rgba(0,0,0,0.08)' }}>
                         <motion.div 
                           className="h-full rounded-full" 
                           style={{ background: PARTICIPATION_COLORS[i] }}
                           initial={{ width: 0 }}
-                          animate={{ width: `${cat.value}%` }}
+                          animate={{ width: '100%' }}
                           transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
                         />
                       </div>
