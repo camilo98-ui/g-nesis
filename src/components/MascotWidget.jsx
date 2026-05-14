@@ -1,26 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Sparkles, ChevronDown, RotateCcw, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Send, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
 
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
 
-// Context per page/route
 const PAGE_CONTEXTS = {
-  '/':              { name: 'Dashboard Principal', focus: 'ventas del día, métricas generales de la tienda, cumplimiento de presupuesto y rendimiento del equipo.' },
+  '/':              { name: 'Dashboard', focus: 'ventas del día, métricas generales de la tienda, cumplimiento de presupuesto y rendimiento del equipo.' },
   '/Sales':         { name: 'Ventas', focus: 'análisis de ventas, tendencias, ticket promedio, transacciones y comparativos.' },
   '/Budget':        { name: 'Presupuesto', focus: 'cumplimiento de presupuesto mensual, brechas, proyecciones y metas de ventas.' },
   '/Rankings':      { name: 'Rankings', focus: 'desempeño individual de cajeros, clasificaciones, insignias y logros.' },
   '/CashiersDashboard': { name: 'Cajeros', focus: 'rendimiento de cajeros, turnos, ventas por colaborador y gestión del equipo.' },
   '/PYGDashboard':  { name: 'P&G', focus: 'rentabilidad, EBITDA, costos de personal, gastos operativos y márgenes.' },
   '/Management':    { name: 'Gerencia', focus: 'análisis ejecutivo, comparativos entre tiendas, tendencias y decisiones estratégicas.' },
-  '/FreezerMap':    { name: 'Mapa de Nevera', focus: 'inventario de sabores, niveles de stock, rotación de productos y reposición.' },
+  '/FreezerMap':    { name: 'Nevera', focus: 'inventario de sabores, niveles de stock, rotación de productos y reposición.' },
   '/PopsyPlanner':  { name: 'Planeador', focus: 'turnos de colaboradores, programación, solicitudes y optimización de horarios.' },
   '/Quality':       { name: 'Calidad', focus: 'incidencias de calidad, checklists de limpieza, alertas de inventario y estándares.' },
   '/Training':      { name: 'Capacitación', focus: 'progreso de cursos, certificaciones, niveles de aprendizaje y desarrollo del equipo.' },
-  '/WeatherSalesImpact': { name: 'Clima & Ventas', focus: 'impacto del clima en las ventas, correlaciones de temperatura y predicciones.' },
+  '/WeatherSalesImpact': { name: 'Clima', focus: 'impacto del clima en las ventas, correlaciones de temperatura y predicciones.' },
 };
 
 const SYSTEM_PROMPT = `Eres Nova — inteligencia comercial integrada al sistema operativo de Popsy.
@@ -70,7 +69,6 @@ const PROACTIVE_MESSAGES = {
   '/FreezerMap':    "Inventario de nevera activo. Niveles de stock y rotación de sabores monitoreados.",
   '/Management':    "Vista ejecutiva activa. Comparativo entre tiendas y alertas de cumplimiento disponibles.",
   '/Sales':         "Módulo de ventas activo. Tendencias, ticket promedio y transacciones en análisis.",
-  '/Rankings':      "Rendimiento individual procesado. Identifica variaciones y patrones por colaborador.",
   default:          "Nova activa. Sistema operativo Popsy conectado.",
 };
 
@@ -87,12 +85,11 @@ const SUGGESTIONS = {
 
 function TypingDots() {
   return (
-    <div className="flex items-center gap-1 px-3 py-2.5">
+    <div className="flex items-center gap-1 px-2.5 py-2">
       {[0, 1, 2].map(i => (
-        <motion.div key={i} className="w-2 h-2 rounded-full"
-          style={{ background: '#C21875' }}
-          animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
-          transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
+        <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-rose-400"
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.1, 0.8] }}
+          transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.18 }}
         />
       ))}
     </div>
@@ -103,37 +100,34 @@ function ChatMessage({ msg }) {
   const isNova = msg.role === 'assistant';
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex gap-2.5 ${isNova ? 'items-start' : 'items-end flex-row-reverse'}`}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      className={`flex gap-2 ${isNova ? 'items-start' : 'items-end flex-row-reverse'}`}
     >
       {isNova && (
-        <div className="w-7 h-7 rounded-xl overflow-hidden flex-shrink-0 mt-0.5 shadow-sm"
-          style={{ border: '1.5px solid rgba(194,24,117,0.3)' }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain" style={{ background: 'white' }} />
+        <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0 mt-0.5"
+          style={{ border: '1px solid rgba(194,24,117,0.2)', background: 'white' }}>
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" />
         </div>
       )}
-      <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-        isNova ? 'rounded-tl-sm' : 'rounded-tr-sm'
-      }`}
+      <div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${isNova ? 'rounded-tl-sm' : 'rounded-tr-sm'}`}
         style={isNova ? {
-          background: 'linear-gradient(135deg, #FFF7FB 0%, #F8D7E8 100%)',
-          border: '1px solid rgba(194,24,117,0.15)',
-          color: '#5a0e38',
+          background: 'rgba(248,248,250,0.9)',
+          border: '1px solid rgba(0,0,0,0.06)',
+          color: '#1a1a2e',
         } : {
-          background: 'linear-gradient(135deg, #C21875 0%, #E91E63 100%)',
+          background: 'linear-gradient(135deg, #be185d 0%, #db2777 100%)',
           color: 'white',
-          boxShadow: '0 4px 16px rgba(194,24,117,0.3)',
         }}
       >
         {isNova ? (
           <ReactMarkdown
             components={{
-              p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
-              strong: ({ children }) => <strong className="font-bold" style={{ color: '#C21875' }}>{children}</strong>,
-              ul: ({ children }) => <ul className="list-disc ml-4 space-y-0.5 mt-1">{children}</ul>,
-              li: ({ children }) => <li>{children}</li>,
-              h3: ({ children }) => <h3 className="font-black text-sm mb-1" style={{ color: '#C21875' }}>{children}</h3>,
+              p: ({ children }) => <p className="mb-0.5 last:mb-0">{children}</p>,
+              strong: ({ children }) => <strong className="font-semibold" style={{ color: '#be185d' }}>{children}</strong>,
+              ul: ({ children }) => <ul className="list-none space-y-0.5 mt-0.5">{children}</ul>,
+              li: ({ children }) => <li className="flex gap-1"><span style={{ color: '#be185d' }}>·</span>{children}</li>,
             }}
           >
             {msg.content}
@@ -149,7 +143,6 @@ function ChatMessage({ msg }) {
 export default function MascotWidget() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -162,7 +155,6 @@ export default function MascotWidget() {
   const pageCtx = PAGE_CONTEXTS[path] || { name: 'App', focus: 'operaciones generales de la tienda.' };
   const suggestions = SUGGESTIONS[path] || SUGGESTIONS.default;
 
-  // Init welcome message when opening
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       const welcome = PROACTIVE_MESSAGES[path] || PROACTIVE_MESSAGES.default;
@@ -170,7 +162,6 @@ export default function MascotWidget() {
     }
   }, [isOpen]);
 
-  // Reset and re-init when page changes (if open)
   useEffect(() => {
     if (isOpen) {
       const welcome = PROACTIVE_MESSAGES[path] || PROACTIVE_MESSAGES.default;
@@ -178,32 +169,22 @@ export default function MascotWidget() {
     }
   }, [path]);
 
-  // Show bubble after delay
   useEffect(() => {
     const t = setTimeout(() => {
       setBubbleMsg(PROACTIVE_MESSAGES[path] || PROACTIVE_MESSAGES.default);
       setShowBubble(true);
-    }, 4000);
+    }, 5000);
     return () => clearTimeout(t);
   }, []);
 
-  useEffect(() => {
-    if (isOpen) setShowBubble(false);
-  }, [isOpen]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
-
-  useEffect(() => {
-    if (isOpen) setTimeout(() => inputRef.current?.focus(), 300);
-  }, [isOpen]);
+  useEffect(() => { if (isOpen) setShowBubble(false); }, [isOpen]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isLoading]);
+  useEffect(() => { if (isOpen) setTimeout(() => inputRef.current?.focus(), 250); }, [isOpen]);
 
   const sendMessage = async (text) => {
     const userText = text || input.trim();
     if (!userText || isLoading) return;
     setInput('');
-
     const newMessages = [...messages, { role: 'user', content: userText }];
     setMessages(newMessages);
     setIsLoading(true);
@@ -220,8 +201,8 @@ Responde directamente. Sin introducción. Sin relleno. Máximo 2-3 líneas. Tono
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt: contextPrompt });
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-    } catch (e) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Lo siento, tuve un problema técnico. ¿Puedes intentarlo de nuevo? 🍦' }]);
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Error de conexión. Reintenta.' }]);
     } finally {
       setIsLoading(false);
     }
@@ -236,75 +217,77 @@ Responde directamente. Sin introducción. Sin relleno. Máximo 2-3 líneas. Tono
     setMessages([{ role: 'assistant', content: welcome }]);
   };
 
-  const panelWidth = isExpanded ? 'w-96' : 'w-80';
-  const panelHeight = isExpanded ? 'h-[600px]' : 'h-[480px]';
-
   return (
-    <div className="fixed bottom-6 right-5 z-[9999] flex flex-col items-end gap-3">
+    <div className="fixed bottom-5 right-4 z-[9999] flex flex-col items-end gap-2.5">
 
-      {/* Main Chat Panel */}
+      {/* ── Chat Panel ── */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.88, y: 20 }}
+            initial={{ opacity: 0, scale: 0.94, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.88, y: 20 }}
-            transition={{ type: 'spring', damping: 24, stiffness: 300 }}
-            className={`${panelWidth} ${panelHeight} rounded-3xl flex flex-col overflow-hidden`}
+            exit={{ opacity: 0, scale: 0.94, y: 12 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320, duration: 0.35 }}
+            className="w-64 flex flex-col rounded-2xl overflow-hidden"
             style={{
-              background: 'rgba(255,255,255,0.97)',
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
-              border: '1.5px solid rgba(194,24,117,0.18)',
-              boxShadow: '0 12px 60px rgba(194,24,117,0.2), 0 4px 20px rgba(168,85,247,0.1), 0 40px 80px rgba(0,0,0,0.1)',
+              height: 380,
+              background: 'rgba(255,255,255,0.96)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              border: '1px solid rgba(0,0,0,0.07)',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(190,24,93,0.08)',
             }}
           >
-            {/* ── Header ── */}
-            <div className="relative flex items-center gap-3 px-4 py-3 flex-shrink-0 overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #C21875 0%, #E91E63 60%, #A855F7 100%)' }}>
-              <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-15" style={{ background: 'white' }} />
-              <div className="absolute -bottom-4 left-10 w-14 h-14 rounded-full opacity-10" style={{ background: 'white' }} />
-
-              <div className="relative w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-md"
-                style={{ border: '2px solid rgba(255,255,255,0.5)' }}>
-                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain" style={{ background: 'white' }} />
-                </div>
-                    <div className="relative flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-white font-black text-sm">Nova</p>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/20 text-white/90">AI Copilot</span>
-                </div>
-                <p className="text-pink-100 text-[10px] truncate">{pageCtx.name}</p>
+            {/* Header */}
+            <div className="flex items-center gap-2 px-3 py-2.5 flex-shrink-0"
+              style={{
+                background: 'rgba(255,255,255,0.85)',
+                borderBottom: '1px solid rgba(0,0,0,0.05)',
+                backdropFilter: 'blur(20px)',
+              }}>
+              <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0"
+                style={{ border: '1px solid rgba(190,24,93,0.2)', background: 'white' }}>
+                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" />
               </div>
-              <div className="relative flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-lime-300" style={{ boxShadow: '0 0 6px rgba(163,230,53,0.9)' }} />
-                <button onClick={reset} className="p-1.5 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/10" title="Nueva conversación">
-                  <RotateCcw className="w-3.5 h-3.5" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-slate-800 tracking-tight">Nova</span>
+                  <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full text-rose-600"
+                    style={{ background: 'rgba(190,24,93,0.08)', letterSpacing: '0.04em' }}>
+                    AI
+                  </span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-auto"
+                    style={{ boxShadow: '0 0 4px rgba(52,211,153,0.8)' }} />
+                </div>
+                <p className="text-[9px] text-slate-400 font-medium tracking-wide">{pageCtx.name}</p>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <button onClick={reset}
+                  className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+                  <RotateCcw className="w-3 h-3" />
                 </button>
-                <button onClick={() => setIsExpanded(e => !e)} className="p-1.5 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/10">
-                  {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-                </button>
-                <button onClick={() => setIsOpen(false)} className="p-1.5 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/10">
-                  <X className="w-3.5 h-3.5" />
+                <button onClick={() => setIsOpen(false)}
+                  className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             </div>
 
-            {/* ── Messages ── */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth"
-              style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(194,24,117,0.2) transparent' }}>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-3 py-2.5 space-y-2"
+              style={{ scrollbarWidth: 'none' }}>
               {messages.map((msg, i) => (
                 <ChatMessage key={i} msg={msg} />
               ))}
               {isLoading && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="flex items-start gap-2.5">
-                  <div className="w-7 h-7 rounded-xl overflow-hidden flex-shrink-0 shadow-sm"
-                    style={{ border: '1.5px solid rgba(194,24,117,0.3)' }}>
-                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain" style={{ background: 'white' }} />
+                  className="flex items-start gap-2">
+                  <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0"
+                    style={{ border: '1px solid rgba(190,24,93,0.2)', background: 'white' }}>
+                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" />
                   </div>
-                  <div className="rounded-2xl rounded-tl-sm"
-                    style={{ background: 'linear-gradient(135deg,#FFF7FB,#F8D7E8)', border: '1px solid rgba(194,24,117,0.15)' }}>
+                  <div className="rounded-xl rounded-tl-sm"
+                    style={{ background: 'rgba(248,248,250,0.9)', border: '1px solid rgba(0,0,0,0.06)' }}>
                     <TypingDots />
                   </div>
                 </motion.div>
@@ -312,17 +295,16 @@ Responde directamente. Sin introducción. Sin relleno. Máximo 2-3 líneas. Tono
               <div ref={messagesEndRef} />
             </div>
 
-            {/* ── Suggestions ── */}
+            {/* Suggestions */}
             {messages.length <= 1 && (
-              <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto flex-shrink-0"
-                style={{ scrollbarWidth: 'none' }}>
+              <div className="px-3 pb-2 flex gap-1 overflow-x-auto flex-shrink-0" style={{ scrollbarWidth: 'none' }}>
                 {suggestions.map(s => (
                   <button key={s} onClick={() => sendMessage(s)}
-                    className="flex-shrink-0 text-[10px] font-semibold px-3 py-1.5 rounded-full whitespace-nowrap transition-all hover:scale-105 active:scale-95"
+                    className="flex-shrink-0 text-[9px] font-medium px-2 py-1 rounded-lg whitespace-nowrap transition-all hover:bg-rose-50 active:scale-95"
                     style={{
-                      background: 'linear-gradient(135deg,#FFF7FB,#F8D7E8)',
-                      border: '1px solid rgba(194,24,117,0.2)',
-                      color: '#C21875',
+                      border: '1px solid rgba(190,24,93,0.15)',
+                      color: '#be185d',
+                      background: 'rgba(190,24,93,0.04)',
                     }}>
                     {s}
                   </button>
@@ -330,44 +312,33 @@ Responde directamente. Sin introducción. Sin relleno. Máximo 2-3 líneas. Tono
               </div>
             )}
 
-            {/* ── Input ── */}
-            <div className="px-3 pb-3 flex-shrink-0">
-              <div className="flex items-end gap-2 rounded-2xl px-3 py-2"
+            {/* Input */}
+            <div className="px-2.5 pb-2.5 flex-shrink-0">
+              <div className="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5"
                 style={{
-                  background: 'linear-gradient(135deg,#FFF7FB,#fff)',
-                  border: '1.5px solid rgba(194,24,117,0.2)',
-                  boxShadow: '0 2px 12px rgba(194,24,117,0.08)',
+                  background: 'rgba(248,248,250,1)',
+                  border: '1px solid rgba(0,0,0,0.08)',
                 }}>
                 <textarea
                   ref={inputRef}
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Pregúntame algo sobre tu tienda..."
+                  placeholder="Consulta operativa..."
                   rows={1}
-                  className="flex-1 resize-none text-sm bg-transparent outline-none leading-relaxed"
-                  style={{ color: '#5a0e38', maxHeight: 80, minHeight: 24 }}
+                  className="flex-1 resize-none text-xs bg-transparent outline-none leading-relaxed text-slate-700 placeholder-slate-400"
+                  style={{ maxHeight: 60, minHeight: 18 }}
                 />
                 <motion.button
                   onClick={() => sendMessage()}
                   disabled={!input.trim() || isLoading}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.92 }}
-                  className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-40"
-                  style={{ background: 'linear-gradient(135deg,#C21875,#E91E63)' }}>
-                  <Send className="w-3.5 h-3.5 text-white" />
+                  whileTap={{ scale: 0.9 }}
+                  className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-30"
+                  style={{ background: input.trim() ? 'linear-gradient(135deg,#be185d,#db2777)' : 'transparent', border: input.trim() ? 'none' : '1px solid rgba(0,0,0,0.1)' }}>
+                  <Send className={`w-2.5 h-2.5 ${input.trim() ? 'text-white' : 'text-slate-400'}`} />
                 </motion.button>
               </div>
-              <p className="text-center text-[9px] font-bold tracking-widest mt-1.5"
-                style={{ color: 'rgba(194,24,117,0.3)' }}>
-                NOVA · POPSY AI COPILOT
-              </p>
             </div>
-
-            {/* Bottom bar */}
-            <div className="h-0.5 flex-shrink-0" style={{
-              background: 'linear-gradient(90deg, #C21875, #E91E63, #A855F7)',
-            }} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -376,22 +347,21 @@ Responde directamente. Sin introducción. Sin relleno. Máximo 2-3 líneas. Tono
       <AnimatePresence>
         {showBubble && !isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, x: 12 }}
+            initial={{ opacity: 0, scale: 0.9, x: 8 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ type: 'spring', damping: 20 }}
-            className="relative max-w-[200px] rounded-2xl rounded-br-sm px-4 py-3 cursor-pointer"
+            exit={{ opacity: 0, scale: 0.9, x: 8 }}
+            transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+            className="relative max-w-[180px] rounded-xl rounded-br-sm px-3 py-2 cursor-pointer"
             style={{
-              background: 'rgba(255,255,255,0.97)',
+              background: 'rgba(255,255,255,0.96)',
               backdropFilter: 'blur(20px)',
-              border: '1.5px solid rgba(194,24,117,0.25)',
-              color: '#7b1450',
-              boxShadow: '0 6px 28px rgba(194,24,117,0.22)',
+              border: '1px solid rgba(0,0,0,0.07)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(190,24,93,0.1)',
             }}
             onClick={() => { setIsOpen(true); setShowBubble(false); }}
           >
-            <p className="text-xs font-semibold leading-snug">{bubbleMsg}</p>
-            <p className="text-[9px] mt-1.5 font-bold" style={{ color: '#C21875' }}>Toca para chatear ✨</p>
+            <p className="text-[10px] font-medium text-slate-700 leading-snug">{bubbleMsg}</p>
+            <p className="text-[8px] mt-1 font-semibold tracking-wide" style={{ color: '#be185d' }}>NOVA · ACTIVA</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -399,37 +369,30 @@ Responde directamente. Sin introducción. Sin relleno. Máximo 2-3 líneas. Tono
       {/* Mascot Button */}
       <motion.button
         onClick={() => { setIsOpen(o => !o); setShowBubble(false); }}
-        animate={{ y: [0, -5, 0] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.92 }}
-        className="relative w-16 h-16 rounded-full"
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.93 }}
+        className="relative w-12 h-12 rounded-full"
       >
-        {/* Glow */}
-        <motion.div className="absolute -inset-2 rounded-full"
-          animate={{ opacity: [0.25, 0.6, 0.25], scale: [0.94, 1.06, 0.94] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.4) 0%, transparent 70%)' }}
+        <motion.div className="absolute -inset-1.5 rounded-full"
+          animate={{ opacity: [0.2, 0.45, 0.2], scale: [0.95, 1.05, 0.95] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ background: 'radial-gradient(circle, rgba(190,24,93,0.3) 0%, transparent 70%)' }}
         />
-        <motion.div className="absolute -inset-1 rounded-full"
-          animate={{ opacity: [0.5, 0, 0.5] }}
-          transition={{ duration: 2.5, repeat: Infinity, delay: 0.8 }}
-          style={{ border: '2px solid rgba(233,30,99,0.45)', borderRadius: '50%' }}
-        />
-        {/* Avatar */}
-        <div className="relative w-16 h-16 rounded-full overflow-hidden"
+        <div className="relative w-12 h-12 rounded-full overflow-hidden"
           style={{
-            border: '2.5px solid rgba(194,24,117,0.65)',
-            boxShadow: '0 0 0 1.5px rgba(255,255,255,0.9) inset, 0 8px 32px rgba(194,24,117,0.4)',
+            border: '2px solid rgba(190,24,93,0.5)',
+            boxShadow: '0 4px 20px rgba(190,24,93,0.25), inset 0 0 0 1px rgba(255,255,255,0.8)',
             background: 'white',
           }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover scale-[1.6]" style={{ objectPosition: 'center center' }} />
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.6]"
+            style={{ objectPosition: 'center center' }} />
         </div>
-        {/* Status dot */}
-        <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-          style={{ background: 'white', border: '1.5px solid rgba(194,24,117,0.2)', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
-          <div className="w-2 h-2 rounded-full bg-lime-400"
-            style={{ boxShadow: '0 0 5px rgba(163,230,53,0.9)' }} />
+        <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full flex items-center justify-center"
+          style={{ background: 'white', border: '1.5px solid rgba(190,24,93,0.15)' }}>
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+            style={{ boxShadow: '0 0 4px rgba(52,211,153,0.9)' }} />
         </div>
       </motion.button>
     </div>
