@@ -27,7 +27,7 @@ import DetailPanel from '@/components/dashboard/DetailPanel';
 
 import {
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
-  BarChart3, AlertTriangle, CheckCircle2, X, Target,
+  BarChart3, AlertTriangle, CheckCircle2, X, Target, Sparkles,
   ClipboardCheck, Snowflake, Package, Calendar, Activity, CalendarDays } from
 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -40,126 +40,48 @@ import {
   BarChart, Bar, PieChart, Pie, Cell, Legend, ComposedChart, Line } from
 'recharts';
 
-// Metric Card con panel expandible
-function MetricCard({ title, value, budget, icon: Icon, bgColor, iconBg, iconColor, format: formatType = "number", onClick, isActive, insight, comparisonValue, showComparison }) {
-  // Calculate velocity trend (comparing to expected daily rate)
-  const daysInMonth = 30;
-  const daysElapsed = Math.max(1, Math.floor((new Date() - new Date(new Date().getFullYear(), new Date().getMonth(), 1)) / (1000 * 60 * 60 * 24)));
-  const expectedValue = budget ? budget / daysInMonth * daysElapsed : 0;
-  const velocityPct = expectedValue > 0 ? value / expectedValue * 100 - 100 : 0;
-
+// Premium KPI Card - Estilo Enterprise
+function PremiumMetricCard({ title, value, budget, icon: Icon, color, onClick, isActive, comparisonValue, showComparison }) {
   const percentage = budget ? (value / budget * 100).toFixed(1) : 0;
-  const isPositive = percentage >= 100;
-  const isWarning = percentage >= 70 && percentage < 100;
-
-  // Comparación con período anterior
-  const comparisonPercentage = showComparison && comparisonValue > 0 ?
-  ((value - comparisonValue) / comparisonValue * 100).toFixed(1) :
-  null;
-  const isComparisonPositive = comparisonPercentage > 0;
+  const isPositive = value >= (comparisonValue || 0);
+  
+  const change = comparisonValue ? ((value - comparisonValue) / comparisonValue * 100) : 0;
+  const isChangePositive = change >= 0;
 
   const formatValue = (val) => {
-    if (formatType === "currency") {
-      return new Intl.NumberFormat('es-CO', {
-        style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0
-      }).format(val);
-    }
-    return new Intl.NumberFormat('es-CO').format(val);
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0
+    }).format(val);
   };
 
   return (
     <motion.div
-      whileHover={{ y: -8, scale: 1.03, rotate: 1 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ y: -2 }}
       onClick={onClick}
-      animate={isActive ? {
-        boxShadow: ["0 10px 40px rgba(236,72,153,0.3)", "0 15px 50px rgba(236,72,153,0.4)", "0 10px 40px rgba(236,72,153,0.3)"]
-      } : {}}
-      transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
-      className={`cursor-pointer rounded-2xl p-5 transition-all duration-300 border-2 ${
-      isActive ? 'border-pink-400 shadow-xl shadow-pink-500/20' : 'border-transparent shadow-md hover:shadow-xl'} ${
-      bgColor}`}>
-
+      className="cursor-pointer rounded-2xl p-4 transition-all"
+      style={{
+        background: 'rgba(255,255,255,0.82)',
+        backdropFilter: 'blur(24px)',
+        border: '1px solid rgba(0,0,0,0.06)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
+      }}>
+      
       <div className="flex items-start justify-between mb-3">
-        <motion.div
-          className={`w-12 h-12 ${iconBg} rounded-xl flex items-center justify-center`}
-          animate={isActive ? { rotate: [0, -15, 15, -10, 10, 0], scale: [1, 1.1, 1] } : {}}
-          transition={{ duration: 0.6, repeat: isActive ? Infinity : 0, repeatDelay: 2 }}
-          whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}>
-
-          <Icon className={`w-6 h-6 ${iconColor}`} />
-        </motion.div>
-        {budget > 0 && !showComparison &&
-        <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${
-        percentage >= 100 ? 'bg-green-100 text-green-700' : percentage >= 70 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`
-        }>
-            {percentage >= 100 ? <CheckCircle2 className="w-3 h-3" /> : percentage >= 70 ? <TrendingUp className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
-            {percentage}%
-          </div>
-        }
-      </div>
-      
-      <p className="text-sm text-gray-500 mb-1">{title}</p>
-      <motion.p
-        key={value}
-        initial={{ scale: 1.2, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 200 }}
-        className="text-2xl font-semibold text-gray-700">
-
-        {formatValue(value)}
-      </motion.p>
-      
-      {budget > 0 && !showComparison &&
-      <div className="mt-3">
-          <div className="h-2 bg-white/50 rounded-full overflow-hidden">
-            <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(percentage, 100)}%` }}
-            transition={{ duration: 0.8 }}
-            className={`h-full rounded-full ${
-            isPositive ? 'bg-green-400' : isWarning ? 'bg-amber-400' : 'bg-red-400'}`
-            } />
-
-          </div>
-          <p className="text-xs text-gray-400 mt-1">Meta: {formatValue(budget)}</p>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${color}0f` }}>
+          <div style={{ color, width: 15, height: 15, opacity: 0.85, background: color, borderRadius: '4px' }} />
         </div>
-      }
+        <span className={`flex items-center gap-0.5 text-[11px] font-semibold ${isChangePositive ? 'text-emerald-500' : 'text-rose-400'}`}>
+          {isChangePositive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
+          {Math.abs(change).toFixed(0)}%
+        </span>
+      </div>
 
-      {/* Comparación con período anterior */}
-      {showComparison && comparisonValue !== null && comparisonValue !== undefined &&
-      <motion.div
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mt-3 p-2 rounded-lg bg-white/30 border border-white/50">
+      <p className="text-[22px] font-black text-slate-800 leading-none tracking-tight mb-0.5">{formatValue(value).slice(0, -3)}</p>
+      <p className="text-[11px] font-medium text-slate-400 mb-3 tracking-wide">{title}</p>
 
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-600 font-medium">vs Anterior</span>
-            <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-bold ${
-          isComparisonPositive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`
-          }>
-              {isComparisonPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-              {isComparisonPositive ? '+' : ''}{comparisonPercentage}%
-            </div>
-          </div>
-          <div className="flex justify-between text-[10px]">
-            <span className="text-gray-500">Anterior:</span>
-            <span className="text-gray-700 font-semibold">{formatValue(comparisonValue)}</span>
-          </div>
-          <div className="flex justify-between text-[10px] mt-0.5">
-            <span className="text-gray-500">Diferencia:</span>
-            <span className={`font-bold ${isComparisonPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-              {formatValue(Math.abs(value - comparisonValue))} {isComparisonPositive ? 'más' : 'menos'}
-            </span>
-          </div>
-        </motion.div>
-      }
-
-      {insight && !showComparison &&
-      <p className="text-xs text-gray-500 mt-2 italic">{insight}</p>
-      }
-    </motion.div>);
-
+      <div className="absolute bottom-0 left-0 right-0 h-px rounded-b-2xl" style={{ background: `linear-gradient(90deg, transparent, ${color}30, transparent)` }} />
+    </motion.div>
+  );
 }
 
 // DetailPanel is now in components/dashboard/DetailPanel
@@ -1147,38 +1069,104 @@ export default function Dashboard() {
               </motion.div>
           }
 
-            {/* Metrics Grid - Clickeable */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {metrics.map((metric) =>
-            <MetricCard
-              key={metric.id}
-              title={metric.title}
-              value={metric.value}
-              comparisonValue={metric.comparisonValue}
-              showComparison={showComparison}
-              budget={metric.budget}
-              icon={metric.icon}
-              bgColor={metric.bgColor}
-              iconBg={metric.iconBg}
-              iconColor={metric.iconColor}
-              format={metric.format}
-              onClick={() => {
-                const newMetric = activeMetric === metric.id ? null : metric.id;
-                setActiveMetric(newMetric);
-                if (newMetric) {
-                  setTimeout(() => {
-                    const detailPanel = document.getElementById('detail-panel');
-                    if (detailPanel) {
-                      detailPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }, 100);
-                }
-              }}
-              isActive={activeMetric === metric.id}
-              insight={getInsight(metric.id, metric.value, metric.budget)} />
+            {/* Nova AI Strip */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="relative overflow-hidden rounded-2xl p-4 sm:p-5 mb-6"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.75) 100%)',
+                backdropFilter: 'blur(32px)',
+                border: '1px solid rgba(0,0,0,0.06)',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.04)'
+              }}>
+              
+              <div className="absolute inset-0 opacity-30 blur-3xl" style={{ background: 'linear-gradient(135deg, #ec489320, transparent 70%)', pointerEvents: 'none' }} />
+              
+              <div className="relative flex items-start gap-3 sm:gap-4">
+                <div className="text-3xl sm:text-4xl flex-shrink-0 mt-0.5">✨</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="w-4 h-4" style={{ color: '#ec4899' }} />
+                    <h3 className="text-sm font-semibold text-slate-700">Nova · Insight Ejecutivo</h3>
+                  </div>
+                  <p className="text-[13px] text-slate-600 leading-relaxed font-medium">
+                    {gregorianMonthTotals.sales > 0 
+                      ? `Acumulas ${formatCurrency(gregorianMonthTotals.sales)} en ventas del mes. Proyección de cierre: ${formatCurrency((gregorianMonthTotals.sales / new Date().getDate()) * 30)}. Ticket promedio: ${formatCurrency(gregorianMonthTotals.transactions > 0 ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0)}`
+                      : 'Sin datos de ventas aún. Comienza a registrar para ver insights ejecutivos.'}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
 
-            )}
-            </div>
+            {/* Premium KPI Cards */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
+              
+              <PremiumMetricCard
+                title="Ventas Totales"
+                value={gregorianMonthTotals.sales}
+                budget={currentBudget.sales_budget}
+                icon={DollarSign}
+                color="#ef4444"
+                comparisonValue={comparisonTotals?.sales}
+                showComparison={showComparison}
+                onClick={() => {
+                  const newMetric = activeMetric === 'sales' ? null : 'sales';
+                  setActiveMetric(newMetric);
+                }}
+                isActive={activeMetric === 'sales'}
+              />
+              
+              <PremiumMetricCard
+                title="Ticket Promedio"
+                value={gregorianMonthTotals.transactions > 0 ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0}
+                budget={currentBudget.tickets_budget}
+                icon={Receipt}
+                color="#3b82f6"
+                comparisonValue={comparisonAvgTicket}
+                showComparison={showComparison}
+                onClick={() => {
+                  const newMetric = activeMetric === 'tickets' ? null : 'tickets';
+                  setActiveMetric(newMetric);
+                }}
+                isActive={activeMetric === 'tickets'}
+              />
+              
+              <PremiumMetricCard
+                title="Transacciones"
+                value={gregorianMonthTotals.transactions}
+                budget={currentBudget.transactions_budget}
+                icon={Zap}
+                color="#8b5cf6"
+                comparisonValue={comparisonTotals?.transactions}
+                showComparison={showComparison}
+                onClick={() => {
+                  const newMetric = activeMetric === 'transactions' ? null : 'transactions';
+                  setActiveMetric(newMetric);
+                }}
+                isActive={activeMetric === 'transactions'}
+              />
+              
+              <PremiumMetricCard
+                title="Sugeridos"
+                value={gregorianMonthTotals.suggested}
+                budget={currentBudget.suggested_budget}
+                icon={Gift}
+                color="#f59e0b"
+                comparisonValue={comparisonTotals?.suggested}
+                showComparison={showComparison}
+                onClick={() => {
+                  const newMetric = activeMetric === 'suggested' ? null : 'suggested';
+                  setActiveMetric(newMetric);
+                }}
+                isActive={activeMetric === 'suggested'}
+              />
+            </motion.div>
 
             {/* Detail Panel */}
             <AnimatePresence>
