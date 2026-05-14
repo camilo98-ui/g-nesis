@@ -638,106 +638,86 @@ export default function HomeWorkspace({
             transition={{ duration: 0.6 }}
             className="mb-6 space-y-3">
 
-            {/* Nova AI Strip — Premium Executive Copilot */}
+            {/* Nova AI Strip — Minimal Enterprise SaaS */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative overflow-hidden rounded-3xl"
+              className="relative overflow-hidden rounded-2xl"
               style={{
-                background: 'rgba(255, 255, 255, 0.88)',
+                background: 'rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(40px)',
-                border: '1px solid rgba(194, 24, 117, 0.08)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(194, 24, 117, 0.04)'
+                border: '1px solid rgba(194, 24, 117, 0.06)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
               }}>
               
-              <div className="flex items-center h-32 px-6 gap-6">
+              <div className="flex items-center h-16 px-5 gap-4">
                 
-                {/* ZONA 1 — Avatar IA */}
-                <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                  <motion.div
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="relative w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%)',
-                      border: '2px solid rgba(194, 24, 117, 0.2)',
-                      boxShadow: '0 0 24px rgba(194, 24, 117, 0.15), inset 0 1px 2px rgba(255,255,255,0.8)'
-                    }}>
-                    
-                    {/* Glow pulsante */}
-                    <motion.div
-                      animate={{ opacity: [0.3, 0.6, 0.3] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                      className="absolute inset-0 rounded-full"
-                      style={{ background: 'radial-gradient(circle, rgba(194, 24, 117, 0.2), transparent)', filter: 'blur(8px)' }} />
-                    
-                    {/* Avatar Robot Premium */}
-                    <svg width="48" height="48" viewBox="0 0 48 48" className="relative z-10">
-                      <defs>
-                        <linearGradient id="novaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#C21875" />
-                          <stop offset="100%" stopColor="#9333EA" />
-                        </linearGradient>
-                      </defs>
-                      {/* Head */}
-                      <rect x="12" y="8" width="24" height="20" rx="3" fill="url(#novaGrad)" opacity="0.9" />
-                      {/* Eyes */}
-                      <circle cx="17" cy="15" r="2.5" fill="#FFFFFF" opacity="0.8" />
-                      <circle cx="31" cy="15" r="2.5" fill="#FFFFFF" opacity="0.8" />
-                      {/* Accent line */}
-                      <line x1="14" y1="23" x2="34" y2="23" stroke="url(#novaGrad)" strokeWidth="1.5" opacity="0.6" />
-                      {/* Body */}
-                      <rect x="16" y="28" width="16" height="12" rx="2" fill="url(#novaGrad)" opacity="0.7" />
-                      {/* Accent shine */}
-                      <circle cx="24" cy="12" r="1.5" fill="white" opacity="0.5" />
-                    </svg>
-                  </motion.div>
+                {/* Avatar IA Minimalista */}
+                <motion.div
+                  animate={{ scale: [1, 1.03, 1] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%)',
+                    border: '1.5px solid rgba(194, 24, 117, 0.15)',
+                    boxShadow: '0 0 16px rgba(194, 24, 117, 0.1)'
+                  }}>
                   
-                  <div className="text-center">
-                    <p className="text-[9px] font-medium text-slate-400 tracking-wide uppercase">Insight del día</p>
-                    <p className="text-xs font-bold text-slate-800 mt-0.5">Nova AI</p>
-                  </div>
-                </div>
+                  {/* Avatar Robot Minimalista */}
+                  <svg width="28" height="28" viewBox="0 0 28 28" className="relative z-10">
+                    <defs>
+                      <linearGradient id="novaGradMin" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#C21875" />
+                        <stop offset="100%" stopColor="#9333EA" />
+                      </linearGradient>
+                    </defs>
+                    {/* Head simplificado */}
+                    <rect x="8" y="5" width="12" height="11" rx="2" fill="url(#novaGradMin)" opacity="0.85" />
+                    {/* Eyes minimalistas */}
+                    <circle cx="11" cy="10" r="1.2" fill="#FFFFFF" opacity="0.8" />
+                    <circle cx="17" cy="10" r="1.2" fill="#FFFFFF" opacity="0.8" />
+                    {/* Línea delgada */}
+                    <line x1="9" y1="14" x2="19" y2="14" stroke="url(#novaGradMin)" strokeWidth="0.8" opacity="0.5" />
+                    {/* Body compacto */}
+                    <rect x="10" y="17" width="8" height="7" rx="1" fill="url(#novaGradMin)" opacity="0.65" />
+                  </svg>
+                </motion.div>
 
-                {/* SEPARADOR — Línea vertical */}
-                <div className="w-px h-20 bg-gradient-to-b from-transparent via-slate-200 to-transparent opacity-40" />
+                {/* Separador sutil */}
+                <div className="w-px h-8 bg-gradient-to-b from-transparent via-slate-200 to-transparent opacity-30" />
 
-                {/* ZONA 2 — Insight Central */}
+                {/* Insight horizontal compacto */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm leading-relaxed font-medium text-slate-700">
+                  <p className="text-[12px] leading-relaxed font-medium text-slate-700">
                     {latest?.total_sales > 0 
                       ? (() => {
                           const salesM = (latest.total_sales / 1000000).toFixed(1);
                           const projection = ((latest.total_sales / new Date().getHours()) * 24 / 1000000).toFixed(1);
-                          const ticket = ((latest.total_sales / latest.total_transactions) / 1000).toFixed(0);
                           return (
                             <>
-                              Excelente ritmo hoy. Las ventas van en{' '}
+                              Ritmo excelente · ventas{' '}
                               <span style={{ color: '#C21875', fontWeight: 700 }}>${salesM}M</span>
-                              {' '}y la proyección de cierre es{' '}
+                              {' '}→ proyección{' '}
                               <span style={{ color: '#C21875', fontWeight: 700 }}>${projection}M</span>
-                              {' '}con ticket promedio de{' '}
-                              <span style={{ color: '#C21875', fontWeight: 700 }}>${ticket}K</span>.
                             </>
                           );
                         })()
-                      : 'Sin datos de ventas aún. Comienza a registrar para ver insights ejecutivos personalizados.'}
+                      : 'Registra ventas para ver insights personalizados'}
                   </p>
                 </div>
 
-                {/* ZONA 3 — Botón Premium */}
+                {/* Botón minimalista premium */}
                 <motion.button
-                  whileHover={{ scale: 1.04, y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-semibold text-white flex-shrink-0 transition-all"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold text-slate-800 flex-shrink-0 transition-all"
                   style={{
-                    background: 'linear-gradient(135deg, #C21875 0%, #A855F7 100%)',
-                    boxShadow: '0 4px 12px rgba(194, 24, 117, 0.25)',
-                    border: '1px solid rgba(255,255,255,0.2)'
+                    background: 'rgba(194, 24, 117, 0.08)',
+                    border: '1px solid rgba(194, 24, 117, 0.12)',
+                    boxShadow: '0 2px 8px rgba(194, 24, 117, 0.08)'
                   }}>
                   Ver análisis
-                  <span style={{ fontSize: '11px' }}>✨</span>
                 </motion.button>
 
               </div>
@@ -754,13 +734,16 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#ef44440f' }} />
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239, 68, 68, 0.08)' }}>
+                    <TrendingUp style={{ width: 14, height: 14, color: '#ef4444', opacity: 0.7 }} />
+                  </div>
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 12%</span>
                 </div>
                 <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
                   {latest?.total_sales ? `${(latest.total_sales / 1000000).toFixed(1)}M` : '—'}
                 </p>
-                <p className="text-[11px] font-medium text-slate-400 tracking-wide">Ventas Totales</p>
+                <p className="text-[11px] font-medium text-slate-400 tracking-wide mb-2.5">Ventas Totales</p>
+                <PremiumSparkline data={sparkSales} color="#ef4444" width={100} height="18" />
               </div>
 
               {/* Ticket */}
@@ -771,13 +754,16 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#3b82f60f' }} />
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(59, 130, 246, 0.08)' }}>
+                    <Activity style={{ width: 14, height: 14, color: '#3b82f6', opacity: 0.7 }} />
+                  </div>
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 8%</span>
                 </div>
                 <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
                   {latest?.total_transactions > 0 ? `${((latest.total_sales / latest.total_transactions) / 1000).toFixed(0)}K` : '—'}
                 </p>
-                <p className="text-[11px] font-medium text-slate-400 tracking-wide">Ticket Promedio</p>
+                <p className="text-[11px] font-medium text-slate-400 tracking-wide mb-2.5">Ticket Promedio</p>
+                <PremiumSparkline data={sparkTxn.map((v, i) => (sparkSales[i] && sparkTxn[i] ? sparkSales[i] / sparkTxn[i] : 0))} color="#3b82f6" width={100} height="18" />
               </div>
 
               {/* Transactions */}
@@ -788,13 +774,16 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#8b5cf60f' }} />
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(139, 92, 246, 0.08)' }}>
+                    <Zap style={{ width: 14, height: 14, color: '#8b5cf6', opacity: 0.7 }} />
+                  </div>
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 5%</span>
                 </div>
                 <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
                   {latest?.total_transactions ? latest.total_transactions : '—'}
                 </p>
-                <p className="text-[11px] font-medium text-slate-400 tracking-wide">Transacciones</p>
+                <p className="text-[11px] font-medium text-slate-400 tracking-wide mb-2.5">Transacciones</p>
+                <PremiumSparkline data={sparkTxn} color="#8b5cf6" width={100} height="18" />
               </div>
 
               {/* Suggested */}
@@ -805,13 +794,16 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#f59e0b0f' }} />
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245, 158, 11, 0.08)' }}>
+                    <Trophy style={{ width: 14, height: 14, color: '#f59e0b', opacity: 0.7 }} />
+                  </div>
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 3%</span>
                 </div>
                 <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
                   {latest?.total_suggested ? latest.total_suggested : '—'}
                 </p>
-                <p className="text-[11px] font-medium text-slate-400 tracking-wide">Sugeridos</p>
+                <p className="text-[11px] font-medium text-slate-400 tracking-wide mb-2.5">Sugeridos</p>
+                <PremiumSparkline data={[2, 3, 3, 4, 3, 5, 4, latest?.total_suggested || 0]} color="#f59e0b" width={100} height="18" />
               </div>
 
             </div>
