@@ -1302,9 +1302,41 @@ export default function SalesReportView() {
                     );
                   })}
                 </div>
-              </motion.div>
 
-              {/* Top 10 Productos */}
+                {/* Participación del Depto Helados (si es el líder) */}
+                {hierarchy[0]?.dept && (
+                  <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${EXEC.borderLight}` }}>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-3" style={{ color: EXEC.textMuted }}>
+                      Desglose: {hierarchy[0].dept}
+                    </p>
+                    <div className="space-y-2">
+                      {hierarchy[0].sections.filter(s => s.sectionSales > 0).map((sec, i) => {
+                        const color = COLORS[(i + 5) % COLORS.length];
+                        const secPct = hierarchy[0].deptSales > 0 ? (sec.sectionSales / hierarchy[0].deptSales) * 100 : 0;
+                        return (
+                          <div key={i}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium" style={{ color: EXEC.textSecondary }}>{sec.name}</span>
+                              <span className="text-xs font-bold" style={{ color }}>{secPct.toFixed(1)}%</span>
+                            </div>
+                            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${secPct}%` }}
+                                transition={{ duration: 0.7, delay: i * 0.05 }}
+                                className="h-full rounded-full"
+                                style={{ background: color }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                </motion.div>
+
+                {/* Top 10 Productos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
                 <div className="px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${EXEC.borderLight}` }}>
