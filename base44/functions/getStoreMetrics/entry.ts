@@ -42,8 +42,12 @@ Deno.serve(async (req) => {
       suggested: acc.suggested + (s.total_suggested || 0)
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
 
-    // Get current budget
+    // Get current budget - MISMO FILTRO que Dashboard
     const currentBudget = budgets.find(b => 
+      Number(b.month) === now.getMonth() + 1 && 
+      Number(b.year) === now.getFullYear() &&
+      b.is_active === true
+    ) || budgets.find(b => 
       Number(b.month) === now.getMonth() + 1 && 
       Number(b.year) === now.getFullYear()
     ) || {};
@@ -100,8 +104,11 @@ Deno.serve(async (req) => {
         tickets_budget: currentBudget.tickets_budget || 0,
         transactions_budget: currentBudget.transactions_budget || 0,
         suggested_budget: currentBudget.suggested_budget || 0,
+        sales_gap: currentBudget.sales_gap || null,
+        is_active: currentBudget.is_active || false,
         compliance: currentBudget.sales_budget ? 
-          Math.round((monthTotals.sales / currentBudget.sales_budget) * 100) : 0
+          Math.round((monthTotals.sales / currentBudget.sales_budget) * 100) : 0,
+        source: 'Budget entity'
       },
       weather: latestWeather ? {
         temperature: latestWeather.temperature_mean,
