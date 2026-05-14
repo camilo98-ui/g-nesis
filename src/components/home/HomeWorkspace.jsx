@@ -16,6 +16,7 @@ import PremiumSparkline from './PremiumSparkline';
 import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
 import PremiumMainChart from './PremiumMainChart';
+import HeroSection from './HeroSection';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -630,57 +631,9 @@ export default function HomeWorkspace({
             </div>
           </motion.div>
 
-          {/* ── PREMIUM MAIN CHART ── */}
+          {/* ── HERO SECTION ── */}
           {!isGerente &&
-          <PremiumMainChart
-            dailySales={todaySales}
-            activeBudget={budget.length > 0 ? budget.find((b) => {
-              const now = new Date();
-              return Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear();
-            }) : null}
-            dailyBudgets={dailyBudgets} />
-
-          }
-
-          {/* ── DAILY METRICS ── */}
-           {!isGerente &&
-          <DailyMetricsPanel todaySales={todaySales} budget={budget} />
-          }
-
-          {/* ── EXECUTIVE ANALYTICS ── */}
-          {!isGerente &&
-          <ExecutiveAnalyticsPanel
-            todaySales={todaySales}
-            budget={budget}
-            cashiers={cashiers}
-            pygReports={pygReports}
-            shiftRecords={shiftRecords}
-            products={salesReports} />
-
-          }
-
-          {/* ── QUICK ACTIONS ── */}
-          {!isGerente &&
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.45 }}
-            className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 lg:mb-7">
-            
-              {[
-            { label: 'Registrar Ventas', icon: TrendingUp, onClick: onShowStoreSales },
-            { label: 'Presupuesto Mensual', icon: Target, onClick: onShowBudgetDashboard },
-            { label: 'Informe Gerencial', icon: FileText, onClick: onShowReport }].
-            map(({ label, icon: I, onClick }) =>
-            <button key={label} onClick={onClick}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-[11.5px] font-medium text-slate-600 hover:text-slate-900 hover:bg-black/[0.03] transition-all group hidden"
-            style={{ border: '1px solid rgba(0,0,0,0.07)', background: 'rgba(255,255,255,0.7)' }}>
-                  <I style={{ width: 12, height: 12, color: '#9ca3af' }} />
-                  {label}
-                  <ChevronRight className="w-3 h-3 text-slate-200 group-hover:text-slate-400 transition-colors" />
-                </button>
-            )}
-            </motion.div>
+          <HeroSection />
           }
 
           {/* ── CLIMA BANNER ── */}
