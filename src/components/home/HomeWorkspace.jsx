@@ -626,7 +626,14 @@ export default function HomeWorkspace({
 
           {/* ── PREMIUM MAIN CHART ── */}
           {!isGerente &&
-          <PremiumMainChart />
+          <PremiumMainChart 
+            dailySales={todaySales}
+            activeBudget={budget.length > 0 ? budget.find(b => {
+              const now = new Date();
+              return Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear();
+            }) : null}
+            dailyBudgets={[]}
+          />
           }
 
           {/* ── DAILY METRICS ── */}
