@@ -638,85 +638,136 @@ export default function HomeWorkspace({
             transition={{ duration: 0.6 }}
             className="mb-6 space-y-3">
 
-            {/* Nova AI Strip — Minimal Enterprise SaaS */}
+            {/* Nova AI Strip — Premium Enterprise SaaS Copilot */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative overflow-hidden rounded-2xl"
+              className="relative overflow-hidden rounded-2xl backdrop-blur-xl"
               style={{
-                background: 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(40px)',
-                border: '1px solid rgba(194, 24, 117, 0.06)',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.88) 100%)',
+                backdropFilter: 'blur(48px) saturate(120%)',
+                border: '1px solid rgba(194, 24, 117, 0.08)',
+                boxShadow: '0 8px 32px rgba(194, 24, 117, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.5)'
               }}>
               
-              <div className="flex items-center h-16 px-5 gap-4">
+              <div className="flex items-center h-16 px-6 gap-4">
                 
-                {/* Avatar IA Minimalista */}
+                {/* Avatar IA Premium — AI Copilot */}
                 <motion.div
-                  animate={{ scale: [1, 1.03, 1] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                  className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                  animate={{ 
+                    scale: [1, 1.02, 1],
+                    opacity: [1, 1, 1]
+                  }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                  className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%)',
-                    border: '1.5px solid rgba(194, 24, 117, 0.15)',
-                    boxShadow: '0 0 16px rgba(194, 24, 117, 0.1)'
+                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.14) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(194, 24, 117, 0.08) 100%)',
+                    border: '1.5px solid rgba(194, 24, 117, 0.18)',
+                    boxShadow: '0 0 20px rgba(194, 24, 117, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.6)'
                   }}>
                   
-                  {/* Avatar Robot Minimalista */}
+                  {/* Glow pulsante */}
+                  <motion.div
+                    animate={{ opacity: [0.2, 0.4, 0.2] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute inset-0 rounded-full"
+                    style={{ 
+                      background: 'radial-gradient(circle, rgba(194, 24, 117, 0.25), transparent 70%)',
+                      filter: 'blur(10px)'
+                    }} />
+                  
+                  {/* Avatar Robot Premium — Moderne Minimalist */}
                   <svg width="28" height="28" viewBox="0 0 28 28" className="relative z-10">
                     <defs>
-                      <linearGradient id="novaGradMin" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <linearGradient id="novaGradPremium" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#C21875" />
+                        <stop offset="50%" stopColor="#B4297C" />
                         <stop offset="100%" stopColor="#9333EA" />
                       </linearGradient>
+                      <filter id="novaGlow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="0.8" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
                     </defs>
-                    {/* Head simplificado */}
-                    <rect x="8" y="5" width="12" height="11" rx="2" fill="url(#novaGradMin)" opacity="0.85" />
-                    {/* Eyes minimalistas */}
-                    <circle cx="11" cy="10" r="1.2" fill="#FFFFFF" opacity="0.8" />
-                    <circle cx="17" cy="10" r="1.2" fill="#FFFFFF" opacity="0.8" />
-                    {/* Línea delgada */}
-                    <line x1="9" y1="14" x2="19" y2="14" stroke="url(#novaGradMin)" strokeWidth="0.8" opacity="0.5" />
-                    {/* Body compacto */}
-                    <rect x="10" y="17" width="8" height="7" rx="1" fill="url(#novaGradMin)" opacity="0.65" />
+                    {/* Head with shine */}
+                    <rect x="8" y="5" width="12" height="11" rx="2.5" fill="url(#novaGradPremium)" opacity="0.9" filter="url(#novaGlow)" />
+                    {/* Eyes modern */}
+                    <circle cx="11.5" cy="10" r="1.3" fill="#FFFFFF" opacity="0.85" />
+                    <circle cx="16.5" cy="10" r="1.3" fill="#FFFFFF" opacity="0.85" />
+                    {/* Eye shine */}
+                    <circle cx="11.2" cy="9.6" r="0.5" fill="#FFFFFF" opacity="0.4" />
+                    <circle cx="16.2" cy="9.6" r="0.5" fill="#FFFFFF" opacity="0.4" />
+                    {/* Accent line elegant */}
+                    <line x1="9" y1="14.5" x2="19" y2="14.5" stroke="url(#novaGradPremium)" strokeWidth="0.9" opacity="0.6" />
+                    {/* Body sleek */}
+                    <rect x="10" y="17" width="8" height="7" rx="1.5" fill="url(#novaGradPremium)" opacity="0.7" filter="url(#novaGlow)" />
+                    {/* Accent dot */}
+                    <circle cx="24" cy="7" r="1.2" fill="url(#novaGradPremium)" opacity="0.4" />
                   </svg>
                 </motion.div>
 
-                {/* Separador sutil */}
-                <div className="w-px h-8 bg-gradient-to-b from-transparent via-slate-200 to-transparent opacity-30" />
+                {/* Separador elegante */}
+                <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-250 to-transparent opacity-25" />
 
-                {/* Insight horizontal compacto */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[12px] leading-relaxed font-medium text-slate-700">
+                {/* Insight Premium Horizontal */}
+                <div className="flex-1 min-w-0 flex items-center">
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.6 }}
+                    className="text-[12.5px] leading-relaxed font-medium text-slate-700"
+                    style={{ letterSpacing: '0.3px' }}>
                     {latest?.total_sales > 0 
                       ? (() => {
                           const salesM = (latest.total_sales / 1000000).toFixed(1);
                           const projection = ((latest.total_sales / new Date().getHours()) * 24 / 1000000).toFixed(1);
                           return (
                             <>
-                              Ritmo excelente · ventas{' '}
-                              <span style={{ color: '#C21875', fontWeight: 700 }}>${salesM}M</span>
-                              {' '}→ proyección{' '}
-                              <span style={{ color: '#C21875', fontWeight: 700 }}>${projection}M</span>
+                              <span className="text-slate-600">Ritmo excelente · </span>
+                              <span className="text-slate-700">ventas </span>
+                              <span style={{ 
+                                color: '#C21875', 
+                                fontWeight: 800,
+                                fontSize: '13px',
+                                letterSpacing: '-0.3px'
+                              }}>${salesM}M</span>
+                              <span className="text-slate-600"> → proyección </span>
+                              <span style={{ 
+                                color: '#C21875', 
+                                fontWeight: 800,
+                                fontSize: '13px',
+                                letterSpacing: '-0.3px'
+                              }}>${projection}M</span>
                             </>
                           );
                         })()
-                      : 'Registra ventas para ver insights personalizados'}
-                  </p>
+                      : <span className="text-slate-500">Registra ventas para ver insights personalizados</span>}
+                  </motion.p>
                 </div>
 
-                {/* Botón minimalista premium */}
+                {/* Botón Premium SaaS */}
                 <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold text-slate-800 flex-shrink-0 transition-all"
+                  whileHover={{ scale: 1.04, y: -0.5 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold flex-shrink-0 backdrop-blur-md transition-all duration-300 relative overflow-hidden group"
                   style={{
-                    background: 'rgba(194, 24, 117, 0.08)',
-                    border: '1px solid rgba(194, 24, 117, 0.12)',
-                    boxShadow: '0 2px 8px rgba(194, 24, 117, 0.08)'
+                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%)',
+                    border: '1.5px solid rgba(194, 24, 117, 0.15)',
+                    color: '#C21875',
+                    boxShadow: '0 4px 12px rgba(194, 24, 117, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
                   }}>
+                  <motion.div
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute inset-0 rounded-lg"
+                    style={{ 
+                      background: 'radial-gradient(circle at center, rgba(194, 24, 117, 0.08), transparent)',
+                      zIndex: -1
+                    }} />
                   Ver análisis
                 </motion.button>
 
