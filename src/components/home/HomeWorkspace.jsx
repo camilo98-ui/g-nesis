@@ -659,29 +659,14 @@ export default function HomeWorkspace({
                     scale: [1, 1.02, 1]
                   }}
                   transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.14) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(194, 24, 117, 0.08) 100%)',
-                    border: '1.5px solid rgba(194, 24, 117, 0.18)',
-                    boxShadow: '0 0 20px rgba(194, 24, 117, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.6)'
-                  }}>
+                  className="relative flex-shrink-0"
+                  style={{ width: '56px', height: '56px' }}>
                   
-                  {/* Glow pulsante */}
-                  <motion.div
-                    animate={{ opacity: [0.2, 0.4, 0.2] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute inset-0 rounded-full"
-                    style={{ 
-                      background: 'radial-gradient(circle, rgba(194, 24, 117, 0.25), transparent 70%)',
-                      filter: 'blur(10px)',
-                      zIndex: 1
-                    }} />
-                  
-                  {/* Imagen mascota Nova */}
+                  {/* Imagen mascota Nova - Sin círculo, más grande y completa */}
                   <img 
                     src="https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png" 
                     alt="Nova" 
-                    className="w-full h-full object-cover relative z-10"
+                    className="w-full h-full object-cover rounded-xl"
                   />
                 </motion.div>
 
