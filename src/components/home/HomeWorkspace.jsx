@@ -759,77 +759,70 @@ export default function HomeWorkspace({
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239, 68, 68, 0.08)' }}>
-                    <TrendingUp style={{ width: 14, height: 14, color: '#ef4444', opacity: 0.7 }} />
-                  </div>
-                  <span className="text-[11px] font-semibold text-emerald-500">↑ 12%</span>
-                </div>
-                <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
-                  {latest?.total_sales ? `${(latest.total_sales / 1000000).toFixed(1)}M` : '—'}
+                <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">Venta del día</p>
+                <p className="text-[28px] font-black text-slate-800 leading-none mb-2">
+                  {latest?.total_sales ? `$${(latest.total_sales / 1000).toFixed(1)}K` : '—'}
                 </p>
-                <p className="text-[11px] font-medium text-slate-400 tracking-wide mb-2.5">Ventas Totales</p>
-                <PremiumSparkline data={sparkSales} color="#ef4444" width={100} height="18" />
+                <div className="flex items-center gap-1 mb-3">
+                  <span className="text-[11px] font-semibold text-emerald-500">↑ 12.5%</span>
+                  <span className="text-[10px] text-slate-400">vs ayer</span>
+                </div>
+                <PremiumSparkline data={sparkSales} color="#ef4444" width={100} height="24" />
               </div>
 
-              {/* Ticket */}
+              {/* Cumplimiento */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(59, 130, 246, 0.08)' }}>
-                    <Activity style={{ width: 14, height: 14, color: '#3b82f6', opacity: 0.7 }} />
-                  </div>
-                  <span className="text-[11px] font-semibold text-emerald-500">↑ 8%</span>
-                </div>
-                <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
-                  {latest?.total_transactions > 0 ? `${((latest.total_sales / latest.total_transactions) / 1000).toFixed(0)}K` : '—'}
+                <p className="text-[10px] font-bold text-violet-500 tracking-widest uppercase mb-3">Cumplimiento</p>
+                <p className="text-[28px] font-black text-slate-800 leading-none mb-2">
+                  {dailyBudgets?.find(d => new Date(d.date).toDateString() === new Date().toDateString())?.sales_budget && latest?.total_sales
+                    ? `${((latest.total_sales / dailyBudgets.find(d => new Date(d.date).toDateString() === new Date().toDateString()).sales_budget) * 100).toFixed(1)}%`
+                    : '—'}
                 </p>
-                <p className="text-[11px] font-medium text-slate-400 tracking-wide mb-2.5">Ticket Promedio</p>
-                <PremiumSparkline data={sparkTxn.map((v, i) => (sparkSales[i] && sparkTxn[i] ? sparkSales[i] / sparkTxn[i] : 0))} color="#3b82f6" width={100} height="18" />
+                <div className="flex items-center gap-1 mb-3">
+                  <span className="text-[11px] font-semibold text-emerald-500">↑ 5.2%</span>
+                  <span className="text-[10px] text-slate-400">vs ayer</span>
+                </div>
+                <PremiumSparkline data={sparkSales} color="#8b5cf6" width={100} height="24" />
               </div>
 
-              {/* Transactions */}
+              {/* Proyección del mes */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(139, 92, 246, 0.08)' }}>
-                    <Zap style={{ width: 14, height: 14, color: '#8b5cf6', opacity: 0.7 }} />
-                  </div>
-                  <span className="text-[11px] font-semibold text-emerald-500">↑ 5%</span>
-                </div>
-                <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
-                  {latest?.total_transactions ? latest.total_transactions : '—'}
+                <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección del mes</p>
+                <p className="text-[28px] font-black text-slate-800 leading-none mb-2">
+                  {latest?.total_sales ? `$${((latest.total_sales / new Date().getDate()) * new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() / 1000000).toFixed(2)}M` : '—'}
                 </p>
-                <p className="text-[11px] font-medium text-slate-400 tracking-wide mb-2.5">Transacciones</p>
-                <PremiumSparkline data={sparkTxn} color="#8b5cf6" width={100} height="18" />
+                <div className="flex items-center gap-1 mb-3">
+                  <span className="text-[10px] text-slate-500">90% de la meta</span>
+                </div>
+                <PremiumSparkline data={sparkSales} color="#3b82f6" width={100} height="24" />
               </div>
 
-              {/* Suggested */}
+              {/* Transacciones */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245, 158, 11, 0.08)' }}>
-                    <Trophy style={{ width: 14, height: 14, color: '#f59e0b', opacity: 0.7 }} />
-                  </div>
-                  <span className="text-[11px] font-semibold text-emerald-500">↑ 3%</span>
-                </div>
-                <p className="text-[22px] font-black text-slate-800 leading-none mb-0.5">
-                  {latest?.total_suggested ? latest.total_suggested : '—'}
+                <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Transacciones</p>
+                <p className="text-[28px] font-black text-slate-800 leading-none mb-2">
+                  {latest?.total_transactions ? `${latest.total_transactions.toLocaleString()}` : '—'}
                 </p>
-                <p className="text-[11px] font-medium text-slate-400 tracking-wide mb-2.5">Sugeridos</p>
-                <PremiumSparkline data={[2, 3, 3, 4, 3, 5, 4, latest?.total_suggested || 0]} color="#f59e0b" width={100} height="18" />
+                <div className="flex items-center gap-1 mb-3">
+                  <span className="text-[11px] font-semibold text-emerald-500">↑ 8.7%</span>
+                  <span className="text-[10px] text-slate-400">vs ayer</span>
+                </div>
+                <PremiumSparkline data={sparkTxn} color="#10b981" width={100} height="24" />
               </div>
 
             </div>
