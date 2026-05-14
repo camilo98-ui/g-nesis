@@ -879,8 +879,8 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
                 <p className="text-[18px] font-bold text-rose-500 leading-none mb-2">
-                  {budgetData?.adjustedDailyBudget ? 
-                    `$${Math.round(budgetData.adjustedDailyBudget).toLocaleString('es-CO')}`
+                  {budgetData?.excelBudgetForToday ? 
+                    `$${Math.round(budgetData.excelBudgetForToday).toLocaleString('es-CO')}`
                     : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
