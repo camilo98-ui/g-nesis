@@ -649,17 +649,9 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
          <AnalyticsCard title="Participación" subtitle="Mix del negocio por categoría" delay={0.3}>
           <DonutChart data={PARTICIPATION_SEGMENTS} />
           <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Ticket Promedio</p>
-            <div className="p-2 rounded-lg mb-3" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
-              <p className="text-[9px] text-[#8F96A3] font-medium">Mes Actual</p>
-              <p className="text-[13px] font-black text-[#FF4D8D] mt-1">
-                {fmt((currentMonthTotal / Math.max(currentMonthTickets, 1)))}
-              </p>
-            </div>
-            {/* Mini sparkline de ticket promedio diario */}
-            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Ticket últimos 14 días</p>
-            <ResponsiveContainer width="100%" height={48}>
-              <AreaChart data={sorted30.slice(-14)} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
+            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Tendencia de Ticket</p>
+            <ResponsiveContainer width="100%" height={100}>
+              <AreaChart data={sorted30} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
                 <defs>
                   <linearGradient id="ticketMiniGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
