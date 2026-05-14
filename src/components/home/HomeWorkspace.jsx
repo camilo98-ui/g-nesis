@@ -320,9 +320,27 @@ export default function HomeWorkspace({
     staleTime: 10 * 60 * 1000
   });
 
-  const sorted = [...todaySales].sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Obtener data del Dashboard para métricas completas
+  const { data: dailySalesData = [] } = useQuery({
+    queryKey: ['home-daily-sales', selectedStore],
+    queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore,
+    staleTime: 5 * 60 * 1000
+  });
+
+  // Calcular métricas como en Dashboard
+  const sorted = [...dailySalesData].sort((a, b) => new Date(b.date) - new Date(a.date));
   const latest = sorted[0];
   const prev = sorted[1];
+  
+  const totals = {
+    sales: sorted.reduce((s, d) => s + (d.total_sales || 0), 0),
+    transactions: sorted.reduce((s, d) => s + (d.total_transactions || 0), 0),
+    suggested: sorted.reduce((s, d) => s + (d.total_suggested || 0), 0)
+  };
+  
+  const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
+  
   const salesVal = latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(1)}M` : '—';
   const txnVal = latest?.total_transactions ? String(latest.total_transactions) : '—';
   const ticketVal = latest?.total_sales && latest?.total_transactions ?
@@ -464,12 +482,12 @@ export default function HomeWorkspace({
 
 
   const intelItems = [
-  { emoji: '↑', text: salesVal !== '—' ? `Ventas hoy: ${salesVal}${salesChange > 0 ? ` · +${salesChange}% vs ayer` : salesChange < 0 ? ` · ${salesChange}% vs ayer` : ''}` : 'Sin datos de ventas aún hoy', type: salesChange >= 0 ? 'good' : 'warn' },
-  { emoji: '≡', text: txnVal !== '—' ? `${txnVal} transacciones registradas hoy` : 'Sin transacciones registradas hoy', type: 'info' },
+  { emoji: '↑', text: `Ventas acumuladas: $${(totals.sales / 1000000).toFixed(1)}M ${salesChange > 0 ? ` · +${salesChange}% vs ayer` : salesChange < 0 ? ` · ${salesChange}% vs ayer` : ''}`, type: salesChange >= 0 ? 'good' : 'warn' },
+  { emoji: '≡', text: `${totals.transactions.toLocaleString()} transacciones registradas`, type: 'info' },
   { emoji: '◎', text: `${cashiers.length} cajeros activos en tienda`, type: 'info' },
-  { emoji: '◈', text: ticketVal !== '—' ? `Ticket promedio: ${ticketVal} por transacción` : 'Ingresa ventas para calcular el ticket promedio', type: 'good' },
-  { emoji: '!', text: 'Verifica el nivel de stock en la nevera', type: 'warn' },
-  { emoji: '+', text: 'Registra las ventas del turno actual', type: 'action' }];
+  { emoji: '◈', text: `Ticket promedio: $${Math.round(avgTicket).toLocaleString()} por transacción`, type: avgTicket > 50000 ? 'good' : 'info' },
+  { emoji: '🎯', text: budget.length > 0 ? `Meta mensual: ${budget[0]?.sales_budget ? `$${(budget[0].sales_budget / 1000000).toFixed(1)}M` : 'No definida'}` : 'Sin presupuesto configurado', type: 'info' },
+  { emoji: '🎁', text: `${totals.suggested.toLocaleString()} sugeridos vendidos (${totals.transactions > 0 ? (totals.suggested / totals.transactions * 100).toFixed(0) : 0}% conversión)`, type: 'action' }];
 
 
   return (
