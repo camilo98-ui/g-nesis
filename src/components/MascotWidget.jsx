@@ -189,13 +189,24 @@ export default function MascotWidget() {
     }
   }, [path]);
 
+  // Micro insights — frases cortas y discretas
+  const MICRO_INSIGHTS = {
+    '/':              ["Operación estable", "+8% vs ayer", "Ritmo saludable", "Sin alertas"],
+    '/Budget':        ["Proyección positiva", "En meta", "Ritmo normal", "Brecha controlada"],
+    '/Sales':         ["Ventas activas", "Ticket promedio +", "Tendencia positiva", "Ritmo constante"],
+    '/Rankings':      ["Equipo equilibrado", "Desempeño bueno", "Sin anomalías", "Variación normal"],
+    default:          ["Operación activa", "Sin alertas", "Sistema estable", "Todo en orden"],
+  };
+
   useEffect(() => {
+    // Mostrar micro insight después de 8 segundos
     const t = setTimeout(() => {
-      setBubbleMsg(PROACTIVE_MESSAGES[path] || PROACTIVE_MESSAGES.default);
+      const insights = MICRO_INSIGHTS[path] || MICRO_INSIGHTS.default;
+      setBubbleMsg(insights[Math.floor(Math.random() * insights.length)]);
       setShowBubble(true);
-    }, 5000);
+    }, 8000);
     return () => clearTimeout(t);
-  }, []);
+  }, [path]);
 
   useEffect(() => { if (isOpen) setShowBubble(false); }, [isOpen]);
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isLoading]);
@@ -363,56 +374,52 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto �
         )}
       </AnimatePresence>
 
-      {/* Speech Bubble */}
+      {/* Micro Insight — Elegante y discreto */}
       <AnimatePresence>
         {showBubble && !isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, x: 8 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.9, x: 8 }}
-            transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-            className="relative max-w-[180px] rounded-xl rounded-br-sm px-3 py-2 cursor-pointer"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="px-2.5 py-1.5 rounded-lg cursor-pointer"
             style={{
-              background: 'rgba(255,255,255,0.96)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(0,0,0,0.07)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(190,24,93,0.1)',
+              background: 'rgba(255,255,255,0.6)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(190,24,93,0.08)',
+              boxShadow: '0 1px 8px rgba(190,24,93,0.06), 0 1px 2px rgba(0,0,0,0.03)',
             }}
             onClick={() => { setIsOpen(true); setShowBubble(false); }}
           >
-            <p className="text-[10px] font-medium text-slate-700 leading-snug">{bubbleMsg}</p>
-            <p className="text-[8px] mt-1 font-semibold tracking-wide" style={{ color: '#be185d' }}>NOVA · ACTIVA</p>
+            <p className="text-[11px] font-medium text-slate-600 tracking-tight whitespace-nowrap">{bubbleMsg}</p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Mascot Button */}
+      {/* Nova Button — Minimalista y elegante */}
       <motion.button
         onClick={() => { setIsOpen(o => !o); setShowBubble(false); }}
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.93 }}
-        className="relative w-12 h-12 rounded-full"
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.95 }}
+        className="relative w-10 h-10 rounded-full"
       >
-        <motion.div className="absolute -inset-1.5 rounded-full"
-          animate={{ opacity: [0.2, 0.45, 0.2], scale: [0.95, 1.05, 0.95] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ background: 'radial-gradient(circle, rgba(190,24,93,0.3) 0%, transparent 70%)' }}
+        {/* Glow muy sutil */}
+        <motion.div className="absolute -inset-1 rounded-full"
+          animate={{ opacity: [0.08, 0.16, 0.08] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ background: 'radial-gradient(circle, rgba(190,24,93,0.15) 0%, transparent 70%)' }}
         />
-        <div className="relative w-12 h-12 rounded-full overflow-hidden"
+        
+        {/* Avatar */}
+        <div className="relative w-10 h-10 rounded-full overflow-hidden"
           style={{
-            border: '2px solid rgba(190,24,93,0.5)',
-            boxShadow: '0 4px 20px rgba(190,24,93,0.25), inset 0 0 0 1px rgba(255,255,255,0.8)',
+            border: '1.5px solid rgba(190,24,93,0.25)',
+            boxShadow: '0 2px 12px rgba(190,24,93,0.12)',
             background: 'white',
           }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.6]"
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]"
             style={{ objectPosition: 'center center' }} />
-        </div>
-        <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full flex items-center justify-center"
-          style={{ background: 'white', border: '1.5px solid rgba(190,24,93,0.15)' }}>
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-            style={{ boxShadow: '0 0 4px rgba(52,211,153,0.9)' }} />
         </div>
       </motion.button>
     </div>
