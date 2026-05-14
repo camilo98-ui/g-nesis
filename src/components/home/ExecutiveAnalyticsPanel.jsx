@@ -669,29 +669,36 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 </AreaChart>
                 </ResponsiveContainer>
 
-                {/* KPIs de Ticket */}
-                <div className="mt-4 pt-3 grid grid-cols-3 gap-2" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-                 className="p-2 rounded-lg text-center" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
-                 <p className="text-[7px] text-[#8F96A3] font-semibold uppercase">Máximo</p>
-                 <p className="text-[11px] font-black text-[#FF4D8D] mt-0.5">
-                   {sorted30.length > 0 ? fmt(Math.max(...sorted30.map(d => d.ticket || 0))) : '—'}
-                 </p>
-                </motion.div>
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.62 }}
-                 className="p-2 rounded-lg text-center" style={{ background: 'rgba(99, 102, 241, 0.05)' }}>
-                 <p className="text-[7px] text-[#8F96A3] font-semibold uppercase">Promedio</p>
-                 <p className="text-[11px] font-black text-indigo-400 mt-0.5">
-                   {sorted30.length > 0 ? fmt(Math.round(sorted30.reduce((s, d) => s + (d.ticket || 0), 0) / sorted30.length)) : '—'}
-                 </p>
-                </motion.div>
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.64 }}
-                 className="p-2 rounded-lg text-center" style={{ background: 'rgba(255, 182, 201, 0.05)' }}>
-                 <p className="text-[7px] text-[#8F96A3] font-semibold uppercase">Mínimo</p>
-                 <p className="text-[11px] font-black text-[#FFB4C9] mt-0.5">
-                   {sorted30.length > 0 ? fmt(Math.min(...sorted30.map(d => d.ticket || 0))) : '—'}
-                 </p>
-                </motion.div>
+                {/* Top Categorías de Participación */}
+                <div className="mt-4 pt-3 space-y-2" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+                  {[
+                    { name: 'Helados', value: 42, color: '#C1185B', trend: -2.1 },
+                    { name: 'Bebidas', value: 23, color: '#F57C00', trend: 1.5 },
+                    { name: 'Combos', value: 18, color: '#00796B', trend: -0.8 }
+                  ].map((cat, i) => (
+                    <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
+                      className="flex items-center gap-2">
+                      <div className="text-[9px] font-black text-[#8F96A3] w-5">{i + 1}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-semibold text-[#2A2A2A]">{cat.name}</p>
+                        <div className="h-1.5 rounded-full mt-1" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                          <motion.div 
+                            className="h-full rounded-full" 
+                            style={{ background: cat.color }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${cat.value}%` }}
+                            transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
+                          />
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-[9px] font-black tabular-nums" style={{ color: cat.color }}>{cat.value}%</p>
+                        <p className={`text-[8px] font-semibold tabular-nums ${cat.trend < 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
+                          {cat.trend > 0 ? '↑' : '↓'} {Math.abs(cat.trend)}%
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
                 </div>
                 </AnalyticsCard>
