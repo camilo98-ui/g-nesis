@@ -15,6 +15,7 @@ import StoreSelector from '@/components/StoreSelector';
 import PremiumSparkline from './PremiumSparkline';
 import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
+import PremiumDashboardHeader from './PremiumDashboardHeader';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -441,40 +442,23 @@ export default function HomeWorkspace({
         {/* CENTER — scrollable */}
         <div className="flex-1 min-w-0 overflow-y-auto p-4 lg:p-7">
 
-          {/* TOP BAR */}
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="mb-7">
-            
-            <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
-              <div className="flex items-center gap-2">
-                <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
-                <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
-                  {greeting.text}
-                </h1>
-              </div>
-              <div className="w-full sm:w-auto max-w-xs">
-                <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
-              </div>
-              {isGerente &&
-              <div className="hidden sm:flex items-center gap-1.5 ml-auto">
-                  {[
-                { label: 'PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter },
-                { label: 'KPIs', icon: BarChart3, onClick: onShowKpisUploader },
-                { label: 'P&G', icon: TrendingUp, onClick: onShowPYGUploader }].
-                map(({ label, icon: I, onClick }) =>
-                <button key={label} onClick={onClick}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-700 hover:bg-black/[0.04] transition-all"
-                style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
-                      <I style={{ width: 11, height: 11 }} />{label}
-                    </button>
-                )}
-                </div>
-              }
-            </div>
-          </motion.div>
+          {/* ── PREMIUM HEADER ── */}
+          <PremiumDashboardHeader
+            selectedStore={selectedStore}
+            onStoreChange={onStoreChange}
+            isGerente={isGerente}
+            salesVal={salesVal}
+            txnVal={txnVal}
+            ticketVal={ticketVal}
+            salesChange={salesChange}
+            sparkSales={sparkSales}
+            sparkTxn={sparkTxn}
+            budget={budget}
+            sorted={sorted}
+            onShowBudgetImporter={onShowBudgetImporter}
+            onShowKpisUploader={onShowKpisUploader}
+            onShowPYGUploader={onShowPYGUploader}
+          />
 
           {/* ── DAILY METRICS ── */}
            {!isGerente &&
