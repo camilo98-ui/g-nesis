@@ -593,7 +593,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
           <div className="mt-3 pt-2.5 border-t border-slate-100">
             <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">KPI Adicionales</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 mb-3">
               <div className="p-1.5 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
                 <p className="text-[8px] text-[#8F96A3] font-medium">Promedio Txn</p>
                 <p className="text-[10px] font-bold text-[#FF4D8D]">{Math.round(sorted30.reduce((s, d) => s + (d.txn || 0), 0) / (sorted30.length || 1))}</p>
@@ -603,6 +603,24 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 <p className="text-[10px] font-bold text-[#FF4D8D]">1pm-3pm</p>
               </div>
             </div>
+            {/* Mini sparkline de txn por día */}
+            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Txn últimos 14 días</p>
+            <ResponsiveContainer width="100%" height={48}>
+              <AreaChart data={sorted30.slice(-14)} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
+                <defs>
+                  <linearGradient id="txnMiniGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <Area type="monotone" dataKey="txn" stroke="#FF4D8D" strokeWidth={1.5} fill="url(#txnMiniGrad)" dot={false} />
+                <Tooltip
+                  contentStyle={{ background: 'rgba(15,15,20,0.9)', border: 'none', borderRadius: 8, fontSize: 10, padding: '4px 8px' }}
+                  formatter={(v) => [v, 'Txn']}
+                  labelFormatter={(l) => l}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </AnalyticsCard>
 
@@ -611,12 +629,32 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           <DonutChart data={PARTICIPATION_SEGMENTS} />
           <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
             <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Ticket Promedio</p>
-            <div className="p-2 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
+            <div className="p-2 rounded-lg mb-3" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
               <p className="text-[9px] text-[#8F96A3] font-medium">Período Actual</p>
               <p className="text-[13px] font-black text-[#FF4D8D] mt-1">
                 {fmt((todaySales.reduce((s, d) => s + (d.total_sales || 0), 0) / Math.max(todaySales.reduce((s, d) => s + (d.total_tickets || 1), 0), 1)))}
               </p>
             </div>
+            {/* Mini sparkline de ticket promedio diario */}
+            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Ticket últimos 14 días</p>
+            <ResponsiveContainer width="100%" height={48}>
+              <AreaChart data={sorted30.slice(-14)} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
+                <defs>
+                  <linearGradient id="ticketMiniGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <Area type="monotone" dataKey="ticket" stroke="#6366f1" strokeWidth={1.5} fill="url(#ticketMiniGrad)" dot={false} />
+                {/* Línea de meta $25K */}
+                <Line type="monotone" dataKey="ticketPPT" stroke="#FFB4C9" strokeWidth={1} strokeDasharray="3,3" dot={false} />
+                <Tooltip
+                  contentStyle={{ background: 'rgba(15,15,20,0.9)', border: 'none', borderRadius: 8, fontSize: 10, padding: '4px 8px' }}
+                  formatter={(v) => [fmt(v), 'Ticket']}
+                  labelFormatter={(l) => l}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </AnalyticsCard>
 
