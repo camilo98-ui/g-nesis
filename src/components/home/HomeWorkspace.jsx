@@ -348,6 +348,38 @@ export default function HomeWorkspace({
 
   const filteredNav = NAV_ITEMS.filter((n) => n.roles.includes(selectedRole));
 
+  // Generar frase dinámica según contexto operativo
+  const getDynamicPhrase = () => {
+    if (!todaySales.length) return "Comienza el día. Aún sin datos operativos.";
+    
+    const sorted = [...todaySales].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const latest = sorted[0];
+    const prev = sorted[1];
+    
+    if (!latest) return "Aún sin datos operativos hoy.";
+    
+    const salesChange = prev ? Math.round((latest.total_sales - prev.total_sales) / prev.total_sales * 100) : 0;
+    const currentSales = latest.total_sales || 0;
+    const currentTxn = latest.total_transactions || 0;
+    const avgTicket = currentTxn > 0 ? currentSales / currentTxn : 0;
+    
+    // Array de frases dinámicas basadas en condiciones
+    const phrases = [
+      ...(salesChange > 15 ? ["El ritmo de venta está acelerado hoy."] : []),
+      ...(salesChange < -10 ? ["Las ventas van más lento que ayer."] : []),
+      ...(salesChange > 0 && salesChange <= 15 ? ["Ritmo estable vs. ayer."] : []),
+      ...(avgTicket > 50000 ? ["El ticket promedio sostiene la operación."] : []),
+      ...(currentTxn > 80 ? ["Buen volumen de transacciones registrado."] : []),
+      ...(latestWeather?.precipitation > 5 ? ["La lluvia impacta el tráfico hoy."] : []),
+      ...(latestWeather?.temperature_mean > 26 ? ["Clima caluroso — buen día para helados."] : []),
+      ...(budget.length > 0 ? ["Proyección de cierre al alcance."] : []),
+      ...(cashiers.length > 3 ? ["Equipo completo para el turno."] : []),
+      "El negocio mantiene su ritmo normal.",
+    ];
+    
+    return phrases.length > 0 ? phrases[Math.floor(Math.random() * phrases.length)] : "La operación sigue su marcha.";
+  };
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
@@ -508,11 +540,16 @@ export default function HomeWorkspace({
             className="mb-7">
             
             <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
-              <div className="flex items-center gap-2">
-                <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
-                <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
-                  {greeting.text}
-                </h1>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
+                  <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
+                    {greeting.text}
+                  </h1>
+                </div>
+                <p className="text-[12px] text-slate-400 font-medium leading-snug max-w-sm">
+                  {getDynamicPhrase()}
+                </p>
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <div className="flex-1 sm:flex-none sm:max-w-xs">
