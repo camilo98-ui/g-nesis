@@ -669,33 +669,33 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 </AreaChart>
                 </ResponsiveContainer>
 
-                {/* Top Categorías de Participación */}
-                <div className="mt-4 pt-3 space-y-2" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+                {/* Top 3 Productos */}
+                <div className="mt-4 pt-3 space-y-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
                   {[
-                    { name: 'Helados', value: 42, color: '#C1185B', trend: -2.1 },
-                    { name: 'Bebidas', value: 23, color: '#F57C00', trend: 1.5 },
-                    { name: 'Combos', value: 18, color: '#00796B', trend: -0.8 }
-                  ].map((cat, i) => (
+                    { name: 'HLDO 2 SABORES EXCL', value: 85, sales: 17957846, trend: -13.0 },
+                    { name: 'HLDO 1 SABOR EXCL', value: 72, sales: 14522217, trend: -8.5 },
+                    { name: 'HLDO 1 SABOR', value: 65, sales: 13414281, trend: -12.8 }
+                  ].map((prod, i) => (
                     <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
-                      className="flex items-center gap-2">
-                      <div className="text-[9px] font-black text-[#8F96A3] w-5">{i + 1}</div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-semibold text-[#2A2A2A]">{cat.name}</p>
-                        <div className="h-1.5 rounded-full mt-1" style={{ background: 'rgba(0,0,0,0.08)' }}>
-                          <motion.div 
-                            className="h-full rounded-full" 
-                            style={{ background: cat.color }}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${cat.value}%` }}
-                            transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
-                          />
+                      className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <div className="text-[10px] font-black text-white rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ background: '#6366f1' }}>
+                          {i + 1}
+                        </div>
+                        <p className="text-[10px] font-bold text-[#2A2A2A] flex-1">{prod.name}</p>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-[9px] font-black text-rose-500 tabular-nums">↓ {prod.trend}%</p>
+                          <p className="text-[9px] font-bold text-[#FF4D8D] tabular-nums">{fmt(prod.sales)}</p>
                         </div>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-[9px] font-black tabular-nums" style={{ color: cat.color }}>{cat.value}%</p>
-                        <p className={`text-[8px] font-semibold tabular-nums ${cat.trend < 0 ? 'text-rose-500' : 'text-emerald-600'}`}>
-                          {cat.trend > 0 ? '↑' : '↓'} {Math.abs(cat.trend)}%
-                        </p>
+                      <div className="h-1.5 rounded-full ml-7" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                        <motion.div 
+                          className="h-full rounded-full" 
+                          style={{ background: '#6366f1' }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${prod.value}%` }}
+                          transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
+                        />
                       </div>
                     </motion.div>
                   ))}
