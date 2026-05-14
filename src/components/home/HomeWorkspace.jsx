@@ -8,7 +8,7 @@ import {
   Download, FileText, Lock, Receipt, Snowflake, Settings as SettingsIcon,
   CalendarDays, LogOut, Sparkles, Trophy, FileSpreadsheet, BarChart3, Clock,
   ChevronRight, Zap, BarChart2, ArrowUpRight, ArrowDownRight, Minus,
-  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown } from
+  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown, Plus } from
 'lucide-react';
 import { STORES } from '@/components/StoreSelector';
 import StoreSelector from '@/components/StoreSelector';
@@ -514,8 +514,24 @@ export default function HomeWorkspace({
                   {greeting.text}
                 </h1>
               </div>
-              <div className="w-full sm:w-auto max-w-xs">
-                <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="flex-1 sm:flex-none sm:max-w-xs">
+                  <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
+                </div>
+                {!isGerente && (
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={onShowStoreSales}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-rose-500 hover:text-rose-600 flex-shrink-0 transition-all"
+                    style={{
+                      background: 'rgba(244,63,94,0.07)',
+                      border: '1px solid rgba(244,63,94,0.15)'
+                    }}>
+                    <Plus style={{ width: 12, height: 12 }} />
+                    <span className="hidden sm:inline">Venta</span>
+                  </motion.button>
+                )}
               </div>
               {isGerente &&
               <div className="hidden sm:flex items-center gap-1.5 ml-auto">
