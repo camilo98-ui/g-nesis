@@ -763,7 +763,7 @@ export default function HomeWorkspace({
             </motion.div>
 
             {/* Premium KPI Cards Grid - 4 Tarjetas principales */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 hidden">
 
               {/* 1. PPT del Día */}
               <div className="rounded-2xl p-4" style={{
@@ -773,11 +773,11 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
-                <p className="text-xl font-black text-slate-900 mb-2">
-                  {budgetData?.excelBudgetForToday > 0 
-                    ? `$${Math.round(budgetData.excelBudgetForToday).toLocaleString('es-CO')}`
-                    : `$${budgetData?.monthlyBudget ? Math.round(budgetData.monthlyBudget / 30).toLocaleString('es-CO') : '0'}`}
-                </p>
+                
+
+
+
+                
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-400 text-center flex-1">del 01 - {new Date().getDate()} may</span>
                 </div>
