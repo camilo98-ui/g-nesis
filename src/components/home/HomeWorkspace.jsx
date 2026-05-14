@@ -509,7 +509,7 @@ export default function HomeWorkspace({
         
         {/* Logo */}
         <div className="px-4 pt-5 pb-4">
-          <img src={LOGO_URL} alt="Popsy" className="h-8 object-contain mb-5" />
+          <img src={LOGO_URL} alt="Popsy" className="h-12 object-contain mb-5" />
           {!isGerente && selectedStore &&
           <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl"
           style={{ background: 'rgba(194,24,117,0.05)', border: '1px solid rgba(194,24,117,0.09)' }}>
