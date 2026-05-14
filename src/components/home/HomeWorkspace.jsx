@@ -653,20 +653,55 @@ export default function HomeWorkspace({
               
               <div className="flex items-center h-16 px-6 gap-4">
                 
-                {/* Avatar Nova Mascota */}
+                {/* Avatar Nova Mascota - Premium Floating Character */}
                 <motion.div
                   animate={{ 
-                    scale: [1, 1.02, 1]
+                    y: [0, -2, 0],
+                    scale: [1, 1.01, 1]
                   }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                  transition={{ 
+                    duration: 4, 
+                    repeat: Infinity, 
+                    ease: 'easeInOut',
+                    type: 'spring',
+                    stiffness: 100
+                  }}
                   className="relative flex-shrink-0"
-                  style={{ width: '56px', height: '56px' }}>
+                  style={{ 
+                    width: '80px', 
+                    height: '80px',
+                    marginLeft: '-12px',
+                    marginRight: '4px'
+                  }}>
                   
-                  {/* Imagen mascota Nova - Sin círculo, más grande y completa */}
-                  <img 
+                  {/* Glow suave rosado/morado alrededor */}
+                  <motion.div
+                    animate={{ opacity: [0.25, 0.45, 0.25] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute inset-0 rounded-full"
+                    style={{ 
+                      background: 'radial-gradient(circle at center, rgba(194, 24, 117, 0.3), rgba(168, 85, 247, 0.15), transparent 75%)',
+                      filter: 'blur(16px)',
+                      zIndex: 0
+                    }} />
+                  
+                  {/* Sombra flotante ligera */}
+                  <motion.div
+                    animate={{ opacity: [0.15, 0.25, 0.15] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-full h-8 rounded-full"
+                    style={{ 
+                      background: 'radial-gradient(ellipse at center, rgba(194, 24, 117, 0.2), transparent 70%)',
+                      filter: 'blur(8px)',
+                      zIndex: 0
+                    }} />
+                  
+                  {/* Imagen mascota Nova - Completa y libre */}
+                  <motion.img 
                     src="https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png" 
                     alt="Nova" 
-                    className="w-full h-full object-cover rounded-xl"
+                    className="w-full h-full object-contain relative z-10 drop-shadow-lg"
+                    whileHover={{ scale: 1.05 }}
                   />
                 </motion.div>
 
