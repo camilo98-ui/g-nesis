@@ -294,6 +294,54 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
             </motion.div> :
 
             <>
+              {/* 3 Cards compactos: PPT, Brecha, Proyección */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                {/* Card 1: PPT del Día */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="rounded-xl p-4 bg-gradient-to-br from-rose-400/60 to-pink-400/60 border border-rose-300/30 backdrop-blur-sm">
+                  <p className="text-[11px] font-bold text-white/80 uppercase tracking-widest mb-2">PPT del Día</p>
+                  <p className="text-2xl font-black text-white leading-none mb-1">
+                    {formatCurrency(budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : (budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0))}
+                  </p>
+                  <p className="text-[10px] text-white/60">vs ppt</p>
+                </motion.div>
+
+                {/* Card 2: Brecha del Mes */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="rounded-xl p-4 bg-gradient-to-br from-emerald-400/60 to-teal-400/60 border border-emerald-300/30 backdrop-blur-sm">
+                  <p className="text-[11px] font-bold text-white/80 uppercase tracking-widest mb-2">Brecha del Mes</p>
+                  <p className="text-2xl font-black text-white leading-none mb-1">
+                    {(() => {
+                      const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
+                      return formatCurrency(monthGap);
+                    })()}
+                  </p>
+                  <p className="text-[10px] text-white/60">{(() => {
+                    const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
+                    return monthGap >= 0 ? 'Sobre meta' : 'Bajo meta';
+                  })()}</p>
+                </motion.div>
+
+                {/* Card 3: Proyección Cierre Mes */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="rounded-xl p-4 bg-gradient-to-br from-indigo-400/60 to-blue-400/60 border border-indigo-300/30 backdrop-blur-sm">
+                  <p className="text-[11px] font-bold text-white/80 uppercase tracking-widest mb-2">Proyección Cierre</p>
+                  <p className="text-2xl font-black text-white leading-none mb-1">
+                    {budgetData.monthProjectionCompliance.toFixed(0)}%
+                  </p>
+                  <p className="text-[10px] text-white/60">{formatCurrency(budgetData.monthProjection)}</p>
+                </motion.div>
+              </div>
+
               {/* Presupuesto del Día - DESTACADO */}
               <motion.div
                 whileHover={{ scale: 1.02, y: -2 }}
