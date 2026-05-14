@@ -669,31 +669,26 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 </AreaChart>
                 </ResponsiveContainer>
 
-                {/* Top 3 Productos */}
+                {/* Top 3 Categorías de Participación */}
                 <div className="mt-4 pt-3 space-y-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-                  {[
-                    { name: 'HLDO 2 SABORES EXCL', value: 85, sales: 17957846, trend: -13.0 },
-                    { name: 'HLDO 1 SABOR EXCL', value: 72, sales: 14522217, trend: -8.5 },
-                    { name: 'HLDO 1 SABOR', value: 65, sales: 13414281, trend: -12.8 }
-                  ].map((prod, i) => (
+                  {PARTICIPATION_SEGMENTS.slice(0, 3).map((cat, i) => (
                     <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
                       className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <div className="text-[10px] font-black text-white rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ background: '#6366f1' }}>
+                        <div className="text-[10px] font-black text-white rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0" style={{ background: PARTICIPATION_COLORS[i] }}>
                           {i + 1}
                         </div>
-                        <p className="text-[10px] font-bold text-[#2A2A2A] flex-1">{prod.name}</p>
+                        <p className="text-[10px] font-bold text-[#2A2A2A] flex-1">{cat.name}</p>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-[9px] font-black text-rose-500 tabular-nums">↓ {prod.trend}%</p>
-                          <p className="text-[9px] font-bold text-[#FF4D8D] tabular-nums">{fmt(prod.sales)}</p>
+                          <p className="text-[9px] font-black tabular-nums" style={{ color: PARTICIPATION_COLORS[i] }}>{cat.value}%</p>
                         </div>
                       </div>
                       <div className="h-1.5 rounded-full ml-7" style={{ background: 'rgba(0,0,0,0.08)' }}>
                         <motion.div 
                           className="h-full rounded-full" 
-                          style={{ background: '#6366f1' }}
+                          style={{ background: PARTICIPATION_COLORS[i] }}
                           initial={{ width: 0 }}
-                          animate={{ width: `${prod.value}%` }}
+                          animate={{ width: `${cat.value}%` }}
                           transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
                         />
                       </div>
