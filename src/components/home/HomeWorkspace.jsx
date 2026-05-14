@@ -777,6 +777,34 @@ export default function HomeWorkspace({
               </div>
             </motion.div>
 
+            {/* Subtle KPI Navigation Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="flex items-center gap-2 px-6 mb-6 overflow-x-auto pb-2">
+              {[
+                { label: 'PPT del Día', icon: '📊' },
+                { label: 'Proyección', icon: '📈' },
+                { label: 'Cmp Día', icon: '✓' }
+              ].map((item) => (
+                <motion.button
+                  key={item.label}
+                  whileHover={{ scale: 1.03, y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium whitespace-nowrap flex-shrink-0 transition-all duration-300"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.08) 0%, rgba(168, 85, 247, 0.06) 100%)',
+                    border: '1px solid rgba(194, 24, 117, 0.12)',
+                    color: '#64748b',
+                    boxShadow: '0 2px 8px rgba(194, 24, 117, 0.05)'
+                  }}>
+                  <span className="text-[9px] sm:text-[10px]">{item.icon}</span>
+                  <span>{item.label}</span>
+                </motion.button>
+              ))}
+            </motion.div>
+
             {/* Premium KPI Cards Grid - 4 Tarjetas principales */}
             
 
