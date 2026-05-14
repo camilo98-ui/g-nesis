@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, AreaChart } from 'recharts';
+import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, AreaChart, Legend } from 'recharts';
 import { motion } from 'framer-motion';
 import { TrendingUp, Target, ArrowUpRight, TrendingDown, Zap } from 'lucide-react';
 
@@ -25,7 +25,7 @@ const generateComplianceData = () => {
     const compliancePercent = actualSales / dailyBudget * 100;
 
     return {
-      date: `${date.getDate()}`,
+      date: date.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit' }),
       day: date.toLocaleDateString('es-CO', { weekday: 'short' }).substring(0, 3),
       actualSales: Math.max(0, actualSales),
       budget: dailyBudget,
@@ -267,7 +267,7 @@ export default function PremiumMainChart() {
         </div>
 
         {/* Gráfica - ComposedChart con dos líneas */}
-        <div className="h-32 px-4 pb-4">
+        <div className="h-40 px-4">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={complianceData}
@@ -297,23 +297,23 @@ export default function PremiumMainChart() {
               <XAxis
                 dataKey="date"
                 stroke="rgba(100,116,139,0.3)"
-                style={{ fontSize: '10px' }}
-                tick={{ fill: 'rgba(100,116,139,0.6)' }}
-                tickFormatter={(date) => {
-                  const d = new Date(date);
-                  return `${d.getDate()}/${d.getMonth() + 1}`;
-                }} />
+                style={{ fontSize: '9px' }}
+                tick={{ fill: 'rgba(100,116,139,0.6)' }} />
+
+               <YAxis
+                 stroke="rgba(100,116,139,0.3)"
+                 style={{ fontSize: '9px' }}
+                 tick={{ fill: 'rgba(100,116,139,0.6)' }}
+                 tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
               
-              <YAxis
-                stroke="rgba(100,116,139,0.3)"
-                style={{ fontSize: '11px' }}
-                tick={{ fill: 'rgba(100,116,139,0.6)' }}
-                label={{ value: 'Pesos ($)', angle: -90, position: 'insideLeft' }} />
-              
-              
-              <Tooltip content={<CustomComplianceTooltip />} cursor={{ stroke: 'rgba(236, 72, 153, 0.2)', strokeWidth: 1 }} />
-              
-              {/* Área suave debajo de ventas */}
+
+               <Tooltip content={<CustomComplianceTooltip />} cursor={{ stroke: 'rgba(236, 72, 153, 0.2)', strokeWidth: 1 }} />
+               <Legend 
+                 verticalAlign="bottom" 
+                 height={20}
+                 wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} />
+
+               {/* Área suave debajo de ventas */}
               <Area
                 type="monotone"
                 dataKey="actualSales"
@@ -351,32 +351,29 @@ export default function PremiumMainChart() {
           </ResponsiveContainer>
         </div>
 
-        {/* Métricas Clave - Minimalista */}
-        <div className="px-4 pb-4 flex items-center justify-between gap-4 hidden">
-          <div>
-            <p className="text-xs text-slate-500 font-semibold mb-1">Acumulado</p>
-            <p className="text-2xl font-black" style={{ color: COLORS.primary }}>
+        {/* Métricas Clave */}
+        <div className="px-4 pb-4 grid grid-cols-4 gap-2">
+          <div className="p-2 rounded-lg text-center" style={{ background: 'rgba(236,72,153,0.05)', border: '1px solid rgba(236,72,153,0.1)' }}>
+            <p className="text-[7px] font-bold text-slate-500 uppercase mb-1">Acumulado</p>
+            <p className="text-[9px] font-black" style={{ color: COLORS.primary }}>
               ${(complianceMetrics.accumulated / 1000000).toFixed(1)}M
             </p>
           </div>
-          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
-          <div>
-            <p className="text-xs text-slate-500 font-semibold mb-1">Presupuesto</p>
-            <p className="text-2xl font-black" style={{ color: COLORS.budget }}>
+          <div className="p-2 rounded-lg text-center" style={{ background: 'rgba(203,213,225,0.2)', border: '1px solid rgba(203,213,225,0.4)' }}>
+            <p className="text-[7px] font-bold text-slate-500 uppercase mb-1">Presupuesto</p>
+            <p className="text-[9px] font-black text-slate-500">
               ${(complianceMetrics.budget / 1000000).toFixed(1)}M
             </p>
           </div>
-          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
-          <div>
-            <p className="text-xs text-slate-500 font-semibold mb-1">Diferencia</p>
-            <p className="text-2xl font-black" style={{ color: complianceMetrics.variance > 0 ? COLORS.success : COLORS.danger }}>
-              {complianceMetrics.variance > 0 ? '+' : ''} ${(complianceMetrics.variance / 1000000).toFixed(2)}M
+          <div className="p-2 rounded-lg text-center" style={{ background: complianceMetrics.variance > 0 ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)', border: `1px solid ${complianceMetrics.variance > 0 ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)'}` }}>
+            <p className="text-[7px] font-bold text-slate-500 uppercase mb-1">Diferencia</p>
+            <p className="text-[9px] font-black" style={{ color: complianceMetrics.variance > 0 ? COLORS.success : COLORS.danger }}>
+              {complianceMetrics.variance > 0 ? '+' : ''}${(complianceMetrics.variance / 1000000).toFixed(1)}M
             </p>
           </div>
-          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
-          <div>
-            <p className="text-xs text-slate-500 font-semibold mb-1">Proyección</p>
-            <p className="text-2xl font-black" style={{ color: COLORS.accent }}>
+          <div className="p-2 rounded-lg text-center" style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.15)' }}>
+            <p className="text-[7px] font-bold text-slate-500 uppercase mb-1">Proyección</p>
+            <p className="text-[9px] font-black" style={{ color: COLORS.accent }}>
               ${(complianceMetrics.monthlyProjection / 1000000).toFixed(1)}M
             </p>
           </div>
@@ -427,6 +424,10 @@ export default function PremiumMainChart() {
                 <XAxis dataKey="day" stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} />
                 <YAxis stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
                 <Tooltip content={<ProjectionTooltip />} />
+                <Legend 
+                  verticalAlign="bottom" 
+                  height={20}
+                  wrapperStyle={{ paddingTop: '8px', fontSize: '11px' }} />
                 <Line
                   type="natural"
                   dataKey="dailySales"
