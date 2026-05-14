@@ -321,11 +321,11 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                           : budgetData.incrementPct > 0 ? `PPT del Día ×${100 + budgetData.incrementPct}%` : `PPT del Día`}
                       </p>
                       <motion.p
-                        key={`${budgetData.adjustedDailyBudget}-${gregorianMode}`}
+                        key={`${budgetData.excelBudgetForToday}-${gregorianMode}`}
                         initial={{ scale: 1.2, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-none mb-2">
-                        {formatCurrency(budgetData.adjustedDailyBudget)}
+                        {formatCurrency(budgetData.excelBudgetForToday)}
                       </motion.p>
                       <div className="space-y-1">
                         {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 &&
