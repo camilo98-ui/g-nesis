@@ -760,7 +760,7 @@ export default function HomeWorkspace({
             {/* Premium KPI Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 
-              {/* PPT del Día */}
+              {/* PPT del Día - Desde RetailWeekBudgetCard */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
@@ -769,8 +769,8 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
                 <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
-                  {budgetData?.excelBudgetForToday ? 
-                    budgetData.excelBudgetForToday.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                  {budgetData?.adjustedDailyBudget ? 
+                    budgetData.adjustedDailyBudget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
                     : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
@@ -779,7 +779,7 @@ export default function HomeWorkspace({
                 <PremiumSparkline data={sparkSales} color="#ef4444" width={100} height="24" />
               </div>
 
-              {/* Brecha del Mes */}
+              {/* Brecha del Mes - Desde RetailWeekBudgetCard */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
@@ -806,7 +806,7 @@ export default function HomeWorkspace({
                 <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
               </div>
 
-              {/* Proyección Cierre Mes */}
+              {/* Proyección Cierre Mes - Desde RetailWeekBudgetCard */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
@@ -815,11 +815,11 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
                 <p className="text-[20px] font-bold text-blue-500 leading-none mb-2">
-                  {budgetData ? `${budgetData.monthProjectionCompliance.toFixed(0)}%` : '0%'}
+                  {budgetData?.monthProjectionCompliance ? `${budgetData.monthProjectionCompliance.toFixed(0)}%` : '0%'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-500 text-center flex-1">
-                    {budgetData ? 
+                    {budgetData?.monthProjection ? 
                       `${budgetData.monthProjection.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })} / ${budgetData.monthlyBudget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
                       : ''}
                   </span>
