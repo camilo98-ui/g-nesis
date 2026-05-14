@@ -15,6 +15,7 @@ import StoreSelector from '@/components/StoreSelector';
 import PremiumSparkline from './PremiumSparkline';
 import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
+import PremiumMainChart from './PremiumMainChart';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -622,6 +623,11 @@ export default function HomeWorkspace({
               }
             </div>
           </motion.div>
+
+          {/* ── PREMIUM MAIN CHART ── */}
+          {!isGerente &&
+          <PremiumMainChart />
+          }
 
           {/* ── DAILY METRICS ── */}
            {!isGerente &&
