@@ -257,6 +257,7 @@ export default function HomeWorkspace({
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
+  const conversationRef = useRef(null);
 
   const storeName = selectedStoreName || STORES.find((s) => s.code === selectedStore)?.name || 'Tu Tienda';
   const isGerente = selectedRole === 'gerente';
@@ -353,26 +354,41 @@ export default function HomeWorkspace({
 
   async function sendMessage(text) {
     if (!text.trim()) return;
-    setMessages((prev) => [...prev, { role: 'user', text: text.trim() }]);
+    const userMsg = text.trim();
+    setMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
     setInputVal('');
     setIsTyping(true);
     
     try {
-      const response = await base44.functions.invoke('retailStrategist', {
-        prompt: text.trim(),
-        selectedStore,
-        selectedRole
-      });
-      
-      setIsTyping(false);
-      if (response.data?.success) {
-        setMessages((prev) => [...prev, { role: 'nova', text: response.data.response }]);
-      } else {
-        setMessages((prev) => [...prev, { role: 'nova', text: 'Hubo un error procesando tu solicitud. Intenta nuevamente.' }]);
+      // Crear conversación si no existe
+      if (!conversationRef.current) {
+        conversationRef.current = await base44.agents.createConversation({
+          agent_name: 'nova',
+          metadata: { store: selectedStore, role: selectedRole }
+        });
+        // Suscribirse a updates en tiempo real
+        base44.agents.subscribeToConversation(conversationRef.current.id, (data) => {
+          const agentMessages = (data.messages || [])
+            .filter(m => m.role === 'assistant' || m.role === 'user')
+            .map(m => ({ role: m.role === 'assistant' ? 'nova' : 'user', text: m.content }));
+          if (agentMessages.length > 1) {
+            setMessages([INITIAL_MESSAGES[0], ...agentMessages]);
+          }
+          // Detectar si el agente terminó de responder
+          const lastMsg = data.messages?.[data.messages.length - 1];
+          if (lastMsg?.role === 'assistant') {
+            setIsTyping(false);
+          }
+        });
       }
+
+      await base44.agents.addMessage(conversationRef.current, {
+        role: 'user',
+        content: userMsg
+      });
     } catch (error) {
       setIsTyping(false);
-      setMessages((prev) => [...prev, { role: 'nova', text: 'Error de conexión. Verifica tu pregunta e intenta de nuevo.' }]);
+      setMessages((prev) => [...prev, { role: 'nova', text: 'Error de conexión. Intenta de nuevo.' }]);
     }
   }
 
