@@ -773,11 +773,11 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
-                <p className="text-[18px] font-bold text-rose-500 leading-none mb-2 hidden">
-                  {budgetData?.excelBudgetForToday ?
-                  `$${Math.round(budgetData.excelBudgetForToday).toLocaleString('es-CO')}` :
-                  '$0'}
-                </p>
+                
+
+
+
+                
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-400 text-center flex-1">del 01 - {new Date().getDate()} may</span>
                 </div>
@@ -792,13 +792,13 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
-                <p className="text-[18px] font-bold text-emerald-500 leading-none mb-2 hidden">
-                  {(() => {
-                    const monthGap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
-                    const sign = monthGap >= 0 ? '+' : '-';
-                    return `${sign}$${Math.abs(Math.round(monthGap)).toLocaleString('es-CO')}`;
-                  })()}
-                </p>
+                
+
+
+
+
+
+                
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-400 text-center flex-1">
                     Sobre meta: {budgetData?.monthlyBudget ?
@@ -820,9 +820,9 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
-                <p className="text-[18px] font-bold text-blue-500 leading-none mb-2 hidden">
-                  {budgetData?.monthProjectionCompliance ? `${budgetData.monthProjectionCompliance.toFixed(0)}%` : '0%'}
-                </p>
+                
+
+                
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-500 text-center flex-1">
                     {budgetData?.monthProjection && budgetData?.monthlyBudget ?
@@ -841,11 +841,11 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Venta del día</p>
-                <p className="text-[18px] font-bold text-emerald-500 leading-none mb-2 hidden">
-                  {latest?.total_sales ?
-                  `$${Math.round(latest.total_sales).toLocaleString('es-CO')}` :
-                  '$0'}
-                </p>
+                
+
+
+
+                
                 <div className="flex items-center gap-1 mb-3">
                   {latest && prev ?
                   <>
