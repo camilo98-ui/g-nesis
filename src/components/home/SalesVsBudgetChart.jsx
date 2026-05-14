@@ -143,10 +143,7 @@ const SalesVsBudgetChart = ({ todaySales = 0, budget = {}, shiftRecords = [], da
       {/* Gráfica */}
       <div className="rounded-2xl p-7 bg-white border border-slate-100 shadow-sm overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
         
-        {filterType === 'daily' &&
-        <div className="hidden">
-             <ResponsiveContainer width="100%" height={340}>
-               
+        
 
 
 
@@ -223,31 +220,34 @@ const SalesVsBudgetChart = ({ todaySales = 0, budget = {}, shiftRecords = [], da
 
 
 
-            
-             </ResponsiveContainer>
-            
-            {/* Detalles diarios */}
-            <div className="mt-8 grid grid-cols-4 gap-4">
-              {[
-            { label: 'Hoy (Venta)', value: fmt(todaySales) },
-            { label: 'Presupuesto diario', value: fmt(dailyBudget) },
-            { label: 'Cumplimiento hoy', value: `${dailyBudget > 0 ? Math.round(todaySales / dailyBudget * 100) : 0}%` },
-            { label: 'Diferencia', value: fmt(todaySales - dailyBudget), color: todaySales >= dailyBudget ? 'text-emerald-600' : 'text-slate-600' }].
-            map((stat, i) =>
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors">
-              
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide mb-2">{stat.label}</p>
-                  <p className={`text-[16px] font-black ${stat.color || 'text-slate-900'}`}>{stat.value}</p>
-                </motion.div>
-            )}
-            </div>
-          </div>
-        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
         {filterType === 'projection' &&
         <div>
