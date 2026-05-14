@@ -753,15 +753,19 @@ export default function HomeWorkspace({
                   {/* Subtle KPI Navigation Buttons */}
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     {[
-                      { label: 'PPT del Día', icon: '📊' },
-                      { label: 'Proyección', icon: '📈' },
-                      { label: 'Cmp Día', icon: '✓' }
+                      { label: 'PPT del Día', icon: '📊', id: 'ppt-del-dia' },
+                      { label: 'Proyección', icon: '📈', id: 'proyeccion' },
+                      { label: 'Cmp Día', icon: '✓', id: 'cmp-dia' }
                     ].map((item) => (
                       <motion.button
                         key={item.label}
                         whileHover={{ scale: 1.03, y: -0.5 }}
                         whileTap={{ scale: 0.97 }}
-                        className="flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-medium whitespace-nowrap transition-all duration-300"
+                        onClick={() => {
+                          const element = document.getElementById(item.id);
+                          if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }}
+                        className="flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-medium whitespace-nowrap transition-all duration-300 cursor-pointer"
                         style={{
                           background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.08) 0%, rgba(168, 85, 247, 0.06) 100%)',
                           border: '1px solid rgba(194, 24, 117, 0.12)',
