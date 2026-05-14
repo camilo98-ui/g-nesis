@@ -1303,47 +1303,7 @@ export default function SalesReportView() {
                   })}
                 </div>
 
-                {/* Participación del Depto Helados - Donut Chart */}
-                {hierarchy[0]?.dept && (
-                  <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${EXEC.borderLight}` }}>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-3" style={{ color: EXEC.textMuted }}>
-                      Participación: {hierarchy[0].dept}
-                    </p>
-                    <div className="flex items-center gap-4">
-                      <div style={{ flex: '0 0 140px' }}>
-                        <ResponsiveContainer width="100%" height={140}>
-                          <PieChart>
-                            <Pie
-                              data={hierarchy[0].sections.filter(s => s.sectionSales > 0).map((sec, i) => ({
-                                name: sec.name,
-                                value: sec.sectionSales,
-                                fill: COLORS[i % COLORS.length]
-                              }))}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={45}
-                              outerRadius={65}
-                              dataKey="value"
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        {hierarchy[0].sections.filter(s => s.sectionSales > 0).map((sec, i) => {
-                          const color = COLORS[i % COLORS.length];
-                          const secPct = hierarchy[0].deptSales > 0 ? (sec.sectionSales / hierarchy[0].deptSales) * 100 : 0;
-                          return (
-                            <div key={i} className="flex items-center gap-2 text-xs">
-                              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
-                              <span style={{ color: EXEC.textSecondary }}>{sec.name}</span>
-                              <span className="ml-auto font-bold" style={{ color }}>{secPct.toFixed(1)}%</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
+
                 </motion.div>
 
                 {/* Top 10 Productos */}
