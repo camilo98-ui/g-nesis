@@ -523,87 +523,68 @@ export default function HomeWorkspace({
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="mb-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-            {/* Card 1 — Torres de ventas por turno */}
+            {/* Card 1 — Barras de ventas últimos 7 días */}
             <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Ventas por turno</p>
+              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Ventas · 7 días</p>
               <p className="text-[18px] font-black text-slate-800 leading-none mb-3">{salesVal}</p>
-              <div className="flex items-end gap-2 h-12">
-                {(() => {
-                  const turnos = [
-                    { label: 'Mañ', val: shiftRecords.filter(s=>s.shift==='morning').reduce((a,b)=>a+(b.sales||0),0) || 2100000 },
-                    { label: 'Tar', val: shiftRecords.filter(s=>s.shift==='afternoon').reduce((a,b)=>a+(b.sales||0),0) || 3400000 },
-                    { label: 'Noc', val: shiftRecords.filter(s=>s.shift==='night').reduce((a,b)=>a+(b.sales||0),0) || 1600000 },
-                  ];
-                  const maxT = Math.max(...turnos.map(t=>t.val), 1);
-                  const colors = ['#be185d','#7c3aed','#0ea5e9'];
-                  return turnos.map((t,i) => (
-                    <div key={t.label} className="flex-1 flex flex-col items-center gap-1">
-                      <motion.div
-                        initial={{ height: 0 }}
-                        animate={{ height: `${Math.max((t.val/maxT)*100,10)}%` }}
-                        transition={{ delay: 0.4+i*0.1, duration: 0.7, ease:[0.23,1,0.32,1] }}
-                        className="w-full rounded-t-md"
-                        style={{ background: colors[i], opacity: 0.85 }} />
-                      <span className="text-[8px] font-semibold text-slate-300">{t.label}</span>
-                    </div>
-                  ));
-                })()}
+              <div className="flex items-end gap-1 h-12">
+                {(sparkSales.length > 0 ? sparkSales.slice(-7) : [3,4,4,5,4,6,5]).map((v, i, arr) => {
+                  const max = Math.max(...arr, 1);
+                  const pct = Math.max((v / max) * 100, 8);
+                  const isLast = i === arr.length - 1;
+                  return (
+                    <div key={i} className="flex-1 rounded-t-md transition-all"
+                      style={{ height: `${pct}%`, background: isLast ? '#be185d' : 'rgba(190,24,93,0.18)' }} />
+                  );
+                })}
               </div>
-              <p className="text-[9px] text-slate-300 mt-1 font-medium">Distribución por turno</p>
+              <p className="text-[9px] text-slate-300 mt-2 font-medium">Lun → Hoy</p>
             </div>
 
-            {/* Card 2 — Ticket promedio animado con donut */}
+            {/* Card 2 — Tendencia sparkline transacciones */}
+            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Transacciones</p>
+              <p className="text-[18px] font-black text-slate-800 leading-none mb-3">{txnVal}</p>
+              <div className="h-12">
+                <PremiumSparkline
+                  data={sparkTxn.length > 0 ? sparkTxn : [20,28,24,32,27,35,30]}
+                  color="#7c3aed"
+                  width={200}
+                  height={48}
+                />
+              </div>
+              <p className="text-[9px] text-slate-300 mt-2 font-medium">Tendencia semanal</p>
+            </div>
+
+            {/* Card 3 — Donut ticket promedio */}
             <div className="rounded-2xl p-4 flex flex-col" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
               <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Ticket promedio</p>
               <p className="text-[18px] font-black text-slate-800 leading-none mb-2">{ticketVal}</p>
               <div className="flex items-center gap-3 flex-1">
-                {/* Donut animado */}
-                {(() => {
-                  const totalSales = sorted.reduce((s,d)=>s+(d.total_sales||0),0);
-                  const totalBudget = budget.reduce((s,b)=>s+(b.sales_budget||0),0);
-                  const pct = totalBudget > 0 ? Math.min(totalSales/totalBudget,1) : 0.64;
-                  const circ = 2*Math.PI*18;
-                  const slices = [
-                    { color: '#be185d', share: 0.42 },
-                    { color: '#f59e0b', share: 0.24 },
-                    { color: '#10b981', share: 0.19 },
-                    { color: '#94a3b8', share: 0.15 },
-                  ];
-                  let offset = 0;
-                  return (
-                    <svg width="54" height="54" viewBox="0 0 52 52" className="flex-shrink-0">
-                      <circle cx="26" cy="26" r="18" fill="none" stroke="#f1f5f9" strokeWidth="6" />
-                      {slices.map((sl,i) => {
-                        const dash = sl.share * circ;
-                        const gap = circ - dash;
-                        const rotate = -90 + (offset/circ)*360;
-                        offset += dash;
-                        return (
-                          <motion.circle key={i} cx="26" cy="26" r="18"
-                            fill="none" stroke={sl.color} strokeWidth="6"
-                            strokeDasharray={`${dash} ${gap}`}
-                            strokeLinecap="butt"
-                            transform={`rotate(${rotate} 26 26)`}
-                            initial={{ strokeDasharray: `0 ${circ}` }}
-                            animate={{ strokeDasharray: `${dash} ${gap}` }}
-                            transition={{ delay: 0.5+i*0.15, duration: 0.8, ease:[0.23,1,0.32,1] }}
-                          />
-                        );
-                      })}
-                      {/* Pulso central */}
-                      <motion.circle cx="26" cy="26" r="6" fill="#be185d" opacity={0.12}
-                        animate={{ r:[5,7,5], opacity:[0.1,0.2,0.1] }}
-                        transition={{ duration:2.5, repeat:Infinity, ease:'easeInOut' }} />
-                    </svg>
-                  );
-                })()}
-                <div className="flex-1">
+                {/* Mini donut SVG */}
+                <svg width="52" height="52" viewBox="0 0 52 52" className="flex-shrink-0">
+                  <circle cx="26" cy="26" r="18" fill="none" stroke="#f1f5f9" strokeWidth="7" />
+                  {(() => {
+                    const totalSales = sorted.reduce((s,d) => s+(d.total_sales||0), 0);
+                    const totalBudget = budget.reduce((s,b) => s+(b.sales_budget||0), 0);
+                    const pct = totalBudget > 0 ? Math.min(totalSales/totalBudget, 1) : 0.62;
+                    const circ = 2 * Math.PI * 18;
+                    return (
+                      <circle cx="26" cy="26" r="18" fill="none"
+                        stroke="#be185d" strokeWidth="7"
+                        strokeDasharray={`${pct * circ} ${circ}`}
+                        strokeLinecap="round"
+                        transform="rotate(-90 26 26)" />
+                    );
+                  })()}
+                </svg>
+                <div>
                   {[
                     { label: 'Helados', color: '#be185d', pct: 42 },
-                    { label: 'Bebidas', color: '#f59e0b', pct: 24 },
-                    { label: 'Combos', color: '#10b981', pct: 19 },
-                    { label: 'Otros',   color: '#94a3b8', pct: 15 },
-                  ].map(({label,color,pct}) => (
+                    { label: 'Bebidas', color: '#f59e0b', pct: 23 },
+                    { label: 'Combos', color: '#10b981', pct: 18 },
+                    { label: 'Otros', color: '#94a3b8', pct: 17 },
+                  ].map(({ label, color, pct }) => (
                     <div key={label} className="flex items-center gap-1.5 mb-0.5">
                       <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
                       <span className="text-[9px] text-slate-400 font-medium">{label}</span>
@@ -612,56 +593,6 @@ export default function HomeWorkspace({
                   ))}
                 </div>
               </div>
-            </div>
-
-            {/* Card 3 — EBITDA estimado con barra animada */}
-            <div className="rounded-2xl p-4 flex flex-col" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">EBITDA estimado</p>
-              {(() => {
-                const totalSales = sorted.reduce((s,d)=>s+(d.total_sales||0),0);
-                const ebitda = totalSales * 0.18;
-                const ebitdaStr = ebitda > 0 ? `$${(ebitda/1000000).toFixed(1)}M` : '—';
-                const totalBudget = budget.reduce((s,b)=>s+(b.sales_budget||0),0);
-                const margin = totalSales > 0 ? 18 : 0;
-                const pctBudget = totalBudget > 0 ? Math.min(totalSales/totalBudget,1) : 0.71;
-                return (
-                  <>
-                    <p className="text-[18px] font-black text-slate-800 leading-none mb-1">{ebitdaStr}</p>
-                    <p className="text-[9px] font-semibold mb-3" style={{ color: '#10b981' }}>Margen ~18%</p>
-                    {/* Barras horizontales animadas */}
-                    <div className="space-y-2 flex-1">
-                      {[
-                        { label: 'Cumplimiento PPT', pct: pctBudget, color: '#be185d' },
-                        { label: 'Margen bruto', pct: 0.62, color: '#10b981' },
-                        { label: 'Eficiencia txn', pct: 0.78, color: '#7c3aed' },
-                      ].map(({label, pct, color}) => (
-                        <div key={label}>
-                          <div className="flex justify-between mb-0.5">
-                            <span className="text-[8.5px] text-slate-400 font-medium">{label}</span>
-                            <span className="text-[8.5px] font-bold" style={{ color }}>{Math.round(pct*100)}%</span>
-                          </div>
-                          <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${pct*100}%` }}
-                              transition={{ delay: 0.6, duration: 1, ease:[0.23,1,0.32,1] }}
-                              className="h-full rounded-full"
-                              style={{ background: color }}>
-                              {/* Shimmer */}
-                              <motion.div
-                                className="h-full w-8 opacity-40 rounded-full"
-                                style={{ background: 'linear-gradient(90deg,transparent,white,transparent)' }}
-                                animate={{ x: [-32, 120] }}
-                                transition={{ duration: 1.8, repeat: Infinity, ease: 'linear', delay: 1 }}
-                              />
-                            </motion.div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                );
-              })()}
             </div>
 
           </motion.div>
