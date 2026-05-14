@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, RotateCcw, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Send, Sparkles, ChevronDown, RotateCcw, Maximize2, Minimize2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
-import NovaMascot from '@/components/NovaMascot';
 
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
 
@@ -223,7 +222,7 @@ Responde como Nova de forma concisa, accionable y cálida. Máximo 3-4 párrafos
   const panelHeight = isExpanded ? 'h-[600px]' : 'h-[480px]';
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end gap-2">
+    <div className="fixed bottom-6 right-5 z-[9999] flex flex-col items-end gap-3">
 
       {/* Main Chat Panel */}
       <AnimatePresence>
@@ -355,54 +354,67 @@ Responde como Nova de forma concisa, accionable y cálida. Máximo 3-4 párrafos
         )}
       </AnimatePresence>
 
-      {/* Speech Bubble — iMessage style */}
+      {/* Speech Bubble */}
       <AnimatePresence>
         {showBubble && !isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.82, x: 16, y: 6 }}
-            animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0, scale: 0.82, x: 10 }}
-            transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-            className="relative max-w-[210px] cursor-pointer"
+            initial={{ opacity: 0, scale: 0.8, x: 12 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: 'spring', damping: 20 }}
+            className="relative max-w-[200px] rounded-2xl rounded-br-sm px-4 py-3 cursor-pointer"
+            style={{
+              background: 'rgba(255,255,255,0.97)',
+              backdropFilter: 'blur(20px)',
+              border: '1.5px solid rgba(194,24,117,0.25)',
+              color: '#7b1450',
+              boxShadow: '0 6px 28px rgba(194,24,117,0.22)',
+            }}
             onClick={() => { setIsOpen(true); setShowBubble(false); }}
           >
-            <div
-              className="rounded-3xl rounded-br-lg px-4 py-3.5"
-              style={{
-                background: 'rgba(255,255,255,0.98)',
-                backdropFilter: 'blur(24px)',
-                border: '1.5px solid rgba(194,24,117,0.2)',
-                boxShadow: '0 8px 32px rgba(194,24,117,0.18), 0 2px 8px rgba(0,0,0,0.06)',
-              }}
-            >
-              <p className="text-xs font-medium leading-relaxed" style={{ color: '#5a0e38' }}>{bubbleMsg}</p>
-              <div className="flex items-center gap-1.5 mt-2">
-                <motion.div className="w-1.5 h-1.5 rounded-full" style={{ background: '#C21875' }}
-                  animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.4, repeat: Infinity }} />
-                <p className="text-[9px] font-bold tracking-wide uppercase" style={{ color: '#C21875' }}>Nova · toca para chatear</p>
-              </div>
-            </div>
-            {/* Bubble tail */}
-            <div className="absolute -bottom-1.5 right-6"
-              style={{
-                width: 12, height: 12,
-                background: 'rgba(255,255,255,0.98)',
-                clipPath: 'polygon(0 0, 100% 0, 100% 100%)',
-                border: '1.5px solid rgba(194,24,117,0.2)',
-                borderTop: 'none',
-                borderLeft: 'none',
-              }}
-            />
+            <p className="text-xs font-semibold leading-snug">{bubbleMsg}</p>
+            <p className="text-[9px] mt-1.5 font-bold" style={{ color: '#C21875' }}>Toca para chatear ✨</p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Nova Full-Body Mascot */}
-      <NovaMascot
-        isOpen={isOpen}
+      {/* Mascot Button */}
+      <motion.button
         onClick={() => { setIsOpen(o => !o); setShowBubble(false); }}
-        size={82}
-      />
+        animate={{ y: [0, -5, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.92 }}
+        className="relative w-16 h-16 rounded-full"
+      >
+        {/* Glow */}
+        <motion.div className="absolute -inset-2 rounded-full"
+          animate={{ opacity: [0.25, 0.6, 0.25], scale: [0.94, 1.06, 0.94] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.4) 0%, transparent 70%)' }}
+        />
+        <motion.div className="absolute -inset-1 rounded-full"
+          animate={{ opacity: [0.5, 0, 0.5] }}
+          transition={{ duration: 2.5, repeat: Infinity, delay: 0.8 }}
+          style={{ border: '2px solid rgba(233,30,99,0.45)', borderRadius: '50%' }}
+        />
+        {/* Avatar */}
+        <div className="relative w-16 h-16 rounded-full overflow-hidden"
+          style={{
+            border: '2.5px solid rgba(194,24,117,0.65)',
+            boxShadow: '0 0 0 1.5px rgba(255,255,255,0.9) inset, 0 8px 32px rgba(194,24,117,0.4)',
+          }}>
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 rounded-full"
+            style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 55%)' }} />
+        </div>
+        {/* Status dot */}
+        <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+          style={{ background: 'white', border: '1.5px solid rgba(194,24,117,0.2)', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>
+          <div className="w-2 h-2 rounded-full bg-lime-400"
+            style={{ boxShadow: '0 0 5px rgba(163,230,53,0.9)' }} />
+        </div>
+      </motion.button>
     </div>
   );
 }
