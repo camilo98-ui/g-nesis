@@ -755,10 +755,7 @@ export default function HomeWorkspace({
                 <motion.button
                   whileHover={{ scale: 1.04, y: -0.5 }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={() => {
-                    const climaSection = document.getElementById('climate-section');
-                    if (climaSection) climaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
+                  onClick={() => window.location.href = '/WeatherSalesImpact'}
                   className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold flex-shrink-0 backdrop-blur-md transition-all duration-300 relative overflow-hidden group cursor-pointer"
                   style={{
                     background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%)',
