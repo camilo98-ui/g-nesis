@@ -93,7 +93,7 @@ export default function PremiumMainChart() {
   }, [dailyVsProjectionData]);
 
   return (
-    <div className="mb-7 space-y-4">
+    <div className="mb-7 grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Gráfica 1: Cumplimiento */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -125,7 +125,7 @@ export default function PremiumMainChart() {
           </div>
         </div>
 
-        <div className="h-64 -mx-2 px-2">
+        <div className="h-56 -mx-2 px-2">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={complianceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
@@ -194,7 +194,7 @@ export default function PremiumMainChart() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
+        transition={{ duration: 0.5 }}
         className="rounded-3xl p-6 lg:p-8"
         style={{
           background: 'rgba(255,255,255,0.93)',
@@ -221,7 +221,7 @@ export default function PremiumMainChart() {
           </div>
         </div>
 
-        <div className="h-64 -mx-2 px-2">
+        <div className="h-56 -mx-2 px-2">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={dailyVsProjectionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
