@@ -405,7 +405,7 @@ Responde como Nova de forma concisa, accionable y cálida. Máximo 3-4 párrafos
             boxShadow: '0 0 0 1.5px rgba(255,255,255,0.9) inset, 0 8px 32px rgba(194,24,117,0.4)',
             background: 'white',
           }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-110" style={{ objectPosition: 'center center' }} />
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover scale-[1.6]" style={{ objectPosition: 'center center' }} />
         </div>
         {/* Status dot */}
         <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
