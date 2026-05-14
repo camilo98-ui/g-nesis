@@ -256,8 +256,13 @@ export default function HomeWorkspace({
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [userName, setUserName] = useState('');
   const chatEndRef = useRef(null);
   const conversationRef = useRef(null);
+
+  useEffect(() => {
+    base44.auth.me().then(u => u && setUserName(u.full_name || '')).catch(() => {});
+  }, []);
 
   const storeName = selectedStoreName || STORES.find((s) => s.code === selectedStore)?.name || 'Tu Tienda';
   const isGerente = selectedRole === 'gerente';
@@ -540,11 +545,11 @@ export default function HomeWorkspace({
             className="mb-7">
             
             <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
                   <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
-                    {greeting.text}
+                    {greeting.text}, {userName}
                   </h1>
                 </div>
                 <p className="text-[12px] text-slate-400 font-medium leading-snug max-w-sm">
