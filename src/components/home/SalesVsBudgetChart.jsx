@@ -144,55 +144,87 @@ const SalesVsBudgetChart = ({ todaySales = 0, budget = {}, shiftRecords = [], da
       <div className="rounded-2xl p-7 bg-white border border-slate-100 shadow-sm overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
         
         {filterType === 'daily' && (
-          <div>
-            <ResponsiveContainer width="100%" height={320}>
-              <ComposedChart data={salesByDay} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
-                <defs>
-                  <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#f43f5e" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="budgetGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#64748b" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="#64748b" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
-                <XAxis 
-                  dataKey="day" 
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
-                  stroke="#e2e8f0"
-                />
-                <YAxis 
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
-                  stroke="#e2e8f0"
-                  tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                  wrapperStyle={{ paddingTop: '20px' }}
-                  iconType="line"
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="sales" 
-                  fill="url(#salesGrad)" 
-                  stroke="#f43f5e" 
-                  strokeWidth={2.5}
-                  name="Venta"
-                  isAnimationActive
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="budget" 
-                  stroke="#64748b" 
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  name="Presupuesto"
-                  dot={false}
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
+           <div>
+             <ResponsiveContainer width="100%" height={340}>
+               <BarChart data={salesByDay} margin={{ top: 10, right: 30, left: 0, bottom: 50 }}>
+                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                 <XAxis 
+                   dataKey="day" 
+                   tick={{ fontSize: 10, fill: '#94a3b8' }}
+                   stroke="none"
+                   axisLine={false}
+                 />
+                 <YAxis 
+                   tick={{ fontSize: 10, fill: '#94a3b8' }}
+                   stroke="none"
+                   axisLine={false}
+                   tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`}
+                 />
+                 <Tooltip 
+                   content={({ active, payload }) => {
+                     if (!active || !payload?.[0]) return null;
+                     const data = payload[0].payload;
+                     const isMet = data.compliance >= 100;
+                     const diff = data.sales - data.budget;
+                     return (
+                       <motion.div
+                         initial={{ opacity: 0, scale: 0.95 }}
+                         animate={{ opacity: 1, scale: 1 }}
+                         className="bg-white p-4 rounded-xl shadow-2xl border border-slate-100 backdrop-blur-sm"
+                       >
+                         <p className="text-[12px] font-bold text-slate-900 mb-3">{data.day}</p>
+                         <div className="space-y-2">
+                           <div className="flex justify-between gap-4">
+                             <span className="text-[11px] text-slate-600">Venta:</span>
+                             <span className="text-[11px] font-black text-slate-900">{fmt(data.sales)}</span>
+                           </div>
+                           <div className="flex justify-between gap-4">
+                             <span className="text-[11px] text-slate-600">PPT:</span>
+                             <span className="text-[11px] font-black text-slate-600">{fmt(data.budget)}</span>
+                           </div>
+                           <div className="h-px bg-slate-200 my-1" />
+                           <div className="flex justify-between gap-4">
+                             <span className="text-[11px] font-bold">Diferencia:</span>
+                             <span className={`text-[12px] font-black ${isMet ? 'text-emerald-600' : 'text-rose-500'}`}>
+                               {isMet ? '+' : ''}{fmt(diff)}
+                             </span>
+                           </div>
+                           <div className="flex items-center justify-between gap-4 pt-1">
+                             <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${isMet ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'}`}>
+                               {isMet ? '✓ Cumplido' : '✗ Incumplido'} {data.compliance}%
+                             </span>
+                           </div>
+                         </div>
+                       </motion.div>
+                     );
+                   }}
+                 />
+                 <Bar 
+                   dataKey="sales" 
+                   radius={[8, 8, 0, 0]}
+                   name="Venta"
+                   fill="#64748b"
+                 >
+                   {salesByDay.map((entry, index) => (
+                     <Bar
+                       key={`bar-${index}`}
+                       dataKey="sales"
+                       fill={entry.compliance >= 100 ? '#10b981' : '#ef4444'}
+                     />
+                   ))}
+                 </Bar>
+                 <Line 
+                   type="monotone" 
+                   dataKey="budget" 
+                   stroke="#64748b" 
+                   strokeWidth={3}
+                   strokeDasharray="6 4"
+                   name="Presupuesto"
+                   dot={{ fill: '#64748b', r: 4 }}
+                   isAnimationActive
+                 />
+               </BarChart>
+             </ResponsiveContainer>
             
             {/* Detalles diarios */}
             <div className="mt-8 grid grid-cols-4 gap-4">
