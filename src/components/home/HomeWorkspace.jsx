@@ -761,7 +761,7 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
                 <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
-                  {dailyBudgets?.length > 0 && dailyBudgets[0].sales_budget ? `$${(dailyBudgets[0].sales_budget / 1000000).toFixed(2)}M` : '—'}
+                  {dailyBudgets?.length > 0 && dailyBudgets[0].sales_budget ? `$${(dailyBudgets[0].sales_budget / 1000000).toFixed(2)}M` : '$0.00M'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 12.5%</span>
@@ -779,7 +779,7 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
                 <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
-                  {budget?.length > 0 && budget[0].sales_gap ? `+$${(budget[0].sales_gap / 1000000).toFixed(2)}M` : '—'}
+                  {budget?.length > 0 && budget[0].sales_gap ? `+$${(budget[0].sales_gap / 1000000).toFixed(2)}M` : '+$0.00M'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 5.2%</span>
@@ -797,7 +797,7 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
                 <p className="text-[20px] font-bold text-blue-500 leading-none mb-2">
-                  {budget?.length > 0 && budget[0].sales_budget ? `${Math.round((latest?.total_sales || 0) / budget[0].sales_budget * 100)}%` : '—'}
+                  {budget?.length > 0 && budget[0].sales_budget ? `${Math.round((latest?.total_sales || 0) / budget[0].sales_budget * 100)}%` : '0%'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-500">De la meta mensual</span>
@@ -814,7 +814,7 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Venta del día</p>
                 <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
-                  {latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(2)}M` : '—'}
+                  {latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(2)}M` : '$0.00M'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 8.7%</span>
