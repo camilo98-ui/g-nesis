@@ -304,36 +304,33 @@ function DonutChart({ data }) {
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], cashiers = [], pygReports = [], shiftRecords = [] }) {
-  const [trendViewMode, setTrendViewMode] = useState('compliance'); // 'compliance' | 'acceleration'
 
-  // Build 30-day sales trend from todaySales
+  // Build 30-day trend from todaySales
   const sorted30 = useMemo(() => {
-    const daily = [...todaySales].
-    sort((a, b) => new Date(a.date) - new Date(b.date)).
-    slice(-30);
+    const daily = [...todaySales]
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(-30);
 
-    return daily.map((d, i) => {
+    return daily.map((d) => {
       const ventas = d.total_sales || 0;
-      // Acceleration: day-over-day growth %
-      const prevVentas = i > 0 ? (daily[i-1].total_sales || 0) : ventas;
-      const acceleration = prevVentas > 0 ? Math.round(((ventas - prevVentas) / prevVentas) * 100) : 0;
+      const txn = d.total_transactions || 0;
+      const ticket = txn > 0 ? Math.round(ventas / txn) : 0;
 
-      // PPT diario real: presupuesto del mes al que pertenece ese día ÷ días reales de ese mes
       const saleDate = new Date(d.date);
       const salesMonth = saleDate.getMonth() + 1;
       const salesYear = saleDate.getFullYear();
-      const matchBudget = budget.find(b => Number(b.month) === salesMonth && Number(b.year) === salesYear)
-        || budget[0];
+      const matchBudget = budget.find(b => Number(b.month) === salesMonth && Number(b.year) === salesYear) || budget[0];
       const daysInSaleMonth = new Date(salesYear, salesMonth, 0).getDate();
       const dailyPPT = matchBudget?.sales_budget ? matchBudget.sales_budget / daysInSaleMonth : 0;
-      
+      const ticketPPT = matchBudget?.tickets_budget || 0;
+
       return {
         date: saleDate.toLocaleDateString('es', { day: 'numeric', month: 'short' }),
-        ventas: ventas,
+        ventas,
         presupuesto: dailyPPT,
-        cumplimiento: dailyPPT > 0 ? (ventas / dailyPPT) * 100 : 0,
-        aceleracion: acceleration,
-        txn: d.total_transactions || 0
+        ticket,
+        ticketPPT,
+        txn
       };
     });
   }, [todaySales, budget]);
@@ -446,109 +443,78 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, staggerChildren: 0.1 }}>
 
-        {/* Tendencia de Ventas - Compliance vs Aceleración */}
+        {/* Tendencia Ticket Promedio */}
         <AnalyticsCard
-          title="Tendencia & Análisis"
-          subtitle={trendViewMode === 'compliance' ? 'Venta Real vs Presupuesto Diario' : 'Velocidad de Crecimiento Diario'}
+          title="Ticket Promedio"
+          subtitle="Tendencia diaria · últimos 30 días"
           delay={0.18}
           colSpan="lg:col-span-3">
           
           {hasSalesData ? (
             <>
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.22 }}
-                  className="p-3 rounded-xl group relative overflow-hidden"
-                  style={{ background: 'linear-gradient(135deg, rgba(255, 77, 141, 0.08), rgba(255, 182, 201, 0.04))' }}>
-                  
-                  <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Promedio Diario</p>
-                  <p className="text-[18px] font-black text-[#FF4D8D] mb-1" style={{ lineHeight: '1' }}>
-                    {fmt(avgDailySales)}
-                  </p>
-                  <p className="text-[9px] font-bold text-[#8F96A3]">período actual</p>
-                </motion.div>
-                
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.25 }}
-                  className="p-3 rounded-xl group relative overflow-hidden"
-                  style={{ background: 'linear-gradient(135deg, rgba(255, 127, 165, 0.08), rgba(255, 182, 201, 0.04))' }}>
-                  
-                  <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Proyección Mes</p>
-                  <p className="text-[18px] font-black text-[#FF7FA5] mb-1" style={{ lineHeight: '1' }}>
-                    {fmt(monthSalesProjection)}
-                  </p>
-                  <p className="text-[9px] font-bold" style={{ color: monthProjectionPercent >= 100 ? '#10b981' : monthProjectionPercent >= 80 ? '#f59e0b' : '#ef4444' }}>
-                    {monthProjectionPercent}% de PPT
-                  </p>
-                </motion.div>
-              </div>
-
-              <div className="flex gap-2 mb-3">
-                <button
-                  onClick={() => setTrendViewMode('compliance')}
-                  className={`flex-1 py-1.5 text-[8px] font-bold rounded-lg transition-all ${
-                    trendViewMode === 'compliance' 
-                      ? 'bg-[#FF4D8D] text-white' 
-                      : 'bg-slate-100 text-[#8F96A3]'
-                  }`}>
-                  Real vs PPT
-                </button>
-                <button
-                  onClick={() => setTrendViewMode('acceleration')}
-                  className={`flex-1 py-1.5 text-[8px] font-bold rounded-lg transition-all ${
-                    trendViewMode === 'acceleration' 
-                      ? 'bg-[#FF4D8D] text-white' 
-                      : 'bg-slate-100 text-[#8F96A3]'
-                  }`}>
-                  Aceleración
-                </button>
+              {/* KPI summary */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                {(() => {
+                  const withTicket = sorted30.filter(d => d.ticket > 0);
+                  const avgTicket = withTicket.length > 0 ? Math.round(withTicket.reduce((s, d) => s + d.ticket, 0) / withTicket.length) : 0;
+                  const latestTicket = withTicket[withTicket.length - 1]?.ticket || 0;
+                  const ticketPPT = sorted30.find(d => d.ticketPPT > 0)?.ticketPPT || 0;
+                  const pctVsPPT = ticketPPT > 0 ? Math.round((latestTicket / ticketPPT) * 100) : null;
+                  return (
+                    <>
+                      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
+                        className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(255,77,141,0.08), rgba(255,182,201,0.04))' }}>
+                        <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Último día</p>
+                        <p className="text-[16px] font-black text-[#FF4D8D] mb-0.5" style={{ lineHeight: '1' }}>{fmt(latestTicket)}</p>
+                        {pctVsPPT !== null && <p className="text-[9px] font-bold" style={{ color: pctVsPPT >= 100 ? '#10b981' : '#f59e0b' }}>{pctVsPPT}% del PPT</p>}
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+                        className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(255,127,165,0.08), rgba(255,182,201,0.04))' }}>
+                        <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Promedio 30d</p>
+                        <p className="text-[16px] font-black text-[#FF7FA5] mb-0.5" style={{ lineHeight: '1' }}>{fmt(avgTicket)}</p>
+                        <p className="text-[9px] font-bold text-[#8F96A3]">período actual</p>
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
+                        className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(165,180,252,0.04))' }}>
+                        <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Meta Ticket</p>
+                        <p className="text-[16px] font-black text-indigo-400 mb-0.5" style={{ lineHeight: '1' }}>{ticketPPT > 0 ? fmt(ticketPPT) : '—'}</p>
+                        <p className="text-[9px] font-bold text-[#8F96A3]">presupuesto</p>
+                      </motion.div>
+                    </>
+                  );
+                })()}
               </div>
 
               <ResponsiveContainer width="100%" height={140}>
                 <ComposedChart data={sorted30} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
                   <defs>
-                    <linearGradient id="ventasGrad" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="ticketGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.35" />
                       <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
+                  <CartesianGrid strokeDasharray="0" stroke="rgba(255,77,141,0.08)" vertical={false} />
                   <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
                   <YAxis hide />
-                  <Tooltip content={<SalesTooltip />} />
-                  {trendViewMode === 'compliance' ? (
-                    <>
-                      <Area type="monotone" dataKey="ventas" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ventasGrad)" dot={false} name="Venta Real" />
-                      <Line type="monotone" dataKey="presupuesto" stroke="#FFB4C9" strokeWidth={2.5} strokeDasharray="5,5" dot={false} name="PPT Diario" />
-                    </>
-                  ) : (
-                    <Line type="monotone" dataKey="aceleracion" stroke="#FF4D8D" strokeWidth={2.5} dot={{ fill: '#FF4D8D', r: 3 }} name="Aceleración %" />
+                  <Tooltip
+                    contentStyle={{ background: '#fff', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 12, fontSize: 11 }}
+                    formatter={(v, name) => [fmt(v), name]} />
+                  <Area type="monotone" dataKey="ticket" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ticketGrad)" dot={false} name="Ticket Real" />
+                  {sorted30.some(d => d.ticketPPT > 0) && (
+                    <Line type="monotone" dataKey="ticketPPT" stroke="#6366f1" strokeWidth={2} strokeDasharray="5,5" dot={false} name="Meta Ticket" />
                   )}
                 </ComposedChart>
               </ResponsiveContainer>
-              
+
               <div className="flex gap-6 mt-3 text-[10px]">
-                {trendViewMode === 'compliance' ? (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4D8D' }} />
-                      <span className="text-[#8F96A3]">Venta Real</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FFB4C9' }} />
-                      <span className="text-[#8F96A3]">PPT Diario</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4D8D' }} />
-                    <span className="text-[#8F96A3]">% Crecimiento Día a Día</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4D8D' }} />
+                  <span className="text-[#8F96A3]">Ticket Real</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#6366f1' }} />
+                  <span className="text-[#8F96A3]">Meta Ticket (PPT)</span>
+                </div>
               </div>
             </>
           ) : (
