@@ -220,16 +220,16 @@ function ModuleCard({ m, i }) {
 
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
 const INITIAL_MESSAGES = [
-{ role: 'nova', text: '¡Hola! Soy Nova, tu copiloto de operaciones Popsy. ¿En qué te puedo ayudar hoy?' }];
+{ role: 'nova', text: 'Nova · inteligencia comercial activa. Consulta ventas, KPIs, cajeros o proyecciones.' }];
 
 
 const QUICK_ACTIONS = [
-{ label: 'Ventas hoy', icon: TrendingUp, prompt: 'Muéstrame el resumen de ventas de hoy' },
-{ label: 'Top cajeros', icon: Users, prompt: 'Cuáles son los cajeros con mejor rendimiento?' },
-{ label: 'vs ayer', icon: BarChart2, prompt: 'Compara las ventas de hoy vs ayer' },
-{ label: 'Stock crítico', icon: Snowflake, prompt: 'Qué productos tienen stock crítico en la nevera?' },
-{ label: 'Insights', icon: Brain, prompt: 'Dame los insights más importantes de esta semana' },
-{ label: 'Alertas', icon: Bell, prompt: 'Hay alguna alerta operacional que deba saber?' }];
+{ label: 'Proyección cierre', icon: TrendingUp, prompt: 'Proyecta el cierre del mes con el ritmo actual de ventas y dime si hay riesgo de incumplimiento del PPT' },
+{ label: 'Anomalías', icon: Activity, prompt: 'Detecta anomalías en ventas o transacciones de los últimos 7 días' },
+{ label: 'Top cajeros', icon: Users, prompt: 'Muéstrame el ranking de cajeros por ventas y transacciones con números reales' },
+{ label: 'Riesgo PPT', icon: Target, prompt: 'Analiza el riesgo de no cumplir el presupuesto del mes con datos reales' },
+{ label: 'Tendencia', icon: BarChart2, prompt: 'Analiza la tendencia de ventas de los últimos 14 días con comparación histórica' },
+{ label: 'Alertas ops', icon: Bell, prompt: 'Lista todas las alertas operacionales críticas: stock, cumplimiento, incidentes' }];
 
 
 const AI_RESPONSES = {
@@ -766,7 +766,7 @@ export default function HomeWorkspace({
                   <p className="text-[12.5px] font-bold text-slate-700">Nova</p>
                   <span className="text-[9px] font-semibold text-rose-400 uppercase tracking-wide">AI</span>
                 </div>
-                <p className="text-[10px] text-slate-400">Copiloto · en línea</p>
+                <p className="text-[10px] text-slate-400">Inteligencia comercial · activa</p>
               </div>
               <Cpu className="w-3.5 h-3.5 flex-shrink-0 text-slate-200" />
             </div>
@@ -774,7 +774,7 @@ export default function HomeWorkspace({
 
           {/* Quick chips */}
           <div className="px-3 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-            <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.12em] mb-2">Preguntas rápidas</p>
+            <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.12em] mb-2">Análisis rápido</p>
             <div className="flex flex-wrap gap-1.5">
               {QUICK_ACTIONS.map((a) =>
               <AIChip key={a.label} label={a.label} icon={a.icon}
