@@ -144,7 +144,7 @@ const SalesVsBudgetChart = ({ todaySales = 0, budget = {}, shiftRecords = [], da
       <div className="rounded-2xl p-7 bg-white border border-slate-100 shadow-sm overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
         
         {filterType === 'daily' &&
-        <div>
+        <div className="hidden">
              <ResponsiveContainer width="100%" height={340}>
                
 
