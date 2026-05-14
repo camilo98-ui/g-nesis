@@ -653,14 +653,13 @@ export default function HomeWorkspace({
               
               <div className="flex items-center h-16 px-6 gap-4">
                 
-                {/* Avatar IA Premium — AI Copilot */}
+                {/* Avatar Nova Mascota */}
                 <motion.div
                   animate={{ 
-                    scale: [1, 1.02, 1],
-                    opacity: [1, 1, 1]
+                    scale: [1, 1.02, 1]
                   }}
                   transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 group"
+                  className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
                   style={{
                     background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.14) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(194, 24, 117, 0.08) 100%)',
                     border: '1.5px solid rgba(194, 24, 117, 0.18)',
@@ -674,40 +673,16 @@ export default function HomeWorkspace({
                     className="absolute inset-0 rounded-full"
                     style={{ 
                       background: 'radial-gradient(circle, rgba(194, 24, 117, 0.25), transparent 70%)',
-                      filter: 'blur(10px)'
+                      filter: 'blur(10px)',
+                      zIndex: 1
                     }} />
                   
-                  {/* Avatar Robot Premium — Moderne Minimalist */}
-                  <svg width="28" height="28" viewBox="0 0 28 28" className="relative z-10">
-                    <defs>
-                      <linearGradient id="novaGradPremium" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#C21875" />
-                        <stop offset="50%" stopColor="#B4297C" />
-                        <stop offset="100%" stopColor="#9333EA" />
-                      </linearGradient>
-                      <filter id="novaGlow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="0.8" result="coloredBlur"/>
-                        <feMerge>
-                          <feMergeNode in="coloredBlur"/>
-                          <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                      </filter>
-                    </defs>
-                    {/* Head with shine */}
-                    <rect x="8" y="5" width="12" height="11" rx="2.5" fill="url(#novaGradPremium)" opacity="0.9" filter="url(#novaGlow)" />
-                    {/* Eyes modern */}
-                    <circle cx="11.5" cy="10" r="1.3" fill="#FFFFFF" opacity="0.85" />
-                    <circle cx="16.5" cy="10" r="1.3" fill="#FFFFFF" opacity="0.85" />
-                    {/* Eye shine */}
-                    <circle cx="11.2" cy="9.6" r="0.5" fill="#FFFFFF" opacity="0.4" />
-                    <circle cx="16.2" cy="9.6" r="0.5" fill="#FFFFFF" opacity="0.4" />
-                    {/* Accent line elegant */}
-                    <line x1="9" y1="14.5" x2="19" y2="14.5" stroke="url(#novaGradPremium)" strokeWidth="0.9" opacity="0.6" />
-                    {/* Body sleek */}
-                    <rect x="10" y="17" width="8" height="7" rx="1.5" fill="url(#novaGradPremium)" opacity="0.7" filter="url(#novaGlow)" />
-                    {/* Accent dot */}
-                    <circle cx="24" cy="7" r="1.2" fill="url(#novaGradPremium)" opacity="0.4" />
-                  </svg>
+                  {/* Imagen mascota Nova */}
+                  <img 
+                    src="https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png" 
+                    alt="Nova" 
+                    className="w-full h-full object-contain scale-[1.4] relative z-10"
+                  />
                 </motion.div>
 
                 {/* Separador elegante */}
