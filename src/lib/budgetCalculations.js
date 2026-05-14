@@ -1,6 +1,6 @@
 import { format, startOfMonth, endOfMonth, eachWeekOfInterval, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, parseISO, isWithinInterval } from 'date-fns';
 
-export function calculateBudgetData(dailySales, activeBudget, dailyBudgets = [], storeId = null) {
+export function calculateBudgetData(activeBudget, dailySales, dailyBudgets = [], storeId = null) {
   if (!activeBudget?.sales_budget) {
     const now = new Date();
     const monthStart = startOfMonth(now);
