@@ -384,17 +384,28 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
   const hasSalesData = sorted30.length > 0;
   
-  // Average daily sales
-  const avgDailySales = hasSalesData 
-    ? Math.round(todaySales.reduce((s, d) => s + (d.total_sales || 0), 0) / todaySales.length)
-    : 0;
-  
-  // Month-end projection (based on avg daily sales * remaining days)
+  // ── PROYECCIÓN: solo mes actual ──────────────────────────────────────────────
   const currentDate = new Date();
-  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-  const daysRemaining = daysInMonth - currentDate.getDate();
-  const monthSalesProjection = totalSales + (avgDailySales * daysRemaining);
-  const monthProjectionPercent = activeBudget?.sales_budget ? Math.round((monthSalesProjection / activeBudget.sales_budget) * 100) : 0;
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const dayOfMonth = currentDate.getDate(); // días transcurridos (incluye hoy)
+
+  // Ventas solo del mes actual
+  const currentMonthSales = todaySales.filter(d => {
+    const dd = new Date(d.date);
+    return dd.getMonth() === currentMonth && dd.getFullYear() === currentYear;
+  });
+  const currentMonthTotal = currentMonthSales.reduce((s, d) => s + (d.total_sales || 0), 0);
+  const daysWithData = currentMonthSales.length || 1;
+  const avgDailySales = Math.round(currentMonthTotal / daysWithData);
+
+  // Proyección: lo ya acumulado + promedio diario × días restantes
+  const daysRemaining = Math.max(daysInMonth - dayOfMonth, 0);
+  const monthSalesProjection = currentMonthTotal + (avgDailySales * daysRemaining);
+  const monthProjectionPercent = activeBudget?.sales_budget
+    ? Math.round((monthSalesProjection / activeBudget.sales_budget) * 100)
+    : 0;
   
   // Average margin from real PYG data
   const avgMargin = ebitdaDataEnhancedFromPYG.length > 0
