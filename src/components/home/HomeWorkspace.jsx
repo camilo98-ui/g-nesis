@@ -507,7 +507,7 @@ export default function HomeWorkspace({
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
-        className="flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20"
+        className="hidden lg:flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20"
         style={{
           background: 'rgba(255,255,255,0.75)',
           backdropFilter: 'blur(32px)',
@@ -572,24 +572,24 @@ export default function HomeWorkspace({
       <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh' }}>
 
         {/* CENTER — scrollable */}
-        <div className="flex-1 min-w-0 overflow-y-auto p-4 lg:p-7">
+        <div className="flex-1 min-w-0 overflow-y-auto p-2 sm:p-4 lg:p-7">
 
           {/* TOP BAR */}
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="mb-7">
+            className="mb-4 lg:mb-7">
             
-            <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
-                  <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
+            <div className="flex items-center justify-between gap-2 sm:gap-4 mb-3 lg:mb-5 flex-wrap">
+              <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <GreetIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
+                  <h1 className="text-sm sm:text-base lg:text-lg font-bold text-slate-700 tracking-tight truncate">
                     {greeting.text}, {LEADERS[selectedStore] || 'Tienda'}
                   </h1>
                 </div>
-                <p className="text-[12px] text-slate-400 font-medium leading-snug max-w-sm">
+                <p className="text-[11px] sm:text-[12px] text-slate-400 font-medium leading-snug max-w-sm">
                   {getDynamicPhrase()}
                 </p>
               </div>
@@ -665,7 +665,7 @@ export default function HomeWorkspace({
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.45 }}
-            className="flex flex-wrap gap-2 mb-7">
+            className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 lg:mb-7">
             
               {[
             { label: 'Registrar Ventas', icon: TrendingUp, onClick: onShowStoreSales },
@@ -685,10 +685,10 @@ export default function HomeWorkspace({
 
           {/* ── CLIMA BANNER ── */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="mb-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
+           initial={{ opacity: 0, y: 10 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+           className="mb-4 lg:mb-7 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
 
             {/* Card 1 — Temperatura del día + tendencia 7 días (barras) */}
             {(() => {
@@ -702,11 +702,11 @@ export default function HomeWorkspace({
               return (
                 <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
                   <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Temperatura · 7 días</p>
-                    <span className="text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : '🌤 Fresco'}</span>
+                    <p className="text-[8px] sm:text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Temperatura · 7 días</p>
+                    <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : '🌤 Fresco'}</span>
                   </div>
                   <div className="flex items-baseline gap-1 mb-1">
-                    <p className="text-[22px] font-black text-slate-800 leading-none">{temp != null ? `${Math.round(temp)}°` : '—'}</p>
+                    <p className="text-lg sm:text-[22px] font-black text-slate-800 leading-none">{temp != null ? `${Math.round(temp)}°` : '—'}</p>
                     {tempMax != null && tempMin != null && (
                       <p className="text-[10px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</p>
                     )}
@@ -737,11 +737,11 @@ export default function HomeWorkspace({
               return (
                 <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
                   <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Lluvia · 7 días</p>
-                    <span className="text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
+                    <p className="text-[8px] sm:text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Lluvia · 7 días</p>
+                    <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
                   </div>
                   <div className="flex items-baseline gap-1 mb-1">
-                    <p className="text-[22px] font-black text-slate-800 leading-none">{todayRain > 0 ? `${todayRain.toFixed(1)}` : '0'}<span className="text-[12px] font-semibold text-slate-400">mm</span></p>
+                    <p className="text-lg sm:text-[22px] font-black text-slate-800 leading-none">{todayRain > 0 ? `${todayRain.toFixed(1)}` : '0'}<span className="text-[10px] sm:text-[12px] font-semibold text-slate-400">mm</span></p>
                     <p className="text-[10px] text-slate-400 font-medium ml-1">hoy</p>
                   </div>
                   <div className="flex items-end gap-1 h-11 mt-2">
@@ -779,9 +779,9 @@ export default function HomeWorkspace({
               return (
                 <div className="rounded-2xl p-4 flex flex-col" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
                   <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Condición · semana</p>
+                    <p className="text-[8px] sm:text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Condición · semana</p>
                   </div>
-                  <p className="text-[18px] font-black text-slate-800 leading-none mb-2">{humidity > 0 ? `${Math.round(humidity)}% 💧` : '—'}</p>
+                  <p className="text-base sm:text-[18px] font-black text-slate-800 leading-none mb-2">{humidity > 0 ? `${Math.round(humidity)}% 💧` : '—'}</p>
                   <div className="flex items-center gap-3 flex-1">
                     <svg width="48" height="48" viewBox="0 0 48 48" className="flex-shrink-0">
                       <circle cx="24" cy="24" r="16" fill="none" stroke="#f1f5f9" strokeWidth="6" />
@@ -829,7 +829,7 @@ export default function HomeWorkspace({
           initial={{ x: 24, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-          className="hidden xl:flex flex-col w-72 flex-shrink-0"
+          className="hidden lg:flex flex-col w-56 xl:w-72 flex-shrink-0"
           style={{
             height: '100vh',
             position: 'sticky',
