@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, AreaChart, Legend } from 'recharts';
 import { motion } from 'framer-motion';
 import { TrendingUp, Target, ArrowUpRight, TrendingDown, Zap } from 'lucide-react';
-import { useMemo } from 'react';
 
 const COLORS = {
   primary: '#ec4899',
