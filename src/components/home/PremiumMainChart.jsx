@@ -145,34 +145,34 @@ const ProjectionTooltip = ({ active, payload }) => {
 export default function PremiumMainChart({ dailySales = [], activeBudget = null, dailyBudgets = [] }) {
   const complianceData = useMemo(() => {
     if (!activeBudget || !dailySales.length) return generateComplianceData();
-    
+
     // Procesar dailySales y dailyBudgets para el mes actual
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
-    
+
     // Obtener presupuesto diario del activeBudget (si está disponible) o calcular
     const monthlyBudget = activeBudget?.sales_budget || 0;
     const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
     const dailyTargetFromMonthly = monthlyBudget / daysInMonth;
-    
+
     // Crear mapa de presupuestos diarios desde dailyBudgets
     const budgetsByDate = {};
-    dailyBudgets.forEach(db => {
+    dailyBudgets.forEach((db) => {
       if (db.date && db.sales_budget) {
         budgetsByDate[db.date] = db.sales_budget;
       }
     });
-    
+
     // Construir datos de complianza
-    const data = dailySales.map(ds => {
+    const data = dailySales.map((ds) => {
       const date = new Date(ds.date);
       const dateStr = ds.date;
       const budget = budgetsByDate[dateStr] || dailyTargetFromMonthly;
       const actualSales = ds.total_sales || 0;
       const variance = actualSales - budget;
-      const compliance = budget > 0 ? (actualSales / budget) * 100 : 0;
-      
+      const compliance = budget > 0 ? actualSales / budget * 100 : 0;
+
       return {
         date: date.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit' }),
         day: date.toLocaleDateString('es-CO', { weekday: 'short' }).substring(0, 3),
@@ -183,7 +183,7 @@ export default function PremiumMainChart({ dailySales = [], activeBudget = null,
         isSurplus: variance > 0
       };
     }).sort((a, b) => new Date(a.date) - new Date(b.date));
-    
+
     return data.length > 0 ? data : generateComplianceData();
   }, [dailySales, activeBudget, dailyBudgets]);
 
@@ -214,10 +214,10 @@ export default function PremiumMainChart({ dailySales = [], activeBudget = null,
     const daysAboveBudget = complianceData.filter((d) => d.actualSales >= d.budget).length;
     const daysBelow = complianceData.filter((d) => d.actualSales < d.budget).length;
     const bestDay = complianceData.reduce((max, d) => d.compliance > max.compliance ? d : max, complianceData[0]);
-    
+
     // Proyección: si hay datos de hoy, proyectar al mes
-    const daysWithData = complianceData.filter(d => d.actualSales > 0).length;
-    const monthlyProjection = daysWithData > 0 ? (totalActualSales / daysWithData) * 30 : totalBudget;
+    const daysWithData = complianceData.filter((d) => d.actualSales > 0).length;
+    const monthlyProjection = daysWithData > 0 ? totalActualSales / daysWithData * 30 : totalBudget;
     const monthlyVariancePercent = totalBudget > 0 ? ((monthlyProjection - totalBudget) / totalBudget * 100).toFixed(1) : '0';
     const avgDailyCompliance = complianceData.length > 0 ? (complianceData.reduce((s, d) => s + d.compliance, 0) / complianceData.length).toFixed(1) : '0';
 
@@ -266,7 +266,7 @@ export default function PremiumMainChart({ dailySales = [], activeBudget = null,
   }, [dailyVsProjectionData]);
 
   return (
-    <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4 hidden">
       {/* Estrategias de Crecimiento */}
       <SalesOptimizationStrategies />
 
@@ -370,17 +370,17 @@ export default function PremiumMainChart({ dailySales = [], activeBudget = null,
                 tick={{ fill: 'rgba(100,116,139,0.6)' }} />
 
                <YAxis
-                 stroke="rgba(100,116,139,0.3)"
-                 style={{ fontSize: '9px' }}
-                 tick={{ fill: 'rgba(100,116,139,0.6)' }}
-                 tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
+                stroke="rgba(100,116,139,0.3)"
+                style={{ fontSize: '9px' }}
+                tick={{ fill: 'rgba(100,116,139,0.6)' }}
+                tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
               
 
                <Tooltip content={<CustomComplianceTooltip />} cursor={{ stroke: 'rgba(236, 72, 153, 0.2)', strokeWidth: 1 }} />
-               <Legend 
-                 verticalAlign="bottom" 
-                 height={20}
-                 wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} />
+               <Legend
+                verticalAlign="bottom"
+                height={20}
+                wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} />
 
                {/* Área suave debajo de ventas */}
               <Area
@@ -493,8 +493,8 @@ export default function PremiumMainChart({ dailySales = [], activeBudget = null,
                 <XAxis dataKey="day" stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} />
                 <YAxis stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
                 <Tooltip content={<ProjectionTooltip />} />
-                <Legend 
-                  verticalAlign="bottom" 
+                <Legend
+                  verticalAlign="bottom"
                   height={20}
                   wrapperStyle={{ paddingTop: '8px', fontSize: '11px' }} />
                 <Line
