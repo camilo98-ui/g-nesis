@@ -507,7 +507,7 @@ export default function HomeWorkspace({
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
-        className="hidden lg:flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20"
+        className="flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20"
         style={{
           background: 'rgba(255,255,255,0.75)',
           backdropFilter: 'blur(32px)',
