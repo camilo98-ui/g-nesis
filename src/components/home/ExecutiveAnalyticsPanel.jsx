@@ -305,7 +305,7 @@ function DonutChart({ data }) {
 }
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
-export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], cashiers = [], pygReports = [], shiftRecords = [] }) {
+export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], cashiers = [], pygReports = [], shiftRecords = [], products = [] }) {
 
   // Build 30-day trend from todaySales
   const sorted30 = useMemo(() => {
@@ -669,24 +669,31 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 </AreaChart>
                 </ResponsiveContainer>
 
-                {/* Top 3 Categorías - Cards Compactas */}
+                {/* Top 3 Productos Más Vendidos */}
                 <div className="mt-4 pt-3 grid grid-cols-3 gap-2" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-                  {PARTICIPATION_SEGMENTS.slice(0, 3).map((cat, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
-                      className="p-2.5 rounded-lg text-center" style={{ background: `${PARTICIPATION_COLORS[i]}15` }}>
-                      <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1.5">{cat.name}</p>
-                      <p className="text-[14px] font-black" style={{ color: PARTICIPATION_COLORS[i] }} className="mb-1.5">{cat.value}%</p>
-                      <div className="h-1 rounded-full mx-auto w-12" style={{ background: 'rgba(0,0,0,0.08)' }}>
-                        <motion.div 
-                          className="h-full rounded-full" 
-                          style={{ background: PARTICIPATION_COLORS[i] }}
-                          initial={{ width: 0 }}
-                          animate={{ width: '100%' }}
-                          transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
-                        />
-                      </div>
-                    </motion.div>
-                  ))}
+                  {(() => {
+                    const top3 = [...(products || [])].filter(p => p.total_sales > 0).sort((a, b) => b.total_sales - a.total_sales).slice(0, 3);
+                    const maxSales = top3[0]?.total_sales || 1;
+                    return top3.map((prod, i) => {
+                      const pct = (prod.total_sales / maxSales) * 100;
+                      return (
+                        <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
+                          className="p-2.5 rounded-lg text-center" style={{ background: `${PARTICIPATION_COLORS[i]}15` }}>
+                          <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1.5 truncate">{prod.product}</p>
+                          <p className="text-[12px] font-black" style={{ color: PARTICIPATION_COLORS[i] }} className="mb-1.5">{fmt(prod.total_sales)}</p>
+                          <div className="h-1 rounded-full mx-auto w-12" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                            <motion.div 
+                              className="h-full rounded-full" 
+                              style={{ background: PARTICIPATION_COLORS[i] }}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${pct}%` }}
+                              transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
+                            />
+                          </div>
+                        </motion.div>
+                      );
+                    });
+                  })()}
                 </div>
                 </div>
                 </AnalyticsCard>
