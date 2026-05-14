@@ -348,35 +348,35 @@ export default function PremiumMainChart() {
         </div>
 
         {/* Métricas Clave - Minimalista */}
-        <div className="px-7 pb-7 flex items-center justify-between gap-6 hidden">
-          <div>
-            <p className="text-xs text-slate-500 font-semibold mb-1">Acumulado</p>
-            <p className="text-2xl font-black" style={{ color: COLORS.primary }}>
-              ${(complianceMetrics.accumulated / 1000000).toFixed(1)}M
-            </p>
-          </div>
-          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
-          <div>
-            <p className="text-xs text-slate-500 font-semibold mb-1">Presupuesto</p>
-            <p className="text-2xl font-black" style={{ color: COLORS.budget }}>
-              ${(complianceMetrics.budget / 1000000).toFixed(1)}M
-            </p>
-          </div>
-          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
-          <div>
-            <p className="text-xs text-slate-500 font-semibold mb-1">Diferencia</p>
-            <p className="text-2xl font-black" style={{ color: complianceMetrics.variance > 0 ? COLORS.success : COLORS.danger }}>
-              {complianceMetrics.variance > 0 ? '+' : ''} ${(complianceMetrics.variance / 1000000).toFixed(2)}M
-            </p>
-          </div>
-          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
-          <div>
-            <p className="text-xs text-slate-500 font-semibold mb-1">Proyección</p>
-            <p className="text-2xl font-black" style={{ color: COLORS.accent }}>
-              ${(complianceMetrics.monthlyProjection / 1000000).toFixed(1)}M
-            </p>
-          </div>
-        </div>
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
       </motion.div>
 
       {/* Gráfica 2: Venta Diaria vs Proyección */}
