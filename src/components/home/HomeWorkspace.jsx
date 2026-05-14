@@ -316,6 +316,16 @@ export default function HomeWorkspace({
   const sparkSales = sorted.slice(0, 8).reverse().map((d) => d.total_sales || 0);
   const sparkTxn = sorted.slice(0, 8).reverse().map((d) => d.total_transactions || 0);
 
+  const { data: weatherHistory = [] } = useQuery({
+    queryKey: ['home-weather', selectedStore],
+    queryFn: () => base44.entities.WeatherHistory.filter({ store_id: selectedStore }),
+    enabled: !!selectedStore,
+    staleTime: 30 * 60 * 1000
+  });
+  const weatherSorted = [...weatherHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const latestWeather = weatherSorted[0];
+  const weatherLast7 = weatherSorted.slice(0, 7).reverse();
+
   const filteredNav = NAV_ITEMS.filter((n) => n.roles.includes(selectedRole));
 
   useEffect(() => {
@@ -516,84 +526,139 @@ export default function HomeWorkspace({
             </motion.div>
           }
 
-          {/* ── MINI CHARTS BANNER ── */}
+          {/* ── CLIMA BANNER ── */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="mb-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-            {/* Card 1 — Barras de ventas últimos 7 días */}
-            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Ventas · 7 días</p>
-              <p className="text-[18px] font-black text-slate-800 leading-none mb-3">{salesVal}</p>
-              <div className="flex items-end gap-1 h-12">
-                {(sparkSales.length > 0 ? sparkSales.slice(-7) : [3,4,4,5,4,6,5]).map((v, i, arr) => {
-                  const max = Math.max(...arr, 1);
-                  const pct = Math.max((v / max) * 100, 8);
-                  const isLast = i === arr.length - 1;
-                  return (
-                    <div key={i} className="flex-1 rounded-t-md transition-all"
-                      style={{ height: `${pct}%`, background: isLast ? '#be185d' : 'rgba(190,24,93,0.18)' }} />
-                  );
-                })}
-              </div>
-              <p className="text-[9px] text-slate-300 mt-2 font-medium">Lun → Hoy</p>
-            </div>
-
-            {/* Card 2 — Tendencia sparkline transacciones */}
-            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Transacciones</p>
-              <p className="text-[18px] font-black text-slate-800 leading-none mb-3">{txnVal}</p>
-              <div className="h-12">
-                <PremiumSparkline
-                  data={sparkTxn.length > 0 ? sparkTxn : [20,28,24,32,27,35,30]}
-                  color="#7c3aed"
-                  width={200}
-                  height={48}
-                />
-              </div>
-              <p className="text-[9px] text-slate-300 mt-2 font-medium">Tendencia semanal</p>
-            </div>
-
-            {/* Card 3 — Donut ticket promedio */}
-            <div className="rounded-2xl p-4 flex flex-col" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Ticket promedio</p>
-              <p className="text-[18px] font-black text-slate-800 leading-none mb-2">{ticketVal}</p>
-              <div className="flex items-center gap-3 flex-1">
-                {/* Mini donut SVG */}
-                <svg width="52" height="52" viewBox="0 0 52 52" className="flex-shrink-0">
-                  <circle cx="26" cy="26" r="18" fill="none" stroke="#f1f5f9" strokeWidth="7" />
-                  {(() => {
-                    const totalSales = sorted.reduce((s,d) => s+(d.total_sales||0), 0);
-                    const totalBudget = budget.reduce((s,b) => s+(b.sales_budget||0), 0);
-                    const pct = totalBudget > 0 ? Math.min(totalSales/totalBudget, 1) : 0.62;
-                    const circ = 2 * Math.PI * 18;
-                    return (
-                      <circle cx="26" cy="26" r="18" fill="none"
-                        stroke="#be185d" strokeWidth="7"
-                        strokeDasharray={`${pct * circ} ${circ}`}
-                        strokeLinecap="round"
-                        transform="rotate(-90 26 26)" />
-                    );
-                  })()}
-                </svg>
-                <div>
-                  {[
-                    { label: 'Helados', color: '#be185d', pct: 42 },
-                    { label: 'Bebidas', color: '#f59e0b', pct: 23 },
-                    { label: 'Combos', color: '#10b981', pct: 18 },
-                    { label: 'Otros', color: '#94a3b8', pct: 17 },
-                  ].map(({ label, color, pct }) => (
-                    <div key={label} className="flex items-center gap-1.5 mb-0.5">
-                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
-                      <span className="text-[9px] text-slate-400 font-medium">{label}</span>
-                      <span className="text-[9px] font-bold text-slate-600 ml-auto pl-2">{pct}%</span>
-                    </div>
-                  ))}
+            {/* Card 1 — Temperatura del día + tendencia 7 días (barras) */}
+            {(() => {
+              const tempData = weatherLast7.map(d => d.temperature_mean || d.temperature_max || 0);
+              const maxTemp = Math.max(...tempData, 1);
+              const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
+              const tempMax = latestWeather?.temperature_max;
+              const tempMin = latestWeather?.temperature_min;
+              const isHot = temp > 26;
+              const accentColor = isHot ? '#f97316' : '#38bdf8';
+              return (
+                <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Temperatura · 7 días</p>
+                    <span className="text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : '🌤 Fresco'}</span>
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <p className="text-[22px] font-black text-slate-800 leading-none">{temp != null ? `${Math.round(temp)}°` : '—'}</p>
+                    {tempMax != null && tempMin != null && (
+                      <p className="text-[10px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</p>
+                    )}
+                  </div>
+                  <div className="flex items-end gap-1 h-11 mt-2">
+                    {(tempData.length > 0 ? tempData : [20,22,21,24,23,25,24]).map((v, i, arr) => {
+                      const pct = Math.max((v / Math.max(...arr, 1)) * 100, 8);
+                      const isLast = i === arr.length - 1;
+                      return (
+                        <div key={i} className="flex-1 rounded-t-md"
+                          style={{ height: `${pct}%`, background: isLast ? accentColor : `${accentColor}28` }} />
+                      );
+                    })}
+                  </div>
+                  <p className="text-[9px] text-slate-300 mt-1.5 font-medium">Últimos 7 días · °C</p>
                 </div>
-              </div>
-            </div>
+              );
+            })()}
+
+            {/* Card 2 — Precipitación (barras) últimos 7 días */}
+            {(() => {
+              const rainData = weatherLast7.map(d => d.precipitation || 0);
+              const totalRain = rainData.reduce((s, v) => s + v, 0);
+              const maxRain = Math.max(...rainData, 1);
+              const todayRain = latestWeather?.precipitation ?? 0;
+              const rainLevel = totalRain > 20 ? 'Alta' : totalRain > 5 ? 'Moderada' : 'Baja';
+              const rainColor = totalRain > 20 ? '#6366f1' : totalRain > 5 ? '#38bdf8' : '#94a3b8';
+              return (
+                <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Lluvia · 7 días</p>
+                    <span className="text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <p className="text-[22px] font-black text-slate-800 leading-none">{todayRain > 0 ? `${todayRain.toFixed(1)}` : '0'}<span className="text-[12px] font-semibold text-slate-400">mm</span></p>
+                    <p className="text-[10px] text-slate-400 font-medium ml-1">hoy</p>
+                  </div>
+                  <div className="flex items-end gap-1 h-11 mt-2">
+                    {(rainData.length > 0 ? rainData : [0,2,1,5,3,8,4]).map((v, i, arr) => {
+                      const pct = Math.max((v / Math.max(...arr, 0.1)) * 100, 4);
+                      const isLast = i === arr.length - 1;
+                      return (
+                        <div key={i} className="flex-1 rounded-t-md"
+                          style={{ height: `${pct}%`, background: isLast ? rainColor : `${rainColor}30` }} />
+                      );
+                    })}
+                  </div>
+                  <p className="text-[9px] text-slate-300 mt-1.5 font-medium">Total semana: {totalRain.toFixed(1)} mm</p>
+                </div>
+              );
+            })()}
+
+            {/* Card 3 — Donut condición climática + humedad */}
+            {(() => {
+              const humidity = latestWeather?.humidity ?? 0;
+              const precip = latestWeather?.precipitation ?? 0;
+              const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max ?? 0;
+              // Classify days of last 7 as sunny/cloudy/rainy
+              const sunny = weatherLast7.filter(d => (d.precipitation || 0) < 1).length;
+              const rainy = weatherLast7.filter(d => (d.precipitation || 0) >= 5).length;
+              const cloudy = weatherLast7.length - sunny - rainy;
+              const total = Math.max(weatherLast7.length, 1);
+              const segments = [
+                { label: 'Soleado', color: '#f97316', val: sunny },
+                { label: 'Nublado', color: '#94a3b8', val: cloudy },
+                { label: 'Lluvioso', color: '#6366f1', val: rainy },
+              ];
+              const circ = 2 * Math.PI * 16;
+              let cumulative = 0;
+              return (
+                <div className="rounded-2xl p-4 flex flex-col" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Condición · semana</p>
+                  </div>
+                  <p className="text-[18px] font-black text-slate-800 leading-none mb-2">{humidity > 0 ? `${Math.round(humidity)}% 💧` : '—'}</p>
+                  <div className="flex items-center gap-3 flex-1">
+                    <svg width="48" height="48" viewBox="0 0 48 48" className="flex-shrink-0">
+                      <circle cx="24" cy="24" r="16" fill="none" stroke="#f1f5f9" strokeWidth="6" />
+                      {segments.map(({ color, val }) => {
+                        const pct = val / total;
+                        const dash = pct * circ;
+                        const offset = -cumulative * circ;
+                        cumulative += pct;
+                        return (
+                          <circle key={color} cx="24" cy="24" r="16" fill="none"
+                            stroke={color} strokeWidth="6"
+                            strokeDasharray={`${dash} ${circ}`}
+                            strokeDashoffset={offset}
+                            strokeLinecap="butt"
+                            transform="rotate(-90 24 24)" />
+                        );
+                      })}
+                    </svg>
+                    <div className="flex flex-col gap-1">
+                      {segments.map(({ label, color, val }) => (
+                        <div key={label} className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
+                          <span className="text-[9px] text-slate-400 font-medium">{label}</span>
+                          <span className="text-[9px] font-bold text-slate-600 ml-auto pl-1">{val}d</span>
+                        </div>
+                      ))}
+                      {temp > 0 && (
+                        <p className="text-[9px] text-slate-300 mt-0.5">Temp prom: {Math.round(temp)}°C</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
           </motion.div>
 
