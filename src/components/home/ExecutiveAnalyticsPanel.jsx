@@ -6,6 +6,7 @@ import {
 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
+import { AnimatedChartWrapper, AnimatedProgressBar } from '@/components/dashboard/AnimatedChartWrapper';
 
 // ── ANIMATED COUNTER ──────────────────────────────────────────────────────────
 function AnimatedCounter({ value, format = (v) => v, delay = 0, duration = 2 }) {
@@ -79,22 +80,23 @@ const EbitdaTooltip = makePremiumTooltip((val) => `${val}%`);
 
 // ── PREMIUM ANALYTICS CARD ────────────────────────────────────────────────────
 function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay, duration: 0.7, ease: [0.165, 0.84, 0.44, 1] }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      whileHover={{ y: -4, transition: { duration: 0.4 } }}
-      className={`rounded-3xl p-6 ${colSpan} group relative overflow-hidden`}
-      style={{
-        background: 'linear-gradient(135deg, rgba(255,248,250,0.98) 0%, rgba(255,255,255,0.93) 100%)',
-        backdropFilter: 'blur(40px)',
-        border: '1px solid rgba(255, 77, 141, 0.15)',
-      }}>
+   const [isHovered, setIsHovered] = useState(false);
+
+   return (
+     <motion.div
+       initial={{ opacity: 0, y: 24, scale: 0.98 }}
+       animate={{ opacity: 1, y: 0, scale: 1 }}
+       transition={{ delay, duration: 0.7, ease: [0.165, 0.84, 0.44, 1] }}
+       onHoverStart={() => setIsHovered(true)}
+       onHoverEnd={() => setIsHovered(false)}
+       whileHover={{ y: -4, transition: { duration: 0.4 } }}
+       className={`rounded-3xl p-6 ${colSpan} group relative overflow-hidden`}
+       style={{
+         background: 'linear-gradient(135deg, rgba(255,248,250,0.98) 0%, rgba(255,255,255,0.93) 100%)',
+         backdropFilter: 'blur(40px)',
+         border: '1px solid rgba(255, 77, 141, 0.15)',
+       }}
+       whileTap={{ scale: 0.98 }}>
       
       {/* Animated glow effect on hover */}
       <motion.div
@@ -486,24 +488,33 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 })()}
               </div>
 
-              <ResponsiveContainer width="100%" height={140}>
-                <ComposedChart data={sorted30} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="ticketGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.35" />
-                      <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="0" stroke="rgba(255,77,141,0.08)" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
-                  <YAxis hide />
-                  <Tooltip
-                    contentStyle={{ background: '#fff', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 12, fontSize: 11 }}
-                    formatter={(v, name) => [fmt(v), name]} />
-                  <Area type="monotone" dataKey="ticket" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ticketGrad)" dot={false} name="Ticket Real" />
-                  <Line type="monotone" dataKey="ticketPPT" stroke="#6366f1" strokeWidth={2} strokeDasharray="5,5" dot={false} name="Meta Ticket $25K" />
-                </ComposedChart>
-              </ResponsiveContainer>
+              <AnimatedChartWrapper label="Ticket Promedio">
+                <ResponsiveContainer width="100%" height={140}>
+                  <ComposedChart data={sorted30} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                     <defs>
+                       <linearGradient id="ticketGrad" x1="0" y1="0" x2="0" y2="1">
+                         <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.35" />
+                         <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
+                       </linearGradient>
+                       <filter id="ticketGlow">
+                         <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                         <feMerge>
+                           <feMergeNode in="coloredBlur" />
+                           <feMergeNode in="SourceGraphic" />
+                         </feMerge>
+                       </filter>
+                     </defs>
+                     <CartesianGrid strokeDasharray="0" stroke="rgba(255,77,141,0.08)" vertical={false} />
+                     <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
+                     <YAxis hide />
+                     <Tooltip
+                       contentStyle={{ background: '#fff', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 12, fontSize: 11 }}
+                       formatter={(v, name) => [fmt(v), name]} />
+                     <Area type="monotone" dataKey="ticket" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ticketGrad)" dot={false} name="Ticket Real" isAnimationActive={true} animationDuration={1200} />
+                     <Line type="monotone" dataKey="ticketPPT" stroke="#6366f1" strokeWidth={2} strokeDasharray="5,5" dot={false} name="Meta Ticket $25K" isAnimationActive={true} animationDuration={1200} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </AnimatedChartWrapper>
 
               <div className="flex gap-6 mt-3 text-[10px]">
                 <div className="flex items-center gap-2">
@@ -532,22 +543,31 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           
           {ebitdaDataWithAvg && ebitdaDataWithAvg.length > 0 ? (
             <>
-              <ResponsiveContainer width="100%" height={140}>
-                <LineChart data={ebitdaDataWithAvg} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
-                  <YAxis hide domain={[0, 50]} />
-                  <Tooltip content={<EbitdaTooltip />} />
-                  <Line type="monotone" dataKey="margen" stroke="#FF4D8D" strokeWidth={2.5} dot={{ fill: '#FF4D8D', r: 4 }} name="EBITDA %" />
-                  <Line type="linear" dataKey="promedio" stroke="#FFB4C9" strokeWidth={2} strokeDasharray="4,4" dot={false} name="Promedio" />
-                </LineChart>
-              </ResponsiveContainer>
+               <AnimatedChartWrapper label="EBITDA">
+                 <ResponsiveContainer width="100%" height={140}>
+                   <LineChart data={ebitdaDataWithAvg} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                     <defs>
+                       <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
+                         <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.3" />
+                         <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
+                       </linearGradient>
+                       <filter id="ebitdaGlow">
+                         <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                         <feMerge>
+                           <feMergeNode in="coloredBlur" />
+                           <feMergeNode in="SourceGraphic" />
+                         </feMerge>
+                       </filter>
+                     </defs>
+                     <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
+                     <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
+                     <YAxis hide domain={[0, 50]} />
+                     <Tooltip content={<EbitdaTooltip />} />
+                     <Line type="monotone" dataKey="margen" stroke="#FF4D8D" strokeWidth={2.5} dot={{ fill: '#FF4D8D', r: 4 }} name="EBITDA %" isAnimationActive={true} animationDuration={1500} />
+                     <Line type="linear" dataKey="promedio" stroke="#FFB4C9" strokeWidth={2} strokeDasharray="4,4" dot={false} name="Promedio" isAnimationActive={true} animationDuration={1500} />
+                   </LineChart>
+                 </ResponsiveContainer>
+               </AnimatedChartWrapper>
               
               <div className="mt-3 pt-2 border-t border-slate-100">
                 <div className="grid grid-cols-2 gap-2 text-[9px]">
@@ -711,19 +731,11 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                           )}
                         </div>
                       </div>
-                      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${salesPercent}%` }}
-                          transition={{ delay: 0.55 + i * 0.08, duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-                          className="h-full rounded-full transition-all"
-                          style={{
-                            background: i === 0 
-                              ? 'linear-gradient(90deg, #FF4D8D, #FF7FA5)' 
-                              : `linear-gradient(90deg, rgba(255, 77, 141, ${0.4 - i * 0.08}), rgba(255, 182, 201, ${0.3 - i * 0.06}))`,
-                            boxShadow: i === 0 ? '0 0 12px rgba(255, 77, 141, 0.4)' : 'none'
-                          }} />
-                      </div>
+                      <AnimatedProgressBar 
+                        value={salesPercent} 
+                        color={i === 0 ? '#FF4D8D' : `rgba(255, 77, 141, ${0.7 - i * 0.1})`}
+                        height={8}
+                      />
                     </motion.div>
                   );
                 })}
