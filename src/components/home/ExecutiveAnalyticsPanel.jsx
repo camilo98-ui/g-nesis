@@ -679,7 +679,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                       return (
                         <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
                           className="p-2.5 rounded-lg text-center" style={{ background: `${PARTICIPATION_COLORS[i]}15` }}>
-                          <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1.5 truncate">{prod.product}</p>
+                          <p className="text-[9px] text-[#8F96A3] font-semibold uppercase mb-1.5 line-clamp-2 min-h-6 break-words">{prod.product}</p>
                           <p className="text-[12px] font-black" style={{ color: PARTICIPATION_COLORS[i] }} className="mb-1.5">{fmt(prod.total_sales)}</p>
                           <div className="h-1 rounded-full mx-auto w-12" style={{ background: 'rgba(0,0,0,0.08)' }}>
                             <motion.div 
