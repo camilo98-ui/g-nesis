@@ -305,6 +305,14 @@ export default function HomeWorkspace({
     staleTime: 10 * 60 * 1000
   });
 
+  // Fetch products for the store
+  const { data: salesReports = [] } = useQuery({
+    queryKey: ['home-sales-reports', selectedStore],
+    queryFn: () => base44.entities.SalesReport.filter({ store_code: selectedStore }),
+    enabled: !!selectedStore,
+    staleTime: 10 * 60 * 1000
+  });
+
   // For ShiftRecord we need store_id — find from Store entity
   const { data: storeEntities = [] } = useQuery({
     queryKey: ['all-stores'],
@@ -627,7 +635,8 @@ export default function HomeWorkspace({
             budget={budget}
             cashiers={cashiers}
             pygReports={pygReports}
-            shiftRecords={shiftRecords} />
+            shiftRecords={shiftRecords}
+            products={salesReports} />
 
           }
 
