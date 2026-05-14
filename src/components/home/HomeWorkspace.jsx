@@ -760,7 +760,7 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">Venta del día</p>
-                <p className="text-[20px] font-extrabold text-slate-800 leading-none mb-2">
+                <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
                   {latest?.total_sales ? `$${(latest.total_sales / 1000).toFixed(1)}K` : '—'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
@@ -778,7 +778,7 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-violet-500 tracking-widest uppercase mb-3">Cumplimiento</p>
-                <p className="text-[20px] font-extrabold text-slate-800 leading-none mb-2">
+                <p className="text-[20px] font-bold text-violet-500 leading-none mb-2">
                   {dailyBudgets?.find(d => new Date(d.date).toDateString() === new Date().toDateString())?.sales_budget && latest?.total_sales
                     ? `${((latest.total_sales / dailyBudgets.find(d => new Date(d.date).toDateString() === new Date().toDateString()).sales_budget) * 100).toFixed(1)}%`
                     : '—'}
@@ -798,7 +798,7 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección del mes</p>
-                <p className="text-[20px] font-extrabold text-slate-800 leading-none mb-2">
+                <p className="text-[20px] font-bold text-blue-500 leading-none mb-2">
                   {latest?.total_sales ? `$${((latest.total_sales / new Date().getDate()) * new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() / 1000000).toFixed(2)}M` : '—'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
@@ -815,7 +815,7 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Transacciones</p>
-                <p className="text-[20px] font-extrabold text-slate-800 leading-none mb-2">
+                <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
                   {latest?.total_transactions ? `${latest.total_transactions.toLocaleString()}` : '—'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
