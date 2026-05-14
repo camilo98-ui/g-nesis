@@ -82,14 +82,14 @@ Usa **negritas** solo para cifras y KPIs clave. Sin introducciones. Sin despedid
 CONTEXTO: Popsy Colombia — retail de helados premium. Usuarios: líderes, embajadores, gerentes, directores. Tienes visibilidad completa de lo que está en pantalla y en el sistema.`;
 
 const PROACTIVE_MESSAGES = {
-  '/':              "Nova activa. Analizando ventas, cumplimiento y KPIs operativos del día.",
-  '/Budget':        "Vista de presupuesto cargada. Proyecciones de cierre y brechas disponibles.",
-  '/Rankings':      "Datos de rendimiento por cajero procesados. Ranking y anomalías de desempeño listos.",
-  '/PYGDashboard':  "P&G cargado. Márgenes, EBITDA y estructura de costos en análisis.",
-  '/FreezerMap':    "Inventario de nevera activo. Niveles de stock y rotación de sabores monitoreados.",
-  '/Management':    "Vista ejecutiva activa. Comparativo entre tiendas y alertas de cumplimiento disponibles.",
-  '/Sales':         "Módulo de ventas activo. Tendencias, ticket promedio y transacciones en análisis.",
-  default:          "Nova activa. Sistema operativo Popsy conectado.",
+  '/':              "Hola. ¿Cómo va el día? Tengo la visibilidad de ventas, cumplimiento y métricas del equipo.",
+  '/Budget':        "Hola. Presupuesto en la pantalla. ¿Querés ver la proyección del cierre?",
+  '/Rankings':      "Hola. Aquí están los datos de desempeño por cajero. ¿Hay algo que te llame la atención?",
+  '/PYGDashboard':  "Hola. P&G cargado. Tengo márgenes, EBITDA y costos listos para analizar.",
+  '/FreezerMap':    "Hola. Inventario de la nevera activo. ¿Necesitas revisar niveles de stock o rotación?",
+  '/Management':    "Hola. Vista de gerencia abierta. Puedo mostrarte comparativos entre tiendas.",
+  '/Sales':         "Hola. Módulo de ventas. ¿Qué querés analizar — tendencias, ticket o transacciones?",
+  default:          "Hola. Nova aquí. ¿En qué te enfoco?",
 };
 
 const SUGGESTIONS = {
