@@ -653,64 +653,44 @@ export default function HomeWorkspace({
               
               <div className="flex items-center h-16 px-6 gap-4">
                 
-                {/* Avatar Nova Mascota - Premium Floating Character */}
+                {/* Avatar Nova Mascota */}
                 <motion.div
                   animate={{ 
-                    y: [0, -2, 0],
-                    scale: [1, 1.01, 1]
+                    scale: [1, 1.02, 1]
                   }}
-                  transition={{ 
-                    duration: 4, 
-                    repeat: Infinity, 
-                    ease: 'easeInOut',
-                    type: 'spring',
-                    stiffness: 100
-                  }}
-                  className="relative flex-shrink-0"
-                  style={{ 
-                    width: '80px', 
-                    height: '80px',
-                    marginLeft: '-12px',
-                    marginRight: '4px'
+                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                  className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.14) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(194, 24, 117, 0.08) 100%)',
+                    border: '1.5px solid rgba(194, 24, 117, 0.18)',
+                    boxShadow: '0 0 20px rgba(194, 24, 117, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.6)'
                   }}>
                   
-                  {/* Glow suave rosado/morado alrededor */}
+                  {/* Glow pulsante */}
                   <motion.div
-                    animate={{ opacity: [0.25, 0.45, 0.25] }}
+                    animate={{ opacity: [0.2, 0.4, 0.2] }}
                     transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                     className="absolute inset-0 rounded-full"
                     style={{ 
-                      background: 'radial-gradient(circle at center, rgba(194, 24, 117, 0.3), rgba(168, 85, 247, 0.15), transparent 75%)',
-                      filter: 'blur(16px)',
-                      zIndex: 0
+                      background: 'radial-gradient(circle, rgba(194, 24, 117, 0.25), transparent 70%)',
+                      filter: 'blur(10px)',
+                      zIndex: 1
                     }} />
                   
-                  {/* Sombra flotante ligera */}
-                  <motion.div
-                    animate={{ opacity: [0.15, 0.25, 0.15] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-full h-8 rounded-full"
-                    style={{ 
-                      background: 'radial-gradient(ellipse at center, rgba(194, 24, 117, 0.2), transparent 70%)',
-                      filter: 'blur(8px)',
-                      zIndex: 0
-                    }} />
-                  
-                  {/* Imagen mascota Nova - Completa y libre */}
-                  <motion.img 
+                  {/* Imagen mascota Nova */}
+                  <img 
                     src="https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png" 
                     alt="Nova" 
-                    className="w-full h-full object-contain relative z-10 drop-shadow-lg"
-                    whileHover={{ scale: 1.05 }}
+                    className="w-full h-full object-contain scale-[1.4] relative z-10"
                   />
                 </motion.div>
 
                 {/* Separador elegante */}
                 <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-250 to-transparent opacity-25" />
 
-                {/* Insight Premium Horizontal — Rich Data */}
+                {/* Insight Premium Horizontal */}
                 <div className="flex-1 min-w-0 flex items-center">
-                  <motion.div 
+                  <motion.p 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.6 }}
@@ -718,50 +698,30 @@ export default function HomeWorkspace({
                     style={{ letterSpacing: '0.3px' }}>
                     {latest?.total_sales > 0 
                       ? (() => {
-                          const now = new Date();
-                          const hours = now.getHours();
                           const salesM = (latest.total_sales / 1000000).toFixed(1);
-                          const projection = ((latest.total_sales / hours) * 24 / 1000000).toFixed(1);
-                          const ticket = ((latest.total_sales / latest.total_transactions) / 1000).toFixed(0);
-                          const dailyBudgetData = dailyBudgets?.find(d => new Date(d.date).toDateString() === new Date().toDateString());
-                          const budgetSales = dailyBudgetData?.sales_budget || 0;
-                          const compliance = budgetSales > 0 ? ((latest.total_sales / budgetSales) * 100).toFixed(0) : 0;
-                          
+                          const projection = ((latest.total_sales / new Date().getHours()) * 24 / 1000000).toFixed(1);
                           return (
                             <>
-                              <span className="text-slate-600">Ritmo </span>
-                              <span style={{ color: '#C21875', fontWeight: 800 }}>excelente</span>
-                              <span className="text-slate-600"> · </span>
+                              <span className="text-slate-600">Ritmo excelente · </span>
                               <span className="text-slate-700">ventas </span>
                               <span style={{ 
                                 color: '#C21875', 
                                 fontWeight: 800,
-                                fontSize: '13px'
+                                fontSize: '13px',
+                                letterSpacing: '-0.3px'
                               }}>${salesM}M</span>
-                              <span className="text-slate-600"> ({compliance}% cumpl)</span>
-                              
-                              <span className="text-slate-400 mx-1.5">·</span>
-                              
-                              <span className="text-slate-700">ticket </span>
+                              <span className="text-slate-600"> → proyección </span>
                               <span style={{ 
                                 color: '#C21875', 
                                 fontWeight: 800,
-                                fontSize: '13px'
-                              }}>${ticket}K</span>
-                              
-                              <span className="text-slate-400 mx-1.5">·</span>
-                              
-                              <span className="text-slate-700">proyección </span>
-                              <span style={{ 
-                                color: '#C21875', 
-                                fontWeight: 800,
-                                fontSize: '13px'
+                                fontSize: '13px',
+                                letterSpacing: '-0.3px'
                               }}>${projection}M</span>
                             </>
                           );
                         })()
-                      : <span className="text-slate-500">Registra ventas para ver insights operativos en tiempo real</span>}
-                  </motion.div>
+                      : <span className="text-slate-500">Registra ventas para ver insights personalizados</span>}
+                  </motion.p>
                 </div>
 
                 {/* Botón Premium SaaS */}
