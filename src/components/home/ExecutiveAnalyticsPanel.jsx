@@ -670,7 +670,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 </ResponsiveContainer>
 
                 {/* Top 3 Productos Más Vendidos */}
-                <div className="mt-4 pt-3 grid grid-cols-3 gap-2" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+                <div className="mt-3 pt-2 grid grid-cols-3 gap-1.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
                   {(() => {
                     const grouped = (products || []).filter(p => p.total_sales > 0 && p.level === 'product' && p.product).reduce((acc, p) => {
                       const existing = acc.find(item => item.product === p.product);
@@ -681,30 +681,30 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                     const top3 = grouped.sort((a, b) => b.total_sales - a.total_sales).slice(0, 3);
                     const maxSales = top3[0]?.total_sales || 1;
                     return top3.map((prod, i) => {
-                      const pct = (prod.total_sales / maxSales) * 100;
-                      return (
-                        <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
-                          className="p-2.5 rounded-lg text-center relative" style={{ background: `${PARTICIPATION_COLORS[i]}15` }}>
-                          <div className="absolute top-1 right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black text-white flex-shrink-0"
-                            style={{ background: PARTICIPATION_COLORS[i] }}>
-                            {i + 1}
-                          </div>
-                          <p className="text-[9px] text-[#8F96A3] font-semibold uppercase mb-1.5 line-clamp-2 min-h-6 break-words">{prod.product}</p>
-                          <p className="text-[12px] font-black" style={{ color: PARTICIPATION_COLORS[i] }} className="mb-1.5">{fmt(prod.total_sales)}</p>
-                          <div className="h-1 rounded-full mx-auto w-12" style={{ background: 'rgba(0,0,0,0.08)' }}>
-                            <motion.div 
-                              className="h-full rounded-full" 
-                              style={{ background: PARTICIPATION_COLORS[i] }}
-                              initial={{ width: 0 }}
-                              animate={{ width: `${pct}%` }}
-                              transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
-                            />
-                          </div>
-                        </motion.div>
-                      );
-                    });
-                  })()}
-                </div>
+                       const pct = (prod.total_sales / maxSales) * 100;
+                       return (
+                         <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
+                           className="p-1.5 rounded-lg text-center relative" style={{ background: `${PARTICIPATION_COLORS[i]}15` }}>
+                           <div className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-black text-white flex-shrink-0"
+                             style={{ background: PARTICIPATION_COLORS[i] }}>
+                             {i + 1}
+                           </div>
+                           <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1 line-clamp-2 min-h-5 break-words">{prod.product}</p>
+                           <p className="text-[10px] font-black" style={{ color: PARTICIPATION_COLORS[i] }} className="mb-1">{fmt(prod.total_sales)}</p>
+                           <div className="h-0.5 rounded-full mx-auto w-10" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                             <motion.div 
+                               className="h-full rounded-full" 
+                               style={{ background: PARTICIPATION_COLORS[i] }}
+                               initial={{ width: 0 }}
+                               animate={{ width: `${pct}%` }}
+                               transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
+                             />
+                           </div>
+                         </motion.div>
+                       );
+                     });
+                   })()}
+                 </div>
                 </div>
                 </AnalyticsCard>
 
