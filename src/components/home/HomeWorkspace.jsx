@@ -878,9 +878,9 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
-                <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
+                <p className="text-[18px] font-bold text-rose-500 leading-none mb-2">
                   {budgetData?.adjustedDailyBudget ? 
-                    `$${(budgetData.adjustedDailyBudget / 1000000).toFixed(2)}M`
+                    `$${Math.round(budgetData.adjustedDailyBudget).toLocaleString('es-CO')}`
                     : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
@@ -897,11 +897,11 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
-                <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
+                <p className="text-[18px] font-bold text-emerald-500 leading-none mb-2">
                   {(() => {
                     const monthGap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
                     const sign = monthGap >= 0 ? '+' : '-';
-                    return `${sign}$${(Math.abs(monthGap) / 1000000).toFixed(2)}M`;
+                    return `${sign}$${Math.abs(Math.round(monthGap)).toLocaleString('es-CO')}`;
                   })()}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
@@ -925,13 +925,13 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
-                <p className="text-[20px] font-bold text-blue-500 leading-none mb-2">
+                <p className="text-[18px] font-bold text-blue-500 leading-none mb-2">
                   {budgetData?.monthProjectionCompliance ? `${budgetData.monthProjectionCompliance.toFixed(0)}%` : '0%'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-500 text-center flex-1">
                     {budgetData?.monthProjection && budgetData?.monthlyBudget ? 
-                      `$${(budgetData.monthProjection / 1000000).toFixed(2)}M / $${(budgetData.monthlyBudget / 1000000).toFixed(2)}M`
+                      `$${Math.round(budgetData.monthProjection).toLocaleString('es-CO')} / $${Math.round(budgetData.monthlyBudget).toLocaleString('es-CO')}`
                       : ''}
                   </span>
                 </div>
@@ -946,9 +946,9 @@ export default function HomeWorkspace({
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Venta del día</p>
-                <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
+                <p className="text-[18px] font-bold text-emerald-500 leading-none mb-2">
                   {latest?.total_sales ? 
-                    `$${(latest.total_sales / 1000000).toFixed(2)}M`
+                    `$${Math.round(latest.total_sales).toLocaleString('es-CO')}`
                     : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
