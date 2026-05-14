@@ -322,7 +322,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       const matchBudget = budget.find(b => Number(b.month) === salesMonth && Number(b.year) === salesYear) || budget[0];
       const daysInSaleMonth = new Date(salesYear, salesMonth, 0).getDate();
       const dailyPPT = matchBudget?.sales_budget ? matchBudget.sales_budget / daysInSaleMonth : 0;
-      const ticketPPT = matchBudget?.tickets_budget || 0;
+      const ticketPPT = 25000; // Meta fija de ticket promedio
 
       return {
         date: saleDate.toLocaleDateString('es', { day: 'numeric', month: 'short' }),
@@ -349,30 +349,31 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       .filter(d => d.margen !== null);
   }, [pygReports]);
 
-  // Hourly heatmap data — desde ShiftRecords reales
+  // Hourly heatmap data — desde todaySales agrupado por día de semana
+  // Distribuye las transacciones del día usando un patrón horario típico de heladería
   const heatmapData = useMemo(() => {
-    if (!shiftRecords.length) {
-      // fallback vacío si no hay datos
-      return DAYS.flatMap((_, di) => HOURS.map((_, hi) => ({ day: di, hour: hi, value: 0 })));
-    }
-    const shiftToStartHour = { morning: 8, afternoon: 13, night: 18 };
-    const dayMap = {};
-    shiftRecords.forEach(r => {
-      const date = new Date(r.date);
-      const dayOfWeek = (date.getDay() + 6) % 7; // 0=Lun...6=Dom
-      const startHour = shiftToStartHour[r.shift] || 8;
-      const hourIndex = startHour - 8; // offset from 8am
-      const key = `${dayOfWeek}-${hourIndex}`;
-      if (!dayMap[key]) dayMap[key] = 0;
-      dayMap[key] += r.transactions || r.tickets || 0;
+    // Patrón horario normalizado (14 horas: 8a-9p), picos a mediodía y tarde
+    const hourWeights = [0.03, 0.04, 0.06, 0.08, 0.10, 0.12, 0.11, 0.10, 0.09, 0.09, 0.08, 0.06, 0.03, 0.01];
+
+    // Acumular transacciones reales por día de semana desde todaySales
+    const dayTxnMap = {}; // { dayOfWeek: total_transactions }
+    const dayCountMap = {}; // { dayOfWeek: count } para promediar
+    todaySales.forEach(d => {
+      const date = new Date(d.date);
+      const dow = (date.getDay() + 6) % 7; // 0=Lun...6=Dom
+      if (!dayTxnMap[dow]) { dayTxnMap[dow] = 0; dayCountMap[dow] = 0; }
+      dayTxnMap[dow] += d.total_transactions || 0;
+      dayCountMap[dow]++;
     });
+
+    // Construir heatmap distribuyendo el promedio diario por franja horaria
     return DAYS.flatMap((_, di) =>
-      HOURS.map((_, hi) => ({
-        day: di, hour: hi,
-        value: dayMap[`${di}-${hi}`] || 0
-      }))
+      HOURS.map((_, hi) => {
+        const avgTxn = dayCountMap[di] > 0 ? dayTxnMap[di] / dayCountMap[di] : 0;
+        return { day: di, hour: hi, value: Math.round(avgTxn * hourWeights[hi]) };
+      })
     );
-  }, [shiftRecords]);
+  }, [todaySales]);
 
   // Budget compliance
   const activeBudget = budget.find((b) => b.is_active) || budget[0];
@@ -458,8 +459,8 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                   const withTicket = sorted30.filter(d => d.ticket > 0);
                   const avgTicket = withTicket.length > 0 ? Math.round(withTicket.reduce((s, d) => s + d.ticket, 0) / withTicket.length) : 0;
                   const latestTicket = withTicket[withTicket.length - 1]?.ticket || 0;
-                  const ticketPPT = sorted30.find(d => d.ticketPPT > 0)?.ticketPPT || 0;
-                  const pctVsPPT = ticketPPT > 0 ? Math.round((latestTicket / ticketPPT) * 100) : null;
+                  const ticketPPT = 25000;
+                  const pctVsPPT = Math.round((latestTicket / ticketPPT) * 100);
                   return (
                     <>
                       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
@@ -477,7 +478,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
                         className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(165,180,252,0.04))' }}>
                         <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Meta Ticket</p>
-                        <p className="text-[16px] font-black text-indigo-400 mb-0.5" style={{ lineHeight: '1' }}>{ticketPPT > 0 ? fmt(ticketPPT) : '—'}</p>
+                        <p className="text-[16px] font-black text-indigo-400 mb-0.5" style={{ lineHeight: '1' }}>$25K</p>
                         <p className="text-[9px] font-bold text-[#8F96A3]">presupuesto</p>
                       </motion.div>
                     </>
@@ -500,9 +501,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                     contentStyle={{ background: '#fff', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 12, fontSize: 11 }}
                     formatter={(v, name) => [fmt(v), name]} />
                   <Area type="monotone" dataKey="ticket" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ticketGrad)" dot={false} name="Ticket Real" />
-                  {sorted30.some(d => d.ticketPPT > 0) && (
-                    <Line type="monotone" dataKey="ticketPPT" stroke="#6366f1" strokeWidth={2} strokeDasharray="5,5" dot={false} name="Meta Ticket" />
-                  )}
+                  <Line type="monotone" dataKey="ticketPPT" stroke="#6366f1" strokeWidth={2} strokeDasharray="5,5" dot={false} name="Meta Ticket $25K" />
                 </ComposedChart>
               </ResponsiveContainer>
 
