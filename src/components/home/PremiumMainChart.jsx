@@ -22,8 +22,8 @@ const generateComplianceData = () => {
     date.setDate(date.getDate() - (29 - i));
     const actualSales = dailyBudget + (Math.random() - 0.4) * 500000;
     const variance = actualSales - dailyBudget;
-    const compliancePercent = ((actualSales / dailyBudget) * 100);
-    
+    const compliancePercent = actualSales / dailyBudget * 100;
+
     return {
       date: `${date.getDate()}`,
       day: date.toLocaleDateString('es-CO', { weekday: 'short' }).substring(0, 3),
@@ -42,7 +42,7 @@ const generateDailyVsSalesData = () => {
   const daysInMonth = 30;
   const dailySalesTarget = 1500000;
   const currentDay = 14;
-  
+
   return Array.from({ length: daysInMonth }, (_, i) => ({
     day: i + 1,
     dailySales: i <= currentDay ? dailySalesTarget + (Math.random() - 0.5) * 300000 : null,
@@ -54,10 +54,10 @@ const generateDailyVsSalesData = () => {
 const CustomComplianceTooltip = ({ active, payload }) => {
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
-    const compliance = ((data.actualSales / data.budget) * 100).toFixed(1);
+    const compliance = (data.actualSales / data.budget * 100).toFixed(1);
     const variance = data.actualSales - data.budget;
-    const variancePercent = ((variance / data.budget) * 100).toFixed(1);
-    
+    const variancePercent = (variance / data.budget * 100).toFixed(1);
+
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -99,8 +99,8 @@ const CustomComplianceTooltip = ({ active, payload }) => {
             </div>
           </div>
         </div>
-      </motion.div>
-    );
+      </motion.div>);
+
   }
   return null;
 };
@@ -120,14 +120,14 @@ const ProjectionTooltip = ({ active, payload }) => {
         }}>
         <p className="text-xs font-bold text-white mb-1">Día {data.day}</p>
         <div className="space-y-1 text-xs">
-          {data.dailySales && (
-            <div className="flex justify-between gap-3">
+          {data.dailySales &&
+          <div className="flex justify-between gap-3">
               <span className="text-slate-400">Venta Real:</span>
               <span className="font-semibold" style={{ color: COLORS.primary }}>
                 ${(data.dailySales / 1000000).toFixed(2)}M
               </span>
             </div>
-          )}
+          }
           <div className="flex justify-between gap-3">
             <span className="text-slate-400">Proyección:</span>
             <span className="font-semibold" style={{ color: COLORS.secondary }}>
@@ -135,8 +135,8 @@ const ProjectionTooltip = ({ active, payload }) => {
             </span>
           </div>
         </div>
-      </motion.div>
-    );
+      </motion.div>);
+
   }
   return null;
 };
@@ -149,14 +149,14 @@ export default function PremiumMainChart() {
     const totalActualSales = complianceData.reduce((s, d) => s + d.actualSales, 0);
     const totalBudget = complianceData.reduce((s, d) => s + d.budget, 0);
     const variance = totalActualSales - totalBudget;
-    const compliancePercent = ((totalActualSales / totalBudget) * 100).toFixed(1);
-    const daysAboveBudget = complianceData.filter(d => d.actualSales >= d.budget).length;
-    const daysBelow = complianceData.filter(d => d.actualSales < d.budget).length;
+    const compliancePercent = (totalActualSales / totalBudget * 100).toFixed(1);
+    const daysAboveBudget = complianceData.filter((d) => d.actualSales >= d.budget).length;
+    const daysBelow = complianceData.filter((d) => d.actualSales < d.budget).length;
     const bestDay = complianceData.reduce((max, d) => d.compliance > max.compliance ? d : max);
-    const monthlyProjection = (totalActualSales / 14) * 30; // Proyectando a 30 días
-    const monthlyVariancePercent = (((monthlyProjection - totalBudget) / totalBudget) * 100).toFixed(1);
+    const monthlyProjection = totalActualSales / 14 * 30; // Proyectando a 30 días
+    const monthlyVariancePercent = ((monthlyProjection - totalBudget) / totalBudget * 100).toFixed(1);
     const avgDailyCompliance = (complianceData.reduce((s, d) => s + d.compliance, 0) / complianceData.length).toFixed(1);
-    
+
     // IA Insights
     let insight = '';
     if (daysAboveBudget >= 5 && daysAboveBudget <= 7) {
@@ -168,13 +168,13 @@ export default function PremiumMainChart() {
     } else {
       insight = 'Vendimia estable, mantener el ritmo actual';
     }
-    
+
     return {
       current: compliancePercent,
       accumulated: totalActualSales,
       budget: totalBudget,
       variance: variance,
-      variancePercent: ((variance / totalBudget) * 100).toFixed(1),
+      variancePercent: (variance / totalBudget * 100).toFixed(1),
       daysAbove: daysAboveBudget,
       daysBelow: daysBelow,
       bestDay: bestDay,
@@ -187,11 +187,11 @@ export default function PremiumMainChart() {
 
   const salesMetrics = useMemo(() => {
     const todayData = dailyVsProjectionData[13];
-    const totalSalesAccum = dailyVsProjectionData
-      .filter((_, i) => i < 14)
-      .reduce((s, d) => s + (d.dailySales || 0), 0);
+    const totalSalesAccum = dailyVsProjectionData.
+    filter((_, i) => i < 14).
+    reduce((s, d) => s + (d.dailySales || 0), 0);
     const projectedClose = dailyVsProjectionData[29].projection;
-    const complianceProj = ((totalSalesAccum / (14 * 1500000)) * 100).toFixed(1);
+    const complianceProj = (totalSalesAccum / (14 * 1500000) * 100).toFixed(1);
     return {
       accumulated: `$${(totalSalesAccum / 1000000).toFixed(1)}M`,
       projection: `$${(projectedClose / 1000000).toFixed(0)}M`,
@@ -234,13 +234,13 @@ export default function PremiumMainChart() {
                 </p>
                 <motion.div
                   animate={{ y: [0, -2, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  {complianceMetrics.variancePercent > 0 ? (
-                    <ArrowUpRight className="w-5 h-5" style={{ color: COLORS.success }} />
-                  ) : (
-                    <TrendingDown className="w-5 h-5" style={{ color: COLORS.danger }} />
-                  )}
+                  transition={{ duration: 2, repeat: Infinity }}>
+                  
+                  {complianceMetrics.variancePercent > 0 ?
+                  <ArrowUpRight className="w-5 h-5" style={{ color: COLORS.success }} /> :
+
+                  <TrendingDown className="w-5 h-5" style={{ color: COLORS.danger }} />
+                  }
                 </motion.div>
               </div>
               <p className="text-xs font-semibold text-slate-400">
@@ -272,8 +272,8 @@ export default function PremiumMainChart() {
             <ComposedChart
               data={complianceData}
               margin={{ top: 10, right: 10, left: -10, bottom: 10 }}
-              isAnimationActive={true}
-            >
+              isAnimationActive={true}>
+              
               <defs>
                 <linearGradient id="complianceFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={COLORS.primary} stopOpacity={0.2} />
@@ -292,20 +292,20 @@ export default function PremiumMainChart() {
               <CartesianGrid
                 strokeDasharray="0"
                 stroke="rgba(100,116,139,0.08)"
-                vertical={false}
-              />
+                vertical={false} />
+              
               <XAxis
                 dataKey="date"
                 stroke="rgba(100,116,139,0.3)"
                 style={{ fontSize: '11px' }}
-                tick={{ fill: 'rgba(100,116,139,0.6)' }}
-              />
+                tick={{ fill: 'rgba(100,116,139,0.6)' }} />
+              
               <YAxis
                 stroke="rgba(100,116,139,0.3)"
                 style={{ fontSize: '11px' }}
                 tick={{ fill: 'rgba(100,116,139,0.6)' }}
-                label={{ value: 'Pesos ($)', angle: -90, position: 'insideLeft' }}
-              />
+                label={{ value: 'Pesos ($)', angle: -90, position: 'insideLeft' }} />
+              
               
               <Tooltip content={<CustomComplianceTooltip />} cursor={{ stroke: 'rgba(236, 72, 153, 0.2)', strokeWidth: 1 }} />
               
@@ -315,8 +315,8 @@ export default function PremiumMainChart() {
                 dataKey="actualSales"
                 fill="url(#complianceFill)"
                 stroke="none"
-                isAnimationActive={true}
-              />
+                isAnimationActive={true} />
+              
               
               {/* Línea de Ventas Reales - Rosa brillante */}
               <Line
@@ -328,8 +328,8 @@ export default function PremiumMainChart() {
                 activeDot={{ r: 6, strokeWidth: 3 }}
                 isAnimationActive={true}
                 animationDuration={1200}
-                name="Ventas Reales"
-              />
+                name="Ventas Reales" />
+              
               
               {/* Línea de Presupuesto - Gris/Morado tenue */}
               <Line
@@ -341,14 +341,14 @@ export default function PremiumMainChart() {
                 dot={false}
                 isAnimationActive={true}
                 animationDuration={1200}
-                name="Presupuesto"
-              />
+                name="Presupuesto" />
+              
             </ComposedChart>
           </ResponsiveContainer>
         </div>
 
         {/* Métricas Clave - Minimalista */}
-        <div className="px-7 pb-7 flex items-center justify-between gap-6">
+        <div className="px-7 pb-7 flex items-center justify-between gap-6 hidden">
           <div>
             <p className="text-xs text-slate-500 font-semibold mb-1">Acumulado</p>
             <p className="text-2xl font-black" style={{ color: COLORS.primary }}>
@@ -424,21 +424,21 @@ export default function PremiumMainChart() {
                 </defs>
                 <CartesianGrid strokeDasharray="0" stroke="rgba(0,0,0,0.03)" vertical={false} />
                 <XAxis dataKey="day" stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} />
-                <YAxis stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} tickFormatter={v => `${(v / 1000000).toFixed(0)}M`} />
+                <YAxis stroke="rgba(100,116,139,0.3)" style={{ fontSize: '9px' }} tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
                 <Tooltip content={<ProjectionTooltip />} />
-                <Line 
-                  type="natural" 
-                  dataKey="dailySales" 
-                  stroke={COLORS.primary} 
+                <Line
+                  type="natural"
+                  dataKey="dailySales"
+                  stroke={COLORS.primary}
                   strokeWidth={2.5}
                   dot={false}
                   name="Venta Real"
                   isAnimationActive={true}
                   animationDuration={1000} />
-                <Line 
-                  type="natural" 
-                  dataKey="projection" 
-                  stroke={COLORS.secondary} 
+                <Line
+                  type="natural"
+                  dataKey="projection"
+                  stroke={COLORS.secondary}
                   strokeWidth={2}
                   strokeDasharray="4 4"
                   dot={false}
@@ -487,6 +487,6 @@ export default function PremiumMainChart() {
           </div>
         </div>
       </motion.div>
-    </div>
-  );
+    </div>);
+
 }
