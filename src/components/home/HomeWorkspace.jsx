@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, parseISO, isSameDay } from 'date-fns';
 import {
   LayoutDashboard, Users, TrendingUp, Activity, Target, Bell,
   Download, FileText, Lock, Receipt, Snowflake, Settings as SettingsIcon,
@@ -17,7 +18,6 @@ import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
 import PremiumMainChart from './PremiumMainChart';
 import { calculateBudgetData } from '@/lib/budgetCalculations';
-import { startOfMonth, endOfMonth, eachDayOfInterval, parseISO, format, isSameDay } from 'date-fns';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
