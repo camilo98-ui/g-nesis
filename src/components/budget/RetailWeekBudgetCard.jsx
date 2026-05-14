@@ -370,7 +370,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
 
                     {/* Panel derecho: Brecha del Mes */}
                     {(() => {
-                      const monthGap = -budgetData.accumulatedGap;
+                      const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
                       return (
                         <div className="text-right">
                           <p className="text-sm lg:text-base text-white/90 mb-3 lg:mb-2 font-semibold">Brecha del Mes</p>
@@ -384,7 +384,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
                           <div className="space-y-1">
                             {budgetData.monthlyBudget > 0 &&
                               <p className="text-xs text-white/70">
-                                Sobre meta: {(monthGap / budgetData.monthlyBudget * 100).toFixed(0)}%
+                                {monthGap >= 0 ? 'Sobre meta: ' : 'Bajo meta: '}{Math.abs((monthGap / budgetData.monthlyBudget * 100)).toFixed(0)}%
                               </p>
                             }
                           </div>
