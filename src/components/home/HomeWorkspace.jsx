@@ -16,6 +16,7 @@ import PremiumSparkline from './PremiumSparkline';
 import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
 import PremiumMainChart from './PremiumMainChart';
+import { calculateBudgetData } from '@/lib/budgetCalculations';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -347,6 +348,13 @@ export default function HomeWorkspace({
 
   const sparkSales = sorted.slice(0, 8).reverse().map((d) => d.total_sales || 0);
   const sparkTxn = sorted.slice(0, 8).reverse().map((d) => d.total_transactions || 0);
+
+  // Usar la lógica de cálculo compartida para presupuesto
+  const activeBudget = budget.length > 0 ? budget.find((b) => {
+    const now = new Date();
+    return Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear();
+  }) : null;
+  const budgetData = activeBudget ? calculateBudgetData(todaySales, activeBudget, dailyBudgets, storeEntityId) : null;
 
   const { data: weatherData } = useQuery({
     queryKey: ['home-weather-real'],
@@ -761,8 +769,8 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
                 <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
-                  {budget?.length > 0 && budget[0].sales_budget ? 
-                    (budget[0].sales_budget / new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                  {budgetData?.excelBudgetForToday ? 
+                    budgetData.excelBudgetForToday.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
                     : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
@@ -781,28 +789,16 @@ export default function HomeWorkspace({
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
                 <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
                   {(() => {
-                    const now = new Date();
-                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-                    const salesUntilYesterday = todaySales.filter((s) => {
-                      try { const sd = new Date(s.date); return sd < now && sd >= monthStart && sd.getMonth() === now.getMonth(); } catch { return false; }
-                    }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
-                    const budgetUntilYesterday = (budget?.[0]?.sales_budget || 0) * (new Date(now.getFullYear(), now.getMonth(), 0).getDate() - 1) / new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-                    const monthGap = salesUntilYesterday - budgetUntilYesterday;
+                    const monthGap = budgetData?.salesUntilYesterday - budgetData?.budgetUntilYesterday || 0;
                     return monthGap >= 0 ? `+${monthGap.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : monthGap.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
                   })()}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-400 text-center flex-1">
-                    Sobre meta: {budget?.length > 0 && budget[0].sales_budget ? 
+                    Sobre meta: {budgetData?.monthlyBudget ? 
                       (() => {
-                        const now = new Date();
-                        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-                        const salesUntilYesterday = todaySales.filter((s) => {
-                          try { const sd = new Date(s.date); return sd < now && sd >= monthStart && sd.getMonth() === now.getMonth(); } catch { return false; }
-                        }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
-                        const budgetUntilYesterday = (budget[0].sales_budget) * (new Date(now.getFullYear(), now.getMonth(), 0).getDate() - 1) / new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-                        const monthGap = salesUntilYesterday - budgetUntilYesterday;
-                        return `${Math.round((monthGap / budget[0].sales_budget) * 100)}%`;
+                        const monthGap = budgetData.salesUntilYesterday - budgetData.budgetUntilYesterday;
+                        return `${Math.round((monthGap / budgetData.monthlyBudget) * 100)}%`;
                       })()
                       : '0%'}
                   </span>
@@ -819,39 +815,13 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
                 <p className="text-[20px] font-bold text-blue-500 leading-none mb-2">
-                  {(() => {
-                    const now = new Date();
-                    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-                    const currentDay = now.getDate();
-                    const totalMonthSales = (latest?.total_sales || 0) + todaySales.filter((s) => {
-                      try { const sd = new Date(s.date); return sd < now && sd.getMonth() === now.getMonth() && sd.getFullYear() === now.getFullYear(); } catch { return false; }
-                    }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
-                    const monthlyBudget = budget?.length > 0 ? budget[0].sales_budget || 0 : 0;
-                    if (monthlyBudget === 0) return '0%';
-                    const monthAvgDailySales = currentDay > 0 ? totalMonthSales / currentDay : 0;
-                    const daysRemaining = daysInMonth - currentDay;
-                    const monthProjection = totalMonthSales + (monthAvgDailySales * daysRemaining);
-                    return `${Math.round((monthProjection / monthlyBudget) * 100)}%`;
-                  })()}
+                  {budgetData ? `${budgetData.monthProjectionCompliance.toFixed(0)}%` : '0%'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-500 text-center flex-1">
-                    {(() => {
-                      const now = new Date();
-                      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-                      const currentDay = now.getDate();
-                      const totalMonthSales = (latest?.total_sales || 0) + todaySales.filter((s) => {
-                        try { const sd = new Date(s.date); return sd < now && sd.getMonth() === now.getMonth() && sd.getFullYear() === now.getFullYear(); } catch { return false; }
-                      }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
-                      const monthlyBudget = budget?.length > 0 ? budget[0].sales_budget || 0 : 0;
-                      if (monthlyBudget === 0) return '';
-                      const monthAvgDailySales = currentDay > 0 ? totalMonthSales / currentDay : 0;
-                      const daysRemaining = daysInMonth - currentDay;
-                      const monthProjection = totalMonthSales + (monthAvgDailySales * daysRemaining);
-                      const projFormatted = monthProjection.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
-                      const budgetFormatted = monthlyBudget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
-                      return `${projFormatted} / ${budgetFormatted}`;
-                    })()}
+                    {budgetData ? 
+                      `${budgetData.monthProjection.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })} / ${budgetData.monthlyBudget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                      : ''}
                   </span>
                 </div>
                 <PremiumSparkline data={sparkSales} color="#3b82f6" width={100} height="24" />
