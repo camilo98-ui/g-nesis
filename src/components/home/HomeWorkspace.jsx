@@ -331,7 +331,6 @@ export default function HomeWorkspace({
 
   const sorted = [...todaySales].sort((a, b) => new Date(b.date) - new Date(a.date));
   const latest = sorted[0];
-  const useRef = React.useRef;
   const prev = sorted[1];
   const salesVal = latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(1)}M` : '—';
   const txnVal = latest?.total_transactions ? String(latest.total_transactions) : '—';
