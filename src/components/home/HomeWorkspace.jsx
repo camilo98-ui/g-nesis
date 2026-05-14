@@ -241,6 +241,22 @@ const AI_RESPONSES = {
   'Hay alguna alerta operacional que deba saber?': '🔔 **3 alertas activas:**\n• Stock crítico en 2 sabores\n• Caja 2: conversión -8% esta semana\n• Turno tarde con 1 cajero menos'
 };
 
+// ── LÍDERES POR TIENDA ───────────────────────────────────────────────────────────
+const LEADERS = {
+  'TUNJA 1': 'Andrea',
+  'BTA 21': 'Nai',
+  'BTA 71': 'Mafe',
+  'BTA 66': 'Nidia',
+  'BTA 52': 'Zai',
+  'BTA 62': 'Angie',
+  'BTA 18': 'Ruth',
+  'BTA 78': 'Brandon',
+  'TUNJA 2': 'Isa',
+  'BTA 85': 'Edna',
+  'BTA 56': 'Cris',
+  'BTA 27': 'Andre'
+};
+
 // ── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function HomeWorkspace({
   selectedStore, selectedRole, selectedStoreName,
@@ -544,7 +560,7 @@ export default function HomeWorkspace({
                 <div className="flex items-center gap-2">
                   <GreetIcon className="w-4 h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
                   <h1 className="text-base lg:text-lg font-bold text-slate-700 tracking-tight">
-                    {greeting.text}, {storeEntities.find(s => s.code === selectedStore)?.lider_name || storeEntities.find(s => s.code === selectedStore)?.name || 'Tienda'}
+                    {greeting.text}, {LEADERS[selectedStore] || 'Tienda'}
                   </h1>
                 </div>
                 <p className="text-[12px] text-slate-400 font-medium leading-snug max-w-sm">
