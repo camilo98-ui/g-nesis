@@ -761,8 +761,8 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
                 <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
-                  {dailyBudgets?.length > 0 && dailyBudgets[0].sales_budget ? 
-                    dailyBudgets[0].sales_budget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                  {budget?.length > 0 && budget[0].sales_budget ? 
+                    (budget[0].sales_budget / new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
                     : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
@@ -780,14 +780,30 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
                 <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
-                  {budget?.length > 0 && budget[0].sales_gap ? 
-                    `+${budget[0].sales_gap.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-                    : '+$0'}
+                  {(() => {
+                    const now = new Date();
+                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const salesUntilYesterday = todaySales.filter((s) => {
+                      try { const sd = new Date(s.date); return sd < now && sd >= monthStart && sd.getMonth() === now.getMonth(); } catch { return false; }
+                    }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+                    const budgetUntilYesterday = (budget?.[0]?.sales_budget || 0) * (new Date(now.getFullYear(), now.getMonth(), 0).getDate() - 1) / new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                    const monthGap = salesUntilYesterday - budgetUntilYesterday;
+                    return monthGap >= 0 ? `+${monthGap.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : monthGap.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                  })()}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-400 text-center flex-1">
                     Sobre meta: {budget?.length > 0 && budget[0].sales_budget ? 
-                      `${Math.round((budget[0].sales_gap || 0) / budget[0].sales_budget * 100)}%`
+                      (() => {
+                        const now = new Date();
+                        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                        const salesUntilYesterday = todaySales.filter((s) => {
+                          try { const sd = new Date(s.date); return sd < now && sd >= monthStart && sd.getMonth() === now.getMonth(); } catch { return false; }
+                        }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+                        const budgetUntilYesterday = (budget[0].sales_budget) * (new Date(now.getFullYear(), now.getMonth(), 0).getDate() - 1) / new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                        const monthGap = salesUntilYesterday - budgetUntilYesterday;
+                        return `${Math.round((monthGap / budget[0].sales_budget) * 100)}%`;
+                      })()
                       : '0%'}
                   </span>
                 </div>
@@ -804,25 +820,35 @@ export default function HomeWorkspace({
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
                 <p className="text-[20px] font-bold text-blue-500 leading-none mb-2">
                   {(() => {
-                    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-                    const currentDay = new Date().getDate();
-                    const currentSales = latest?.total_sales || 0;
+                    const now = new Date();
+                    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                    const currentDay = now.getDate();
+                    const totalMonthSales = (latest?.total_sales || 0) + todaySales.filter((s) => {
+                      try { const sd = new Date(s.date); return sd < now && sd.getMonth() === now.getMonth() && sd.getFullYear() === now.getFullYear(); } catch { return false; }
+                    }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
                     const monthlyBudget = budget?.length > 0 ? budget[0].sales_budget || 0 : 0;
                     if (monthlyBudget === 0) return '0%';
-                    const projectedSales = (currentSales / currentDay) * daysInMonth;
-                    return `${Math.round((projectedSales / monthlyBudget) * 100)}%`;
+                    const monthAvgDailySales = currentDay > 0 ? totalMonthSales / currentDay : 0;
+                    const daysRemaining = daysInMonth - currentDay;
+                    const monthProjection = totalMonthSales + (monthAvgDailySales * daysRemaining);
+                    return `${Math.round((monthProjection / monthlyBudget) * 100)}%`;
                   })()}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[10px] text-slate-500 text-center flex-1">
                     {(() => {
-                      const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-                      const currentDay = new Date().getDate();
-                      const currentSales = latest?.total_sales || 0;
+                      const now = new Date();
+                      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                      const currentDay = now.getDate();
+                      const totalMonthSales = (latest?.total_sales || 0) + todaySales.filter((s) => {
+                        try { const sd = new Date(s.date); return sd < now && sd.getMonth() === now.getMonth() && sd.getFullYear() === now.getFullYear(); } catch { return false; }
+                      }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
                       const monthlyBudget = budget?.length > 0 ? budget[0].sales_budget || 0 : 0;
                       if (monthlyBudget === 0) return '';
-                      const projectedSales = (currentSales / currentDay) * daysInMonth;
-                      const projFormatted = projectedSales.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                      const monthAvgDailySales = currentDay > 0 ? totalMonthSales / currentDay : 0;
+                      const daysRemaining = daysInMonth - currentDay;
+                      const monthProjection = totalMonthSales + (monthAvgDailySales * daysRemaining);
+                      const projFormatted = monthProjection.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
                       const budgetFormatted = monthlyBudget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
                       return `${projFormatted} / ${budgetFormatted}`;
                     })()}
