@@ -200,13 +200,13 @@ export default function PremiumMainChart() {
   }, [dailyVsProjectionData]);
 
   return (
-    <div className="mb-7 grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Gráfica 1: Cumplimiento vs Presupuesto - REDISEÑO PREMIUM */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="rounded-3xl overflow-hidden"
+        className="rounded-xl overflow-hidden"
         style={{
           background: `linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 50%, rgba(236, 72, 153, 0.01) 100%)`,
           border: '1px solid rgba(236, 72, 153, 0.15)',
@@ -214,22 +214,22 @@ export default function PremiumMainChart() {
           backdropFilter: 'blur(30px)'
         }}>
         {/* Encabezado Premium */}
-        <div className="p-7 pb-5">
-          <div className="flex items-start justify-between mb-6">
+        <div className="p-4 pb-3">
+          <div className="flex items-start justify-between mb-2.5">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2.5 rounded-xl" style={{ background: 'rgba(236, 72, 153, 0.08)', border: '1px solid rgba(236, 72, 153, 0.15)' }}>
-                  <Target className="w-5 h-5" style={{ color: COLORS.primary }} />
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="p-1.5 rounded-lg" style={{ background: 'rgba(236, 72, 153, 0.08)', border: '1px solid rgba(236, 72, 153, 0.15)' }}>
+                  <Target className="w-3.5 h-3.5" style={{ color: COLORS.primary }} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">Cumplimiento vs Presupuesto</h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">Análisis diario de ventas reales vs meta</p>
+                  <h3 className="text-sm font-black text-slate-900">Cumplimiento vs Presupuesto</h3>
+                  <p className="text-[9px] text-slate-400 font-medium mt-0.5">Análisis diario</p>
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="flex items-baseline justify-end gap-2 mb-1">
-                <p className="text-4xl font-black" style={{ color: COLORS.primary }}>
+              <div className="flex items-baseline justify-end gap-1.5 mb-0.5">
+                <p className="text-2xl font-black" style={{ color: COLORS.primary }}>
                   {complianceMetrics.current}%
                 </p>
                 <motion.div
@@ -237,14 +237,14 @@ export default function PremiumMainChart() {
                   transition={{ duration: 2, repeat: Infinity }}>
                   
                   {complianceMetrics.variancePercent > 0 ?
-                  <ArrowUpRight className="w-5 h-5" style={{ color: COLORS.success }} /> :
+                  <ArrowUpRight className="w-3.5 h-3.5" style={{ color: COLORS.success }} /> :
 
-                  <TrendingDown className="w-5 h-5" style={{ color: COLORS.danger }} />
+                  <TrendingDown className="w-3.5 h-3.5" style={{ color: COLORS.danger }} />
                   }
                 </motion.div>
               </div>
-              <p className="text-xs font-semibold text-slate-400">
-                {complianceMetrics.variancePercent > 0 ? '+' : ''}{complianceMetrics.variancePercent}% vs meta
+              <p className="text-[8px] font-semibold text-slate-400">
+                {complianceMetrics.variancePercent > 0 ? '+' : ''}{complianceMetrics.variancePercent}%
               </p>
             </div>
           </div>
@@ -254,20 +254,20 @@ export default function PremiumMainChart() {
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="p-3 rounded-xl flex items-start gap-2.5"
+            className="p-2 rounded-lg flex items-start gap-2"
             style={{
               background: 'rgba(139, 92, 246, 0.05)',
               border: '1px solid rgba(139, 92, 246, 0.1)'
             }}>
-            <Zap className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: COLORS.secondary }} />
-            <p className="text-xs text-slate-700 font-medium leading-relaxed">
+            <Zap className="w-2.5 h-2.5 flex-shrink-0 mt-0.5" style={{ color: COLORS.secondary }} />
+            <p className="text-[8px] text-slate-700 font-medium leading-tight">
               {complianceMetrics.insight}
             </p>
           </motion.div>
         </div>
 
         {/* Gráfica - ComposedChart con dos líneas */}
-        <div className="h-56 px-7 pb-6">
+        <div className="h-32 px-4 pb-4">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={complianceData}
@@ -348,35 +348,35 @@ export default function PremiumMainChart() {
         </div>
 
         {/* Métricas Clave - Minimalista */}
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+        <div className="px-4 pb-4 flex items-center justify-between gap-4 hidden">
+          <div>
+            <p className="text-xs text-slate-500 font-semibold mb-1">Acumulado</p>
+            <p className="text-2xl font-black" style={{ color: COLORS.primary }}>
+              ${(complianceMetrics.accumulated / 1000000).toFixed(1)}M
+            </p>
+          </div>
+          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
+          <div>
+            <p className="text-xs text-slate-500 font-semibold mb-1">Presupuesto</p>
+            <p className="text-2xl font-black" style={{ color: COLORS.budget }}>
+              ${(complianceMetrics.budget / 1000000).toFixed(1)}M
+            </p>
+          </div>
+          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
+          <div>
+            <p className="text-xs text-slate-500 font-semibold mb-1">Diferencia</p>
+            <p className="text-2xl font-black" style={{ color: complianceMetrics.variance > 0 ? COLORS.success : COLORS.danger }}>
+              {complianceMetrics.variance > 0 ? '+' : ''} ${(complianceMetrics.variance / 1000000).toFixed(2)}M
+            </p>
+          </div>
+          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
+          <div>
+            <p className="text-xs text-slate-500 font-semibold mb-1">Proyección</p>
+            <p className="text-2xl font-black" style={{ color: COLORS.accent }}>
+              ${(complianceMetrics.monthlyProjection / 1000000).toFixed(1)}M
+            </p>
+          </div>
+        </div>
       </motion.div>
 
       {/* Gráfica 2: Venta Diaria vs Proyección */}
@@ -391,29 +391,29 @@ export default function PremiumMainChart() {
           boxShadow: '0 4px 20px rgba(139, 92, 246, 0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
           backdropFilter: 'blur(20px)'
         }}>
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-5">
+        <div className="p-4">
+          <div className="flex items-start justify-between mb-3">
             <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="p-2 rounded-lg" style={{ background: 'rgba(139, 92, 246, 0.1)' }}>
-                  <Target className="w-4 h-4" style={{ color: COLORS.secondary }} />
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="p-1.5 rounded-lg" style={{ background: 'rgba(139, 92, 246, 0.1)' }}>
+                  <Target className="w-3.5 h-3.5" style={{ color: COLORS.secondary }} />
                 </div>
-                <h3 className="text-base font-bold text-slate-900">Venta Diaria vs Proyección</h3>
+                <h3 className="text-sm font-bold text-slate-900">Venta Diaria vs Proyección</h3>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">Estimado a cierre</p>
+              <p className="text-[9px] text-slate-500 font-medium">Estimado a cierre</p>
             </div>
             <div className="text-right">
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-black" style={{ color: COLORS.secondary }}>
+              <div className="flex items-baseline gap-1.5">
+                <p className="text-lg font-black" style={{ color: COLORS.secondary }}>
                   {salesMetrics.projection}
                 </p>
-                <ArrowUpRight className="w-4 h-4" style={{ color: COLORS.success }} />
+                <ArrowUpRight className="w-3.5 h-3.5" style={{ color: COLORS.success }} />
               </div>
-              <p className="text-[10px] text-slate-400 mt-1 font-semibold">Meta del mes</p>
+              <p className="text-[8px] text-slate-400 mt-0.5 font-semibold">Meta del mes</p>
             </div>
           </div>
 
-          <div className="h-48">
+          <div className="h-32">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dailyVsProjectionData} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
                 <defs>
@@ -447,42 +447,42 @@ export default function PremiumMainChart() {
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 mt-5">
+          <div className="grid grid-cols-3 gap-2 mt-3">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
-              className="p-2.5 rounded-lg text-center"
+              className="p-1.5 rounded-lg text-center"
               style={{
                 background: 'rgba(236, 72, 153, 0.06)',
                 border: '1px solid rgba(236, 72, 153, 0.12)'
               }}>
-              <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Acumulado</p>
-              <p className="text-xs font-black" style={{ color: COLORS.primary }}>{salesMetrics.accumulated}</p>
+              <p className="text-[7px] font-bold text-slate-500 uppercase mb-0.5">Acumulado</p>
+              <p className="text-[10px] font-black" style={{ color: COLORS.primary }}>{salesMetrics.accumulated}</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.35 }}
-              className="p-2.5 rounded-lg text-center"
+              className="p-1.5 rounded-lg text-center"
               style={{
                 background: 'rgba(139, 92, 246, 0.06)',
                 border: '1px solid rgba(139, 92, 246, 0.12)'
               }}>
-              <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Cumpl. Proy</p>
-              <p className="text-sm font-black" style={{ color: COLORS.secondary }}>{salesMetrics.compliance}%</p>
+              <p className="text-[7px] font-bold text-slate-500 uppercase mb-0.5">Cumpl. Proy</p>
+              <p className="text-[10px] font-black" style={{ color: COLORS.secondary }}>{salesMetrics.compliance}%</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="p-2.5 rounded-lg text-center"
+              className="p-1.5 rounded-lg text-center"
               style={{
                 background: 'rgba(6, 182, 212, 0.06)',
                 border: '1px solid rgba(6, 182, 212, 0.12)'
               }}>
-              <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Día</p>
-              <p className="text-xs font-bold" style={{ color: COLORS.accent }}>14/30</p>
+              <p className="text-[7px] font-bold text-slate-500 uppercase mb-0.5">Día</p>
+              <p className="text-[10px] font-bold" style={{ color: COLORS.accent }}>14/30</p>
             </motion.div>
           </div>
         </div>
