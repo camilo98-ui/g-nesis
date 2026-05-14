@@ -662,14 +662,39 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 {/* Línea de meta $25K */}
                 <Line type="monotone" dataKey="ticketPPT" stroke="#FFB4C9" strokeWidth={1} strokeDasharray="3,3" dot={false} />
                 <Tooltip
-                  contentStyle={{ background: 'rgba(15,15,20,0.9)', border: 'none', borderRadius: 8, fontSize: 10, padding: '4px 8px' }}
-                  formatter={(v) => [fmt(v), 'Ticket']}
-                  labelFormatter={(l) => l}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </AnalyticsCard>
+                   contentStyle={{ background: 'rgba(15,15,20,0.9)', border: 'none', borderRadius: 8, fontSize: 10, padding: '4px 8px' }}
+                   formatter={(v) => [fmt(v), 'Ticket']}
+                   labelFormatter={(l) => l}
+                 />
+                </AreaChart>
+                </ResponsiveContainer>
+
+                {/* KPIs de Ticket */}
+                <div className="mt-4 pt-3 grid grid-cols-3 gap-2" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+                 className="p-2 rounded-lg text-center" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
+                 <p className="text-[7px] text-[#8F96A3] font-semibold uppercase">Máximo</p>
+                 <p className="text-[11px] font-black text-[#FF4D8D] mt-0.5">
+                   {sorted30.length > 0 ? fmt(Math.max(...sorted30.map(d => d.ticket || 0))) : '—'}
+                 </p>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.62 }}
+                 className="p-2 rounded-lg text-center" style={{ background: 'rgba(99, 102, 241, 0.05)' }}>
+                 <p className="text-[7px] text-[#8F96A3] font-semibold uppercase">Promedio</p>
+                 <p className="text-[11px] font-black text-indigo-400 mt-0.5">
+                   {sorted30.length > 0 ? fmt(Math.round(sorted30.reduce((s, d) => s + (d.ticket || 0), 0) / sorted30.length)) : '—'}
+                 </p>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.64 }}
+                 className="p-2 rounded-lg text-center" style={{ background: 'rgba(255, 182, 201, 0.05)' }}>
+                 <p className="text-[7px] text-[#8F96A3] font-semibold uppercase">Mínimo</p>
+                 <p className="text-[11px] font-black text-[#FFB4C9] mt-0.5">
+                   {sorted30.length > 0 ? fmt(Math.min(...sorted30.map(d => d.ticket || 0))) : '—'}
+                 </p>
+                </motion.div>
+                </div>
+                </div>
+                </AnalyticsCard>
 
         {/* Mejores Días de Venta */}
         <AnalyticsCard title="Mejores Días" subtitle="Top días de venta del mes actual" delay={0.34}>
