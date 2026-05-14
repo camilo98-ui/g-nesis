@@ -17,6 +17,7 @@ import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
 import PremiumMainChart from './PremiumMainChart';
 import { calculateBudgetData } from '@/lib/budgetCalculations';
+import { startOfMonth, endOfMonth, eachDayOfInterval, parseISO, format, isSameDay } from 'date-fns';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -358,47 +359,101 @@ export default function HomeWorkspace({
   const budgetData = (() => {
     if (!activeBudget?.sales_budget) return null;
     const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const daysInMonth = monthEnd.getDate();
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+    const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
     
-    const salesUntilYesterday = todaySales.filter((s) => {
+    let dailySalesFiltered = storeEntityId ? todaySales.filter((s) => s.store_id === storeEntityId) : todaySales;
+    
+    // Cálculo de promedios históricos por día de la semana
+    const salesByDayOfWeek = [0, 0, 0, 0, 0, 0, 0];
+    const countByDayOfWeek = [0, 0, 0, 0, 0, 0, 0];
+    const ninetyDaysAgoForAvg = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    dailySalesFiltered.forEach((s) => {
       try {
-        const saleDate = new Date(s.date);
+        const saleDate = parseISO(s.date);
+        if (saleDate < ninetyDaysAgoForAvg || saleDate >= now) return;
+        const dayOfWeek = saleDate.getDay();
+        if (s.total_sales && s.total_sales > 0) {
+          salesByDayOfWeek[dayOfWeek] += s.total_sales;
+          countByDayOfWeek[dayOfWeek]++;
+        }
+      } catch {}
+    });
+    
+    const avgByDayOfWeek = salesByDayOfWeek.map((sum, idx) => countByDayOfWeek[idx] > 0 ? sum / countByDayOfWeek[idx] : 0);
+    const totalWeeklyAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
+    const weightByDayOfWeek = avgByDayOfWeek.map((avg) => totalWeeklyAvg > 0 ? avg / totalWeeklyAvg : 1 / 7);
+    
+    const getDailyBudget = (date) => {
+      const dailyBaseBudget = activeBudget.sales_budget / daysInMonth;
+      if (!dailyBaseBudget || dailyBaseBudget <= 0) return 0;
+      if (totalWeeklyAvg === 0) return dailyBaseBudget;
+      const dayOfWeek = date.getDay();
+      if (countByDayOfWeek[dayOfWeek] >= 3) {
+        const totalHistoricalAvg = avgByDayOfWeek.reduce((a, b) => a + b, 0);
+        const monthlyHistoricalProjection = totalHistoricalAvg * (daysInMonth / 7);
+        if (monthlyHistoricalProjection <= 0) return dailyBaseBudget;
+        const scaleFactor = activeBudget.sales_budget / monthlyHistoricalProjection;
+        const calculatedBudget = avgByDayOfWeek[dayOfWeek] * scaleFactor;
+        return Math.min(calculatedBudget > 0 ? calculatedBudget : dailyBaseBudget, dailyBaseBudget * 1.5);
+      } else {
+        const weight = weightByDayOfWeek[dayOfWeek];
+        if (!weight || weight <= 0) return dailyBaseBudget;
+        const weeklyBudget = dailyBaseBudget * 7;
+        const calculatedBudget = weeklyBudget * weight;
+        return Math.min(calculatedBudget > 0 ? calculatedBudget : dailyBaseBudget, dailyBaseBudget * 1.5);
+      }
+    };
+    
+    // Ventas hasta ayer
+    const salesUntilYesterday = dailySalesFiltered.filter((s) => {
+      try {
+        const saleDate = parseISO(s.date);
         return saleDate < now && saleDate >= monthStart && saleDate <= monthEnd;
       } catch { return false; }
     }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
     
-    const todaySalesValue = todaySales.find((s) => {
-      try { return new Date(s.date).toDateString() === now.toDateString(); } catch { return false; }
-    })?.total_sales || 0;
-    
+    // Presupuesto hasta ayer
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
+    const daysUntilYesterday = eachDayOfInterval({ start: monthStart, end: yesterday });
+    const budgetUntilYesterday = daysUntilYesterday.reduce((sum, day) => {
+      const dayStr = format(day, 'yyyy-MM-dd');
+      const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
+      return sum + (excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day));
+    }, 0);
     
-    let budgetUntilYesterday = 0;
-    for (let i = 0; i < yesterday.getDate(); i++) {
-      const day = new Date(now.getFullYear(), now.getMonth(), i + 1);
-      budgetUntilYesterday += activeBudget.sales_budget / daysInMonth;
-    }
+    const accumulatedGap = budgetUntilYesterday - salesUntilYesterday;
+    const todayStr = format(now, 'yyyy-MM-dd');
+    const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === todayStr);
+    const excelBudgetForToday = excelRec?.budget_amount > 0 ? excelRec.budget_amount : activeBudget.sales_budget / daysInMonth;
     
+    const remainingDays = eachDayOfInterval({ start: now, end: monthEnd }).length;
+    const targetDayOfWeek = now.getDay();
+    const todayWeight = weightByDayOfWeek[targetDayOfWeek] || (1 / 7);
+    const dayMultiplier = todayWeight * 7;
+    const gapPerDay = accumulatedGap > 0 && remainingDays > 0 ? accumulatedGap / remainingDays : 0;
+    const recoveryToday = gapPerDay * dayMultiplier;
+    const adjustedDailyBudget = excelBudgetForToday + recoveryToday;
+    
+    // Proyección mensual
+    const todaySalesValue = dailySalesFiltered.find((s) => {
+      try { return isSameDay(parseISO(s.date), now); } catch { return false; }
+    })?.total_sales || 0;
     const totalMonthSales = salesUntilYesterday + todaySalesValue;
-    const daysWithSales = todaySales.filter(s => {
+    const daysWithSales = dailySalesFiltered.filter(s => {
       try {
-        const sd = new Date(s.date);
+        const sd = parseISO(s.date);
         return sd >= monthStart && sd <= now && (s.total_sales || 0) > 0;
       } catch { return false; }
     }).length;
-    const daysElapsedCalendar = Math.floor((now - monthStart) / (1000 * 60 * 60 * 24)) + 1;
+    const daysElapsedCalendar = eachDayOfInterval({ start: monthStart, end: now }).length;
     const effectiveDays = daysWithSales > 0 ? daysWithSales : daysElapsedCalendar;
     const monthAvgDailySales = effectiveDays > 0 ? totalMonthSales / effectiveDays : 0;
     const daysRemainingMonth = daysInMonth - daysElapsedCalendar;
     const monthProjection = totalMonthSales + (monthAvgDailySales * Math.max(daysRemainingMonth, 0));
     const monthProjectionCompliance = activeBudget.sales_budget > 0 ? monthProjection / activeBudget.sales_budget * 100 : 0;
-    
-    const accumulatedGap = budgetUntilYesterday - salesUntilYesterday;
-    const dailyBaseBudget = activeBudget.sales_budget / daysInMonth;
-    const adjustedDailyBudget = dailyBaseBudget + (accumulatedGap > 0 ? accumulatedGap / Math.max(daysRemainingMonth, 1) : 0);
     
     return {
       adjustedDailyBudget,
@@ -406,7 +461,8 @@ export default function HomeWorkspace({
       budgetUntilYesterday,
       monthProjection,
       monthProjectionCompliance,
-      monthlyBudget: activeBudget.sales_budget
+      monthlyBudget: activeBudget.sales_budget,
+      excelBudgetForToday
     };
   })();
 
