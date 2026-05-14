@@ -347,115 +347,35 @@ export default function PremiumMainChart() {
           </ResponsiveContainer>
         </div>
 
-        {/* Métricas Detalladas - Grid 2x3 */}
-        <div className="px-7 pb-7 grid grid-cols-2 lg:grid-cols-3 gap-3">
-          {/* Venta Acumulada */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="p-4 rounded-xl"
-            style={{
-              background: 'rgba(236, 72, 153, 0.06)',
-              border: '1px solid rgba(236, 72, 153, 0.12)',
-              boxShadow: '0 2px 8px rgba(236, 72, 153, 0.04)'
-            }}>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Acumulado Venta</p>
-            <p className="text-lg font-black" style={{ color: COLORS.primary }}>
+        {/* Métricas Clave - Minimalista */}
+        <div className="px-7 pb-7 flex items-center justify-between gap-6">
+          <div>
+            <p className="text-xs text-slate-500 font-semibold mb-1">Acumulado</p>
+            <p className="text-2xl font-black" style={{ color: COLORS.primary }}>
               ${(complianceMetrics.accumulated / 1000000).toFixed(1)}M
             </p>
-            <p className="text-[9px] text-slate-400 font-medium mt-1">14 días procesados</p>
-          </motion.div>
-
-          {/* Presupuesto Acumulado */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="p-4 rounded-xl"
-            style={{
-              background: 'rgba(100,116,139,0.05)',
-              border: '1px solid rgba(100,116,139,0.12)',
-              boxShadow: '0 2px 8px rgba(100,116,139,0.04)'
-            }}>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Presupuesto</p>
-            <p className="text-lg font-black" style={{ color: COLORS.budget }}>
+          </div>
+          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
+          <div>
+            <p className="text-xs text-slate-500 font-semibold mb-1">Presupuesto</p>
+            <p className="text-2xl font-black" style={{ color: COLORS.budget }}>
               ${(complianceMetrics.budget / 1000000).toFixed(1)}M
             </p>
-            <p className="text-[9px] text-slate-400 font-medium mt-1">Meta del período</p>
-          </motion.div>
-
-          {/* Diferencia */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="p-4 rounded-xl"
-            style={{
-              background: `rgba(${complianceMetrics.variance > 0 ? '16, 185, 129' : '239, 68, 68'}, 0.06)`,
-              border: `1px solid rgba(${complianceMetrics.variance > 0 ? '16, 185, 129' : '239, 68, 68'}, 0.12)`,
-              boxShadow: `0 2px 8px rgba(${complianceMetrics.variance > 0 ? '16, 185, 129' : '239, 68, 68'}, 0.04)`
-            }}>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Diferencia</p>
-            <p className="text-lg font-black" style={{ color: complianceMetrics.variance > 0 ? COLORS.success : COLORS.danger }}>
+          </div>
+          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
+          <div>
+            <p className="text-xs text-slate-500 font-semibold mb-1">Diferencia</p>
+            <p className="text-2xl font-black" style={{ color: complianceMetrics.variance > 0 ? COLORS.success : COLORS.danger }}>
               {complianceMetrics.variance > 0 ? '+' : ''} ${(complianceMetrics.variance / 1000000).toFixed(2)}M
             </p>
-            <p className="text-[9px] text-slate-400 font-medium mt-1">vs presupuesto</p>
-          </motion.div>
-
-          {/* Mejor Día */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="p-4 rounded-xl"
-            style={{
-              background: 'rgba(139, 92, 246, 0.06)',
-              border: '1px solid rgba(139, 92, 246, 0.12)',
-              boxShadow: '0 2px 8px rgba(139, 92, 246, 0.04)'
-            }}>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Mejor Día</p>
-            <p className="text-lg font-black" style={{ color: COLORS.secondary }}>
-              {complianceMetrics.bestDay.compliance.toFixed(1)}%
-            </p>
-            <p className="text-[9px] text-slate-400 font-medium mt-1">Día {complianceMetrics.bestDay.date}</p>
-          </motion.div>
-
-          {/* Proyección Mensual */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="p-4 rounded-xl"
-            style={{
-              background: 'rgba(6, 182, 212, 0.06)',
-              border: '1px solid rgba(6, 182, 212, 0.12)',
-              boxShadow: '0 2px 8px rgba(6, 182, 212, 0.04)'
-            }}>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Proyección</p>
-            <p className="text-lg font-black" style={{ color: COLORS.accent }}>
+          </div>
+          <div className="h-12 w-px" style={{ background: 'rgba(100,116,139,0.1)' }} />
+          <div>
+            <p className="text-xs text-slate-500 font-semibold mb-1">Proyección</p>
+            <p className="text-2xl font-black" style={{ color: COLORS.accent }}>
               ${(complianceMetrics.monthlyProjection / 1000000).toFixed(1)}M
             </p>
-            <p className="text-[9px] text-slate-400 font-medium mt-1">Estimado cierre</p>
-          </motion.div>
-
-          {/* Cumplimiento Promedio */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="p-4 rounded-xl"
-            style={{
-              background: complianceMetrics.avgCompliance > 95 ? 'rgba(16, 185, 129, 0.06)' : 'rgba(245, 158, 11, 0.06)',
-              border: complianceMetrics.avgCompliance > 95 ? '1px solid rgba(16, 185, 129, 0.12)' : '1px solid rgba(245, 158, 11, 0.12)',
-              boxShadow: complianceMetrics.avgCompliance > 95 ? '0 2px 8px rgba(16, 185, 129, 0.04)' : '0 2px 8px rgba(245, 158, 11, 0.04)'
-            }}>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Cumplimiento Prom</p>
-            <p className="text-lg font-black" style={{ color: complianceMetrics.avgCompliance > 95 ? COLORS.success : COLORS.warning }}>
-              {complianceMetrics.avgCompliance}%
-            </p>
-            <p className="text-[9px] text-slate-400 font-medium mt-1">14 días</p>
-          </motion.div>
+          </div>
         </div>
       </motion.div>
 
