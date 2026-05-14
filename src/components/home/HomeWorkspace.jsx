@@ -814,14 +814,14 @@ export default function HomeWorkspace({
             {/* Premium KPI Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 
-              {/* PPT del Día - Desde RetailWeekBudgetCard */}
+              {/* Meta del Día - Desde RetailWeekBudgetCard */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
+                <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">Meta del día</p>
                 <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
                   {budgetData?.adjustedDailyBudget ? 
                     budgetData.adjustedDailyBudget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
