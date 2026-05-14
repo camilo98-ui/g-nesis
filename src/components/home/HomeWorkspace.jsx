@@ -761,11 +761,12 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
                 <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
-                  {dailyBudgets?.length > 0 && dailyBudgets[0].sales_budget ? `$${(dailyBudgets[0].sales_budget / 1000000).toFixed(2)}M` : '$0.00M'}
+                  {dailyBudgets?.length > 0 && dailyBudgets[0].sales_budget ? 
+                    dailyBudgets[0].sales_budget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                    : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
-                  <span className="text-[11px] font-semibold text-emerald-500">↑ 12.5%</span>
-                  <span className="text-[10px] text-slate-400">vs ayer</span>
+                  <span className="text-[10px] text-slate-400 text-center flex-1">del 01 - 31 may</span>
                 </div>
                 <PremiumSparkline data={sparkSales} color="#ef4444" width={100} height="24" />
               </div>
@@ -779,11 +780,16 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
                 <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
-                  {budget?.length > 0 && budget[0].sales_gap ? `+$${(budget[0].sales_gap / 1000000).toFixed(2)}M` : '+$0.00M'}
+                  {budget?.length > 0 && budget[0].sales_gap ? 
+                    `+${budget[0].sales_gap.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                    : '+$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
-                  <span className="text-[11px] font-semibold text-emerald-500">↑ 5.2%</span>
-                  <span className="text-[10px] text-slate-400">vs ayer</span>
+                  <span className="text-[10px] text-slate-400 text-center flex-1">
+                    Sobre meta: {budget?.length > 0 && budget[0].sales_budget ? 
+                      `${Math.round((budget[0].sales_gap || 0) / budget[0].sales_budget * 100)}%`
+                      : '0%'}
+                  </span>
                 </div>
                 <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
               </div>
@@ -797,10 +803,30 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
                 <p className="text-[20px] font-bold text-blue-500 leading-none mb-2">
-                  {budget?.length > 0 && budget[0].sales_budget ? `${Math.round((latest?.total_sales || 0) / budget[0].sales_budget * 100)}%` : '0%'}
+                  {(() => {
+                    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+                    const currentDay = new Date().getDate();
+                    const currentSales = latest?.total_sales || 0;
+                    const monthlyBudget = budget?.length > 0 ? budget[0].sales_budget || 0 : 0;
+                    if (monthlyBudget === 0) return '0%';
+                    const projectedSales = (currentSales / currentDay) * daysInMonth;
+                    return `${Math.round((projectedSales / monthlyBudget) * 100)}%`;
+                  })()}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
-                  <span className="text-[10px] text-slate-500">De la meta mensual</span>
+                  <span className="text-[10px] text-slate-500 text-center flex-1">
+                    {(() => {
+                      const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+                      const currentDay = new Date().getDate();
+                      const currentSales = latest?.total_sales || 0;
+                      const monthlyBudget = budget?.length > 0 ? budget[0].sales_budget || 0 : 0;
+                      if (monthlyBudget === 0) return '';
+                      const projectedSales = (currentSales / currentDay) * daysInMonth;
+                      const projFormatted = projectedSales.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                      const budgetFormatted = monthlyBudget.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                      return `${projFormatted} / ${budgetFormatted}`;
+                    })()}
+                  </span>
                 </div>
                 <PremiumSparkline data={sparkSales} color="#3b82f6" width={100} height="24" />
               </div>
@@ -814,11 +840,21 @@ export default function HomeWorkspace({
               }}>
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Venta del día</p>
                 <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
-                  {latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(2)}M` : '$0.00M'}
+                  {latest?.total_sales ? 
+                    latest.total_sales.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })
+                    : '$0'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
-                  <span className="text-[11px] font-semibold text-emerald-500">↑ 8.7%</span>
-                  <span className="text-[10px] text-slate-400">vs ayer</span>
+                  {latest && prev ? (
+                    <>
+                      <span className={`text-[11px] font-semibold ${salesChange >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        {salesChange >= 0 ? '↑' : '↓'} {Math.abs(salesChange)}%
+                      </span>
+                      <span className="text-[10px] text-slate-400">vs ayer</span>
+                    </>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 flex-1 text-center">Sin comparación</span>
+                  )}
                 </div>
                 <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
               </div>
