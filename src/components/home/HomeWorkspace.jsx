@@ -752,16 +752,16 @@ export default function HomeWorkspace({
             {/* Premium KPI Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 
-              {/* Sales */}
+              {/* PPT del Día */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">Venta del día</p>
+                <p className="text-[10px] font-bold text-rose-500 tracking-widest uppercase mb-3">PPT del día</p>
                 <p className="text-[20px] font-bold text-rose-500 leading-none mb-2">
-                  {latest?.total_sales ? `$${(latest.total_sales / 1000).toFixed(1)}K` : '—'}
+                  {dailyBudgets?.length > 0 && dailyBudgets[0].sales_budget ? `$${(dailyBudgets[0].sales_budget / 1000000).toFixed(2)}M` : '—'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 12.5%</span>
@@ -770,59 +770,57 @@ export default function HomeWorkspace({
                 <PremiumSparkline data={sparkSales} color="#ef4444" width={100} height="24" />
               </div>
 
-              {/* Cumplimiento */}
+              {/* Brecha del Mes */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <p className="text-[10px] font-bold text-violet-500 tracking-widest uppercase mb-3">Cumplimiento</p>
-                <p className="text-[20px] font-bold text-violet-500 leading-none mb-2">
-                  {dailyBudgets?.find(d => new Date(d.date).toDateString() === new Date().toDateString())?.sales_budget && latest?.total_sales
-                    ? `${((latest.total_sales / dailyBudgets.find(d => new Date(d.date).toDateString() === new Date().toDateString()).sales_budget) * 100).toFixed(1)}%`
-                    : '—'}
+                <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
+                <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
+                  {budget?.length > 0 && budget[0].sales_gap ? `+$${(budget[0].sales_gap / 1000000).toFixed(2)}M` : '—'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 5.2%</span>
                   <span className="text-[10px] text-slate-400">vs ayer</span>
                 </div>
-                <PremiumSparkline data={sparkSales} color="#8b5cf6" width={100} height="24" />
+                <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
               </div>
 
-              {/* Proyección del mes */}
+              {/* Proyección Cierre Mes */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección del mes</p>
+                <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase mb-3">Proyección cierre</p>
                 <p className="text-[20px] font-bold text-blue-500 leading-none mb-2">
-                  {latest?.total_sales ? `$${((latest.total_sales / new Date().getDate()) * new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() / 1000000).toFixed(2)}M` : '—'}
+                  {budget?.length > 0 && budget[0].sales_budget ? `${Math.round((latest?.total_sales || 0) / budget[0].sales_budget * 100)}%` : '—'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
-                  <span className="text-[10px] text-slate-500">90% de la meta</span>
+                  <span className="text-[10px] text-slate-500">De la meta mensual</span>
                 </div>
                 <PremiumSparkline data={sparkSales} color="#3b82f6" width={100} height="24" />
               </div>
 
-              {/* Transacciones */}
+              {/* Venta del Día */}
               <div className="rounded-2xl p-4" style={{
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(24px)',
                 border: '1px solid rgba(0,0,0,0.06)',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
               }}>
-                <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Transacciones</p>
+                <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Venta del día</p>
                 <p className="text-[20px] font-bold text-emerald-500 leading-none mb-2">
-                  {latest?.total_transactions ? `${latest.total_transactions.toLocaleString()}` : '—'}
+                  {latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(2)}M` : '—'}
                 </p>
                 <div className="flex items-center gap-1 mb-3">
                   <span className="text-[11px] font-semibold text-emerald-500">↑ 8.7%</span>
                   <span className="text-[10px] text-slate-400">vs ayer</span>
                 </div>
-                <PremiumSparkline data={sparkTxn} color="#10b981" width={100} height="24" />
+                <PremiumSparkline data={sparkSales} color="#10b981" width={100} height="24" />
               </div>
 
             </div>
