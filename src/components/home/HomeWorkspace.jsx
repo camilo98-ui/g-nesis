@@ -349,12 +349,66 @@ export default function HomeWorkspace({
   const sparkSales = sorted.slice(0, 8).reverse().map((d) => d.total_sales || 0);
   const sparkTxn = sorted.slice(0, 8).reverse().map((d) => d.total_transactions || 0);
 
-  // Usar la lógica de cálculo compartida para presupuesto
+  // Cálculo exacto de RetailWeekBudgetCard
   const activeBudget = budget.length > 0 ? budget.find((b) => {
     const now = new Date();
     return Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear();
   }) : null;
-  const budgetData = activeBudget ? calculateBudgetData(todaySales, activeBudget, dailyBudgets, storeEntityId) : null;
+
+  const budgetData = (() => {
+    if (!activeBudget?.sales_budget) return null;
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const daysInMonth = monthEnd.getDate();
+    
+    const salesUntilYesterday = todaySales.filter((s) => {
+      try {
+        const saleDate = new Date(s.date);
+        return saleDate < now && saleDate >= monthStart && saleDate <= monthEnd;
+      } catch { return false; }
+    }).reduce((sum, s) => sum + (s.total_sales || 0), 0);
+    
+    const todaySalesValue = todaySales.find((s) => {
+      try { return new Date(s.date).toDateString() === now.toDateString(); } catch { return false; }
+    })?.total_sales || 0;
+    
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    let budgetUntilYesterday = 0;
+    for (let i = 0; i < yesterday.getDate(); i++) {
+      const day = new Date(now.getFullYear(), now.getMonth(), i + 1);
+      budgetUntilYesterday += activeBudget.sales_budget / daysInMonth;
+    }
+    
+    const totalMonthSales = salesUntilYesterday + todaySalesValue;
+    const daysWithSales = todaySales.filter(s => {
+      try {
+        const sd = new Date(s.date);
+        return sd >= monthStart && sd <= now && (s.total_sales || 0) > 0;
+      } catch { return false; }
+    }).length;
+    const daysElapsedCalendar = Math.floor((now - monthStart) / (1000 * 60 * 60 * 24)) + 1;
+    const effectiveDays = daysWithSales > 0 ? daysWithSales : daysElapsedCalendar;
+    const monthAvgDailySales = effectiveDays > 0 ? totalMonthSales / effectiveDays : 0;
+    const daysRemainingMonth = daysInMonth - daysElapsedCalendar;
+    const monthProjection = totalMonthSales + (monthAvgDailySales * Math.max(daysRemainingMonth, 0));
+    const monthProjectionCompliance = activeBudget.sales_budget > 0 ? monthProjection / activeBudget.sales_budget * 100 : 0;
+    
+    const accumulatedGap = budgetUntilYesterday - salesUntilYesterday;
+    const dailyBaseBudget = activeBudget.sales_budget / daysInMonth;
+    const adjustedDailyBudget = dailyBaseBudget + (accumulatedGap > 0 ? accumulatedGap / Math.max(daysRemainingMonth, 1) : 0);
+    
+    return {
+      adjustedDailyBudget,
+      salesUntilYesterday,
+      budgetUntilYesterday,
+      monthProjection,
+      monthProjectionCompliance,
+      monthlyBudget: activeBudget.sales_budget
+    };
+  })();
 
   const { data: weatherData } = useQuery({
     queryKey: ['home-weather-real'],
