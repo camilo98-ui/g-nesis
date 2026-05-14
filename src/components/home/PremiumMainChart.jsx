@@ -297,8 +297,12 @@ export default function PremiumMainChart() {
               <XAxis
                 dataKey="date"
                 stroke="rgba(100,116,139,0.3)"
-                style={{ fontSize: '11px' }}
-                tick={{ fill: 'rgba(100,116,139,0.6)' }} />
+                style={{ fontSize: '10px' }}
+                tick={{ fill: 'rgba(100,116,139,0.6)' }}
+                tickFormatter={(date) => {
+                  const d = new Date(date);
+                  return `${d.getDate()}/${d.getMonth() + 1}`;
+                }} />
               
               <YAxis
                 stroke="rgba(100,116,139,0.3)"
@@ -403,13 +407,10 @@ export default function PremiumMainChart() {
               <p className="text-[9px] text-slate-500 font-medium">Estimado a cierre</p>
             </div>
             <div className="text-right">
-              <div className="flex items-baseline gap-1.5">
-                <p className="text-lg font-black" style={{ color: COLORS.secondary }}>
-                  {salesMetrics.projection}
-                </p>
-                <ArrowUpRight className="w-3.5 h-3.5" style={{ color: COLORS.success }} />
-              </div>
-              <p className="text-[8px] text-slate-400 mt-0.5 font-semibold">Meta del mes</p>
+              <p className="text-sm font-bold text-slate-500 mb-1">Hoy:</p>
+              <p className="text-lg font-black" style={{ color: COLORS.secondary }}>
+                {salesMetrics.projection}
+              </p>
             </div>
           </div>
 
@@ -447,42 +448,54 @@ export default function PremiumMainChart() {
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 mt-3">
+          <div className="grid grid-cols-4 gap-2 mt-2.5">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
-              className="p-1.5 rounded-lg text-center"
+              className="p-2 rounded-lg text-center"
               style={{
                 background: 'rgba(236, 72, 153, 0.06)',
                 border: '1px solid rgba(236, 72, 153, 0.12)'
               }}>
-              <p className="text-[7px] font-bold text-slate-500 uppercase mb-0.5">Acumulado</p>
-              <p className="text-[10px] font-black" style={{ color: COLORS.primary }}>{salesMetrics.accumulated}</p>
+              <p className="text-[7px] font-bold text-slate-500 uppercase mb-1">Hoy</p>
+              <p className="text-[9px] font-black" style={{ color: COLORS.primary }}>{salesMetrics.accumulated}</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.35 }}
-              className="p-1.5 rounded-lg text-center"
+              className="p-2 rounded-lg text-center"
               style={{
                 background: 'rgba(139, 92, 246, 0.06)',
                 border: '1px solid rgba(139, 92, 246, 0.12)'
               }}>
-              <p className="text-[7px] font-bold text-slate-500 uppercase mb-0.5">Cumpl. Proy</p>
-              <p className="text-[10px] font-black" style={{ color: COLORS.secondary }}>{salesMetrics.compliance}%</p>
+              <p className="text-[7px] font-bold text-slate-500 uppercase mb-1">% Meta</p>
+              <p className="text-[9px] font-black" style={{ color: COLORS.secondary }}>{salesMetrics.compliance}%</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="p-1.5 rounded-lg text-center"
+              className="p-2 rounded-lg text-center"
               style={{
                 background: 'rgba(6, 182, 212, 0.06)',
                 border: '1px solid rgba(6, 182, 212, 0.12)'
               }}>
-              <p className="text-[7px] font-bold text-slate-500 uppercase mb-0.5">Día</p>
-              <p className="text-[10px] font-bold" style={{ color: COLORS.accent }}>14/30</p>
+              <p className="text-[7px] font-bold text-slate-500 uppercase mb-1">Mes</p>
+              <p className="text-[9px] font-bold" style={{ color: COLORS.accent }}>14/30</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.45 }}
+              className="p-2 rounded-lg text-center"
+              style={{
+                background: 'rgba(34, 197, 94, 0.06)',
+                border: '1px solid rgba(34, 197, 94, 0.12)'
+              }}>
+              <p className="text-[7px] font-bold text-slate-500 uppercase mb-1">Crecimiento</p>
+              <p className="text-[9px] font-black" style={{ color: COLORS.success }}>+8.2%</p>
             </motion.div>
           </div>
         </div>
