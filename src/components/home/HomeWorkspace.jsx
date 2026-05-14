@@ -316,15 +316,34 @@ export default function HomeWorkspace({
   const sparkSales = sorted.slice(0, 8).reverse().map((d) => d.total_sales || 0);
   const sparkTxn = sorted.slice(0, 8).reverse().map((d) => d.total_transactions || 0);
 
-  const { data: weatherHistory = [] } = useQuery({
-    queryKey: ['home-weather', selectedStore],
-    queryFn: () => base44.entities.WeatherHistory.filter({ store_id: selectedStore }),
-    enabled: !!selectedStore,
-    staleTime: 30 * 60 * 1000
+  const { data: weatherData } = useQuery({
+    queryKey: ['home-weather-real'],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('getWeatherDataForBogota', {});
+      return res.data;
+    },
+    staleTime: 60 * 60 * 1000
   });
-  const weatherSorted = [...weatherHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
-  const latestWeather = weatherSorted[0];
-  const weatherLast7 = weatherSorted.slice(0, 7).reverse();
+
+  const weatherHistory = weatherData?.history || {};
+  const wTimes = weatherHistory.time || [];
+  const wTemps = weatherHistory.temperature_2m_mean || [];
+  const wTempsMax = weatherHistory.temperature_2m_max || [];
+  const wTempsMin = weatherHistory.temperature_2m_min || [];
+  const wRain = weatherHistory.precipitation_sum || [];
+  const wCodes = weatherHistory.weathercode || [];
+
+  // Últimos 7 días
+  const last7Start = Math.max(0, wTimes.length - 7);
+  const weatherLast7 = wTimes.slice(last7Start).map((date, i) => ({
+    date,
+    temperature_mean: wTemps[last7Start + i],
+    temperature_max: wTempsMax[last7Start + i],
+    temperature_min: wTempsMin[last7Start + i],
+    precipitation: wRain[last7Start + i],
+    weather_code: wCodes[last7Start + i],
+  }));
+  const latestWeather = weatherLast7[weatherLast7.length - 1] || null;
 
   const filteredNav = NAV_ITEMS.filter((n) => n.roles.includes(selectedRole));
 
