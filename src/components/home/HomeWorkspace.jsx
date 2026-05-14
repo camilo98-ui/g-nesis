@@ -709,31 +709,45 @@ export default function HomeWorkspace({
                     transition={{ delay: 0.3, duration: 0.6 }}
                     className="text-[12.5px] leading-relaxed font-medium text-slate-700"
                     style={{ letterSpacing: '0.3px' }}>
-                    {latest?.total_sales > 0 ?
+                    {latestWeather ?
                     (() => {
-                      const salesM = (latest.total_sales / 1000000).toFixed(1);
-                      const projection = (latest.total_sales / new Date().getHours() * 24 / 1000000).toFixed(1);
+                      const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
+                      const rain = latestWeather?.precipitation ?? 0;
+                      const isHot = temp > 26;
+                      const isRainy = rain > 5;
+                      
+                      if (isRainy) {
+                        return (
+                          <>
+                            <span className="text-slate-600">🌧 Lluvia impacta tráfico · </span>
+                            <span className="text-slate-700">ventas </span>
+                            <span style={{ color: '#C21875', fontWeight: 800, fontSize: '13px' }}>↓ {rain.toFixed(1)}mm</span>
+                            <span className="text-slate-600"> · Aumenta pedidos a domicilio</span>
+                          </>
+                        );
+                      }
+                      
+                      if (isHot) {
+                        return (
+                          <>
+                            <span className="text-slate-600">☀️ Clima caluroso · </span>
+                            <span className="text-slate-700">día ideal para helados · </span>
+                            <span style={{ color: '#C21875', fontWeight: 800, fontSize: '13px' }}>{Math.round(temp)}°C</span>
+                            <span className="text-slate-600"> · Espera peak en horarios centrales</span>
+                          </>
+                        );
+                      }
+                      
                       return (
                         <>
-                              <span className="text-slate-600">Ritmo excelente · </span>
-                              <span className="text-slate-700">ventas </span>
-                              <span style={{
-                            color: '#C21875',
-                            fontWeight: 800,
-                            fontSize: '13px',
-                            letterSpacing: '-0.3px'
-                          }}>${salesM}M</span>
-                              <span className="text-slate-600"> → proyección </span>
-                              <span style={{
-                            color: '#C21875',
-                            fontWeight: 800,
-                            fontSize: '13px',
-                            letterSpacing: '-0.3px'
-                          }}>${projection}M</span>
-                            </>);
-
+                          <span className="text-slate-600">🌤 Clima templado · </span>
+                          <span className="text-slate-700">vendibilidad normal · </span>
+                          <span style={{ color: '#C21875', fontWeight: 800, fontSize: '13px' }}>{Math.round(temp)}°C</span>
+                          <span className="text-slate-600"> · Ritmo constante</span>
+                        </>
+                      );
                     })() :
-                    <span className="text-slate-500">Registra ventas para ver insights personalizados</span>}
+                    <span className="text-slate-500">Cargando datos del clima...</span>}
                   </motion.p>
                 </div>
 
