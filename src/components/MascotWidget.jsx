@@ -89,7 +89,7 @@ function ChatMessage({ msg }) {
       {isNova && (
         <div className="w-7 h-7 rounded-xl overflow-hidden flex-shrink-0 mt-0.5 shadow-sm"
           style={{ border: '1.5px solid rgba(194,24,117,0.3)' }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain" style={{ background: 'white' }} />
         </div>
       )}
       <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
@@ -249,9 +249,9 @@ Responde como Nova de forma concisa, accionable y cálida. Máximo 3-4 párrafos
 
               <div className="relative w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow-md"
                 style={{ border: '2px solid rgba(255,255,255,0.5)' }}>
-                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
-              </div>
-              <div className="relative flex-1 min-w-0">
+                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain" style={{ background: 'white' }} />
+                </div>
+                    <div className="relative flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <p className="text-white font-black text-sm">Nova</p>
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/20 text-white/90">AI Copilot</span>
@@ -283,7 +283,7 @@ Responde como Nova de forma concisa, accionable y cálida. Máximo 3-4 párrafos
                   className="flex items-start gap-2.5">
                   <div className="w-7 h-7 rounded-xl overflow-hidden flex-shrink-0 shadow-sm"
                     style={{ border: '1.5px solid rgba(194,24,117,0.3)' }}>
-                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
+                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain" style={{ background: 'white' }} />
                   </div>
                   <div className="rounded-2xl rounded-tl-sm"
                     style={{ background: 'linear-gradient(135deg,#FFF7FB,#F8D7E8)', border: '1px solid rgba(194,24,117,0.15)' }}>
@@ -403,10 +403,9 @@ Responde como Nova de forma concisa, accionable y cálida. Máximo 3-4 párrafos
           style={{
             border: '2.5px solid rgba(194,24,117,0.65)',
             boxShadow: '0 0 0 1.5px rgba(255,255,255,0.9) inset, 0 8px 32px rgba(194,24,117,0.4)',
+            background: 'white',
           }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 rounded-full"
-            style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 55%)' }} />
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-110" style={{ objectPosition: 'center center' }} />
         </div>
         {/* Status dot */}
         <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
