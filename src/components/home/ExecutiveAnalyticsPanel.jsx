@@ -669,7 +669,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 </AreaChart>
                 </ResponsiveContainer>
 
-                {/* Top 6 Productos Más Vendidos */}
+                {/* Top 3 Productos Más Vendidos */}
                 <div className="mt-3 pt-2 grid grid-cols-3 gap-1.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
                   {(() => {
                     const grouped = (products || []).filter(p => p.total_sales > 0 && p.level === 'product' && p.product).reduce((acc, p) => {
@@ -678,7 +678,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                       else acc.push({ ...p });
                       return acc;
                     }, []);
-                    const top3 = grouped.sort((a, b) => b.total_sales - a.total_sales).slice(0, 6);
+                    const top3 = grouped.sort((a, b) => b.total_sales - a.total_sales).slice(0, 3);
                     const maxSales = top3[0]?.total_sales || 1;
                     return top3.map((prod, i) => {
                        const pct = (prod.total_sales / maxSales) * 100;
