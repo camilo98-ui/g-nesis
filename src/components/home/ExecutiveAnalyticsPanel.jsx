@@ -317,12 +317,21 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       // Acceleration: day-over-day growth %
       const prevVentas = i > 0 ? (daily[i-1].total_sales || 0) : ventas;
       const acceleration = prevVentas > 0 ? Math.round(((ventas - prevVentas) / prevVentas) * 100) : 0;
+
+      // PPT diario real: presupuesto del mes al que pertenece ese día ÷ días reales de ese mes
+      const saleDate = new Date(d.date);
+      const salesMonth = saleDate.getMonth() + 1;
+      const salesYear = saleDate.getFullYear();
+      const matchBudget = budget.find(b => Number(b.month) === salesMonth && Number(b.year) === salesYear)
+        || budget[0];
+      const daysInSaleMonth = new Date(salesYear, salesMonth, 0).getDate();
+      const dailyPPT = matchBudget?.sales_budget ? matchBudget.sales_budget / daysInSaleMonth : 0;
       
       return {
-        date: new Date(d.date).toLocaleDateString('es', { day: 'numeric', month: 'short' }),
+        date: saleDate.toLocaleDateString('es', { day: 'numeric', month: 'short' }),
         ventas: ventas,
-        presupuesto: (budget[0]?.sales_budget || 0) / 30,
-        cumplimiento: ((ventas / ((budget[0]?.sales_budget || 0) / 30)) * 100),
+        presupuesto: dailyPPT,
+        cumplimiento: dailyPPT > 0 ? (ventas / dailyPPT) * 100 : 0,
         aceleracion: acceleration,
         txn: d.total_transactions || 0
       };

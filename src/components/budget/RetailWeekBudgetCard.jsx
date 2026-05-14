@@ -220,7 +220,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
       currentWeekNumber, totalWeeks: weeks.length, currentWeekSales, weeklyBudget,
       weeklyCompliance: weeklyBudget > 0 ? currentWeekSales / weeklyBudget * 100 : 0,
       weekProjection, projectionCompliance, dailyTrendData, weeklyData, currentWeekStart, currentWeekEnd,
-      totalMonthSales, daysElapsed, avgDailySales: monthAvgDailySales, monthProjection, monthProjectionCompliance,
+      totalMonthSales, avgDailySales: monthAvgDailySales, monthProjection, monthProjectionCompliance,
       monthlyBudget: adjustedMonthlyBudget,
       last7DaysSales: dailySales.filter((s) => {
         try { const sd = parseISO(s.date); const ago = new Date(now); ago.setDate(ago.getDate() - 7); return sd >= ago && sd <= now && s.total_sales > 0; } catch { return false; }
