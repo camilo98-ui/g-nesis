@@ -516,112 +516,85 @@ export default function HomeWorkspace({
             </motion.div>
           }
 
-          {/* ── QUICK ACCESS BANNER ── */}
+          {/* ── MINI CHARTS BANNER ── */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="mb-7 rounded-2xl overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, #ffd6e7 0%, #ffb3d1 40%, #ffc8d8 70%, #ffe0ec 100%)',
-              boxShadow: '0 2px 16px rgba(255,77,141,0.15)'
-            }}>
-            <div className="flex divide-x divide-pink-200/60">
+            className="mb-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-              {/* SECCIÓN 1 — Módulos */}
-              <div className="flex-1 p-4">
-                <p className="text-[9px] font-bold text-pink-800/60 uppercase tracking-[0.14em] mb-3">Módulos</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {QUICK_MODULES.map((m, i) => (
-                    <Link key={m.label} to={`/${m.path}`}>
-                      <motion.div
-                        whileHover={{ y: -2, transition: { duration: 0.14 } }}
-                        whileTap={{ scale: 0.96 }}
-                        className="flex flex-col items-center gap-1.5 p-2 rounded-xl cursor-pointer group"
-                        style={{
-                          background: 'rgba(255,255,255,0.65)',
-                          backdropFilter: 'blur(12px)',
-                          border: '1px solid rgba(255,255,255,0.8)'
-                        }}>
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                          style={{ background: 'rgba(255,255,255,0.7)' }}>
-                          <m.icon style={{ width: 14, height: 14, color: '#be185d' }} />
-                        </div>
-                        <p className="text-[9.5px] font-semibold text-pink-900/80 text-center leading-tight">{m.label}</p>
-                      </motion.div>
-                    </Link>
-                  ))}
-                </div>
+            {/* Card 1 — Barras de ventas últimos 7 días */}
+            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Ventas · 7 días</p>
+              <p className="text-[18px] font-black text-slate-800 leading-none mb-3">{salesVal}</p>
+              <div className="flex items-end gap-1 h-12">
+                {(sparkSales.length > 0 ? sparkSales.slice(-7) : [3,4,4,5,4,6,5]).map((v, i, arr) => {
+                  const max = Math.max(...arr, 1);
+                  const pct = Math.max((v / max) * 100, 8);
+                  const isLast = i === arr.length - 1;
+                  return (
+                    <div key={i} className="flex-1 rounded-t-md transition-all"
+                      style={{ height: `${pct}%`, background: isLast ? '#be185d' : 'rgba(190,24,93,0.18)' }} />
+                  );
+                })}
               </div>
-
-              {/* SECCIÓN 2 — Panel ejecutivo */}
-              <div className="flex-[1.4] p-4">
-                <p className="text-[9px] font-bold text-pink-800/60 uppercase tracking-[0.14em] mb-3">Panel ejecutivo</p>
-                <div className="flex gap-3 mb-3 flex-wrap">
-                  {[
-                    { icon: Activity, label: 'CMD Center', path: 'GenesisCommandCenter' },
-                    { icon: TrendingUp, label: 'P&G', path: 'PYGDashboard' },
-                    { icon: Trophy, label: 'Ruleta', path: 'RoulettePopsy' },
-                    { icon: BarChart3, label: 'Participación', path: 'SalesReportView' },
-                    { icon: SettingsIcon, label: 'Config', path: 'Settings' }
-                  ].map((m) => (
-                    <Link key={m.label} to={`/${m.path}`}>
-                      <motion.div
-                        whileHover={{ y: -2, scale: 1.05, transition: { duration: 0.14 } }}
-                        className="flex flex-col items-center gap-1 cursor-pointer">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                          style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)' }}>
-                          <m.icon style={{ width: 16, height: 16, color: '#be185d' }} />
-                        </div>
-                        <p className="text-[9px] font-medium text-pink-900/70">{m.label}</p>
-                      </motion.div>
-                    </Link>
-                  ))}
-                </div>
-                {/* Links rápidos gerente */}
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    { label: 'Importar PPT', onClick: onShowBudgetImporter },
-                    { label: 'Subir KPIs', onClick: onShowKpisUploader },
-                    { label: 'Agregadores', onClick: onShowAggregatorsUploader },
-                    { label: 'Subir P&G', onClick: onShowPYGUploader },
-                    { label: 'Ver P&G', onClick: onShowPYGModal },
-                    { label: 'Backup', onClick: onBackup }
-                  ].map(({ label, onClick }) => (
-                    <button key={label} onClick={onClick}
-                      className="px-2.5 py-1 rounded-full text-[10px] font-semibold text-pink-900/70 hover:text-pink-900 transition-colors"
-                      style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.8)' }}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* SECCIÓN 3 — Mini sparkline ventas */}
-              <div className="w-52 p-4 flex flex-col">
-                <p className="text-[9px] font-bold text-pink-800/60 uppercase tracking-[0.14em] mb-2">Tendencia ventas</p>
-                <div className="flex-1 flex items-center justify-center rounded-xl overflow-hidden"
-                  style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.8)', minHeight: 80 }}>
-                  <PremiumSparkline
-                    data={sparkSales.length > 0 ? sparkSales : [3,4,4,5,4,6,5,7]}
-                    color="#be185d"
-                    width={160}
-                    height={70}
-                  />
-                </div>
-                <div className="flex justify-between mt-2">
-                  <div>
-                    <p className="text-[8px] text-pink-800/50 font-medium">Último día</p>
-                    <p className="text-[12px] font-black text-pink-900">{salesVal}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[8px] text-pink-800/50 font-medium">Txn</p>
-                    <p className="text-[12px] font-black text-pink-900">{txnVal}</p>
-                  </div>
-                </div>
-              </div>
-
+              <p className="text-[9px] text-slate-300 mt-2 font-medium">Lun → Hoy</p>
             </div>
+
+            {/* Card 2 — Tendencia sparkline transacciones */}
+            <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Transacciones</p>
+              <p className="text-[18px] font-black text-slate-800 leading-none mb-3">{txnVal}</p>
+              <div className="h-12">
+                <PremiumSparkline
+                  data={sparkTxn.length > 0 ? sparkTxn : [20,28,24,32,27,35,30]}
+                  color="#7c3aed"
+                  width={200}
+                  height={48}
+                />
+              </div>
+              <p className="text-[9px] text-slate-300 mt-2 font-medium">Tendencia semanal</p>
+            </div>
+
+            {/* Card 3 — Donut ticket promedio */}
+            <div className="rounded-2xl p-4 flex flex-col" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
+              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Ticket promedio</p>
+              <p className="text-[18px] font-black text-slate-800 leading-none mb-2">{ticketVal}</p>
+              <div className="flex items-center gap-3 flex-1">
+                {/* Mini donut SVG */}
+                <svg width="52" height="52" viewBox="0 0 52 52" className="flex-shrink-0">
+                  <circle cx="26" cy="26" r="18" fill="none" stroke="#f1f5f9" strokeWidth="7" />
+                  {(() => {
+                    const totalSales = sorted.reduce((s,d) => s+(d.total_sales||0), 0);
+                    const totalBudget = budget.reduce((s,b) => s+(b.sales_budget||0), 0);
+                    const pct = totalBudget > 0 ? Math.min(totalSales/totalBudget, 1) : 0.62;
+                    const circ = 2 * Math.PI * 18;
+                    return (
+                      <circle cx="26" cy="26" r="18" fill="none"
+                        stroke="#be185d" strokeWidth="7"
+                        strokeDasharray={`${pct * circ} ${circ}`}
+                        strokeLinecap="round"
+                        transform="rotate(-90 26 26)" />
+                    );
+                  })()}
+                </svg>
+                <div>
+                  {[
+                    { label: 'Helados', color: '#be185d', pct: 42 },
+                    { label: 'Bebidas', color: '#f59e0b', pct: 23 },
+                    { label: 'Combos', color: '#10b981', pct: 18 },
+                    { label: 'Otros', color: '#94a3b8', pct: 17 },
+                  ].map(({ label, color, pct }) => (
+                    <div key={label} className="flex items-center gap-1.5 mb-0.5">
+                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
+                      <span className="text-[9px] text-slate-400 font-medium">{label}</span>
+                      <span className="text-[9px] font-bold text-slate-600 ml-auto pl-2">{pct}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
           </motion.div>
 
           <p className="text-center text-[9px] font-medium tracking-widest uppercase mt-6 mb-2 text-slate-200">
