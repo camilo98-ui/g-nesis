@@ -1302,11 +1302,9 @@ export default function SalesReportView() {
                     );
                   })}
                 </div>
+              </motion.div>
 
-
-                </motion.div>
-
-                {/* Top 10 Productos */}
+              {/* Top 10 Productos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
                 <div className="px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${EXEC.borderLight}` }}>
