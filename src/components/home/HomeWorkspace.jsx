@@ -701,13 +701,13 @@ export default function HomeWorkspace({
                 {/* Separador elegante */}
                 <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-250 to-transparent opacity-25" />
 
-                {/* Insight Premium Horizontal + KPI Buttons */}
-                <div className="flex-1 min-w-0 flex items-center gap-3">
+                {/* Insight Premium Horizontal */}
+                <div className="flex-1 min-w-0 flex items-center">
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.6 }}
-                    className="text-[12.5px] leading-relaxed font-medium text-slate-700 flex-1"
+                    className="text-[12.5px] leading-relaxed font-medium text-slate-700"
                     style={{ letterSpacing: '0.3px' }}>
                     {latestWeather ?
                     (() => {
@@ -749,34 +749,6 @@ export default function HomeWorkspace({
                     })() :
                     <span className="text-slate-500">Cargando datos del clima...</span>}
                   </motion.p>
-
-                  {/* Subtle KPI Navigation Buttons */}
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    {[
-                      { label: 'PPT del Día', icon: '📊', id: 'ppt-del-dia' },
-                      { label: 'Proyección', icon: '📈', id: 'proyeccion' },
-                      { label: 'Cmp Día', icon: '✓', id: 'cmp-dia' }
-                    ].map((item) => (
-                      <motion.button
-                        key={item.label}
-                        whileHover={{ scale: 1.03, y: -0.5 }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => {
-                          const element = document.getElementById(item.id);
-                          if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }}
-                        className="flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-medium whitespace-nowrap transition-all duration-300 cursor-pointer"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.08) 0%, rgba(168, 85, 247, 0.06) 100%)',
-                          border: '1px solid rgba(194, 24, 117, 0.12)',
-                          color: '#64748b',
-                          boxShadow: '0 2px 6px rgba(194, 24, 117, 0.04)'
-                        }}>
-                        <span className="text-[8px]">{item.icon}</span>
-                        <span className="hidden sm:inline">{item.label}</span>
-                      </motion.button>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Botón Premium SaaS */}

@@ -353,7 +353,6 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
 
               {/* Presupuesto del Día - DESTACADO */}
               <motion.div
-                id="ppt-del-dia"
                 whileHover={{ scale: 1.02, y: -2 }}
                 onClick={() => {
                   const newExpanded = !isExpanded;
