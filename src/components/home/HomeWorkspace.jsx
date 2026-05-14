@@ -899,7 +899,7 @@ export default function HomeWorkspace({
                 <p className="text-[10px] font-bold text-emerald-500 tracking-widest uppercase mb-3">Brecha del mes</p>
                 <p className="text-[18px] font-bold text-emerald-500 leading-none mb-2">
                   {(() => {
-                    const monthGap = budgetData?.accumulatedGap || 0;
+                    const monthGap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
                     const sign = monthGap >= 0 ? '+' : '-';
                     return `${sign}$${Math.abs(Math.round(monthGap)).toLocaleString('es-CO')}`;
                   })()}
@@ -908,8 +908,8 @@ export default function HomeWorkspace({
                   <span className="text-[10px] text-slate-400 text-center flex-1">
                     Sobre meta: {budgetData?.monthlyBudget ? 
                       (() => {
-                        const monthGap = budgetData.accumulatedGap || 0;
-                        return `${Math.round((monthGap / budgetData.monthlyBudget) * 100)}%`;
+                        const monthGap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
+                        return `${Math.abs(Math.round((monthGap / budgetData.monthlyBudget) * 100))}%`;
                       })()
                       : '0%'}
                   </span>
