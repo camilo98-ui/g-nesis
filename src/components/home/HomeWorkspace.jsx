@@ -688,9 +688,9 @@ export default function HomeWorkspace({
                 {/* Separador elegante */}
                 <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-250 to-transparent opacity-25" />
 
-                {/* Insight Premium Horizontal */}
+                {/* Insight Premium Horizontal — Rich Data */}
                 <div className="flex-1 min-w-0 flex items-center">
-                  <motion.p 
+                  <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.6 }}
@@ -698,30 +698,46 @@ export default function HomeWorkspace({
                     style={{ letterSpacing: '0.3px' }}>
                     {latest?.total_sales > 0 
                       ? (() => {
+                          const now = new Date();
+                          const hours = now.getHours();
                           const salesM = (latest.total_sales / 1000000).toFixed(1);
-                          const projection = ((latest.total_sales / new Date().getHours()) * 24 / 1000000).toFixed(1);
+                          const projection = ((latest.total_sales / hours) * 24 / 1000000).toFixed(1);
+                          const ticket = ((latest.total_sales / latest.total_transactions) / 1000).toFixed(0);
+                          
                           return (
                             <>
-                              <span className="text-slate-600">Ritmo excelente · </span>
+                              <span className="text-slate-600">Ritmo </span>
+                              <span style={{ color: '#C21875', fontWeight: 800 }}>excelente</span>
+                              <span className="text-slate-600"> · </span>
                               <span className="text-slate-700">ventas </span>
                               <span style={{ 
                                 color: '#C21875', 
                                 fontWeight: 800,
-                                fontSize: '13px',
-                                letterSpacing: '-0.3px'
+                                fontSize: '13px'
                               }}>${salesM}M</span>
-                              <span className="text-slate-600"> → proyección </span>
+                              
+                              <span className="text-slate-400 mx-1.5">·</span>
+                              
+                              <span className="text-slate-700">ticket </span>
                               <span style={{ 
                                 color: '#C21875', 
                                 fontWeight: 800,
-                                fontSize: '13px',
-                                letterSpacing: '-0.3px'
+                                fontSize: '13px'
+                              }}>${ticket}K</span>
+                              
+                              <span className="text-slate-400 mx-1.5">·</span>
+                              
+                              <span className="text-slate-700">proyección </span>
+                              <span style={{ 
+                                color: '#C21875', 
+                                fontWeight: 800,
+                                fontSize: '13px'
                               }}>${projection}M</span>
                             </>
                           );
                         })()
-                      : <span className="text-slate-500">Registra ventas para ver insights personalizados</span>}
-                  </motion.p>
+                      : <span className="text-slate-500">Registra ventas para ver insights operativos en tiempo real</span>}
+                  </motion.div>
                 </div>
 
                 {/* Botón Premium SaaS */}
