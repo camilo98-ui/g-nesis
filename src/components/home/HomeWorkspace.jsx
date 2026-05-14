@@ -326,7 +326,7 @@ export default function HomeWorkspace({
     queryFn: () => base44.entities.Store.list(),
     staleTime: 60 * 60 * 1000
   });
-  const storeEntityId = storeEntities.find(s => s.code === selectedStore)?.id || selectedStore;
+  const storeEntityId = storeEntities.find((s) => s.code === selectedStore)?.id || selectedStore;
 
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['home-shifts', storeEntityId],
@@ -373,7 +373,7 @@ export default function HomeWorkspace({
     temperature_max: wTempsMax[last7Start + i],
     temperature_min: wTempsMin[last7Start + i],
     precipitation: wRain[last7Start + i],
-    weather_code: wCodes[last7Start + i],
+    weather_code: wCodes[last7Start + i]
   }));
   const latestWeather = weatherLast7[weatherLast7.length - 1] || null;
 
@@ -382,32 +382,32 @@ export default function HomeWorkspace({
   // Generar frase dinámica según contexto operativo
   const getDynamicPhrase = () => {
     if (!todaySales.length) return "Comienza el día. Aún sin datos operativos.";
-    
+
     const sorted = [...todaySales].sort((a, b) => new Date(b.date) - new Date(a.date));
     const latest = sorted[0];
     const prev = sorted[1];
-    
+
     if (!latest) return "Aún sin datos operativos hoy.";
-    
+
     const salesChange = prev ? Math.round((latest.total_sales - prev.total_sales) / prev.total_sales * 100) : 0;
     const currentSales = latest.total_sales || 0;
     const currentTxn = latest.total_transactions || 0;
     const avgTicket = currentTxn > 0 ? currentSales / currentTxn : 0;
-    
+
     // Array de frases dinámicas basadas en condiciones
     const phrases = [
-      ...(salesChange > 15 ? ["El ritmo de venta está acelerado hoy."] : []),
-      ...(salesChange < -10 ? ["Las ventas van más lento que ayer."] : []),
-      ...(salesChange > 0 && salesChange <= 15 ? ["Ritmo estable vs. ayer."] : []),
-      ...(avgTicket > 50000 ? ["El ticket promedio sostiene la operación."] : []),
-      ...(currentTxn > 80 ? ["Buen volumen de transacciones registrado."] : []),
-      ...(latestWeather?.precipitation > 5 ? ["La lluvia impacta el tráfico hoy."] : []),
-      ...(latestWeather?.temperature_mean > 26 ? ["Clima caluroso — buen día para helados."] : []),
-      ...(budget.length > 0 ? ["Proyección de cierre al alcance."] : []),
-      ...(cashiers.length > 3 ? ["Equipo completo para el turno."] : []),
-      "El negocio mantiene su ritmo normal.",
-    ];
-    
+    ...(salesChange > 15 ? ["El ritmo de venta está acelerado hoy."] : []),
+    ...(salesChange < -10 ? ["Las ventas van más lento que ayer."] : []),
+    ...(salesChange > 0 && salesChange <= 15 ? ["Ritmo estable vs. ayer."] : []),
+    ...(avgTicket > 50000 ? ["El ticket promedio sostiene la operación."] : []),
+    ...(currentTxn > 80 ? ["Buen volumen de transacciones registrado."] : []),
+    ...(latestWeather?.precipitation > 5 ? ["La lluvia impacta el tráfico hoy."] : []),
+    ...(latestWeather?.temperature_mean > 26 ? ["Clima caluroso — buen día para helados."] : []),
+    ...(budget.length > 0 ? ["Proyección de cierre al alcance."] : []),
+    ...(cashiers.length > 3 ? ["Equipo completo para el turno."] : []),
+    "El negocio mantiene su ritmo normal."];
+
+
     return phrases.length > 0 ? phrases[Math.floor(Math.random() * phrases.length)] : "La operación sigue su marcha.";
   };
 
@@ -421,11 +421,11 @@ export default function HomeWorkspace({
     setMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
     setInputVal('');
     setIsTyping(true);
-    
+
     try {
       // Crear conversación si no existe
       if (!conversationRef.current) {
-        const storeEntity = storeEntities.find(s => s.code === selectedStore);
+        const storeEntity = storeEntities.find((s) => s.code === selectedStore);
         const conv = await base44.agents.createConversation({
           agent_name: 'nova',
           metadata: { store: selectedStore, role: selectedRole }
@@ -444,8 +444,8 @@ export default function HomeWorkspace({
         base44.agents.subscribeToConversation(conv.id, (data) => {
           const allMsgs = data.messages || [];
           // Filtrar: saltar el primer mensaje de contexto (índice 0 user) y su respuesta (índice 1 assistant)
-          const visibleMsgs = allMsgs.slice(2).filter(m => m.role === 'assistant' || m.role === 'user');
-          const mapped = visibleMsgs.map(m => ({ role: m.role === 'assistant' ? 'nova' : 'user', text: m.content }));
+          const visibleMsgs = allMsgs.slice(2).filter((m) => m.role === 'assistant' || m.role === 'user');
+          const mapped = visibleMsgs.map((m) => ({ role: m.role === 'assistant' ? 'nova' : 'user', text: m.content }));
           if (mapped.length > 0) {
             setMessages([INITIAL_MESSAGES[0], ...mapped]);
           }
@@ -456,7 +456,7 @@ export default function HomeWorkspace({
         });
 
         // Esperar respuesta al contexto antes de enviar el mensaje real
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise((r) => setTimeout(r, 1500));
       }
 
       await base44.agents.addMessage(conversationRef.current, {
@@ -490,16 +490,16 @@ export default function HomeWorkspace({
   return (
     <motion.div className="min-h-screen flex"
     animate={{
-      backgroundPosition: ['0% 0%', '50% 50%', '0% 0%'],
+      backgroundPosition: ['0% 0%', '50% 50%', '0% 0%']
     }}
     transition={{
       duration: 15,
       repeat: Infinity,
-      ease: 'easeInOut',
+      ease: 'easeInOut'
     }}
-    style={{ 
+    style={{
       background: 'linear-gradient(155deg, #FAFBFF 0%, #FFFFFF 45%, #F8F8FC 100%, #FFFBFE 100%)',
-      backgroundSize: '300% 300%',
+      backgroundSize: '300% 300%'
     }}>
 
       {/* ── LEFT SIDEBAR ── */}
@@ -597,20 +597,20 @@ export default function HomeWorkspace({
                 <div className="flex-1 sm:flex-none sm:max-w-xs">
                   <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
                 </div>
-                {!isGerente && (
-                  <motion.button
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={onShowStoreSales}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-rose-500 hover:text-rose-600 flex-shrink-0 transition-all"
-                    style={{
-                      background: 'rgba(244,63,94,0.07)',
-                      border: '1px solid rgba(244,63,94,0.15)'
-                    }}>
+                {!isGerente &&
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={onShowStoreSales}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-rose-500 hover:text-rose-600 flex-shrink-0 transition-all"
+                  style={{
+                    background: 'rgba(244,63,94,0.07)',
+                    border: '1px solid rgba(244,63,94,0.15)'
+                  }}>
                     <Plus style={{ width: 12, height: 12 }} />
                     <span className="hidden sm:inline">Venta</span>
                   </motion.button>
-                )}
+                }
               </div>
               {isGerente &&
               <div className="hidden sm:flex items-center gap-1.5 ml-auto">
@@ -632,14 +632,14 @@ export default function HomeWorkspace({
 
           {/* ── PREMIUM MAIN CHART ── */}
           {!isGerente &&
-          <PremiumMainChart 
+          <PremiumMainChart
             dailySales={todaySales}
-            activeBudget={budget.length > 0 ? budget.find(b => {
+            activeBudget={budget.length > 0 ? budget.find((b) => {
               const now = new Date();
               return Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear();
             }) : null}
-            dailyBudgets={dailyBudgets}
-          />
+            dailyBudgets={dailyBudgets} />
+
           }
 
           {/* ── DAILY METRICS ── */}
@@ -685,14 +685,14 @@ export default function HomeWorkspace({
 
           {/* ── CLIMA BANNER ── */}
           <motion.div
-           initial={{ opacity: 0, y: 10 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-           className="mb-4 lg:mb-7 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            className="mb-4 lg:mb-7 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
 
             {/* Card 1 — Temperatura del día + tendencia 7 días (barras) */}
             {(() => {
-              const tempData = weatherLast7.map(d => d.temperature_mean || d.temperature_max || 0);
+              const tempData = weatherLast7.map((d) => d.temperature_mean || d.temperature_max || 0);
               const maxTemp = Math.max(...tempData, 1);
               const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
               const tempMax = latestWeather?.temperature_max;
@@ -707,28 +707,28 @@ export default function HomeWorkspace({
                   </div>
                   <div className="flex items-baseline gap-1 mb-1">
                     <p className="text-lg sm:text-[22px] font-black text-slate-800 leading-none">{temp != null ? `${Math.round(temp)}°` : '—'}</p>
-                    {tempMax != null && tempMin != null && (
-                      <p className="text-[10px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</p>
-                    )}
+                    {tempMax != null && tempMin != null &&
+                    <p className="text-[10px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</p>
+                    }
                   </div>
                   <div className="flex items-end gap-1 h-11 mt-2">
-                    {(tempData.length > 0 ? tempData : [20,22,21,24,23,25,24]).map((v, i, arr) => {
-                      const pct = Math.max((v / Math.max(...arr, 1)) * 100, 8);
+                    {(tempData.length > 0 ? tempData : [20, 22, 21, 24, 23, 25, 24]).map((v, i, arr) => {
+                      const pct = Math.max(v / Math.max(...arr, 1) * 100, 8);
                       const isLast = i === arr.length - 1;
                       return (
                         <div key={i} className="flex-1 rounded-t-md"
-                          style={{ height: `${pct}%`, background: isLast ? accentColor : `${accentColor}28` }} />
-                      );
+                        style={{ height: `${pct}%`, background: isLast ? accentColor : `${accentColor}28` }} />);
+
                     })}
                   </div>
                   <p className="text-[9px] text-slate-300 mt-1.5 font-medium">Últimos 7 días · °C</p>
-                </div>
-              );
+                </div>);
+
             })()}
 
             {/* Card 2 — Precipitación (barras) últimos 7 días */}
             {(() => {
-              const rainData = weatherLast7.map(d => d.precipitation || 0);
+              const rainData = weatherLast7.map((d) => d.precipitation || 0);
               const totalRain = rainData.reduce((s, v) => s + v, 0);
               const maxRain = Math.max(...rainData, 1);
               const todayRain = latestWeather?.precipitation ?? 0;
@@ -745,18 +745,18 @@ export default function HomeWorkspace({
                     <p className="text-[10px] text-slate-400 font-medium ml-1">hoy</p>
                   </div>
                   <div className="flex items-end gap-1 h-11 mt-2">
-                    {(rainData.length > 0 ? rainData : [0,2,1,5,3,8,4]).map((v, i, arr) => {
-                      const pct = Math.max((v / Math.max(...arr, 0.1)) * 100, 4);
+                    {(rainData.length > 0 ? rainData : [0, 2, 1, 5, 3, 8, 4]).map((v, i, arr) => {
+                      const pct = Math.max(v / Math.max(...arr, 0.1) * 100, 4);
                       const isLast = i === arr.length - 1;
                       return (
                         <div key={i} className="flex-1 rounded-t-md"
-                          style={{ height: `${pct}%`, background: isLast ? rainColor : `${rainColor}30` }} />
-                      );
+                        style={{ height: `${pct}%`, background: isLast ? rainColor : `${rainColor}30` }} />);
+
                     })}
                   </div>
                   <p className="text-[9px] text-slate-300 mt-1.5 font-medium">Total semana: {totalRain.toFixed(1)} mm</p>
-                </div>
-              );
+                </div>);
+
             })()}
 
             {/* Card 3 — Donut condición climática + humedad */}
@@ -765,15 +765,15 @@ export default function HomeWorkspace({
               const precip = latestWeather?.precipitation ?? 0;
               const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max ?? 0;
               // Classify days of last 7 as sunny/cloudy/rainy
-              const sunny = weatherLast7.filter(d => (d.precipitation || 0) < 1).length;
-              const rainy = weatherLast7.filter(d => (d.precipitation || 0) >= 5).length;
+              const sunny = weatherLast7.filter((d) => (d.precipitation || 0) < 1).length;
+              const rainy = weatherLast7.filter((d) => (d.precipitation || 0) >= 5).length;
               const cloudy = weatherLast7.length - sunny - rainy;
               const total = Math.max(weatherLast7.length, 1);
               const segments = [
-                { label: 'Soleado', color: '#f97316', val: sunny },
-                { label: 'Nublado', color: '#94a3b8', val: cloudy },
-                { label: 'Lluvioso', color: '#6366f1', val: rainy },
-              ];
+              { label: 'Soleado', color: '#f97316', val: sunny },
+              { label: 'Nublado', color: '#94a3b8', val: cloudy },
+              { label: 'Lluvioso', color: '#6366f1', val: rainy }];
+
               const circ = 2 * Math.PI * 16;
               let cumulative = 0;
               return (
@@ -792,29 +792,29 @@ export default function HomeWorkspace({
                         cumulative += pct;
                         return (
                           <circle key={color} cx="24" cy="24" r="16" fill="none"
-                            stroke={color} strokeWidth="6"
-                            strokeDasharray={`${dash} ${circ}`}
-                            strokeDashoffset={offset}
-                            strokeLinecap="butt"
-                            transform="rotate(-90 24 24)" />
-                        );
+                          stroke={color} strokeWidth="6"
+                          strokeDasharray={`${dash} ${circ}`}
+                          strokeDashoffset={offset}
+                          strokeLinecap="butt"
+                          transform="rotate(-90 24 24)" />);
+
                       })}
                     </svg>
                     <div className="flex flex-col gap-1">
-                      {segments.map(({ label, color, val }) => (
-                        <div key={label} className="flex items-center gap-1.5">
+                      {segments.map(({ label, color, val }) =>
+                      <div key={label} className="flex items-center gap-1.5">
                           <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
                           <span className="text-[9px] text-slate-400 font-medium">{label}</span>
                           <span className="text-[9px] font-bold text-slate-600 ml-auto pl-1">{val}d</span>
                         </div>
-                      ))}
-                      {temp > 0 && (
-                        <p className="text-[9px] text-slate-300 mt-0.5">Temp prom: {Math.round(temp)}°C</p>
                       )}
+                      {temp > 0 &&
+                      <p className="text-[9px] text-slate-300 mt-0.5">Temp prom: {Math.round(temp)}°C</p>
+                      }
                     </div>
                   </div>
-                </div>
-              );
+                </div>);
+
             })()}
 
           </motion.div>
@@ -825,116 +825,116 @@ export default function HomeWorkspace({
         </div>
 
         {/* ── RIGHT AI PANEL ── */}
-        <motion.aside
-          initial={{ x: 24, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-          className="hidden lg:flex flex-col w-56 xl:w-72 flex-shrink-0"
-          style={{
-            height: '100vh',
-            position: 'sticky',
-            top: 0,
-            background: 'rgba(255,255,255,0.7)',
-            backdropFilter: 'blur(40px)',
-            borderLeft: '1px solid rgba(0,0,0,0.05)'
-          }}>
-          
-          {/* Panel header */}
-          <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ y: [0, -3, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="relative flex-shrink-0">
-                
-                <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-black/5">
-                  <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-white"
-                style={{ boxShadow: '0 0 6px rgba(52,211,153,0.6)' }} />
-              </motion.div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-[12.5px] font-bold text-slate-700">Nova</p>
-                  <span className="text-[9px] font-semibold text-rose-400 uppercase tracking-wide">AI</span>
-                </div>
-                <p className="text-[10px] text-slate-400">Inteligencia comercial · activa</p>
-              </div>
-              <Cpu className="w-3.5 h-3.5 flex-shrink-0 text-slate-200" />
-            </div>
-          </div>
+        
 
-          {/* Quick chips */}
-          <div className="px-3 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-            <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.12em] mb-2">Análisis rápido</p>
-            <div className="flex flex-wrap gap-1.5">
-              {QUICK_ACTIONS.map((a) =>
-              <AIChip key={a.label} label={a.label} icon={a.icon}
-              onClick={() => sendMessage(a.prompt)} />
-              )}
-            </div>
-          </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2.5">
-            <AnimatePresence initial={false}>
-              {messages.map((msg, i) =>
-              <ChatMessage key={i} msg={msg} index={i} />
-              )}
-            </AnimatePresence>
-            {isTyping &&
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="flex gap-2 items-end">
-              
-                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-black/5">
-                  <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
-                </div>
-                <div className="px-3 py-2 rounded-2xl rounded-tl-sm"
-              style={{ background: 'rgba(248,248,250,0.96)', border: '1px solid rgba(0,0,0,0.06)' }}>
-                  <div className="flex gap-1 items-center h-3">
-                    {[0, 0.15, 0.3].map((d, i) =>
-                  <motion.div key={i}
-                  animate={{ y: [0, -3, 0] }}
-                  transition={{ duration: 0.55, repeat: Infinity, delay: d }}
-                  className="w-1 h-1 rounded-full bg-slate-300" />
-                  )}
-                  </div>
-                </div>
-              </motion.div>
-            }
-            <div ref={chatEndRef} />
-          </div>
 
-          {/* Input */}
-          <div className="p-3" style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
-            style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.07)' }}>
-              <input
-                type="text"
-                value={inputVal}
-                onChange={(e) => setInputVal(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && sendMessage(inputVal)}
-                placeholder="Pregunta algo a Nova..."
-                className="flex-1 bg-transparent text-[11.5px] text-slate-600 placeholder-slate-300 outline-none font-medium" />
-              
-              <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => sendMessage(inputVal)}
-                className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors"
-                style={{
-                  background: inputVal.trim() ? 'linear-gradient(135deg, #be185d, #9333ea)' : 'rgba(0,0,0,0.05)'
-                }}>
-                
-                <Send style={{ width: 10, height: 10, color: inputVal.trim() ? 'white' : '#94a3b8' }} />
-              </motion.button>
-            </div>
-          </div>
-        </motion.aside>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
         </main>
         </motion.div>);
 
-        }
+}
