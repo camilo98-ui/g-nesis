@@ -8,37 +8,69 @@ import { useLocation } from 'react-router-dom';
 
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
 
-// Renders the mascot on a canvas with white background removed
+// Renders the mascot with white bg removed via mix-blend-mode multiply
+// The outer div is white (isolated stacking context), the image multiplies against it — white becomes transparent
 function MascotCanvas({ width = 96, height = 96, style = {} }) {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      ctx.drawImage(img, 0, 0);
-      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const d = data.data;
-      for (let i = 0; i < d.length; i += 4) {
-        const r = d[i], g = d[i+1], b = d[i+2];
-        // Remove near-white pixels (checkerboard / white bg)
-        if (r > 220 && g > 220 && b > 220) {
-          d[i+3] = 0; // fully transparent
-        } else if (r > 180 && g > 180 && b > 180) {
-          // Semi-transparent for soft edges
-          const brightness = (r + g + b) / 3;
-          d[i+3] = Math.round(255 * (1 - (brightness - 180) / 75));
-        }
-      }
-      ctx.putImageData(data, 0, 0);
-    };
-    img.src = MASCOT_IMG;
-  }, []);
-  return <canvas ref={canvasRef} style={{ width, height, display: 'block', objectFit: 'contain', ...style }} />;
+  return (
+    <div style={{
+      width, height,
+      background: 'white',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      isolation: 'isolate',
+      borderRadius: 4,
+      ...style,
+    }}>
+      <img
+        src={MASCOT_IMG}
+        alt="Nova"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          mixBlendMode: 'multiply',
+          display: 'block',
+        }}
+      />
+    </div>
+  );
+}
+
+// Blinking eyes overlay — positioned absolutely over the mascot
+function BlinkingEyes({ size = 96 }) {
+  // Eye positions as % of image — adjust to match the character's eyes
+  const scale = size / 96;
+  const eyeSize = Math.max(3, 5 * scale);
+  return (
+    <motion.div
+      className="absolute pointer-events-none"
+      style={{ inset: 0, zIndex: 20 }}
+      animate={{ scaleY: [1, 1, 1, 0.05, 1, 1, 1, 1, 1, 0.05, 1] }}
+      transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', times: [0, 0.3, 0.38, 0.40, 0.42, 0.65, 0.73, 0.75, 0.77, 0.9, 1] }}
+    >
+      {/* Left eye */}
+      <div style={{
+        position: 'absolute',
+        width: eyeSize,
+        height: eyeSize,
+        borderRadius: '50%',
+        background: '#1a0a10',
+        left: `${38 * scale}%`,
+        top: `${36 * scale}%`,
+      }} />
+      {/* Right eye */}
+      <div style={{
+        position: 'absolute',
+        width: eyeSize,
+        height: eyeSize,
+        borderRadius: '50%',
+        background: '#1a0a10',
+        left: `${54 * scale}%`,
+        top: `${36 * scale}%`,
+      }} />
+    </motion.div>
+  );
 }
 
 const PAGE_CONTEXTS = {
@@ -429,7 +461,7 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
         onClick={() => { setIsOpen(o => !o); setShowBubble(false); }}
         whileTap={{ scale: 0.9 }}
         style={{
-          width: 100, height: 110,
+          width: 148, height: 158,
           background: 'none', border: 'none', padding: 0,
           position: 'relative', display: 'flex',
           alignItems: 'flex-end', justifyContent: 'center',
@@ -476,7 +508,7 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
           />
         ))}
 
-        {/* The mascot — canvas with white bg removed */}
+        {/* The mascot — multiply blend removes white bg, blinking eyes overlay */}
         <motion.div
           className="relative z-10"
           animate={{
@@ -489,11 +521,13 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
           whileHover={{ y: -12, scale: 1.05, transition: { duration: 0.35 } }}
           style={{
             filter: isOpen
-              ? 'drop-shadow(0 0 14px rgba(190,24,93,0.55)) drop-shadow(0 4px 16px rgba(190,24,93,0.25))'
-              : 'drop-shadow(0 2px 12px rgba(190,24,93,0.25)) drop-shadow(0 6px 20px rgba(190,24,93,0.15))',
+              ? 'drop-shadow(0 0 18px rgba(190,24,93,0.6)) drop-shadow(0 6px 20px rgba(190,24,93,0.3))'
+              : 'drop-shadow(0 2px 14px rgba(190,24,93,0.3)) drop-shadow(0 8px 24px rgba(190,24,93,0.18))',
+            position: 'relative',
           }}
         >
-          <MascotCanvas width={96} height={96} />
+          <MascotCanvas width={140} height={140} />
+          <BlinkingEyes size={140} />
         </motion.div>
 
         {/* Pink glow ring — rendered below the blended image layer */}
