@@ -98,7 +98,7 @@ function ChatMessage({ msg }) {
       {isNova && (
         <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0 mt-0.5"
           style={{ border: '1px solid rgba(194,24,117,0.2)', background: 'white' }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" />
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" style={{ mixBlendMode: 'multiply' }} />
         </div>
       )}
       <div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${isNova ? 'rounded-tl-sm' : 'rounded-tr-sm'}`}
@@ -273,7 +273,7 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
               }}>
               <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0"
                 style={{ border: '1px solid rgba(190,24,93,0.2)', background: 'white' }}>
-                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" />
+                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" style={{ mixBlendMode: 'multiply' }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -309,7 +309,7 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
                   className="flex items-start gap-2">
                   <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0"
                     style={{ border: '1px solid rgba(190,24,93,0.2)', background: 'white' }}>
-                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" />
+                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" style={{ mixBlendMode: 'multiply' }} />
                   </div>
                   <div className="rounded-xl rounded-tl-sm"
                     style={{ background: 'rgba(248,248,250,0.9)', border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -443,7 +443,7 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
           />
         ))}
 
-        {/* The mascot image — fully free, large, transparent bg */}
+        {/* The mascot image — fully free, large, blended naturally */}
         <motion.div
           className="relative z-10"
           animate={{
@@ -461,9 +461,10 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
               height: 96,
               objectFit: 'contain',
               display: 'block',
+              mixBlendMode: 'multiply',
               filter: isOpen
-                ? 'drop-shadow(0 0 18px rgba(190,24,93,0.55)) drop-shadow(0 6px 20px rgba(0,0,0,0.14))'
-                : 'drop-shadow(0 4px 16px rgba(190,24,93,0.28)) drop-shadow(0 8px 24px rgba(0,0,0,0.10))',
+                ? 'drop-shadow(0 0 14px rgba(190,24,93,0.50)) drop-shadow(0 4px 16px rgba(190,24,93,0.20))'
+                : 'drop-shadow(0 2px 12px rgba(190,24,93,0.22)) drop-shadow(0 6px 20px rgba(190,24,93,0.12))',
             }}
             animate={{
               scaleX: [1, 1.014, 1, 1.008, 1],
