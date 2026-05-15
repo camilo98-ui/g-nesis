@@ -778,70 +778,52 @@ export default function HomeWorkspace({
             </motion.div>
 
             {/* Budget Mini Cards — PPT del Día, Brecha del Mes, Proyección */}
-            {budgetData &&
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                {/* PPT del Día */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="rounded-2xl p-3 sm:p-4"
-                  style={{ background: 'linear-gradient(135deg, rgba(251,113,133,0.18) 0%, rgba(244,63,94,0.12) 100%)', border: '1px solid rgba(244,63,94,0.12)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                  <p className="text-[8px] sm:text-[9px] font-bold text-rose-400 uppercase tracking-widest mb-1">PPT del Día</p>
-                  <p className="text-base sm:text-xl font-black text-slate-800 leading-none mb-0.5">
-                    {budgetData.excelBudgetForToday > 0
-                      ? `$${(budgetData.excelBudgetForToday / 1000000).toFixed(1)}M`
-                      : budgetData.monthlyBudget
-                        ? `$${(budgetData.monthlyBudget / 30 / 1000000).toFixed(1)}M`
-                        : '—'}
-                  </p>
-                  <p className="text-[9px] text-slate-400">
-                    {budgetData.gapRecoveryIncrement > 0 ? `+${budgetData.incrementPct}% recuperación` : 'meta diaria'}
-                  </p>
-                </motion.div>
+            {budgetData && (() => {
+              const fmt = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
+              const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : (budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
+              const gap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
+              const isPos = gap >= 0;
+              return (
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  {/* PPT del Día */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 }}
+                    className="rounded-xl p-3 sm:p-4 bg-gradient-to-br from-rose-400/60 to-pink-400/60 border border-rose-300/30 backdrop-blur-sm">
+                    <p className="text-[9px] sm:text-[11px] font-bold text-white/80 uppercase tracking-widest mb-1 sm:mb-2">PPT del Día</p>
+                    <p className="text-xs sm:text-base font-black text-white leading-none mb-0.5 sm:mb-1">{fmt(pptVal)}</p>
+                    <p className="text-[8px] sm:text-[10px] text-white/60">
+                      {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 ? `+${budgetData.incrementPct}% para recuperar` : 'vs ppt'}
+                    </p>
+                  </motion.div>
 
-                {/* Brecha del Mes */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 }}
-                  className="rounded-2xl p-3 sm:p-4"
-                  style={{ background: 'linear-gradient(135deg, rgba(52,211,153,0.15) 0%, rgba(16,185,129,0.1) 100%)', border: '1px solid rgba(16,185,129,0.12)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                  {(() => {
-                    const gap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
-                    const isPos = gap >= 0;
-                    return (
-                      <>
-                        <p className="text-[8px] sm:text-[9px] font-bold text-emerald-500 uppercase tracking-widest mb-1">Brecha Mes</p>
-                        <p className={`text-base sm:text-xl font-black leading-none mb-0.5 ${isPos ? 'text-emerald-600' : 'text-rose-500'}`}>
-                          {isPos ? '📈' : '📉'} ${(Math.abs(gap) / 1000000).toFixed(1)}M
-                        </p>
-                        <p className="text-[9px] text-slate-400">
-                          {isPos ? 'Sobre meta' : 'Bajo meta'}
-                          {budgetData.monthlyBudget > 0 ? ` · ${Math.abs((gap / budgetData.monthlyBudget) * 100).toFixed(0)}%` : ''}
-                        </p>
-                      </>
-                    );
-                  })()}
-                </motion.div>
+                  {/* Brecha del Mes */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="rounded-xl p-3 sm:p-4 bg-gradient-to-br from-emerald-400/60 to-teal-400/60 border border-emerald-300/30 backdrop-blur-sm">
+                    <p className="text-[9px] sm:text-[11px] font-bold text-white/80 uppercase tracking-widest mb-1 sm:mb-2">Brecha del Mes</p>
+                    <p className="text-xs sm:text-base font-black text-white leading-none mb-0.5 sm:mb-1">{isPos ? '📈' : '📉'} {fmt(gap)}</p>
+                    <p className="text-[8px] sm:text-[10px] text-white/60">
+                      {budgetData.monthlyBudget > 0 ? `${isPos ? 'Sobre meta: ' : 'Bajo meta: '}${Math.abs((gap / budgetData.monthlyBudget * 100)).toFixed(0)}%` : ''}
+                    </p>
+                  </motion.div>
 
-                {/* Proyección Cierre */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="rounded-2xl p-3 sm:p-4"
-                  style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 100%)', border: '1px solid rgba(99,102,241,0.12)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                  <p className="text-[8px] sm:text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Proyección Cierre</p>
-                  <p className="text-base sm:text-xl font-black text-slate-800 leading-none mb-0.5">
-                    {budgetData.monthProjectionCompliance?.toFixed(0)}%
-                  </p>
-                  <p className="text-[9px] text-slate-400">
-                    ${(budgetData.monthProjection / 1000000).toFixed(1)}M / ${(budgetData.monthlyBudget / 1000000).toFixed(1)}M
-                  </p>
-                </motion.div>
-              </div>
-            }
+                  {/* Proyección Cierre */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="rounded-xl p-3 sm:p-4 bg-gradient-to-br from-indigo-400/60 to-blue-400/60 border border-indigo-300/30 backdrop-blur-sm">
+                    <p className="text-[9px] sm:text-[11px] font-bold text-white/80 uppercase tracking-widest mb-1 sm:mb-2">Proyección Cierre</p>
+                    <p className="text-xs sm:text-base font-black text-white leading-none mb-0.5 sm:mb-1">{budgetData.monthProjectionCompliance?.toFixed(0)}%</p>
+                    <p className="text-[8px] sm:text-[10px] text-white/60">{fmt(budgetData.monthProjection)} / {fmt(budgetData.monthlyBudget)}</p>
+                  </motion.div>
+                </div>
+              );
+            })()}
 
             
 
