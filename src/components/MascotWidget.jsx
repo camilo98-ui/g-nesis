@@ -479,8 +479,8 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
       let enrichedPrompt = contextPrompt;
       let response;
 
-      // For analytical queries, use advanced intelligence function
-      if (isAnalyticalQuery && pageData?.storeCode) {
+      // Always use advanced intelligence function with full platform data access
+      if (pageData?.storeCode) {
         try {
           const intelligenceRes = await base44.functions.invoke('novaIntelligence', {
             userQuery: userText,
@@ -492,11 +492,10 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
           if (intelligenceRes.data?.analysis) {
             response = intelligenceRes.data.analysis;
           } else {
-            // Fallback to standard LLM
             response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt, model: 'claude_sonnet_4_6' });
           }
         } catch (analyzeErr) {
-          // Fallback to standard prompt
+          // Fallback: still use advanced model for comprehensive analysis
           response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt, model: 'claude_sonnet_4_6' });
         }
       } else {
