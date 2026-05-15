@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import MascotCanvas from '@/components/MascotCanvas';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, parseISO, isSameDay } from 'date-fns';
 import {
   LayoutDashboard, Users, TrendingUp, Activity, Target, Bell,
@@ -24,37 +25,6 @@ import { useNova } from '@/components/NovaContext';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
-
-// Renders mascot on canvas with white background removed
-function MascotCanvas({ width = 48, height = 48, style = {} }) {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      ctx.drawImage(img, 0, 0);
-      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const d = data.data;
-      for (let i = 0; i < d.length; i += 4) {
-        const r = d[i], g = d[i+1], b = d[i+2];
-        if (r > 220 && g > 220 && b > 220) {
-          d[i+3] = 0;
-        } else if (r > 180 && g > 180 && b > 180) {
-          const brightness = (r + g + b) / 3;
-          d[i+3] = Math.round(255 * (1 - (brightness - 180) / 75));
-        }
-      }
-      ctx.putImageData(data, 0, 0);
-    };
-    img.src = MASCOT_IMG;
-  }, []);
-  return <canvas ref={canvasRef} style={{ width, height, display: 'block', objectFit: 'contain', ...style }} />;
-}
 
 function getGreeting() {
   const h = new Date().getHours();
