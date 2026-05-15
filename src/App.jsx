@@ -14,6 +14,7 @@ import HourlyTransactions from './pages/HourlyTransactions';
 import BudgetNew from './pages/BudgetNew';
 import PowerBIReport from './pages/PowerBIReport';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { NovaProvider } from '@/components/NovaContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -82,6 +83,7 @@ function App() {
 
   return (
     <AuthProvider>
+      <NovaProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <NavigationTracker />
@@ -90,6 +92,7 @@ function App() {
         <Toaster />
         <VisualEditAgent />
       </QueryClientProvider>
+      </NovaProvider>
     </AuthProvider>
   )
 }

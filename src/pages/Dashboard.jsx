@@ -25,6 +25,7 @@ import MonthlyBudgetManager from '@/components/budget/MonthlyBudgetManager';
 import ChartInsight from '@/components/dashboard/ChartInsight';
 import DetailPanel from '@/components/dashboard/DetailPanel';
 
+import { useNova } from '@/components/NovaContext';
 import {
   DollarSign, Receipt, Zap, Gift, TrendingUp, TrendingDown, ArrowLeft,
   BarChart3, AlertTriangle, CheckCircle2, X, Target, Sparkles,
@@ -88,6 +89,7 @@ function PremiumMetricCard({ title, value, budget, icon: Icon, color, onClick, i
 
 export default function Dashboard() {
   const queryClient = useQueryClient();
+  const { setPageData } = useNova() || {};
   
   const [selectedStore, setSelectedStore] = useState('');
   const [dateRange, setDateRange] = useState(null);
@@ -688,6 +690,39 @@ export default function Dashboard() {
       suggested: acc.suggested + (s.total_suggested || 0)
     }), { sales: 0, tickets: 0, transactions: 0, suggested: 0 });
   }, [dailySales, dateRange, weekFilter]);
+
+  // Publicar datos al contexto de Nova
+  useEffect(() => {
+    if (!setPageData || !selectedStore) return;
+    const storeName = STORES.find(s => s.code === selectedStore)?.name || selectedStore;
+    const avgTkt = gregorianMonthTotals.transactions > 0 
+      ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0;
+    const compliance = currentBudget?.sales_budget 
+      ? (gregorianMonthTotals.sales / currentBudget.sales_budget * 100).toFixed(1) : null;
+    const proj = projections;
+    
+    setPageData({
+      page: 'Dashboard',
+      store: storeName,
+      storeCode: selectedStore,
+      ventas_acumuladas: gregorianMonthTotals.sales,
+      presupuesto_mes: currentBudget?.sales_budget || 0,
+      cumplimiento_pct: compliance,
+      ticket_promedio: avgTkt,
+      ticket_meta: currentBudget?.tickets_budget || 0,
+      transacciones: gregorianMonthTotals.transactions,
+      transacciones_meta: currentBudget?.transactions_budget || 0,
+      sugeridos: gregorianMonthTotals.suggested,
+      sugeridos_meta: currentBudget?.suggested_budget || 0,
+      proyeccion_cierre: proj?.projectedSales || 0,
+      brecha: proj?.salesGap || 0,
+      venta_diaria_requerida: proj?.requiredDailySales || 0,
+      dias_restantes: proj?.daysRemaining || 0,
+      promedio_diario: proj?.dailyAvgSales || 0,
+      cajeros_activos: cashiers.filter(c => c.is_active).length,
+      total_cajeros: cashiers.length,
+    });
+  }, [gregorianMonthTotals, currentBudget, projections, selectedStore, cashiers, setPageData]);
 
   // Métricas usando ACUMULADO DEL MES GREGORIANO (siempre muestran el total real del mes)
   const metrics = [

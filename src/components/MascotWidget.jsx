@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNova } from '@/components/NovaContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -131,6 +132,7 @@ function ChatMessage({ msg }) {
 
 export default function MascotWidget() {
   const location = useLocation();
+  const { pageData } = useNova() || {};
   const [isOpen, setIsOpen] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -190,14 +192,33 @@ export default function MascotWidget() {
     setMessages(newMessages);
     setIsLoading(true);
 
+    const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
+    
+    const dataBlock = pageData ? `
+DATOS REALES DE LA TIENDA (usa estos números exactos al responder):
+- Tienda: ${pageData.store} (${pageData.storeCode})
+- Ventas acumuladas mes: ${fmt(pageData.ventas_acumuladas)}
+- Presupuesto mensual: ${fmt(pageData.presupuesto_mes)}
+- Cumplimiento vs PPT: ${pageData.cumplimiento_pct}%
+- Ticket promedio actual: ${fmt(pageData.ticket_promedio)} | Meta ticket: ${fmt(pageData.ticket_meta)}
+- Transacciones: ${pageData.transacciones?.toLocaleString()} | Meta: ${pageData.transacciones_meta?.toLocaleString()}
+- Sugeridos vendidos: ${pageData.sugeridos?.toLocaleString()} | Meta: ${pageData.sugeridos_meta?.toLocaleString()}
+- Proyección de cierre del mes: ${fmt(pageData.proyeccion_cierre)}
+- Brecha vs presupuesto: ${fmt(pageData.brecha)} ${pageData.brecha < 0 ? '(por debajo)' : '(por encima)'}
+- Venta diaria requerida para cerrar: ${fmt(pageData.venta_diaria_requerida)}
+- Días restantes del mes: ${pageData.dias_restantes}
+- Promedio diario actual: ${fmt(pageData.promedio_diario)}
+- Equipo: ${pageData.cajeros_activos} cajeros activos de ${pageData.total_cajeros} totales
+` : '';
+
     const contextPrompt = `${SYSTEM_PROMPT}
 
 SECCIÓN ACTIVA: ${pageCtx.name} — ${pageCtx.focus}
-
+${dataBlock}
 CONVERSACIÓN HASTA AHORA:
 ${newMessages.map(m => `${m.role === 'user' ? 'Usuario' : 'Nova'}: ${m.content}`).join('\n')}
 
-Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto — corto si es simple, más desarrollado si lo requiere. Sin relleno.`;
+Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa los números exactos del bloque de datos. Adapta la longitud al contexto — corto si es simple, más desarrollado si lo requiere. Sin relleno.`;
 
     try {
       const response = await base44.integrations.Core.InvokeLLM({ prompt: contextPrompt });
