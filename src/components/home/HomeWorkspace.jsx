@@ -894,8 +894,9 @@ export default function HomeWorkspace({
               // Tendencias ÚNICAS por card
               const sorted14 = [...todaySales].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-14);
 
-              // PPT: presupuesto diario acumulado vs real (ventas diarias últimos 14d)
-              const sparkPPT = sorted14.map(d => d.total_sales || 0);
+              // PPT: cumplimiento diario (% de ventas vs meta diaria)
+              const dailyBudgetForSpark = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 1;
+              const sparkPPT = sorted14.map(d => dailyBudgetForSpark > 0 ? (d.total_sales || 0) / dailyBudgetForSpark * 100 : 0);
 
               // Brecha: diferencia diaria acumulada ventas - presupuesto (acumulado día a día)
               const sparkGap = sorted14.map((d, i, arr) => {
