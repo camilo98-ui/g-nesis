@@ -498,6 +498,14 @@ export default function HomeWorkspace({
     const trend7d = last7Sales.length >= 2 
       ? ((last7Sales[0].total_sales || 0) - (last7Sales[last7Sales.length - 1].total_sales || 0)) / (last7Sales[last7Sales.length - 1].total_sales || 1) * 100
       : 0;
+    
+    // Análisis de productos más vendidos
+    const topProducts = salesReports.length > 0
+      ? salesReports.sort((a, b) => (b.quantity || 0) - (a.quantity || 0)).slice(0, 5)
+      : [];
+    const topProductsList = topProducts.length > 0
+      ? topProducts.map((p, i) => `${i + 1}. ${p.product_name || 'Producto sin nombre'} - ${p.quantity || 0} unidades${p.sales_amount ? ` · ${fmt(p.sales_amount)}` : ''}`).join(' | ')
+      : 'Sin datos de productos';
 
     setPageData({
       page: 'Home',
@@ -538,6 +546,10 @@ export default function HomeWorkspace({
       // Equipo
       cajeros_activos: cashiers.length,
       
+      // Productos más vendidos
+      top_products: topProductsList,
+      top_products_count: topProducts.length,
+      
       // KPI Card data
       kpi_ppt: fmt(pptHoy),
       kpi_ppt_meta: `Meta: ${fmt(pptHoy)}`,
@@ -549,7 +561,7 @@ export default function HomeWorkspace({
       kpi_proyeccion_meta: `${fmt(budgetData?.monthProjection || 0)} / ${fmt(budgetData?.monthlyBudget || 0)}`,
       kpi_proyeccion_sub: `Cumplimiento: ${projPct.toFixed(1)}%`,
     });
-  }, [latest, budgetData, selectedStore, cashiers, salesChange, setPageData, storeName, activeBudget, todaySales]);
+  }, [latest, budgetData, selectedStore, cashiers, salesChange, setPageData, storeName, activeBudget, todaySales, salesReports]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
