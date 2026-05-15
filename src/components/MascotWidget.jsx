@@ -391,78 +391,54 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
         )}
       </AnimatePresence>
 
-      {/* Nova — Free-floating mascot, no container */}
+      {/* Nova — Circular pill button */}
       <motion.button
         onClick={() => { setIsOpen(o => !o); setShowBubble(false); }}
         whileTap={{ scale: 0.93 }}
-        className="relative flex items-end justify-center"
-        style={{ width: 72, height: 80, background: 'none', border: 'none', padding: 0 }}
+        className="relative flex items-center justify-center"
+        style={{ width: 88, height: 88, background: 'none', border: 'none', padding: 0 }}
       >
-        {/* Ambient glow beneath mascot */}
+        {/* Outer glow ring */}
         <motion.div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2"
-          animate={{ opacity: [0.15, 0.35, 0.15], scaleX: [0.7, 1, 0.7] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute inset-0 rounded-full pointer-events-none"
+          animate={{ opacity: [0.35, 0.7, 0.35], scale: [1, 1.06, 1] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
           style={{
-            width: 60, height: 20,
-            background: 'radial-gradient(ellipse, rgba(190,24,93,0.25) 0%, transparent 70%)',
-            filter: 'blur(8px)',
-            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(190,24,93,0.18) 0%, transparent 70%)',
+            filter: 'blur(6px)',
           }}
         />
 
-        {/* Floating holographic particles around Nova */}
-        {[0,1,2].map(i => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              width: i === 1 ? 4 : 3,
-              height: i === 1 ? 4 : 3,
-              background: 'rgba(190,24,93,0.5)',
-              filter: 'blur(0.5px)',
-              left: [8, 56, 28][i],
-              top: [20, 35, 8][i],
-            }}
-            animate={{
-              y: [-4, -12, -4],
-              x: [0, i % 2 === 0 ? 4 : -4, 0],
-              opacity: [0.3, 0.8, 0.3],
-              scale: [0.8, 1.2, 0.8],
-            }}
-            transition={{
-              duration: 2.5 + i * 0.7,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: i * 0.9,
-            }}
-          />
-        ))}
-
-        {/* The mascot — free, no container, fully visible */}
+        {/* Circle container */}
         <motion.div
-          className="relative z-10"
+          className="relative flex items-center justify-center rounded-full overflow-hidden z-10"
           animate={{
-            y: [0, -7, -3, -8, 0],
-            rotate: [0, 0.8, -0.4, 0.6, 0],
+            y: [0, -5, -2, -6, 0],
           }}
           transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          whileHover={{
-            y: -10,
-            rotate: 3,
-            transition: { duration: 0.3 },
+          style={{
+            width: 84,
+            height: 84,
+            background: isOpen
+              ? 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,240,248,0.98) 100%)'
+              : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,235,245,0.95) 100%)',
+            border: isOpen
+              ? '2px solid rgba(190,24,93,0.35)'
+              : '2px solid rgba(190,24,93,0.18)',
+            boxShadow: isOpen
+              ? '0 8px 32px rgba(190,24,93,0.28), 0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)'
+              : '0 6px 24px rgba(190,24,93,0.14), 0 2px 6px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.8)',
+            backdropFilter: 'blur(20px)',
           }}
         >
           <motion.img
             src={MASCOT_IMG}
             alt="Nova"
             style={{
-              width: 68,
-              height: 'auto',
+              width: 70,
+              height: 70,
               objectFit: 'contain',
-              filter: isOpen
-                ? 'drop-shadow(0 0 16px rgba(190,24,93,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.12))'
-                : 'drop-shadow(0 6px 16px rgba(190,24,93,0.22)) drop-shadow(0 2px 6px rgba(0,0,0,0.08))',
+              objectPosition: 'center',
             }}
             animate={{
               scaleX: [1, 1.012, 1, 1.008, 1],
@@ -477,8 +453,8 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-400"
-            style={{ boxShadow: '0 0 8px rgba(52,211,153,0.8)' }}
+            className="absolute bottom-1 right-1 w-3 h-3 rounded-full bg-emerald-400 z-20"
+            style={{ boxShadow: '0 0 8px rgba(52,211,153,0.9)' }}
           />
         )}
       </motion.button>
