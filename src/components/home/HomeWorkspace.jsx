@@ -902,25 +902,22 @@ export default function HomeWorkspace({
                       {/* Top accent bar */}
                       <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}60, ${c.accent}20)` }} />
 
-                      {/* Header row: label + badge */}
-                      <div className="flex items-center justify-between gap-1 mb-1">
-                        <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 truncate">{c.label}</p>
-                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-                          style={{ background: `${c.accent}12`, color: c.accent }}>
-                          {c.label === 'PPT del Día' ? 'HOY' : c.label === 'Brecha del Mes' ? (isPos ? 'SOBRE' : 'BAJO') : (projPct >= 100 ? '✓ META' : 'EN CURSO')}
-                        </span>
-                      </div>
+                      {/* Label */}
+                      <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-2">{c.label}</p>
 
-                      {/* KPI value */}
-                      <p className="text-base sm:text-xl font-black leading-none tabular-nums mb-0.5" style={{ color: c.accent }}>
-                        {c.prefix && <span className="text-[11px] sm:text-sm mr-0.5 font-bold">{c.prefix}</span>}
-                        {c.value}
-                      </p>
-                      <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium truncate mb-2">{c.sub}</p>
-
-                      {/* Full-width sparkline at bottom */}
-                      <div className="w-full" style={{ height: 48 }}>
-                        <Spark points={c.spark} color={c.accent} />
+                      {/* KPI + sparkline side by side */}
+                      <div className="flex items-center justify-between gap-2 flex-1">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm sm:text-lg font-black leading-none tabular-nums" style={{ color: '#0f172a' }}>
+                            {c.prefix && <span className="mr-0.5 font-bold" style={{ color: c.accent }}>{c.prefix}</span>}
+                            {c.value}
+                          </p>
+                          <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium mt-1.5">{c.sub}</p>
+                        </div>
+                        {/* Sparkline al lado derecho — mismo height que el texto */}
+                        <div className="flex-shrink-0" style={{ width: 80, height: 40 }}>
+                          <Spark points={c.spark} color={c.accent} />
+                        </div>
                       </div>
                     </motion.div>
                   ))}
