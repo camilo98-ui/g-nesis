@@ -25,6 +25,37 @@ import { useNova } from '@/components/NovaContext';
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
 
+// Renders mascot on canvas with white background removed
+function MascotCanvas({ width = 48, height = 48, style = {} }) {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = data.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i+1], b = d[i+2];
+        if (r > 220 && g > 220 && b > 220) {
+          d[i+3] = 0;
+        } else if (r > 180 && g > 180 && b > 180) {
+          const brightness = (r + g + b) / 3;
+          d[i+3] = Math.round(255 * (1 - (brightness - 180) / 75));
+        }
+      }
+      ctx.putImageData(data, 0, 0);
+    };
+    img.src = MASCOT_IMG;
+  }, []);
+  return <canvas ref={canvasRef} style={{ width, height, display: 'block', objectFit: 'contain', ...style }} />;
+}
+
 function getGreeting() {
   const h = new Date().getHours();
   if (h < 12) return { text: 'Buenos días', icon: Sun, color: '#92400e' };
@@ -137,8 +168,8 @@ function ChatMessage({ msg, index }) {
       className={`flex gap-2 ${isNova ? '' : 'flex-row-reverse'}`}>
       
       {isNova &&
-      <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 mt-0.5 ring-1 ring-black/5">
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
+      <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 mt-0.5 ring-1 ring-black/5 flex items-center justify-center">
+          <MascotCanvas width={20} height={20} />
         </div>
       }
       <div className={`max-w-[84%] px-3 py-2 rounded-2xl text-[11.5px] leading-relaxed font-medium ${
@@ -598,8 +629,8 @@ export default function HomeWorkspace({
         <div className="p-3 border-t border-black/5">
           <div className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl mb-2"
           style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}>
-            <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-              <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" />
+            <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center">
+              <MascotCanvas width={24} height={24} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[10.5px] font-semibold text-slate-600">Nova AI</p>
@@ -724,10 +755,7 @@ export default function HomeWorkspace({
                     }} />
                   
                   {/* Imagen mascota Nova */}
-                  <img
-                    src="https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png"
-                    alt="Nova"
-                    className="w-full h-full object-contain scale-[1.4] relative z-10" />
+                  <MascotCanvas width={72} height={72} style={{ scale: 1.4, position: 'relative', zIndex: 10 }} />
                   
                 </motion.div>
 
