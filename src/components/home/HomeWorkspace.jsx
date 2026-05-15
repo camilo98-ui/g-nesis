@@ -9,8 +9,9 @@ import {
   Download, FileText, Lock, Receipt, Snowflake, Settings as SettingsIcon,
   CalendarDays, LogOut, Sparkles, Trophy, FileSpreadsheet, BarChart3, Clock,
   ChevronRight, Zap, BarChart2, ArrowUpRight, ArrowDownRight, Minus,
-  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown, Plus } from
+  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown, Plus, X } from
 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { STORES } from '@/components/StoreSelector';
 import StoreSelector from '@/components/StoreSelector';
 import PremiumSparkline from './PremiumSparkline';
@@ -906,56 +907,173 @@ export default function HomeWorkspace({
                 },
               ];
 
+              // Build rich chart data for each modal
+              const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0;
+              const chartSales14 = sorted14.map((d, i) => ({
+                day: format(parseISO(d.date), 'd/M'),
+                ventas: Math.round(d.total_sales || 0),
+                ppt: Math.round(dailyBudgetBase),
+                brecha: Math.round((d.total_sales || 0) - dailyBudgetBase),
+                cumplimiento: dailyBudgetBase > 0 ? Math.round((d.total_sales || 0) / dailyBudgetBase * 100) : 0,
+                acumVentas: Math.round(sorted14.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0)),
+                acumPPT: Math.round(dailyBudgetBase * (i + 1)),
+              }));
+
+              const modalCharts = {
+                ppt: {
+                  title: 'PPT del Día — Ventas vs Meta Diaria',
+                  subtitle: 'Últimos 14 días · COP',
+                  color: '#C21875',
+                  stats: [
+                    { label: 'Meta hoy', value: fmt(pptVal), color: '#C21875' },
+                    { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#94a3b8' },
+                    { label: 'Días restantes', value: `${budgetData.remainingDays ?? '—'} días`, color: '#f59e0b' },
+                    { label: 'Incremento recup.', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : 'Sin brecha', color: '#10b981' },
+                  ],
+                  chart: (
+                    <ResponsiveContainer width="100%" height={160}>
+                      <BarChart data={chartSales14} barGap={2}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : `${(v/1e3).toFixed(0)}K`} width={38} />
+                        <Tooltip formatter={(v, n) => [fmt(v), n === 'ventas' ? 'Ventas' : 'PPT']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
+                        <ReferenceLine y={dailyBudgetBase} stroke="#C21875" strokeDasharray="4 3" strokeWidth={1.5} />
+                        <Bar dataKey="ventas" fill="#C21875" opacity={0.85} radius={[3,3,0,0]} />
+                        <Bar dataKey="ppt" fill="#f9a8d4" opacity={0.4} radius={[3,3,0,0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ),
+                },
+                gap: {
+                  title: 'Brecha Acumulada del Mes',
+                  subtitle: 'Diferencia ventas - presupuesto acumulado',
+                  color: isPos ? '#059669' : '#e11d48',
+                  stats: [
+                    { label: 'Ventas acumuladas', value: fmt(budgetData.salesUntilYesterday || 0), color: '#059669' },
+                    { label: 'PPT acumulado', value: fmt(budgetData.budgetUntilYesterday || 0), color: '#94a3b8' },
+                    { label: 'Brecha total', value: fmt(gap), color: isPos ? '#059669' : '#e11d48' },
+                    { label: 'Brecha %', value: `${Math.abs((gap / (budgetData.monthlyBudget || 1) * 100)).toFixed(1)}%`, color: '#7c3aed' },
+                  ],
+                  chart: (
+                    <ResponsiveContainer width="100%" height={160}>
+                      <AreaChart data={chartSales14}>
+                        <defs>
+                          <linearGradient id="gradGap" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={isPos ? '#059669' : '#e11d48'} stopOpacity={0.18} />
+                            <stop offset="100%" stopColor={isPos ? '#059669' : '#e11d48'} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : `${(v/1e3).toFixed(0)}K`} width={38} />
+                        <Tooltip formatter={(v, n) => [fmt(v), n === 'acumVentas' ? 'Ventas acum.' : 'PPT acum.']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
+                        <ReferenceLine y={0} stroke="#e2e8f0" />
+                        <Area type="monotone" dataKey="acumVentas" stroke={isPos ? '#059669' : '#e11d48'} strokeWidth={2} fill="url(#gradGap)" />
+                        <Line type="monotone" dataKey="acumPPT" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ),
+                },
+                proj: {
+                  title: 'Proyección de Cierre del Mes',
+                  subtitle: 'Cumplimiento diario acumulado · %',
+                  color: '#7c3aed',
+                  stats: [
+                    { label: 'Proyección cierre', value: fmt(budgetData.monthProjection || 0), color: '#7c3aed' },
+                    { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#94a3b8' },
+                    { label: 'Cumplimiento', value: `${projPct.toFixed(1)}%`, color: projPct >= 100 ? '#059669' : projPct >= 80 ? '#f59e0b' : '#e11d48' },
+                    { label: 'Ritmo diario req.', value: fmt(budgetData.dailyRequiredSales || 0), color: '#f59e0b' },
+                  ],
+                  chart: (
+                    <ResponsiveContainer width="100%" height={160}>
+                      <LineChart data={chartSales14}>
+                        <defs>
+                          <linearGradient id="gradProj" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#7c3aed" stopOpacity={0.15} />
+                            <stop offset="100%" stopColor="#7c3aed" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} width={32} />
+                        <Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
+                        <ReferenceLine y={100} stroke="#7c3aed" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: '100%', position: 'right', fontSize: 9, fill: '#7c3aed' }} />
+                        <Line type="monotone" dataKey="cumplimiento" stroke="#7c3aed" strokeWidth={2.5} dot={{ r: 3, fill: '#7c3aed' }} activeDot={{ r: 5 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ),
+                },
+              };
+
+              const activeModal = kpiModal ? modalCharts[kpiModal] : null;
               const activeCard = cards.find(c => c.key === kpiModal);
 
               return (
                 <>
                 {/* KPI Detail Modal */}
                 <AnimatePresence>
-                  {activeCard && (
+                  {activeModal && activeCard && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={() => setKpiModal(null)}
-                      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                      style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(4px)' }}>
+                      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+                      style={{ background: 'rgba(15,23,42,0.35)', backdropFilter: 'blur(8px)' }}>
                       <motion.div
-                        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                        initial={{ opacity: 0, scale: 0.96, y: 24 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.94, y: 12 }}
-                        transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                        exit={{ opacity: 0, scale: 0.96, y: 24 }}
+                        transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
                         onClick={e => e.stopPropagation()}
-                        className="w-full max-w-sm rounded-2xl p-5"
-                        style={{ background: '#fff', border: '1px solid #F3F4F6', boxShadow: '0 24px 64px rgba(0,0,0,0.12)' }}>
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400">{activeCard.label}</p>
-                            <p className="text-2xl font-bold tracking-tight mt-0.5" style={{ color: activeCard.accent }}>
-                              {activeCard.prefix && <span className="mr-1 text-lg">{activeCard.prefix}</span>}
-                              {activeCard.value}
-                            </p>
-                          </div>
-                          <button onClick={() => setKpiModal(null)}
-                            className="w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors text-lg">×</button>
-                        </div>
-                        {/* Detail rows */}
-                        <div className="space-y-2">
-                          {activeCard.detail.map(({ label, value }) => (
-                            <div key={label} className="flex items-center justify-between py-2" style={{ borderBottom: '1px solid #F9FAFB' }}>
-                              <span className="text-[11px] text-slate-400 font-medium">{label}</span>
-                              <span className="text-[12px] font-semibold text-slate-700 tabular-nums">{value}</span>
+                        className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
+                        style={{ background: '#fff', boxShadow: '0 32px 80px rgba(0,0,0,0.18)' }}>
+                        
+                        {/* Colored header band */}
+                        <div className="relative p-5 pb-4" style={{ background: `linear-gradient(135deg, ${activeModal.color}10, ${activeModal.color}04)`, borderBottom: `1px solid ${activeModal.color}15` }}>
+                          <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: `linear-gradient(90deg, ${activeModal.color}, ${activeModal.color}40)` }} />
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-400 mb-1">{activeModal.title}</p>
+                              <p className="text-[28px] font-black tracking-tight leading-none" style={{ color: activeModal.color }}>
+                                {activeCard.prefix && <span className="mr-1 text-xl">{activeCard.prefix}</span>}
+                                {activeCard.value}
+                              </p>
+                              <p className="text-[10px] text-slate-400 mt-1 font-medium">{activeModal.subtitle}</p>
                             </div>
-                          ))}
+                            <button onClick={() => setKpiModal(null)}
+                              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/[0.06] transition-colors mt-0.5">
+                              <X className="w-4 h-4 text-slate-400" />
+                            </button>
+                          </div>
+                          {/* Stat pills */}
+                          <div className="grid grid-cols-2 gap-2 mt-4">
+                            {activeModal.stats.map(({ label, value, color }) => (
+                              <div key={label} className="rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.05)' }}>
+                                <p className="text-[9px] text-slate-400 font-medium mb-0.5">{label}</p>
+                                <p className="text-[13px] font-bold tabular-nums leading-none" style={{ color }}>{value}</p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
+
+                        {/* Chart area */}
+                        <div className="p-5 pt-4">
+                          <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-300 mb-3">Tendencia · últimos 14 días</p>
+                          {chartSales14.length >= 2 ? activeModal.chart : (
+                            <div className="h-40 flex items-center justify-center text-[11px] text-slate-300">Sin suficientes datos históricos</div>
+                          )}
+                        </div>
+
                         {/* CTA */}
-                        <button
-                          onClick={() => { setKpiModal(null); onShowBudgetDashboard?.(); }}
-                          className="w-full mt-4 py-2 rounded-xl text-[11px] font-semibold transition-all"
-                          style={{ background: `${activeCard.accent}12`, color: activeCard.accent, border: `1px solid ${activeCard.accent}20` }}>
-                          Ver presupuesto completo →
-                        </button>
+                        <div className="px-5 pb-5">
+                          <button
+                            onClick={() => { setKpiModal(null); onShowBudgetDashboard?.(); }}
+                            className="w-full py-2.5 rounded-xl text-[11.5px] font-semibold transition-all active:scale-98"
+                            style={{ background: `linear-gradient(135deg, ${activeModal.color}18, ${activeModal.color}08)`, color: activeModal.color, border: `1px solid ${activeModal.color}25` }}>
+                            Ver presupuesto completo →
+                          </button>
+                        </div>
                       </motion.div>
                     </motion.div>
                   )}
