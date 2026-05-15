@@ -275,6 +275,7 @@ export default function HomeWorkspace({
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [kpiModal, setKpiModal] = useState(null); // 'ppt' | 'gap' | 'proj'
   const chatEndRef = useRef(null);
   const conversationRef = useRef(null);
 
@@ -862,6 +863,13 @@ export default function HomeWorkspace({
                   accent: '#C21875',
                   spark: sparkPPT,
                   delay: 0.05,
+                  key: 'ppt',
+                  detail: [
+                    { label: 'PPT hoy', value: fmt(pptVal) },
+                    { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0) },
+                    { label: 'Incremento recuperación', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : '—' },
+                    { label: 'Días restantes', value: budgetData.remainingDays ?? '—' },
+                  ],
                 },
                 {
                   label: 'Brecha del Mes',
@@ -873,6 +881,13 @@ export default function HomeWorkspace({
                   spark: sparkGap,
                   delay: 0.1,
                   prefix: isPos ? '▲' : '▼',
+                  key: 'gap',
+                  detail: [
+                    { label: 'Ventas acumuladas', value: fmt(budgetData.salesUntilYesterday || 0) },
+                    { label: 'PPT acumulado', value: fmt(budgetData.budgetUntilYesterday || 0) },
+                    { label: 'Brecha', value: fmt(gap) },
+                    { label: 'Brecha %', value: `${Math.abs((gap / (budgetData.monthlyBudget || 1) * 100)).toFixed(1)}%` },
+                  ],
                 },
                 {
                   label: 'Proyección Cierre',
@@ -881,10 +896,71 @@ export default function HomeWorkspace({
                   accent: '#7c3aed',
                   spark: sparkProj,
                   delay: 0.15,
+                  key: 'proj',
+                  detail: [
+                    { label: 'Proyección cierre', value: fmt(budgetData.monthProjection || 0) },
+                    { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0) },
+                    { label: 'Cumplimiento', value: `${projPct.toFixed(1)}%` },
+                    { label: 'Ritmo diario req.', value: fmt(budgetData.dailyRequiredSales || 0) },
+                  ],
                 },
               ];
 
+              const activeCard = cards.find(c => c.key === kpiModal);
+
               return (
+                <>
+                {/* KPI Detail Modal */}
+                <AnimatePresence>
+                  {activeCard && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setKpiModal(null)}
+                      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                      style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(4px)' }}>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.94, y: 12 }}
+                        transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                        onClick={e => e.stopPropagation()}
+                        className="w-full max-w-sm rounded-2xl p-5"
+                        style={{ background: '#fff', border: '1px solid #F3F4F6', boxShadow: '0 24px 64px rgba(0,0,0,0.12)' }}>
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400">{activeCard.label}</p>
+                            <p className="text-2xl font-bold tracking-tight mt-0.5" style={{ color: activeCard.accent }}>
+                              {activeCard.prefix && <span className="mr-1 text-lg">{activeCard.prefix}</span>}
+                              {activeCard.value}
+                            </p>
+                          </div>
+                          <button onClick={() => setKpiModal(null)}
+                            className="w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors text-lg">×</button>
+                        </div>
+                        {/* Detail rows */}
+                        <div className="space-y-2">
+                          {activeCard.detail.map(({ label, value }) => (
+                            <div key={label} className="flex items-center justify-between py-2" style={{ borderBottom: '1px solid #F9FAFB' }}>
+                              <span className="text-[11px] text-slate-400 font-medium">{label}</span>
+                              <span className="text-[12px] font-semibold text-slate-700 tabular-nums">{value}</span>
+                            </div>
+                          ))}
+                        </div>
+                        {/* CTA */}
+                        <button
+                          onClick={() => { setKpiModal(null); onShowBudgetDashboard?.(); }}
+                          className="w-full mt-4 py-2 rounded-xl text-[11px] font-semibold transition-all"
+                          style={{ background: `${activeCard.accent}12`, color: activeCard.accent, border: `1px solid ${activeCard.accent}20` }}>
+                          Ver presupuesto completo →
+                        </button>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {cards.map((c) => (
                     <motion.div
@@ -893,7 +969,8 @@ export default function HomeWorkspace({
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: c.delay, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                       whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0,0,0,0.08)', transition: { duration: 0.18 } }}
-                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden"
+                      onClick={() => setKpiModal(c.key)}
+                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden cursor-pointer"
                       style={{
                         background: '#ffffff',
                         border: '1px solid #F3F4F6',
@@ -923,6 +1000,7 @@ export default function HomeWorkspace({
                     </motion.div>
                   ))}
                 </div>
+                </>
               );
             })()}
 
