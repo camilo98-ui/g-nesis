@@ -189,15 +189,23 @@ export default function MascotWidget() {
     }
   }, [path]);
 
-  // Estados minimalistas — solo 1-2 palabras
-  const STATES = ["Hola", "Nova activa", "En línea", "Lista", "Nova AI"];
+  const PAGE_BUBBLES = {
+    '/':          ["¿Cómo va el día? 👀", "Tengo los datos listos ✨", "¿Vamos a revisar el PPT?", "El equipo te espera 🚀"],
+    '/Budget':    ["¿Cómo va el presupuesto?", "Revisa la proyección de cierre", "¿Hay brecha que recuperar? 📊"],
+    '/Rankings':  ["¿Quién lidera hoy? 🏆", "Top cajeros a la vista", "¿Quieres ver el ranking?"],
+    '/Sales':     ["Analizando las ventas 📈", "¿Qué quieres comparar?", "Tendencias listas para revisar"],
+    '/FreezerMap':["¿Cómo está el inventario? 🧊", "Stock al día", "¿Hay sabores en riesgo?"],
+    '/PopsyPlanner': ["Turnos listos para revisar 📅", "¿Cómo está el equipo hoy?"],
+    '/Management':["Vista ejecutiva activa 👁️", "Comparativo de tiendas listo"],
+    default:      ["¡Hola! Soy Nova 👋", "Aquí estoy para ayudarte", "¿Tienes alguna consulta?", "Lista para analizar ✨"],
+  };
 
   useEffect(() => {
-    // Mostrar estado minimalista después de 12 segundos
+    const msgs = PAGE_BUBBLES[path] || PAGE_BUBBLES.default;
     const t = setTimeout(() => {
-      setBubbleMsg(STATES[Math.floor(Math.random() * STATES.length)]);
+      setBubbleMsg(msgs[Math.floor(Math.random() * msgs.length)]);
       setShowBubble(true);
-    }, 12000);
+    }, 10000);
     return () => clearTimeout(t);
   }, [path]);
 
@@ -375,17 +383,17 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto �
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="px-2 py-1 rounded-md cursor-pointer"
+            className="px-3 py-1.5 rounded-xl cursor-pointer"
             style={{
-              background: 'rgba(255,255,255,0.45)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: '1px solid rgba(190,24,93,0.06)',
-              boxShadow: '0 0.5px 4px rgba(0,0,0,0.02)',
+              background: 'rgba(255,255,255,0.92)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(190,24,93,0.12)',
+              boxShadow: '0 2px 12px rgba(190,24,93,0.08), 0 1px 3px rgba(0,0,0,0.04)',
             }}
             onClick={() => { setIsOpen(true); setShowBubble(false); }}
           >
-            <p className="text-[10px] font-medium text-slate-500 tracking-tight whitespace-nowrap">{bubbleMsg}</p>
+            <p className="text-[11px] font-semibold text-slate-600 tracking-tight whitespace-nowrap">{bubbleMsg}</p>
           </motion.div>
         )}
       </AnimatePresence>
