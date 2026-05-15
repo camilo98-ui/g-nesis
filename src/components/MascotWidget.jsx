@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
 
-const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
+const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/0811d99f8_generated_image.png";
 
 const PAGE_CONTEXTS = {
   '/':              { name: 'Dashboard', focus: 'ventas del dÃ­a, mÃ©tricas generales de la tienda, cumplimiento de presupuesto y rendimiento del equipo.' },
@@ -126,9 +126,9 @@ function ChatMessage({ msg }) {
       className={`flex gap-2 ${isNova ? 'items-start' : 'items-end flex-row-reverse'}`}
     >
       {isNova && (
-        <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0 mt-0.5"
-          style={{ border: '1px solid rgba(194,24,117,0.2)', background: 'white' }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" />
+        <div className="w-7 h-7 rounded-xl overflow-hidden flex-shrink-0 mt-0.5"
+          style={{ border: '1px solid rgba(244,114,182,0.25)', background: 'linear-gradient(145deg,#fff8fc,#fdf0f7)', boxShadow: '0 2px 6px rgba(244,114,182,0.12)' }}>
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" style={{ objectPosition: 'center top' }} />
         </div>
       )}
       <div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${isNova ? 'rounded-tl-sm' : 'rounded-tr-sm'}`}
@@ -260,38 +260,44 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto â€
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 12 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320, duration: 0.35 }}
-            className="w-64 flex flex-col rounded-2xl overflow-hidden"
+            className="w-72 flex flex-col rounded-3xl overflow-hidden"
             style={{
-              height: 380,
-              background: 'rgba(255,255,255,0.96)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
-              border: '1px solid rgba(0,0,0,0.07)',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(190,24,93,0.08)',
+              height: 420,
+              background: 'rgba(255,252,255,0.97)',
+              backdropFilter: 'blur(60px)',
+              WebkitBackdropFilter: 'blur(60px)',
+              border: '1px solid rgba(244,114,182,0.18)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.10), 0 4px 16px rgba(244,114,182,0.12), 0 0 0 0.5px rgba(255,255,255,0.8) inset',
             }}
           >
             {/* Header */}
-            <div className="flex items-center gap-2 px-3 py-2.5 flex-shrink-0"
+            <div className="flex items-center gap-2.5 px-4 py-3 flex-shrink-0"
               style={{
-                background: 'rgba(255,255,255,0.85)',
-                borderBottom: '1px solid rgba(0,0,0,0.05)',
+                background: 'linear-gradient(135deg, rgba(255,240,249,0.9) 0%, rgba(255,252,255,0.85) 100%)',
+                borderBottom: '1px solid rgba(244,114,182,0.12)',
                 backdropFilter: 'blur(20px)',
               }}>
-              <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0"
-                style={{ border: '1px solid rgba(190,24,93,0.2)', background: 'white' }}>
-                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" />
+              <div className="w-9 h-9 rounded-2xl overflow-hidden flex-shrink-0"
+                style={{
+                  border: '1.5px solid rgba(244,114,182,0.3)',
+                  background: 'linear-gradient(145deg, #fff8fc, #fdf0f7)',
+                  boxShadow: '0 2px 8px rgba(244,114,182,0.15)',
+                }}>
+                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" style={{ objectPosition: 'center top' }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-slate-800 tracking-tight">Nova</span>
-                  <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full text-rose-600"
-                    style={{ background: 'rgba(190,24,93,0.08)', letterSpacing: '0.04em' }}>
+                  <span className="text-[13px] font-semibold tracking-tight" style={{ color: '#1a0a14' }}>Nova</span>
+                  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full tracking-widest uppercase"
+                    style={{ background: 'linear-gradient(135deg,rgba(244,114,182,0.15),rgba(216,180,254,0.1))', color: '#be185d', border: '0.5px solid rgba(244,114,182,0.25)' }}>
                     AI
                   </span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-auto"
-                    style={{ boxShadow: '0 0 4px rgba(52,211,153,0.8)' }} />
+                  <motion.div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-auto"
+                    animate={{ opacity: [0.7,1,0.7] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    style={{ boxShadow: '0 0 6px rgba(52,211,153,0.9)' }} />
                 </div>
-                <p className="text-[9px] text-slate-400 font-medium tracking-wide">{pageCtx.name}</p>
+                <p className="text-[10px] font-medium tracking-wide" style={{ color: '#c084a8' }}>{pageCtx.name} â€” activo</p>
               </div>
               <div className="flex items-center gap-0.5">
                 <button onClick={reset}
@@ -314,9 +320,9 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto â€
               {isLoading && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   className="flex items-start gap-2">
-                  <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0"
-                    style={{ border: '1px solid rgba(190,24,93,0.2)', background: 'white' }}>
-                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" />
+                  <div className="w-7 h-7 rounded-xl overflow-hidden flex-shrink-0"
+                    style={{ border: '1px solid rgba(244,114,182,0.25)', background: 'linear-gradient(145deg,#fff8fc,#fdf0f7)', boxShadow: '0 2px 6px rgba(244,114,182,0.12)' }}>
+                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" style={{ objectPosition: 'center top' }} />
                   </div>
                   <div className="rounded-xl rounded-tl-sm"
                     style={{ background: 'rgba(248,248,250,0.9)', border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -398,30 +404,44 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto â€
         )}
       </AnimatePresence>
 
-      {/* Nova Button â€” Minimalista y elegante */}
+      {/* Nova Button â€” Ultra premium */}
       <motion.button
         onClick={() => { setIsOpen(o => !o); setShowBubble(false); }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
-        className="relative w-10 h-10 rounded-full"
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
+        className="relative w-14 h-14"
       >
-        {/* Glow muy sutil */}
-        <motion.div className="absolute -inset-1 rounded-full"
-          animate={{ opacity: [0.08, 0.16, 0.08] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ background: 'radial-gradient(circle, rgba(190,24,93,0.15) 0%, transparent 70%)' }}
+        {/* Outer cinematic glow ring */}
+        <motion.div className="absolute -inset-2 rounded-full"
+          animate={{ opacity: [0.3, 0.7, 0.3], scale: [0.95, 1.05, 0.95] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ background: 'radial-gradient(circle, rgba(244,114,182,0.35) 0%, rgba(216,180,254,0.12) 60%, transparent 75%)' }}
         />
-        
-        {/* Avatar */}
-        <div className="relative w-10 h-10 rounded-full overflow-hidden"
+        {/* Soft energy ring */}
+        <motion.div className="absolute -inset-0.5 rounded-full"
+          animate={{ opacity: [0.4, 0.9, 0.4] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+          style={{ background: 'conic-gradient(from 0deg, rgba(244,114,182,0.6), rgba(248,187,217,0.1), rgba(244,114,182,0.6))', filter: 'blur(2px)' }}
+        />
+        {/* Avatar shell */}
+        <motion.div
+          className="relative w-14 h-14 rounded-full overflow-hidden"
+          animate={{ y: [0, -3, 0] }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
           style={{
-            border: '1.5px solid rgba(190,24,93,0.25)',
-            boxShadow: '0 2px 12px rgba(190,24,93,0.12)',
-            background: 'white',
+            border: '1.5px solid rgba(244,114,182,0.45)',
+            boxShadow: '0 4px 24px rgba(244,114,182,0.25), 0 0 0 1px rgba(255,255,255,0.6) inset, 0 8px 32px rgba(0,0,0,0.08)',
+            background: 'linear-gradient(145deg, #fff8fc 0%, #fdf0f7 100%)',
           }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]"
-            style={{ objectPosition: 'center center' }} />
-        </div>
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover"
+            style={{ objectPosition: 'center top' }} />
+        </motion.div>
+        {/* Live pulse dot */}
+        <motion.div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white"
+          animate={{ scale: [1, 1.3, 1], opacity: [0.8, 1, 0.8] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ boxShadow: '0 0 8px rgba(52,211,153,0.8)' }}
+        />
       </motion.button>
     </div>
   );
