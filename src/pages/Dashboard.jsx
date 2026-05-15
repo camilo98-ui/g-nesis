@@ -55,33 +55,33 @@ function PremiumMetricCard({ title, value, budget, icon: Icon, color, onClick, i
     }).format(val);
   };
 
-  return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      onClick={onClick}
-      className="cursor-pointer rounded-2xl p-4 transition-all hidden"
-      style={{
-        background: 'rgba(255,255,255,0.82)',
-        backdropFilter: 'blur(24px)',
-        border: '1px solid rgba(0,0,0,0.06)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
-      }}>
-      
-      <div className="flex items-start justify-between mb-3">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${color}0f` }}>
-          <div style={{ color, width: 15, height: 15, opacity: 0.85, background: color, borderRadius: '4px' }} />
-        </div>
-        <span className={`flex items-center gap-0.5 text-[11px] font-semibold ${isChangePositive ? 'text-emerald-500' : 'text-rose-400'}`}>
-          {isChangePositive ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
-          {Math.abs(change).toFixed(0)}%
-        </span>
-      </div>
+  return null;
 
-      <p className="text-[22px] font-black text-slate-800 leading-none tracking-tight mb-0.5">{formatValue(value).slice(0, -3)}</p>
-      <p className="text-[11px] font-medium text-slate-400 mb-3 tracking-wide">{title}</p>
 
-      <div className="absolute bottom-0 left-0 right-0 h-px rounded-b-2xl" style={{ background: `linear-gradient(90deg, transparent, ${color}30, transparent)` }} />
-    </motion.div>);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 
@@ -1105,35 +1105,35 @@ export default function Dashboard() {
           }
 
             {/* Nova AI Strip */}
-            <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="relative overflow-hidden rounded-2xl p-4 sm:p-5 mb-6 hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.75) 100%)',
-              backdropFilter: 'blur(32px)',
-              border: '1px solid rgba(0,0,0,0.06)',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.04)'
-            }}>
-              
-              <div className="absolute inset-0 opacity-30 blur-3xl" style={{ background: 'linear-gradient(135deg, #ec489320, transparent 70%)', pointerEvents: 'none' }} />
-              
-              <div className="relative flex items-start gap-3 sm:gap-4">
-                <div className="text-3xl sm:text-4xl flex-shrink-0 mt-0.5">✨</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Sparkles className="w-4 h-4" style={{ color: '#ec4899' }} />
-                    <h3 className="text-sm font-semibold text-slate-700">Nova · Insight Ejecutivo</h3>
-                  </div>
-                  <p className="text-[13px] text-slate-600 leading-relaxed font-medium">
-                    {gregorianMonthTotals.sales > 0 ?
-                  `Acumulas ${formatCurrency(gregorianMonthTotals.sales)} en ventas del mes. Proyección de cierre: ${formatCurrency(gregorianMonthTotals.sales / new Date().getDate() * 30)}. Ticket promedio: ${formatCurrency(gregorianMonthTotals.transactions > 0 ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0)}` :
-                  'Sin datos de ventas aún. Comienza a registrar para ver insights ejecutivos.'}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
 
             {/* Premium KPI Cards */}
             <motion.div
