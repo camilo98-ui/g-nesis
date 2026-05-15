@@ -777,7 +777,7 @@ export default function HomeWorkspace({
               </div>
             </motion.div>
 
-            {/* Budget KPI Cards — Premium SaaS */}
+            {/* Budget Mini Cards — PPT del Día, Brecha del Mes, Proyección */}
             {budgetData && (() => {
               const fmt = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
               const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : (budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
@@ -785,105 +785,60 @@ export default function HomeWorkspace({
               const isPos = gap >= 0;
               const projPct = budgetData.monthProjectionCompliance ?? 0;
 
-              const spark7 = [...todaySales]
-                .sort((a, b) => new Date(a.date) - new Date(b.date))
-                .slice(-9)
-                .map(d => d.total_sales || 0);
-
-              // Premium smooth sparkline with glow
-              const PremiumSpark = ({ points, color, id }) => {
-                if (!points || points.length < 2) {
-                  // placeholder flat line
-                  const flatPts = [1,1,1,1,1,1,1];
-                  return <PremiumSpark points={flatPts} color={color} id={id + '_flat'} />;
-                }
+              // Mini sparkline SVG inline
+              const Spark = ({ points, color }) => {
+                if (!points || points.length < 2) return null;
                 const max = Math.max(...points, 1);
                 const min = Math.min(...points, 0);
                 const range = max - min || 1;
-                const w = 80, h = 36;
-                const pad = 4;
+                const w = 64, h = 28;
                 const coords = points.map((v, i) => [
-                  pad + (i / (points.length - 1)) * (w - pad * 2),
-                  h - pad - ((v - min) / range) * (h - pad * 2)
+                  (i / (points.length - 1)) * w,
+                  h - ((v - min) / range) * (h - 4) - 2
                 ]);
-
-                // Smooth cubic bezier path
-                let d = `M${coords[0][0].toFixed(2)},${coords[0][1].toFixed(2)}`;
-                for (let i = 1; i < coords.length; i++) {
-                  const [x0, y0] = coords[i - 1];
-                  const [x1, y1] = coords[i];
-                  const cx = (x0 + x1) / 2;
-                  d += ` C${cx.toFixed(2)},${y0.toFixed(2)} ${cx.toFixed(2)},${y1.toFixed(2)} ${x1.toFixed(2)},${y1.toFixed(2)}`;
-                }
-
-                // Area fill path
-                const last = coords[coords.length - 1];
-                const first = coords[0];
-                const areaD = d + ` L${last[0].toFixed(2)},${h} L${first[0].toFixed(2)},${h} Z`;
-
+                const d = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c[0].toFixed(1)},${c[1].toFixed(1)}`).join(' ');
                 return (
-                  <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
-                    <defs>
-                      <linearGradient id={`area-${id}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity="0.12" />
-                        <stop offset="100%" stopColor={color} stopOpacity="0" />
-                      </linearGradient>
-                      <filter id={`glow-${id}`}>
-                        <feGaussianBlur stdDeviation="2.5" result="blur" />
-                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                      </filter>
-                    </defs>
-                    {/* Area fill */}
-                    <path d={areaD} fill={`url(#area-${id})`} />
-                    {/* Glow layer */}
-                    <path d={d} stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.25" filter={`url(#glow-${id})`} />
-                    {/* Main line */}
-                    <path d={d} stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-                    {/* Last dot */}
-                    <circle cx={last[0].toFixed(2)} cy={last[1].toFixed(2)} r="2.5" fill={color} />
-                    <circle cx={last[0].toFixed(2)} cy={last[1].toFixed(2)} r="4.5" fill={color} opacity="0.18" />
+                  <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" className="flex-shrink-0 opacity-70">
+                    <path d={d} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 );
               };
 
+              // Generar sparklines desde ventas reales
+              const spark7 = [...todaySales]
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(-7)
+                .map(d => d.total_sales || 0);
+
               const cards = [
                 {
-                  id: 'ppt',
                   label: 'PPT del Día',
                   value: fmt(pptVal),
                   sub: budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0
-                    ? `+${budgetData.incrementPct}% recuperación incluida`
-                    : 'presupuesto base',
+                    ? `+${budgetData.incrementPct}% recuperación`
+                    : 'meta diaria',
                   accent: '#C21875',
-                  accentRgb: '194,24,117',
-                  tag: 'HOY',
                   spark: spark7,
-                  delay: 0.04,
+                  delay: 0.05,
                 },
                 {
-                  id: 'gap',
                   label: 'Brecha del Mes',
-                  value: fmt(Math.abs(gap)),
-                  prefix: isPos ? '↑' : '↓',
+                  value: fmt(gap),
                   sub: budgetData.monthlyBudget > 0
                     ? `${isPos ? 'Sobre' : 'Bajo'} meta · ${Math.abs((gap / budgetData.monthlyBudget * 100)).toFixed(0)}%`
                     : '',
                   accent: isPos ? '#059669' : '#e11d48',
-                  accentRgb: isPos ? '5,150,105' : '225,29,72',
-                  tag: isPos ? 'SOBRE' : 'BAJO',
                   spark: spark7,
-                  delay: 0.09,
+                  delay: 0.1,
+                  prefix: isPos ? '▲' : '▼',
                 },
                 {
-                  id: 'proj',
                   label: 'Proyección Cierre',
                   value: `${projPct.toFixed(0)}%`,
-                  sub: `${fmt(budgetData.monthProjection)} proyectado`,
+                  sub: `${fmt(budgetData.monthProjection)} / ${fmt(budgetData.monthlyBudget)}`,
                   accent: '#7c3aed',
-                  accentRgb: '124,58,237',
-                  tag: projPct >= 100 ? '✓ META' : `${(100 - projPct).toFixed(0)}% FALTA`,
                   spark: spark7,
-                  delay: 0.14,
+                  delay: 0.15,
                 },
               ];
 
@@ -891,63 +846,34 @@ export default function HomeWorkspace({
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {cards.map((c) => (
                     <motion.div
-                      key={c.id}
-                      initial={{ opacity: 0, y: 10 }}
+                      key={c.label}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: c.delay, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-                      whileHover={{ y: -3, transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
-                      className="relative overflow-hidden cursor-default select-none"
+                      transition={{ delay: c.delay, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                      whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0,0,0,0.08)', transition: { duration: 0.18 } }}
+                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden"
                       style={{
-                        background: 'rgba(255,255,255,0.96)',
-                        border: '1px solid #F0F0F2',
-                        borderRadius: '20px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.03), 0 8px 32px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.02)',
-                        backdropFilter: 'blur(12px)',
-                        padding: '14px 16px 12px',
+                        background: '#ffffff',
+                        border: '1px solid #F3F4F6',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',
                       }}>
+                      {/* Top accent line */}
+                      <div className="absolute top-0 left-4 right-4 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c.accent}30, transparent)` }} />
 
-                      {/* Subtle top accent */}
-                      <div className="absolute top-0 inset-x-0 h-[1.5px]" style={{ background: `linear-gradient(90deg, transparent 0%, rgba(${c.accentRgb},0.4) 40%, rgba(${c.accentRgb},0.4) 60%, transparent 100%)` }} />
-
-                      {/* Ambient glow */}
-                      <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, rgba(${c.accentRgb},0.07) 0%, transparent 70%)` }} />
-
-                      <div className="flex items-start justify-between gap-1">
+                      <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          {/* Label + tag */}
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <p className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400 truncate">{c.label}</p>
-                            <span className="hidden sm:inline-block px-1.5 py-0.5 rounded-md text-[7px] font-bold tracking-wide flex-shrink-0"
-                              style={{ background: `rgba(${c.accentRgb},0.08)`, color: c.accent }}>
-                              {c.tag}
-                            </span>
-                          </div>
-
-                          {/* KPI number */}
-                          <p className="font-black leading-none tabular-nums truncate"
-                            style={{
-                              color: '#0f172a',
-                              fontSize: 'clamp(13px, 2.5vw, 20px)',
-                              letterSpacing: '-0.02em',
-                            }}>
-                            {c.prefix && (
-                              <span className="mr-0.5 font-bold" style={{ color: c.accent, fontSize: '0.65em' }}>{c.prefix} </span>
-                            )}
+                          <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-1.5 truncate">{c.label}</p>
+                          <p className="text-sm sm:text-lg font-black leading-none tabular-nums truncate" style={{ color: c.accent }}>
+                            {c.prefix && <span className="text-[10px] sm:text-[13px] mr-0.5 font-bold">{c.prefix}</span>}
                             {c.value}
                           </p>
                         </div>
-
-                        {/* Sparkline */}
-                        <div className="hidden sm:block flex-shrink-0 self-center">
-                          <PremiumSpark points={c.spark} color={c.accent} id={c.id} />
+                        <div className="pt-4 hidden sm:block">
+                          <Spark points={c.spark} color={c.accent} />
                         </div>
                       </div>
 
-                      {/* Subtext */}
-                      <p className="text-[8px] sm:text-[9px] font-medium text-slate-400 truncate mt-1.5 leading-none">{c.sub}</p>
-
-                      {/* Bottom micro progress line */}
-                      <div className="absolute bottom-0 inset-x-0 h-px" style={{ background: `rgba(${c.accentRgb},0.08)` }} />
+                      <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium leading-snug truncate mt-0.5">{c.sub}</p>
                     </motion.div>
                   ))}
                 </div>
