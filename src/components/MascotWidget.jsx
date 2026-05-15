@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom';
 
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
 
-// Renders the mascot on a white circular background
+// Renders the mascot on a canvas with white background removed
 function MascotCanvas({ width = 96, height = 96, style = {} }) {
   const canvasRef = useRef(null);
   useEffect(() => {
@@ -18,21 +18,27 @@ function MascotCanvas({ width = 96, height = 96, style = {} }) {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      canvas.width = width;
-      canvas.height = height;
-      
-      // Draw white circular background
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(width / 2, height / 2, width / 2, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Draw mascot centered on white background
-      ctx.drawImage(img, 0, 0, width, height);
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = data.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i+1], b = d[i+2];
+        // Remove near-white pixels (checkerboard / white bg)
+        if (r > 220 && g > 220 && b > 220) {
+          d[i+3] = 0; // fully transparent
+        } else if (r > 180 && g > 180 && b > 180) {
+          // Semi-transparent for soft edges
+          const brightness = (r + g + b) / 3;
+          d[i+3] = Math.round(255 * (1 - (brightness - 180) / 75));
+        }
+      }
+      ctx.putImageData(data, 0, 0);
     };
     img.src = MASCOT_IMG;
-  }, [width, height]);
-  return <canvas ref={canvasRef} style={{ width, height, display: 'block', borderRadius: '50%', ...style }} />;
+  }, []);
+  return <canvas ref={canvasRef} style={{ width, height, display: 'block', objectFit: 'contain', ...style }} />;
 }
 
 const PAGE_CONTEXTS = {
