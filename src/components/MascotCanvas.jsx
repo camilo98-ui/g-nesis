@@ -18,7 +18,7 @@ export default function MascotCanvas({ width = 64, height = 64 }) {
     // Draw white circular background (smaller, behind mascot)
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(width / 2, height / 2, width * 0.35, 0, Math.PI * 2);
+    ctx.arc(width / 2, height / 2, width * 0.25, 0, Math.PI * 2);
     ctx.fill();
 
     // Load and draw mascot image
