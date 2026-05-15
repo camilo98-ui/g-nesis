@@ -1,0 +1,31 @@
+import { useEffect } from 'react';
+import { useNova } from '@/components/NovaContext';
+
+/**
+ * Hook para que componentes de secciones inyecten sus datos a Nova automáticamente
+ * Uso: useNovaSection('products', { metrics: {...}, rows: [...] })
+ */
+export function useNovaSection(sectionId, sectionData) {
+  const { extractSectionData, removeSectionData } = useNova() || {};
+
+  useEffect(() => {
+    if (!extractSectionData) return;
+    
+    // Inyectar datos de la sección
+    extractSectionData(sectionId, {
+      name: sectionData?.name || sectionId,
+      metrics: sectionData?.metrics,
+      rows: sectionData?.rows,
+      columns: sectionData?.columns,
+      summary: sectionData?.summary,
+      timestamp: new Date().toISOString()
+    });
+
+    // Limpiar cuando la sección se desmonte
+    return () => {
+      if (removeSectionData) {
+        removeSectionData(sectionId);
+      }
+    };
+  }, [sectionId, sectionData, extractSectionData, removeSectionData]);
+}

@@ -193,6 +193,7 @@ export default function MascotWidget() {
   const path = location?.pathname || '/';
   const pageCtx = PAGE_CONTEXTS[path] || { name: 'App', focus: 'operaciones generales de la tienda.' };
   const suggestions = SUGGESTIONS[path] || SUGGESTIONS.default;
+  const { getSectionsSummary } = useNova() || {};
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -301,14 +302,36 @@ ${d.kpi_proyeccion ? `- Valor: ${d.kpi_proyeccion} ${d.kpi_proyeccion_meta ? ` �
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ` : '';
 
+    // Extraer datos de secciones abiertas
+    const sectionsData = getSectionsSummary?.() || [];
+    const sectionsSummary = sectionsData.length > 0 
+      ? `\nSECCIONES ABIERTAS EN LA PANTALLA:\n${sectionsData.map(s => {
+        const lines = [];
+        if (s.name) lines.push(`📍 ${s.name}`);
+        if (s.metrics) {
+          Object.entries(s.metrics).forEach(([key, val]) => {
+            lines.push(`  • ${key}: ${val}`);
+          });
+        }
+        if (s.rows) {
+          lines.push(`  Filas: ${s.rows.length} registros`);
+        }
+        if (s.columns) {
+          lines.push(`  Columnas: ${s.columns.join(', ')}`);
+        }
+        return lines.join('\n');
+      }).join('\n')}`
+      : '';
+
     const contextPrompt = `${SYSTEM_PROMPT}
 
 SECCIÓN ACTIVA: ${pageCtx.name} — ${pageCtx.focus}
-${dataBlock}
+${dataBlock}${sectionsSummary}
+
 CONVERSACIÓN HASTA AHORA:
 ${newMessages.map(m => `${m.role === 'user' ? 'Usuario' : 'Nova'}: ${m.content}`).join('\n')}
 
-Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa los números exactos del bloque de datos. Adapta la longitud al contexto — corto si es simple, más desarrollado si lo requiere. Sin relleno.`;
+Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa los números exactos del bloque de datos y las secciones abiertas. Adapta la longitud al contexto — corto si es simple, más desarrollado si lo requiere. Sin relleno.`;
 
     try {
       // Búsqueda global: detectar términos de negocio y buscar en índice
