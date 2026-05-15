@@ -493,7 +493,7 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
               : 'drop-shadow(0 2px 12px rgba(190,24,93,0.25)) drop-shadow(0 6px 20px rgba(190,24,93,0.15))',
           }}
         >
-          <MascotCanvas width={96} height={96} />
+          <MascotCanvas width={140} height={140} />
         </motion.div>
 
         {/* Pink glow ring — rendered below the blended image layer */}
