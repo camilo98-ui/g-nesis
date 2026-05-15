@@ -791,15 +791,24 @@ export default function HomeWorkspace({
                 const max = Math.max(...points, 1);
                 const min = Math.min(...points, 0);
                 const range = max - min || 1;
-                const w = 64, h = 28;
+                const w = 120, h = 44;
                 const coords = points.map((v, i) => [
                   (i / (points.length - 1)) * w,
-                  h - ((v - min) / range) * (h - 4) - 2
+                  h - ((v - min) / range) * (h - 6) - 3
                 ]);
                 const d = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c[0].toFixed(1)},${c[1].toFixed(1)}`).join(' ');
+                const areaD = `${d} L${w},${h} L0,${h} Z`;
+                const gradId = `spark-${color.replace('#','')}`;
                 return (
-                  <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" className="flex-shrink-0 opacity-70">
-                    <path d={d} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" className="flex-shrink-0">
+                    <defs>
+                      <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity="0.12" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path d={areaD} fill={`url(#${gradId})`} />
+                    <path d={d} stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
                   </svg>
                 );
               };
@@ -860,20 +869,28 @@ export default function HomeWorkspace({
                       {/* Top accent line */}
                       <div className="absolute top-0 left-4 right-4 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c.accent}30, transparent)` }} />
 
-                      <div className="flex items-start justify-between gap-2">
+                      {/* Header row: label + badge */}
+                      <div className="flex items-center justify-between gap-1 mb-2">
+                        <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 truncate">{c.label}</p>
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                          style={{ background: `${c.accent}12`, color: c.accent }}>
+                          {c.label === 'PPT del Día' ? 'HOY' : c.label === 'Brecha del Mes' ? (isPos ? 'SOBRE' : 'BAJO') : (projPct >= 100 ? '✓ META' : 'EN CURSO')}
+                        </span>
+                      </div>
+
+                      {/* KPI + sparkline side by side */}
+                      <div className="flex items-end justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-1.5 truncate">{c.label}</p>
-                          <p className="text-sm sm:text-lg font-black leading-none tabular-nums truncate" style={{ color: c.accent }}>
-                            {c.prefix && <span className="text-[10px] sm:text-[13px] mr-0.5 font-bold">{c.prefix}</span>}
+                          <p className="text-base sm:text-xl font-black leading-none tabular-nums" style={{ color: c.accent }}>
+                            {c.prefix && <span className="text-[11px] sm:text-sm mr-0.5 font-bold">{c.prefix}</span>}
                             {c.value}
                           </p>
+                          <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium mt-1.5 truncate">{c.sub}</p>
                         </div>
-                        <div className="pt-4 hidden sm:block">
+                        <div className="flex-shrink-0">
                           <Spark points={c.spark} color={c.accent} />
                         </div>
                       </div>
-
-                      <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium leading-snug truncate mt-0.5">{c.sub}</p>
                     </motion.div>
                   ))}
                 </div>
