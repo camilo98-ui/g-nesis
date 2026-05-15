@@ -919,55 +919,39 @@ export default function HomeWorkspace({
                 {/* Separador elegante */}
                 <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-250 to-transparent opacity-25" />
 
-                {/* Insight Premium Horizontal */}
-                <div className="flex-1 min-w-0 flex items-center">
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
-                    className="text-[12.5px] leading-relaxed font-medium text-slate-700"
-                    style={{ letterSpacing: '0.3px' }}>
-                    {latestWeather ?
-                    (() => {
-                      const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
-                      const rain = latestWeather?.precipitation ?? 0;
-                      const isHot = temp > 26;
-                      const isRainy = rain > 5;
-                      
-                      if (isRainy) {
+                {/* Insight Premium — Real Sales Data */}
+                 <div className="flex-1 min-w-0 flex items-center">
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3, duration: 0.6 }}
+                      className="text-[12.5px] leading-relaxed font-medium text-slate-700"
+                      style={{ letterSpacing: '0.3px' }}>
+                      {todaySales && todaySales.length > 0 ?
+                      (() => {
+                        const lastSale = todaySales[todaySales.length - 1];
+                        const totalToday = todaySales.reduce((s, d) => s + (d.total_sales || 0), 0);
+                        const txnCount = todaySales.reduce((s, d) => s + (d.total_transactions || 0), 0);
+                        const avgTicket = txnCount > 0 ? totalToday / txnCount : 0;
+                        const avgSuggest = todaySales.reduce((s, d) => s + (d.total_suggested || 0), 0);
+
+                        // Determine status color based on metrics
+                        const isStrong = avgTicket > 80000 && avgSuggest > 30;
+                        const color = isStrong ? '#10b981' : avgTicket > 60000 ? '#f59e0b' : '#e11d48';
+                        const status = isStrong ? '🚀 Excelente' : avgTicket > 60000 ? '📈 Bueno' : '⚠️ Revisar';
+
                         return (
                           <>
-                            <span className="text-slate-600">🌧 Lluvia impacta tráfico · </span>
-                            <span className="text-slate-700">ventas </span>
-                            <span style={{ color: '#C21875', fontWeight: 800, fontSize: '13px' }}>↓ {rain.toFixed(1)}mm</span>
-                            <span className="text-slate-600"> · Aumenta pedidos a domicilio</span>
+                            <span className="text-slate-600">{status} · </span>
+                            <span className="text-slate-700">Ticket promedio </span>
+                            <span style={{ color, fontWeight: 800, fontSize: '13px' }}>${(avgTicket/1000).toFixed(0)}K</span>
+                            <span className="text-slate-600"> · {txnCount} transacciones hoy · Sugeridos: {avgSuggest.toFixed(0)}</span>
                           </>
                         );
-                      }
-                      
-                      if (isHot) {
-                        return (
-                          <>
-                            <span className="text-slate-600">☀️ Clima caluroso · </span>
-                            <span className="text-slate-700">día ideal para helados · </span>
-                            <span style={{ color: '#C21875', fontWeight: 800, fontSize: '13px' }}>{Math.round(temp)}°C</span>
-                            <span className="text-slate-600"> · Espera peak en horarios centrales</span>
-                          </>
-                        );
-                      }
-                      
-                      return (
-                        <>
-                          <span className="text-slate-600">🌤 Clima templado · </span>
-                          <span className="text-slate-700">vendibilidad normal · </span>
-                          <span style={{ color: '#C21875', fontWeight: 800, fontSize: '13px' }}>{Math.round(temp)}°C</span>
-                          <span className="text-slate-600"> · Ritmo constante</span>
-                        </>
-                      );
-                    })() :
-                    <span className="text-slate-500">Cargando datos del clima...</span>}
-                  </motion.p>
-                </div>
+                      })() :
+                      <span className="text-slate-500">Cargando datos de hoy...</span>}
+                    </motion.p>
+                  </div>
 
                 {/* Botón Premium SaaS */}
                 <motion.button
