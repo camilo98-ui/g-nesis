@@ -279,6 +279,13 @@ ${d.top_5_products_list ? `- Top 5 productos más vendidos: ${d.top_5_products_l
 ${d.top_5_products_participation ? `- Participación Top 5: ${d.top_5_products_participation}% de las ventas del día` : ''}
 ${d.top_products_count ? `- Productos en reporte: ${d.top_products_count}` : ''}
 
+P&G - MÁRGENES Y COSTOS FINANCIEROS
+${d.pyg_ebitda_margin ? `- Margen EBITDA: ${d.pyg_ebitda_margin}% (Meta: ≥25%)` : ''}
+${d.pyg_cost_real && d.pyg_cost_teorico ? `- Costo Real: ${d.pyg_cost_real}% vs Teórico: ${d.pyg_cost_teorico}%` : ''}
+${d.pyg_cost_personal ? `- Costo Personal: ${d.pyg_cost_personal}% (Meta: ≤22%)` : ''}
+${d.pyg_gastos_venta ? `- Gastos %Venta: ${d.pyg_gastos_venta}% (Arriendos: ${d.pyg_arriendos || '—'}%, Servicios: ${d.pyg_servicios || '—'}%)` : ''}
+${d.pyg_administracion || d.pyg_impuestos ? `- Admin: ${d.pyg_administracion || '—'}% | Impuestos: ${d.pyg_impuestos || '—'}%` : ''}
+
 KPI PRINCIPAL (PPT DEL DÍA)
 ${d.kpi_ppt ? `- Valor: ${d.kpi_ppt} ${d.kpi_ppt_sub ? ` · ${d.kpi_ppt_sub}` : ''}` : ''}
 

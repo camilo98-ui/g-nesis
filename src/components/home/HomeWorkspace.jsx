@@ -518,6 +518,18 @@ export default function HomeWorkspace({
       quantity: p.quantity || 0,
       percentage: todaySalesValue > 0 ? ((p.sales_amount || 0) / todaySalesValue * 100).toFixed(1) : 0
     }));
+    
+    // Datos P&G (EBITDA, costos, personal) si están disponibles
+    const latestPyg = pygReports.length > 0 ? pygReports[pygReports.length - 1] : null;
+    const ebitdaMargin = latestPyg?.margen_ebitda ? (latestPyg.margen_ebitda * 100).toFixed(1) : null;
+    const costReal = latestPyg?.cost_real ? (latestPyg.cost_real * 100).toFixed(1) : null;
+    const costTeorico = latestPyg?.cost_teorico ? (latestPyg.cost_teorico * 100).toFixed(1) : null;
+    const costPersonal = latestPyg?.costo_personal ? (latestPyg.costo_personal * 100).toFixed(1) : null;
+    const gastosVenta = latestPyg?.gastos_pct_venta ? (latestPyg.gastos_pct_venta * 100).toFixed(1) : null;
+    const arriendos = latestPyg?.arriendos ? (latestPyg.arriendos * 100).toFixed(1) : null;
+    const servicios = latestPyg?.servicios_publicos ? (latestPyg.servicios_publicos * 100).toFixed(1) : null;
+    const administracion = latestPyg?.administracion ? (latestPyg.administracion * 100).toFixed(1) : null;
+    const impuestos = latestPyg?.impuestos ? (latestPyg.impuestos * 100).toFixed(1) : null;
 
     setPageData({
       page: 'Home',
@@ -563,6 +575,17 @@ export default function HomeWorkspace({
       top_products_count: topProducts.length,
       top_5_products_list: productsDetail.map(p => `${p.name}: ${p.sales} (${p.quantity} unidades, ${p.percentage}% de ventas)`).join(' | '),
       top_5_products_participation: top5Participation.toFixed(1),
+      
+      // Datos P&G - EBITDA y Márgenes
+      pyg_ebitda_margin: ebitdaMargin,
+      pyg_cost_real: costReal,
+      pyg_cost_teorico: costTeorico,
+      pyg_cost_personal: costPersonal,
+      pyg_gastos_venta: gastosVenta,
+      pyg_arriendos: arriendos,
+      pyg_servicios: servicios,
+      pyg_administracion: administracion,
+      pyg_impuestos: impuestos,
       
       // KPI Card data
       kpi_ppt: fmt(pptHoy),
