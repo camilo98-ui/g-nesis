@@ -275,6 +275,32 @@ export default function MascotWidget() {
     };
   }, [pageData?.storeCode, pageData?.store, isOpen]);
 
+  // Integración directa de productos para consultas de Nova
+  const handleProductQuery = useCallback(async (query) => {
+    if (!pageData?.products) return null;
+    
+    const searchTerm = query.toLowerCase();
+    const matches = pageData.products.filter(p => 
+      p.product?.toLowerCase().includes(searchTerm) ||
+      p.department?.toLowerCase().includes(searchTerm) ||
+      p.section?.toLowerCase().includes(searchTerm)
+    );
+    
+    return {
+      found: matches.length > 0,
+      products: matches.map(p => ({
+        name: p.product,
+        sales: `$${(p.total_sales / 1000000).toFixed(1)}M`,
+        participation: `${p.participation.toFixed(2)}%`,
+        units: p.units_sold || 0,
+        department: p.department,
+        section: p.section,
+        rank: pageData.products.filter(pr => pr.total_sales > p.total_sales).length + 1
+      })),
+      summary: pageData.summary
+    };
+  }, [pageData?.products, pageData?.summary]);
+
   const sendMessage = async (text) => {
     const userText = text || input.trim();
     if (!userText || isLoading) return;

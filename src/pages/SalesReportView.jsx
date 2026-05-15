@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNova } from '@/components/NovaContext';
 import {
   ArrowLeft, BarChart3, DollarSign, TrendingUp, FileText,
   Filter, Search, X, Package, Layers, Star, Award,
@@ -932,6 +933,8 @@ function buildHierarchy(records) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function SalesReportView() {
+  const { setPageData, extractSectionData } = useNova() || {};
+  
   const storeCode = (() => {
     try {
       const session = JSON.parse(localStorage.getItem('popsySession') || '{}');
@@ -1046,6 +1049,39 @@ export default function SalesReportView() {
   const { hierarchy: prevHierarchy } = useMemo(() => buildHierarchy(prevRecords), [prevRecords]);
 
   const hasData = currentRecords.length > 0;
+
+  // Inyecta datos de productos en Nova
+  useEffect(() => {
+    if (setPageData && hasData) {
+      setPageData({
+        storeCode,
+        store: storeCode,
+        section: 'SalesReport',
+        products: allProducts,
+        hierarchy,
+        summary,
+        prevHierarchy,
+        currentMonthLabel: `${MONTHS_NAMES[effectiveMonth - 1]} ${effectiveYear}`,
+        prevMonthLabel
+      });
+      
+      // Extrae snapshot de productos para Nova
+      if (extractSectionData) {
+        extractSectionData('products_snapshot', {
+          products: allProducts.map(p => ({
+            name: p.product,
+            sales: p.total_sales,
+            participation: p.participation,
+            units: p.units_sold,
+            department: p.department,
+            section: p.section
+          })),
+          totalProducts: summary.totalProducts,
+          totalSales: summary.totalSales
+        });
+      }
+    }
+  }, [setPageData, extractSectionData, hasData, allProducts, hierarchy, summary, prevHierarchy, effectiveMonth, effectiveYear, storeCode, prevMonthLabel]);
 
   const depts = useMemo(() => [...new Set(currentRecords.map(r => r.department).filter(Boolean))], [currentRecords]);
   const sections = useMemo(() => {
