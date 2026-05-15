@@ -903,19 +903,20 @@ export default function HomeWorkspace({
                       <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}60, ${c.accent}20)` }} />
 
                       {/* Label */}
-                      <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-2">{c.label}</p>
+                      <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-1.5">{c.label}</p>
 
-                      {/* KPI + sparkline side by side */}
-                      <div className="flex items-center justify-between gap-2 flex-1">
-                        <div className="flex-1 min-w-0">
+                      {/* Sparkline ocupa todo el ancho, alineada con el número */}
+                      <div className="flex items-end gap-0 w-full" style={{ minHeight: 44 }}>
+                        {/* KPI texto */}
+                        <div className="flex-shrink-0 flex flex-col justify-end">
                           <p className="text-sm sm:text-lg font-black leading-none tabular-nums" style={{ color: '#0f172a' }}>
                             {c.prefix && <span className="mr-0.5 font-bold" style={{ color: c.accent }}>{c.prefix}</span>}
                             {c.value}
                           </p>
-                          <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium mt-1.5">{c.sub}</p>
+                          <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium mt-1">{c.sub}</p>
                         </div>
-                        {/* Sparkline al lado derecho — ocupa el espacio restante */}
-                        <div className="flex-shrink-0" style={{ width: '45%', height: 44 }}>
+                        {/* Sparkline desde justo después del número hasta el borde */}
+                        <div className="flex-1 min-w-0" style={{ height: 44 }}>
                           <Spark points={c.spark} color={c.accent} />
                         </div>
                       </div>
