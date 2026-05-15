@@ -45,8 +45,8 @@ import {
 function PremiumMetricCard({ title, value, budget, icon: Icon, color, onClick, isActive, comparisonValue, showComparison }) {
   const percentage = budget ? (value / budget * 100).toFixed(1) : 0;
   const isPositive = value >= (comparisonValue || 0);
-  
-  const change = comparisonValue ? ((value - comparisonValue) / comparisonValue * 100) : 0;
+
+  const change = comparisonValue ? (value - comparisonValue) / comparisonValue * 100 : 0;
   const isChangePositive = change >= 0;
 
   const formatValue = (val) => {
@@ -59,7 +59,7 @@ function PremiumMetricCard({ title, value, budget, icon: Icon, color, onClick, i
     <motion.div
       whileHover={{ y: -2 }}
       onClick={onClick}
-      className="cursor-pointer rounded-2xl p-4 transition-all"
+      className="cursor-pointer rounded-2xl p-4 transition-all hidden"
       style={{
         background: 'rgba(255,255,255,0.82)',
         backdropFilter: 'blur(24px)',
@@ -81,8 +81,8 @@ function PremiumMetricCard({ title, value, budget, icon: Icon, color, onClick, i
       <p className="text-[11px] font-medium text-slate-400 mb-3 tracking-wide">{title}</p>
 
       <div className="absolute bottom-0 left-0 right-0 h-px rounded-b-2xl" style={{ background: `linear-gradient(90deg, transparent, ${color}30, transparent)` }} />
-    </motion.div>
-  );
+    </motion.div>);
+
 }
 
 // DetailPanel is now in components/dashboard/DetailPanel
@@ -90,7 +90,7 @@ function PremiumMetricCard({ title, value, budget, icon: Icon, color, onClick, i
 export default function Dashboard() {
   const queryClient = useQueryClient();
   const { setPageData } = useNova() || {};
-  
+
   const [selectedStore, setSelectedStore] = useState('');
   const [dateRange, setDateRange] = useState(null);
   const [activeMetric, setActiveMetric] = useState(null);
@@ -110,7 +110,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchWeather = async () => {
       if (!selectedStore) return;
-      
+
       setLoadingWeather(true);
       const end = new Date();
       const start = new Date();
@@ -207,7 +207,7 @@ export default function Dashboard() {
         const oldCode = selectedStore.replace('BTA', 'BOGOTA');
         allRecords = await base44.entities.ShiftRecord.filter({ store_id: oldCode });
       }
-      return allRecords.filter(record => {
+      return allRecords.filter((record) => {
         const recordDate = record.date?.split('T')[0] || record.date;
         return recordDate >= monthStart && recordDate <= monthEnd;
       });
@@ -271,7 +271,7 @@ export default function Dashboard() {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth(); // 0-11
-    
+
     // Calendario retail basado en semanas
     const retailCalendar = {
       0: { start: new Date(currentYear - 1, 11, 29), end: new Date(currentYear, 1, 1) },
@@ -287,13 +287,13 @@ export default function Dashboard() {
       10: { start: new Date(currentYear, 10, 2), end: new Date(currentYear, 10, 29) },
       11: { start: new Date(currentYear, 10, 30), end: new Date(currentYear + 1, 0, 2) }
     };
-    
+
     const retailMonthStart = retailCalendar[currentMonth].start;
     const gregorianStart = startOfMonth(now);
-    
+
     // Determinar rango: si hay filtro usarlo, si no, mostrar mes actual
     let fromDate, toDate;
-    
+
     if (weekFilter?.from && weekFilter?.to) {
       fromDate = weekFilter.from;
       toDate = weekFilter.to;
@@ -347,12 +347,12 @@ export default function Dashboard() {
 
     const fromStr = format(activeRange.from, 'yyyy-MM-dd');
     const toStr = format(activeRange.to, 'yyyy-MM-dd');
-    
-    const rangeSales = dailySales.filter(s => {
+
+    const rangeSales = dailySales.filter((s) => {
       const saleDate = s.date?.split('T')[0] || s.date;
       return saleDate >= fromStr && saleDate <= toStr;
     });
-    
+
     return rangeSales.reduce((acc, s) => ({
       sales: acc.sales + (s.total_sales || 0),
       tickets: acc.tickets + (s.total_tickets || 0),
@@ -366,7 +366,7 @@ export default function Dashboard() {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth(); // 0-11
-    
+
     // Calendario retail basado en semanas
     const retailCalendar = {
       0: { start: new Date(currentYear - 1, 11, 29), end: new Date(currentYear, 1, 1) },
@@ -382,13 +382,13 @@ export default function Dashboard() {
       10: { start: new Date(currentYear, 10, 2), end: new Date(currentYear, 10, 29) },
       11: { start: new Date(currentYear, 10, 30), end: new Date(currentYear + 1, 0, 2) }
     };
-    
+
     const retailMonthStart = retailCalendar[currentMonth].start;
     const gregorianStart = startOfMonth(now);
-    
+
     // Determinar rango: si hay filtro activo, usarlo; si no, según modo
     let fromDate, toDate;
-    
+
     if (weekFilter?.from && weekFilter?.to) {
       fromDate = weekFilter.from;
       toDate = weekFilter.to;
@@ -400,15 +400,15 @@ export default function Dashboard() {
       fromDate = gregorianMode ? gregorianStart : retailMonthStart;
       toDate = now;
     }
-    
+
     const fromStr = format(fromDate, 'yyyy-MM-dd');
     const toStr = format(toDate, 'yyyy-MM-dd');
-    
-    const monthSales = dailySales.filter(s => {
+
+    const monthSales = dailySales.filter((s) => {
       const saleDate = s.date?.split('T')[0] || s.date;
       return saleDate >= fromStr && saleDate <= toStr;
     });
-    
+
     return monthSales.reduce((acc, s) => ({
       sales: acc.sales + (s.total_sales || 0),
       tickets: acc.tickets + (s.total_tickets || 0),
@@ -432,7 +432,7 @@ export default function Dashboard() {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth(); // 0-11
-    
+
     // Calendario retail basado en semanas
     const retailCalendar = {
       0: { start: new Date(currentYear - 1, 11, 29), end: new Date(currentYear, 1, 1) },
@@ -448,13 +448,13 @@ export default function Dashboard() {
       10: { start: new Date(currentYear, 10, 2), end: new Date(currentYear, 10, 29) },
       11: { start: new Date(currentYear, 10, 30), end: new Date(currentYear + 1, 0, 2) }
     };
-    
+
     const retailMonthStart = retailCalendar[currentMonth].start;
     const gregorianStart = startOfMonth(now);
-    
+
     // Determinar rango a mostrar: según filtros o modo
     let startDate, endDate;
-    
+
     if (weekFilter?.from && weekFilter?.to) {
       // Filtro de semana aplicado
       startDate = weekFilter.from;
@@ -468,7 +468,7 @@ export default function Dashboard() {
       startDate = gregorianMode ? gregorianStart : retailMonthStart;
       endDate = now;
     }
-    
+
     // Generar días del rango
     const currentDays = eachDayOfInterval({ start: startDate, end: endDate });
     const maxDays = currentDays.length;
@@ -552,7 +552,7 @@ export default function Dashboard() {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth(); // 0-11
-    
+
     // Calendario retail basado en semanas
     const retailCalendar = {
       0: { start: new Date(currentYear - 1, 11, 29), end: new Date(currentYear, 1, 1) },
@@ -568,38 +568,38 @@ export default function Dashboard() {
       10: { start: new Date(currentYear, 10, 2), end: new Date(currentYear, 10, 29) },
       11: { start: new Date(currentYear, 10, 30), end: new Date(currentYear + 1, 0, 2) }
     };
-    
+
     // Determinar inicio/fin según modo
     const monthStart = gregorianMode ? startOfMonth(now) : retailCalendar[currentMonth].start;
     const monthEnd = gregorianMode ? endOfMonth(now) : retailCalendar[currentMonth].end;
     const totalDays = differenceInDays(monthEnd, monthStart) + 1;
-    
+
     // Usar SOLO datos del período según modo
-    const monthSales = dailySales.filter(s => {
+    const monthSales = dailySales.filter((s) => {
       const saleDate = s.date?.split('T')[0] || s.date;
       const saleDateObj = new Date(saleDate);
       return saleDateObj >= monthStart && saleDateObj <= now;
     });
-    
+
     // Calcular ventas acumuladas del mes
     const monthTotals = monthSales.reduce((acc, s) => ({
       sales: acc.sales + (s.total_sales || 0),
       transactions: acc.transactions + (s.total_transactions || 0)
     }), { sales: 0, transactions: 0 });
-    
+
     // Días transcurridos hasta HOY
     const daysElapsed = differenceInDays(now, monthStart) + 1;
     const daysRemaining = totalDays - daysElapsed;
 
     // Promedio diario REAL del mes
     const dailyAvgSales = daysElapsed > 0 ? monthTotals.sales / daysElapsed : 0;
-    
+
     // Proyección = venta actual + (promedio diario × días restantes)
-    const projectedSales = monthTotals.sales + (dailyAvgSales * daysRemaining);
-    
+    const projectedSales = monthTotals.sales + dailyAvgSales * daysRemaining;
+
     // Brecha = lo que falta vender
     const salesGap = currentBudget.sales_budget - monthTotals.sales;
-    
+
     // Venta diaria requerida para alcanzar meta
     const requiredDailySales = daysRemaining > 0 ? salesGap / daysRemaining : 0;
 
@@ -609,14 +609,14 @@ export default function Dashboard() {
     // Datos para gráfica de proyección
     const projectionData = [];
     let accumulated = 0;
-    
+
     // Días reales con ventas
     for (let i = 1; i <= daysElapsed; i++) {
-      const daySale = monthSales.find(s => new Date(s.date).getDate() === i);
+      const daySale = monthSales.find((s) => new Date(s.date).getDate() === i);
       accumulated += daySale?.total_sales || 0;
       projectionData.push({ day: `Día ${i}`, real: accumulated, proyectado: null });
     }
-    
+
     // Proyección días restantes
     for (let i = 1; i <= daysRemaining; i++) {
       accumulated += dailyAvgSales;
@@ -656,10 +656,10 @@ export default function Dashboard() {
   // Calcular ticket promedio para el rango filtrado (tarjetas y gráficas)
   const avgTicket = totals.transactions > 0 ? totals.sales / totals.transactions : 0;
   const filteredAvgTicket = filteredTotals.transactions > 0 ? filteredTotals.sales / filteredTotals.transactions : 0;
-  
+
   // Calcular ticket promedio ACUMULADO del mes retail (para resumen al final)
   const monthAvgTicket = monthTotals.transactions > 0 ? monthTotals.sales / monthTotals.transactions : 0;
-  
+
   const comparisonAvgTicket = comparisonTotals && comparisonTotals.transactions > 0 ?
   comparisonTotals.sales / comparisonTotals.transactions :
   0;
@@ -680,7 +680,7 @@ export default function Dashboard() {
       toStr = format(now, 'yyyy-MM-dd');
     }
 
-    return dailySales.filter(s => {
+    return dailySales.filter((s) => {
       const d = s.date?.split('T')[0] || s.date;
       return d >= fromStr && d <= toStr;
     }).reduce((acc, s) => ({
@@ -694,13 +694,13 @@ export default function Dashboard() {
   // Publicar datos al contexto de Nova
   useEffect(() => {
     if (!setPageData || !selectedStore) return;
-    const storeName = STORES.find(s => s.code === selectedStore)?.name || selectedStore;
-    const avgTkt = gregorianMonthTotals.transactions > 0 
-      ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0;
-    const compliance = currentBudget?.sales_budget 
-      ? (gregorianMonthTotals.sales / currentBudget.sales_budget * 100).toFixed(1) : null;
+    const storeName = STORES.find((s) => s.code === selectedStore)?.name || selectedStore;
+    const avgTkt = gregorianMonthTotals.transactions > 0 ?
+    gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0;
+    const compliance = currentBudget?.sales_budget ?
+    (gregorianMonthTotals.sales / currentBudget.sales_budget * 100).toFixed(1) : null;
     const proj = projections;
-    
+
     setPageData({
       page: 'Dashboard',
       store: storeName,
@@ -719,8 +719,8 @@ export default function Dashboard() {
       venta_diaria_requerida: proj?.requiredDailySales || 0,
       dias_restantes: proj?.daysRemaining || 0,
       promedio_diario: proj?.dailyAvgSales || 0,
-      cajeros_activos: cashiers.filter(c => c.is_active).length,
-      total_cajeros: cashiers.length,
+      cajeros_activos: cashiers.filter((c) => c.is_active).length,
+      total_cajeros: cashiers.length
     });
   }, [gregorianMonthTotals, currentBudget, projections, selectedStore, cashiers, setPageData]);
 
@@ -808,7 +808,7 @@ export default function Dashboard() {
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
             {!showComparison && <WeekFilter onWeekChange={(range) => {setWeekFilter(range);setDateRange(null);setGregorianMode(false);}} multiSelect={true} />}
             <DateFilter
-              dateRange={showComparison ? (weekFilter || dateRange || { from: startOfMonth(new Date()), to: new Date() }) : dateRange}
+              dateRange={showComparison ? weekFilter || dateRange || { from: startOfMonth(new Date()), to: new Date() } : dateRange}
               onDateChange={(range) => {
                 if (showComparison) {
                   setDateRange(range);
@@ -823,13 +823,13 @@ export default function Dashboard() {
               buttonClassName={showComparison ? "border-blue-300 hover:border-blue-500" : undefined} />
 
 
-            {showComparison && (
-              <DateFilter
-                dateRange={comparisonRange || { from: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1), to: new Date(new Date().getFullYear(), new Date().getMonth(), 0) }}
-                onDateChange={setComparisonRange}
-                buttonClassName="border-pink-300 hover:border-pink-500"
-                buttonText="📅 Comparar con" />
-            )}
+            {showComparison &&
+            <DateFilter
+              dateRange={comparisonRange || { from: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1), to: new Date(new Date().getFullYear(), new Date().getMonth(), 0) }}
+              onDateChange={setComparisonRange}
+              buttonClassName="border-pink-300 hover:border-pink-500"
+              buttonText="📅 Comparar con" />
+            }
           </div>
         </div>
 
@@ -878,24 +878,24 @@ export default function Dashboard() {
             {/* Retail Week Budget - PRESUPUESTO DEL DÍA (LO MÁS IMPORTANTE) */}
             {!showComparison &&
           <RetailWeekBudgetCard
-          dailySales={dailySales}
-          activeBudget={currentBudget}
-          dailyBudgets={dailyBudgets}
-          storeId={selectedStore}
-          formatCurrency={formatCurrency}
-          currentDateRange={weekFilter || dateRange}
-          gregorianMode={gregorianMode}
-          onConfigureBudget={() => setShowMonthlyBudget(true)}
-          onExpandChange={(expanded) => {
-            if (expanded) {
-              setTimeout(() => {
-                const section = document.getElementById('budget-expanded-content');
-                if (section) {
-                  section.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }, 400);
-            }
-          }} />
+            dailySales={dailySales}
+            activeBudget={currentBudget}
+            dailyBudgets={dailyBudgets}
+            storeId={selectedStore}
+            formatCurrency={formatCurrency}
+            currentDateRange={weekFilter || dateRange}
+            gregorianMode={gregorianMode}
+            onConfigureBudget={() => setShowMonthlyBudget(true)}
+            onExpandChange={(expanded) => {
+              if (expanded) {
+                setTimeout(() => {
+                  const section = document.getElementById('budget-expanded-content');
+                  if (section) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }, 400);
+              }
+            }} />
 
           }
 
@@ -1106,16 +1106,16 @@ export default function Dashboard() {
 
             {/* Nova AI Strip */}
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              className="relative overflow-hidden rounded-2xl p-4 sm:p-5 mb-6"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.75) 100%)',
-                backdropFilter: 'blur(32px)',
-                border: '1px solid rgba(0,0,0,0.06)',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.04)'
-              }}>
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="relative overflow-hidden rounded-2xl p-4 sm:p-5 mb-6 hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.75) 100%)',
+              backdropFilter: 'blur(32px)',
+              border: '1px solid rgba(0,0,0,0.06)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.04)'
+            }}>
               
               <div className="absolute inset-0 opacity-30 blur-3xl" style={{ background: 'linear-gradient(135deg, #ec489320, transparent 70%)', pointerEvents: 'none' }} />
               
@@ -1127,9 +1127,9 @@ export default function Dashboard() {
                     <h3 className="text-sm font-semibold text-slate-700">Nova · Insight Ejecutivo</h3>
                   </div>
                   <p className="text-[13px] text-slate-600 leading-relaxed font-medium">
-                    {gregorianMonthTotals.sales > 0 
-                      ? `Acumulas ${formatCurrency(gregorianMonthTotals.sales)} en ventas del mes. Proyección de cierre: ${formatCurrency((gregorianMonthTotals.sales / new Date().getDate()) * 30)}. Ticket promedio: ${formatCurrency(gregorianMonthTotals.transactions > 0 ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0)}`
-                      : 'Sin datos de ventas aún. Comienza a registrar para ver insights ejecutivos.'}
+                    {gregorianMonthTotals.sales > 0 ?
+                  `Acumulas ${formatCurrency(gregorianMonthTotals.sales)} en ventas del mes. Proyección de cierre: ${formatCurrency(gregorianMonthTotals.sales / new Date().getDate() * 30)}. Ticket promedio: ${formatCurrency(gregorianMonthTotals.transactions > 0 ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0)}` :
+                  'Sin datos de ventas aún. Comienza a registrar para ver insights ejecutivos.'}
                   </p>
                 </div>
               </div>
@@ -1137,70 +1137,70 @@ export default function Dashboard() {
 
             {/* Premium KPI Cards */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
               
               <PremiumMetricCard
-                title="Ventas Totales"
-                value={gregorianMonthTotals.sales}
-                budget={currentBudget.sales_budget}
-                icon={DollarSign}
-                color="#ef4444"
-                comparisonValue={comparisonTotals?.sales}
-                showComparison={showComparison}
-                onClick={() => {
-                  const newMetric = activeMetric === 'sales' ? null : 'sales';
-                  setActiveMetric(newMetric);
-                }}
-                isActive={activeMetric === 'sales'}
-              />
+              title="Ventas Totales"
+              value={gregorianMonthTotals.sales}
+              budget={currentBudget.sales_budget}
+              icon={DollarSign}
+              color="#ef4444"
+              comparisonValue={comparisonTotals?.sales}
+              showComparison={showComparison}
+              onClick={() => {
+                const newMetric = activeMetric === 'sales' ? null : 'sales';
+                setActiveMetric(newMetric);
+              }}
+              isActive={activeMetric === 'sales'} />
+            
               
               <PremiumMetricCard
-                title="Ticket Promedio"
-                value={gregorianMonthTotals.transactions > 0 ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0}
-                budget={currentBudget.tickets_budget}
-                icon={Receipt}
-                color="#3b82f6"
-                comparisonValue={comparisonAvgTicket}
-                showComparison={showComparison}
-                onClick={() => {
-                  const newMetric = activeMetric === 'tickets' ? null : 'tickets';
-                  setActiveMetric(newMetric);
-                }}
-                isActive={activeMetric === 'tickets'}
-              />
+              title="Ticket Promedio"
+              value={gregorianMonthTotals.transactions > 0 ? gregorianMonthTotals.sales / gregorianMonthTotals.transactions : 0}
+              budget={currentBudget.tickets_budget}
+              icon={Receipt}
+              color="#3b82f6"
+              comparisonValue={comparisonAvgTicket}
+              showComparison={showComparison}
+              onClick={() => {
+                const newMetric = activeMetric === 'tickets' ? null : 'tickets';
+                setActiveMetric(newMetric);
+              }}
+              isActive={activeMetric === 'tickets'} />
+            
               
               <PremiumMetricCard
-                title="Transacciones"
-                value={gregorianMonthTotals.transactions}
-                budget={currentBudget.transactions_budget}
-                icon={Zap}
-                color="#8b5cf6"
-                comparisonValue={comparisonTotals?.transactions}
-                showComparison={showComparison}
-                onClick={() => {
-                  const newMetric = activeMetric === 'transactions' ? null : 'transactions';
-                  setActiveMetric(newMetric);
-                }}
-                isActive={activeMetric === 'transactions'}
-              />
+              title="Transacciones"
+              value={gregorianMonthTotals.transactions}
+              budget={currentBudget.transactions_budget}
+              icon={Zap}
+              color="#8b5cf6"
+              comparisonValue={comparisonTotals?.transactions}
+              showComparison={showComparison}
+              onClick={() => {
+                const newMetric = activeMetric === 'transactions' ? null : 'transactions';
+                setActiveMetric(newMetric);
+              }}
+              isActive={activeMetric === 'transactions'} />
+            
               
               <PremiumMetricCard
-                title="Sugeridos"
-                value={gregorianMonthTotals.suggested}
-                budget={currentBudget.suggested_budget}
-                icon={Gift}
-                color="#f59e0b"
-                comparisonValue={comparisonTotals?.suggested}
-                showComparison={showComparison}
-                onClick={() => {
-                  const newMetric = activeMetric === 'suggested' ? null : 'suggested';
-                  setActiveMetric(newMetric);
-                }}
-                isActive={activeMetric === 'suggested'}
-              />
+              title="Sugeridos"
+              value={gregorianMonthTotals.suggested}
+              budget={currentBudget.suggested_budget}
+              icon={Gift}
+              color="#f59e0b"
+              comparisonValue={comparisonTotals?.suggested}
+              showComparison={showComparison}
+              onClick={() => {
+                const newMetric = activeMetric === 'suggested' ? null : 'suggested';
+                setActiveMetric(newMetric);
+              }}
+              isActive={activeMetric === 'suggested'} />
+            
             </motion.div>
 
             {/* Detail Panel */}
@@ -1208,16 +1208,16 @@ export default function Dashboard() {
               {activeMetric && !activeMetric.includes('_comp') &&
             <div id="detail-panel">
                   <DetailPanel
-                  metric={activeMetric}
-                  data={totals}
-                  chartData={chartData.map((d) => ({
-                   ...d,
-                   avgTicket: d.tickets > 0 ? d.ventas / d.tickets : 0
-                  }))}
-                  onClose={() => setActiveMetric(null)}
-                  formatCurrency={formatCurrency}
-                  shiftData={shiftRecords}
-                  gregorianTotal={activeMetric === 'sales' ? gregorianMonthTotals.sales : undefined} />
+                metric={activeMetric}
+                data={totals}
+                chartData={chartData.map((d) => ({
+                  ...d,
+                  avgTicket: d.tickets > 0 ? d.ventas / d.tickets : 0
+                }))}
+                onClose={() => setActiveMetric(null)}
+                formatCurrency={formatCurrency}
+                shiftData={shiftRecords}
+                gregorianTotal={activeMetric === 'sales' ? gregorianMonthTotals.sales : undefined} />
 
                 </div>
             }
@@ -1461,12 +1461,12 @@ export default function Dashboard() {
                           Ventas Diarias {showComparison && '- Comparativo'}
                         </CardTitle>
                       </div>
-                      <ChartInsight 
-                        data={chartData} 
-                        metric="ventas"
-                        formatCurrency={formatCurrency}
-                        comparisonData={showComparison ? comparisonTotals : null}
-                      />
+                      <ChartInsight
+                    data={chartData}
+                    metric="ventas"
+                    formatCurrency={formatCurrency}
+                    comparisonData={showComparison ? comparisonTotals : null} />
+                  
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1522,12 +1522,12 @@ export default function Dashboard() {
                         <Zap className="w-4 h-4 text-purple-500" />
                         Transacciones vs Ventas {showComparison && '- Comparativo'}
                       </CardTitle>
-                      <ChartInsight 
-                        data={chartData} 
-                        metric="transactions"
-                        formatCurrency={(v) => v.toLocaleString()}
-                        comparisonData={showComparison ? comparisonTotals : null}
-                      />
+                      <ChartInsight
+                    data={chartData}
+                    metric="transactions"
+                    formatCurrency={(v) => v.toLocaleString()}
+                    comparisonData={showComparison ? comparisonTotals : null} />
+                  
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1563,12 +1563,12 @@ export default function Dashboard() {
                         <Receipt className="w-4 h-4 text-blue-500" />
                         Ticket Promedio {showComparison && '- Comparativo'}
                       </CardTitle>
-                      <ChartInsight 
-                        data={chartData} 
-                        metric="ticketPromedio"
-                        formatCurrency={formatCurrency}
-                        comparisonData={showComparison ? comparisonTotals : null}
-                      />
+                      <ChartInsight
+                    data={chartData}
+                    metric="ticketPromedio"
+                    formatCurrency={formatCurrency}
+                    comparisonData={showComparison ? comparisonTotals : null} />
+                  
                     </CardHeader>
                     <CardContent>
                       <div className="h-64">
@@ -1613,41 +1613,41 @@ export default function Dashboard() {
 
                 {/* Third Row - Velocidad de Crecimiento */}
                 <GrowthVelocityChart
-                dailyTrend={chartData.map((d) => ({ ...d, sales: d.ventas }))}
-                budget={currentBudget?.sales_budget || 0}
-                formatCurrency={formatCurrency} />
+              dailyTrend={chartData.map((d) => ({ ...d, sales: d.ventas }))}
+              budget={currentBudget?.sales_budget || 0}
+              formatCurrency={formatCurrency} />
 
                 {/* Weather Impact Analysis - NUEVO */}
-                {weatherData && !loadingWeather && (
-                <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                >
+                {weatherData && !loadingWeather &&
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}>
+              
                     <WeatherSalesImpactChart
-                  weatherData={weatherData}
-                  dailySales={dailySales}
-                  formatCurrency={formatCurrency} />
+                weatherData={weatherData}
+                dailySales={dailySales}
+                formatCurrency={formatCurrency} />
                   </motion.div>
-                )}
+            }
 
-                {loadingWeather && (
-                <Card className="bg-gradient-to-br from-sky-50 to-blue-50 border-0 shadow-lg">
+                {loadingWeather &&
+            <Card className="bg-gradient-to-br from-sky-50 to-blue-50 border-0 shadow-lg">
                     <CardContent className="p-12 text-center">
                       <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="w-16 h-16 mx-auto mb-4"
-                  >
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  className="w-16 h-16 mx-auto mb-4">
+                  
                         <Activity className="w-16 h-16 text-blue-500" />
                       </motion.div>
                       <p className="text-gray-600 font-medium">Cargando datos del clima...</p>
                       <p className="text-gray-400 text-sm mt-2">Analizando 90 días de historia meteorológica</p>
                     </CardContent>
                   </Card>
-                )}
+            }
                 </motion.div>
-                }
+          }
 
 
 
