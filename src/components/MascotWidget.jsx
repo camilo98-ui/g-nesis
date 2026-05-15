@@ -407,9 +407,31 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
       const businessTerms = ['galletería', 'bebidas', 'helado', 'producto', 'vende', 'venta', 'participación', 'sabor', 'cookie', 'chocolate', 'wafer', 'cracker', 'departamento', 'categoría', 'qué vende', 'cuánto vende', 'performance', 'sección'];
       const hasBusinessTerm = businessTerms.some(term => userText.toLowerCase().includes(term));
       
-      if (hasBusinessTerm && pageData?.storeCode) {
+      // Primero, buscar en los datos de productos cargados en SalesReportView
+      if (pageData?.products && pageData.products.length > 0) {
+        const searchLower = userText.toLowerCase();
+        const matchedProducts = pageData.products.filter(p => 
+          p.name?.toLowerCase().includes(searchLower) ||
+          p.section?.toLowerCase().includes(searchLower) ||
+          p.department?.toLowerCase().includes(searchLower)
+        );
+        
+        if (matchedProducts.length > 0) {
+          const productsInfo = matchedProducts.slice(0, 5).map(p => {
+            const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
+            return `PRODUCTO: ${p.name} (${p.department} › ${p.section}) → Venta: ${fmt(p.sales)} | Participación: ${p.participation?.toFixed(2)}% | Unidades: ${p.units || 0}`;
+          }).join('\n');
+          
+          enrichedPrompt = contextPrompt.replace(
+            'CONVERSACIÓN HASTA AHORA:',
+            `PRODUCTOS ENCONTRADOS EN LA PANTALLA ABIERTA:\n${productsInfo}\n\nCONVERSACIÓN HASTA AHORA:`
+          );
+        }
+      }
+      
+      // Si no hay match en productos locales, intentar búsqueda global
+      if (hasBusinessTerm && pageData?.storeCode && enrichedPrompt === contextPrompt) {
         try {
-          // Búsqueda global en todas las tablas
           const globalSearchRes = await base44.functions.invoke('globalSearchParticipation', {
             query: userText,
             store_code: pageData.storeCode,
@@ -429,10 +451,7 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
             
             enrichedPrompt = contextPrompt.replace(
               'CONVERSACIÓN HASTA AHORA:',
-              `ÍNDICE GLOBAL DE BÚSQUEDA:
-${searchResults}
-
-CONVERSACIÓN HASTA AHORA:`
+              `ÍNDICE GLOBAL DE BÚSQUEDA:\n${searchResults}\n\nCONVERSACIÓN HASTA AHORA:`
             );
           }
         } catch (searchErr) {
