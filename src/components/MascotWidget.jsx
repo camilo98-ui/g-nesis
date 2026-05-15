@@ -391,78 +391,110 @@ ${d.kpi_proyeccion ? `- Valor: ${d.kpi_proyeccion} ${d.kpi_proyeccion_meta ? ` �
       }).join('\n')}`
       : '';
 
-    const contextPrompt = `${SYSTEM_PROMPT}
+    const SYSTEM_PROMPT_ANALYTICS = `You are NOVA, an enterprise-grade business intelligence AI.
 
-SECCIÓN ACTIVA: ${pageCtx.name} — ${pageCtx.focus}
+You operate as:
+✓ Chief Analytics Officer — Deep understanding of business metrics
+✓ Financial Strategist — EBITDA, margins, cash flow interpretation
+✓ Predictive Analyst — Trend forecasting and anomaly detection
+✓ Operations Expert — KPI optimization and process improvement
+✓ Executive Advisor — Strategic, data-driven recommendations
+
+CORE PHILOSOPHY:
+- Every number tells a story. Find the narrative.
+- Connect dots between metrics. Identify causation.
+- Think like a CFO. Communicate like an executive.
+- Always ground insights in data and logic.
+- Be proactive in identifying risks and opportunities.
+
+COMMUNICATION PRINCIPLES:
+- Speak with authority backed by numbers
+- Explain reasoning clearly
+- Prioritize actionable insights
+- Flag anomalies and risks immediately
+- Compare periods (daily, weekly, monthly trends)
+- Quantify impact and implications
+- End with strategic recommendations
+
+ANALYTICAL FRAMEWORK:
+1. Identify the core question
+2. Extract relevant metrics
+3. Analyze historical patterns
+4. Detect anomalies or deviations
+5. Determine root causes
+6. Assess risk level
+7. Generate recommendations
+8. Forecast impact
+
+You speak Spanish professionally. Be clear, intelligent, analytical, and results-focused.`;
+
+    const contextPrompt = `${SYSTEM_PROMPT_ANALYTICS}
+
+ACTIVE CONTEXT: ${pageCtx.name}
 ${dataBlock}${sectionsSummary}
 
-CONVERSACIÓN HASTA AHORA:
+CONVERSATION:
 ${newMessages.map(m => `${m.role === 'user' ? 'Usuario' : 'Nova'}: ${m.content}`).join('\n')}
 
-Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa los números exactos del bloque de datos y las secciones abiertas. Adapta la longitud al contexto — corto si es simple, más desarrollado si lo requiere. Sin relleno.`;
+Analyze now. Think like a business analyst. Ground every statement in data. Explain reasoning. Identify patterns. Provide recommendations. Be intelligent, professional, and precise.`;
 
     try {
-      // Búsqueda global: detectar términos de negocio y buscar en índice
+      // Detect if query is analytical/business question
+      const analyticalTerms = ['análisis', 'tendencia', 'proyección', 'brecha', 'cumplimiento', 'ebitda', 'margen', 'riesgo', 'anomalía', 'comparar', 'vs', 'vs.', 'impacto', 'estrategia', 'recomendación', 'diagnóstico', 'forecast', 'variación', 'cambio', 'crecimiento', 'caída', 'rendimiento'];
+      const isAnalyticalQuery = analyticalTerms.some(term => userText.toLowerCase().includes(term));
+
       let enrichedPrompt = contextPrompt;
-      const businessTerms = ['galletería', 'bebidas', 'helado', 'producto', 'vende', 'venta', 'participación', 'sabor', 'cookie', 'chocolate', 'wafer', 'cracker', 'departamento', 'categoría', 'qué vende', 'cuánto vende', 'performance', 'sección'];
-      const hasBusinessTerm = businessTerms.some(term => userText.toLowerCase().includes(term));
-      
-      // Primero, buscar en los datos de productos cargados en SalesReportView
-      if (pageData?.products && pageData.products.length > 0) {
-        const searchLower = userText.toLowerCase();
-        const matchedProducts = pageData.products.filter(p => 
-          p.name?.toLowerCase().includes(searchLower) ||
-          p.section?.toLowerCase().includes(searchLower) ||
-          p.department?.toLowerCase().includes(searchLower)
-        );
-        
-        if (matchedProducts.length > 0) {
-          const productsInfo = matchedProducts.slice(0, 5).map(p => {
-            const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
-            return `PRODUCTO: ${p.name} (${p.department} › ${p.section}) → Venta: ${fmt(p.sales)} | Participación: ${p.participation?.toFixed(2)}% | Unidades: ${p.units || 0}`;
-          }).join('\n');
-          
-          enrichedPrompt = contextPrompt.replace(
-            'CONVERSACIÓN HASTA AHORA:',
-            `PRODUCTOS ENCONTRADOS EN LA PANTALLA ABIERTA:\n${productsInfo}\n\nCONVERSACIÓN HASTA AHORA:`
-          );
-        }
-      }
-      
-      // Si no hay match en productos locales, intentar búsqueda global
-      if (hasBusinessTerm && pageData?.storeCode && enrichedPrompt === contextPrompt) {
+      let response;
+
+      // For analytical queries, use advanced intelligence function
+      if (isAnalyticalQuery && pageData?.storeCode) {
         try {
-          const globalSearchRes = await base44.functions.invoke('globalSearchParticipation', {
-            query: userText,
-            store_code: pageData.storeCode,
-            limit: 10
+          const intelligenceRes = await base44.functions.invoke('novaIntelligence', {
+            userQuery: userText,
+            storeCode: pageData.storeCode,
+            pageData,
+            businessContext: { messages: newMessages }
           });
+
+          if (intelligenceRes.data?.analysis) {
+            response = intelligenceRes.data.analysis;
+          } else {
+            // Fallback to standard LLM
+            response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt, model: 'claude_sonnet_4_6' });
+          }
+        } catch (analyzeErr) {
+          // Fallback to standard prompt
+          response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt, model: 'claude_sonnet_4_6' });
+        }
+      } else {
+        // For product/section queries, use standard approach
+        if (pageData?.products && pageData.products.length > 0) {
+          const searchLower = userText.toLowerCase();
+          const matchedProducts = pageData.products.filter(p => 
+            p.name?.toLowerCase().includes(searchLower) ||
+            p.section?.toLowerCase().includes(searchLower) ||
+            p.department?.toLowerCase().includes(searchLower)
+          );
           
-          if (globalSearchRes.data?.found && globalSearchRes.data?.results?.length > 0) {
-            const searchResults = globalSearchRes.data.results.map(r => {
-              if (r.type === 'department') {
-                return `CATEGORÍA: ${r.name} → Venta Total: $${r.total_sales.toLocaleString('es-CO')} | ${r.product_count} productos | Participación promedio: ${r.avg_participation}% | Tendencia: ${r.trend > 0 ? '+' : ''}${r.trend}%`;
-              } else if (r.type === 'section') {
-                return `SECCIÓN: ${r.name} (${r.department}) → Venta: $${r.total_sales.toLocaleString('es-CO')} | ${r.product_count} productos | Participación: ${r.avg_participation}%`;
-              } else {
-                return `PRODUCTO: ${r.name} (${r.department} › ${r.section}) → Venta Total: $${r.total_sales.toLocaleString('es-CO')} | ${r.total_units} unidades | Participación promedio: ${r.avg_participation}% | Tendencia: ${r.trend > 0 ? '+' : ''}${r.trend}%`;
-              }
+          if (matchedProducts.length > 0) {
+            const productsInfo = matchedProducts.slice(0, 5).map(p => {
+              const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
+              return `PRODUCTO: ${p.name} (${p.department} › ${p.section}) → Venta: ${fmt(p.sales)} | Participación: ${p.participation?.toFixed(2)}% | Unidades: ${p.units || 0}`;
             }).join('\n');
             
             enrichedPrompt = contextPrompt.replace(
-              'CONVERSACIÓN HASTA AHORA:',
-              `ÍNDICE GLOBAL DE BÚSQUEDA:\n${searchResults}\n\nCONVERSACIÓN HASTA AHORA:`
+              'CONVERSACIÓN:',
+              `PRODUCTOS ENCONTRADOS:\n${productsInfo}\n\nCONVERSACIÓN:`
             );
           }
-        } catch (searchErr) {
-          // Continuar sin datos de búsqueda si hay error
         }
+
+        response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt, model: 'claude_sonnet_4_6' });
       }
-      
-      const response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt });
+
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Error de conexión. Reintenta.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Error de análisis. Reintenta con otra pregunta.' }]);
     } finally {
       setIsLoading(false);
     }
