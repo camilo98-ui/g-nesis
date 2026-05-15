@@ -909,11 +909,11 @@ export default function HomeWorkspace({
                       <div className="flex items-end gap-0 w-full" style={{ minHeight: 44 }}>
                         {/* KPI texto */}
                         <div className="flex-shrink-0 flex flex-col justify-end">
-                          <p className="text-sm sm:text-lg font-black leading-none tabular-nums" style={{ color: '#0f172a' }}>
-                            {c.prefix && <span className="mr-0.5 font-bold" style={{ color: c.accent }}>{c.prefix}</span>}
+                          <p className="text-sm sm:text-base font-semibold leading-none tabular-nums tracking-tight" style={{ color: c.accent, opacity: 0.9 }}>
+                            {c.prefix && <span className="mr-0.5 text-[11px] sm:text-[13px]">{c.prefix}</span>}
                             {c.value}
                           </p>
-                          <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium mt-1">{c.sub}</p>
+                          <p className="text-[8px] sm:text-[9px] text-slate-300 font-medium mt-1.5 tracking-wide">{c.sub}</p>
                         </div>
                         {/* Sparkline desde justo después del número hasta el borde */}
                         <div className="flex-1 min-w-0" style={{ height: 44 }}>
