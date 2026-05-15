@@ -5,6 +5,7 @@ import { X, Send, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
+import NovaAlerts from '@/components/NovaAlerts';
 
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
 
@@ -187,8 +188,10 @@ export default function MascotWidget() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [bubbleMsg, setBubbleMsg] = useState('');
+  const [alerts, setAlerts] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const alertCheckRef = useRef(null);
 
   const path = location?.pathname || '/';
   const pageCtx = PAGE_CONTEXTS[path] || { name: 'App', focus: 'operaciones generales de la tienda.' };
@@ -232,6 +235,45 @@ export default function MascotWidget() {
   useEffect(() => { if (isOpen) setShowBubble(false); }, [isOpen]);
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isLoading]);
   useEffect(() => { if (isOpen) setTimeout(() => inputRef.current?.focus(), 250); }, [isOpen]);
+
+  // Sistema de alertas automáticas (cada 2 minutos)
+  useEffect(() => {
+    if (!pageData?.storeCode) return;
+
+    const checkAlerts = async () => {
+      try {
+        const res = await base44.functions.invoke('checkStoreAlerts', {
+          store_id: pageData.store,
+          store_code: pageData.storeCode
+        });
+
+        if (res.data?.alerts && res.data.alerts.length > 0) {
+          const newAlerts = res.data.alerts.map((a, i) => ({
+            id: `${Date.now()}-${i}`,
+            ...a
+          }));
+          
+          setAlerts(prev => [...prev, ...newAlerts]);
+
+          // Si hay alertas críticas, notificar a Nova
+          const critical = newAlerts.filter(a => a.severity === 'critical' || a.severity === 'positive');
+          if (critical.length > 0 && !isOpen) {
+            setBubbleMsg(`⚠️ ${critical[0].title}: ${critical[0].message}`);
+            setShowBubble(true);
+          }
+        }
+      } catch (error) {
+        // Error silencioso en verificación de alertas
+      }
+    };
+
+    checkAlerts();
+    alertCheckRef.current = setInterval(checkAlerts, 120000); // Cada 2 minutos
+
+    return () => {
+      if (alertCheckRef.current) clearInterval(alertCheckRef.current);
+    };
+  }, [pageData?.storeCode, pageData?.store, isOpen]);
 
   const sendMessage = async (text) => {
     const userText = text || input.trim();
@@ -392,6 +434,8 @@ CONVERSACIÓN HASTA AHORA:`
 
   return (
     <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end gap-0">
+      {/* Alerts panel */}
+      <NovaAlerts alerts={alerts} onDismiss={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} />
 
       {/* ── Chat Panel ── */}
       <AnimatePresence>
