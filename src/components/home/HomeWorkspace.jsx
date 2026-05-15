@@ -499,12 +499,41 @@ export default function HomeWorkspace({
       ? ((last7Sales[0].total_sales || 0) - (last7Sales[last7Sales.length - 1].total_sales || 0)) / (last7Sales[last7Sales.length - 1].total_sales || 1) * 100
       : 0;
     
-    // Análisis de productos más vendidos
+    // Análisis de productos más vendidos con descripción
     const topProducts = salesReports.length > 0
       ? salesReports.sort((a, b) => (b.sales_amount || b.quantity || 0) - (a.sales_amount || a.quantity || 0)).slice(0, 15)
       : [];
+    
+    // Mapeo de descripciones de productos (galletería, bebidas, etc.)
+    const productDescriptions = {
+      'cookie': 'galleta/cookie',
+      'jar': 'frasco/recipiente',
+      'cookie jaar': 'galleta en frasco (Cookie Jaar)',
+      'bebida': 'bebida',
+      'helado': 'helado',
+      'chocolate': 'chocolate',
+      'wafer': 'galleta wafer',
+      'cracker': 'galleta salada',
+      'galleta': 'producto de galletería',
+      'café': 'bebida café',
+      'té': 'bebida té',
+      'jugo': 'bebida jugo'
+    };
+    
+    const getProductType = (name) => {
+      if (!name) return '';
+      const lower = name.toLowerCase();
+      for (let [key, desc] of Object.entries(productDescriptions)) {
+        if (lower.includes(key)) return desc;
+      }
+      return 'producto';
+    };
+    
     const topProductsList = topProducts.length > 0
-      ? topProducts.map((p, i) => `${i + 1}. ${p.product_name || 'Producto sin nombre'} - ${fmt(p.sales_amount || 0)}${p.quantity ? ` (${p.quantity} unidades)` : ''}`).join(' | ')
+      ? topProducts.map((p, i) => {
+        const type = getProductType(p.product_name);
+        return `${i + 1}. ${p.product_name || 'Producto'} (${type}) - ${fmt(p.sales_amount || 0)}${p.quantity ? ` (${p.quantity} unidades)` : ''}`;
+      }).join(' | ')
       : 'Sin datos de productos';
     
     // Análisis por categoría/departamento (galletería, bebidas, etc.)
@@ -585,15 +614,21 @@ export default function HomeWorkspace({
       // Equipo
       cajeros_activos: cashiers.length,
       
-      // Productos más vendidos (con detalles completos)
+      // Productos más vendidos (con detalles y descripción de qué son)
       top_products: topProductsList,
       top_products_count: topProducts.length,
-      top_5_products_list: productsDetail.map(p => `${p.name}: ${p.sales} (${p.quantity} unidades, ${p.percentage}% de ventas)`).join(' | '),
+      top_5_products_list: productsDetail.map(p => {
+        const type = getProductType(p.name);
+        return `${p.name} (${type}): ${p.sales} (${p.quantity} unidades, ${p.percentage}% de ventas)`;
+      }).join(' | '),
       top_5_products_participation: top5Participation.toFixed(1),
       
-      // Categorías/Departamentos (Galletería, Bebidas, etc.)
-      categories_summary: departmentSummary.map(d => `${d.name}: ${d.sales} (${d.percentage}% de ventas, ${d.productCount} productos)`).join(' | '),
-      top_categories: departmentSummary.slice(0, 5).map(d => `${d.name} - ${d.percentage}% (top producto: ${d.topProduct?.product_name || 'N/A'})`).join(' | '),
+      // Categorías/Departamentos (Galletería, Bebidas, etc.) con productos top identificados
+      categories_summary: departmentSummary.map(d => {
+        const topType = getProductType(d.topProduct?.product_name || '');
+        return `${d.name}: ${d.sales} (${d.percentage}% de ventas, ${d.productCount} productos) - top: ${d.topProduct?.product_name || 'N/A'} (${topType})`;
+      }).join(' | '),
+      top_categories: departmentSummary.slice(0, 5).map(d => `${d.name} - ${d.percentage}% (top: ${d.topProduct?.product_name} que es ${getProductType(d.topProduct?.product_name)})`).join(' | '),
       
       // Datos P&G - EBITDA y Márgenes
       pyg_ebitda_margin: ebitdaMargin,
