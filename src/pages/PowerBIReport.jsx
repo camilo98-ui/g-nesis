@@ -35,7 +35,7 @@ export default function PowerBIReport() {
         >
           <iframe
             title="Producto para llevar"
-            src="https://app.powerbi.com/reportEmbed?reportId=c158c2bb-3148-47f0-9ddb-a56ef1c3b366&autoAuth=true&ctid=common"
+            src="https://app.powerbi.com/reportEmbed?reportId=c158c2bb-3148-47f0-9ddb-a56ef1c3b366&autoAuth=true&ctid=29db183d-c"
             allowFullScreen
             style={{ width: '100%', height: '100%', border: 'none' }}
           />
