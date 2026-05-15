@@ -783,44 +783,99 @@ export default function HomeWorkspace({
               const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : (budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
               const gap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
               const isPos = gap >= 0;
+              const projPct = budgetData.monthProjectionCompliance ?? 0;
+
+              // Mini sparkline SVG inline
+              const Spark = ({ points, color }) => {
+                if (!points || points.length < 2) return null;
+                const max = Math.max(...points, 1);
+                const min = Math.min(...points, 0);
+                const range = max - min || 1;
+                const w = 64, h = 28;
+                const coords = points.map((v, i) => [
+                  (i / (points.length - 1)) * w,
+                  h - ((v - min) / range) * (h - 4) - 2
+                ]);
+                const d = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c[0].toFixed(1)},${c[1].toFixed(1)}`).join(' ');
+                return (
+                  <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" className="flex-shrink-0 opacity-70">
+                    <path d={d} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                );
+              };
+
+              // Generar sparklines desde ventas reales
+              const spark7 = [...todaySales]
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(-7)
+                .map(d => d.total_sales || 0);
+
+              const cards = [
+                {
+                  label: 'PPT del Día',
+                  value: fmt(pptVal),
+                  sub: budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0
+                    ? `+${budgetData.incrementPct}% recuperación`
+                    : 'meta diaria',
+                  accent: '#C21875',
+                  spark: spark7,
+                  delay: 0.05,
+                },
+                {
+                  label: 'Brecha del Mes',
+                  value: fmt(gap),
+                  sub: budgetData.monthlyBudget > 0
+                    ? `${isPos ? 'Sobre' : 'Bajo'} meta · ${Math.abs((gap / budgetData.monthlyBudget * 100)).toFixed(0)}%`
+                    : '',
+                  accent: isPos ? '#059669' : '#e11d48',
+                  spark: spark7,
+                  delay: 0.1,
+                  prefix: isPos ? '▲' : '▼',
+                },
+                {
+                  label: 'Proyección Cierre',
+                  value: `${projPct.toFixed(0)}%`,
+                  sub: `${fmt(budgetData.monthProjection)} / ${fmt(budgetData.monthlyBudget)}`,
+                  accent: '#7c3aed',
+                  spark: spark7,
+                  delay: 0.15,
+                },
+              ];
+
               return (
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  {/* PPT del Día */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.05 }}
-                    className="rounded-xl p-3 sm:p-4 bg-gradient-to-br from-rose-400/60 to-pink-400/60 border border-rose-300/30 backdrop-blur-sm">
-                    <p className="text-[9px] sm:text-[11px] font-bold text-white/80 uppercase tracking-widest mb-1 sm:mb-2">PPT del Día</p>
-                    <p className="text-xs sm:text-base font-black text-white leading-none mb-0.5 sm:mb-1">{fmt(pptVal)}</p>
-                    <p className="text-[8px] sm:text-[10px] text-white/60">
-                      {budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 ? `+${budgetData.incrementPct}% para recuperar` : 'vs ppt'}
-                    </p>
-                  </motion.div>
+                  {cards.map((c) => (
+                    <motion.div
+                      key={c.label}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: c.delay, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                      whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0,0,0,0.08)', transition: { duration: 0.18 } }}
+                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden"
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #F3F4F6',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',
+                      }}>
+                      {/* Top accent line */}
+                      <div className="absolute top-0 left-4 right-4 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c.accent}30, transparent)` }} />
 
-                  {/* Brecha del Mes */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="rounded-xl p-3 sm:p-4 bg-gradient-to-br from-emerald-400/60 to-teal-400/60 border border-emerald-300/30 backdrop-blur-sm">
-                    <p className="text-[9px] sm:text-[11px] font-bold text-white/80 uppercase tracking-widest mb-1 sm:mb-2">Brecha del Mes</p>
-                    <p className="text-xs sm:text-base font-black text-white leading-none mb-0.5 sm:mb-1">{isPos ? '📈' : '📉'} {fmt(gap)}</p>
-                    <p className="text-[8px] sm:text-[10px] text-white/60">
-                      {budgetData.monthlyBudget > 0 ? `${isPos ? 'Sobre meta: ' : 'Bajo meta: '}${Math.abs((gap / budgetData.monthlyBudget * 100)).toFixed(0)}%` : ''}
-                    </p>
-                  </motion.div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-1.5 truncate">{c.label}</p>
+                          <p className="text-sm sm:text-lg font-black leading-none tabular-nums truncate" style={{ color: c.accent }}>
+                            {c.prefix && <span className="text-[10px] sm:text-[13px] mr-0.5 font-bold">{c.prefix}</span>}
+                            {c.value}
+                          </p>
+                        </div>
+                        <div className="pt-4 hidden sm:block">
+                          <Spark points={c.spark} color={c.accent} />
+                        </div>
+                      </div>
 
-                  {/* Proyección Cierre */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 }}
-                    className="rounded-xl p-3 sm:p-4 bg-gradient-to-br from-indigo-400/60 to-blue-400/60 border border-indigo-300/30 backdrop-blur-sm">
-                    <p className="text-[9px] sm:text-[11px] font-bold text-white/80 uppercase tracking-widest mb-1 sm:mb-2">Proyección Cierre</p>
-                    <p className="text-xs sm:text-base font-black text-white leading-none mb-0.5 sm:mb-1">{budgetData.monthProjectionCompliance?.toFixed(0)}%</p>
-                    <p className="text-[8px] sm:text-[10px] text-white/60">{fmt(budgetData.monthProjection)} / {fmt(budgetData.monthlyBudget)}</p>
-                  </motion.div>
+                      <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium leading-snug truncate mt-0.5">{c.sub}</p>
+                    </motion.div>
+                  ))}
                 </div>
               );
             })()}
