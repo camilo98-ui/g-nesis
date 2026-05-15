@@ -311,7 +311,42 @@ ${newMessages.map(m => `${m.role === 'user' ? 'Usuario' : 'Nova'}: ${m.content}`
 Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa los números exactos del bloque de datos. Adapta la longitud al contexto — corto si es simple, más desarrollado si lo requiere. Sin relleno.`;
 
     try {
-      const response = await base44.integrations.Core.InvokeLLM({ prompt: contextPrompt });
+      // Detectar si el usuario pregunta por un producto y buscar en la BD
+      let enrichedPrompt = contextPrompt;
+      const productKeywords = ['producto', 'vende', 'venta', 'participación', 'sabor', 'cookie', 'bebida', 'helado', 'qué vende', 'cuánto vende', 'performance'];
+      const asksAboutProduct = productKeywords.some(kw => userText.toLowerCase().includes(kw));
+      
+      if (asksAboutProduct && pageData?.storeCode) {
+        try {
+          // Buscar el producto específico en la BD
+          const storeCode = pageData.storeCode;
+          const searchTerm = userText.split(/\s+/).slice(1).join(' ') || userText;
+          
+          const searchRes = await base44.functions.invoke('searchProductParticipation', {
+            searchTerm: searchTerm,
+            store_code: storeCode,
+            limit: 5
+          });
+          
+          if (searchRes.data?.found && searchRes.data?.results?.length > 0) {
+            const productInfo = searchRes.data.results.map(p => 
+              `${p.product_name} (${p.department}): $${p.total_sales.toLocaleString('es-CO')} en ${p.record_count} períodos · Participación promedio: ${p.avg_participation}% · Tendencia: ${p.trend > 0 ? '+' : ''}${p.trend}%`
+            ).join(' | ');
+            
+            enrichedPrompt = contextPrompt.replace(
+              'CONVERSACIÓN HASTA AHORA:',
+              `BÚSQUEDA DE PRODUCTO EN BD:
+${productInfo}
+
+CONVERSACIÓN HASTA AHORA:`
+            );
+          }
+        } catch (searchErr) {
+          // Continuar sin datos de búsqueda si hay error
+        }
+      }
+      
+      const response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt });
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Error de conexión. Reintenta.' }]);
