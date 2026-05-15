@@ -19,6 +19,7 @@ import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
 import PremiumMainChart from './PremiumMainChart';
 import { calculateBudgetData } from '@/lib/budgetCalculations';
+import AIExecutiveReport from './AIExecutiveReport';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -277,6 +278,7 @@ export default function HomeWorkspace({
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [kpiModal, setKpiModal] = useState(null); // 'ppt' | 'gap' | 'proj'
+  const [showAIReport, setShowAIReport] = useState(false);
   const chatEndRef = useRef(null);
   const conversationRef = useRef(null);
 
@@ -549,6 +551,10 @@ export default function HomeWorkspace({
             const handleClick = () => {
               if (!item.path) {
                 if (item.onClick === 'onShowPYGModal') onShowPYGModal?.();
+                return;
+              }
+              if (item.label === 'Informe') {
+                setShowAIReport(true);
                 return;
               }
               setActiveNav(item.path);
@@ -1530,6 +1536,19 @@ export default function HomeWorkspace({
 
         
         </main>
-        </motion.div>);
+
+      {/* ── AI EXECUTIVE REPORT MODAL ── */}
+      <AIExecutiveReport
+        isOpen={showAIReport}
+        onClose={() => setShowAIReport(false)}
+        storeName={storeName}
+        storeCode={selectedStore}
+        todaySales={todaySales}
+        budget={budget}
+        cashiers={cashiers}
+        shiftRecords={shiftRecords}
+      />
+      </motion.div>
+  );
 
 }
