@@ -279,6 +279,10 @@ ${d.top_5_products_list ? `- Top 5 productos más vendidos: ${d.top_5_products_l
 ${d.top_5_products_participation ? `- Participación Top 5: ${d.top_5_products_participation}% de las ventas del día` : ''}
 ${d.top_products_count ? `- Productos en reporte: ${d.top_products_count}` : ''}
 
+CATEGORÍAS Y DEPARTAMENTOS (GALLETERÍA, BEBIDAS, ETC.)
+${d.top_categories ? `- Top Categorías: ${d.top_categories}` : ''}
+${d.categories_summary ? `- Desglose por categoría: ${d.categories_summary}` : ''}
+
 P&G - MÁRGENES Y COSTOS FINANCIEROS
 ${d.pyg_ebitda_margin ? `- Margen EBITDA: ${d.pyg_ebitda_margin}% (Meta: ≥25%)` : ''}
 ${d.pyg_cost_real && d.pyg_cost_teorico ? `- Costo Real: ${d.pyg_cost_real}% vs Teórico: ${d.pyg_cost_teorico}%` : ''}

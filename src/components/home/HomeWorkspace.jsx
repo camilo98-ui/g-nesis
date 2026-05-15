@@ -501,11 +501,26 @@ export default function HomeWorkspace({
     
     // Análisis de productos más vendidos
     const topProducts = salesReports.length > 0
-      ? salesReports.sort((a, b) => (b.sales_amount || b.quantity || 0) - (a.sales_amount || a.quantity || 0)).slice(0, 10)
+      ? salesReports.sort((a, b) => (b.sales_amount || b.quantity || 0) - (a.sales_amount || a.quantity || 0)).slice(0, 15)
       : [];
     const topProductsList = topProducts.length > 0
       ? topProducts.map((p, i) => `${i + 1}. ${p.product_name || 'Producto sin nombre'} - ${fmt(p.sales_amount || 0)}${p.quantity ? ` (${p.quantity} unidades)` : ''}`).join(' | ')
       : 'Sin datos de productos';
+    
+    // Análisis por categoría/departamento (galletería, bebidas, etc.)
+    const departments = [...new Set(salesReports.map(p => p.department).filter(Boolean))];
+    const departmentSummary = departments.map(dept => {
+      const deptProducts = salesReports.filter(p => p.department === dept);
+      const deptSales = deptProducts.reduce((sum, p) => sum + (p.sales_amount || 0), 0);
+      const deptPercentage = todaySalesValue > 0 ? (deptSales / todaySalesValue * 100) : 0;
+      return {
+        name: dept,
+        sales: fmt(deptSales),
+        percentage: deptPercentage.toFixed(1),
+        productCount: deptProducts.length,
+        topProduct: deptProducts.sort((a, b) => (b.sales_amount || 0) - (a.sales_amount || 0))[0]
+      };
+    }).sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
     
     // Participación de top 5 productos en ventas totales
     const top5ProductsSales = topProducts.slice(0, 5).reduce((sum, p) => sum + (p.sales_amount || 0), 0);
@@ -575,6 +590,10 @@ export default function HomeWorkspace({
       top_products_count: topProducts.length,
       top_5_products_list: productsDetail.map(p => `${p.name}: ${p.sales} (${p.quantity} unidades, ${p.percentage}% de ventas)`).join(' | '),
       top_5_products_participation: top5Participation.toFixed(1),
+      
+      // Categorías/Departamentos (Galletería, Bebidas, etc.)
+      categories_summary: departmentSummary.map(d => `${d.name}: ${d.sales} (${d.percentage}% de ventas, ${d.productCount} productos)`).join(' | '),
+      top_categories: departmentSummary.slice(0, 5).map(d => `${d.name} - ${d.percentage}% (top producto: ${d.topProduct?.product_name || 'N/A'})`).join(' | '),
       
       // Datos P&G - EBITDA y Márgenes
       pyg_ebitda_margin: ebitdaMargin,
