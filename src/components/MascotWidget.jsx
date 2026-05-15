@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNova } from '@/components/NovaContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, RotateCcw } from 'lucide-react';
@@ -7,6 +7,39 @@ import ReactMarkdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
 
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
+
+// Renders the mascot on a canvas with white background removed
+function MascotCanvas({ width = 96, height = 96, style = {} }) {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      ctx.drawImage(img, 0, 0);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = data.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i+1], b = d[i+2];
+        // Remove near-white pixels (checkerboard / white bg)
+        if (r > 220 && g > 220 && b > 220) {
+          d[i+3] = 0; // fully transparent
+        } else if (r > 180 && g > 180 && b > 180) {
+          // Semi-transparent for soft edges
+          const brightness = (r + g + b) / 3;
+          d[i+3] = Math.round(255 * (1 - (brightness - 180) / 75));
+        }
+      }
+      ctx.putImageData(data, 0, 0);
+    };
+    img.src = MASCOT_IMG;
+  }, []);
+  return <canvas ref={canvasRef} style={{ width, height, display: 'block', objectFit: 'contain', ...style }} />;
+}
 
 const PAGE_CONTEXTS = {
   '/':              { name: 'Dashboard', focus: 'ventas del día, métricas generales de la tienda, cumplimiento de presupuesto y rendimiento del equipo.' },
@@ -96,9 +129,9 @@ function ChatMessage({ msg }) {
       className={`flex gap-2 ${isNova ? 'items-start' : 'items-end flex-row-reverse'}`}
     >
       {isNova && (
-        <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0 mt-0.5"
-          style={{ border: '1px solid rgba(194,24,117,0.2)', background: 'white' }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" style={{ mixBlendMode: 'multiply' }} />
+        <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0 mt-0.5 flex items-center justify-center"
+          style={{ border: '1px solid rgba(194,24,117,0.15)', background: 'rgba(255,240,248,0.8)' }}>
+          <MascotCanvas width={24} height={24} />
         </div>
       )}
       <div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${isNova ? 'rounded-tl-sm' : 'rounded-tr-sm'}`}
@@ -271,9 +304,9 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
                 borderBottom: '1px solid rgba(0,0,0,0.05)',
                 backdropFilter: 'blur(20px)',
               }}>
-              <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0"
-                style={{ border: '1px solid rgba(190,24,93,0.2)', background: 'white' }}>
-                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" style={{ mixBlendMode: 'multiply' }} />
+              <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
+                style={{ border: '1px solid rgba(190,24,93,0.15)', background: 'rgba(255,240,248,0.8)' }}>
+                <MascotCanvas width={32} height={32} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -308,8 +341,8 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   className="flex items-start gap-2">
                   <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0"
-                    style={{ border: '1px solid rgba(190,24,93,0.2)', background: 'white' }}>
-                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]" style={{ mixBlendMode: 'multiply' }} />
+                    style={{ border: '1px solid rgba(190,24,93,0.15)', background: 'rgba(255,240,248,0.8)' }}>
+                    <MascotCanvas width={24} height={24} />
                   </div>
                   <div className="rounded-xl rounded-tl-sm"
                     style={{ background: 'rgba(248,248,250,0.9)', border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -443,36 +476,39 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
           />
         ))}
 
-        {/* The mascot image — fully free, large, blended naturally */}
+        {/* The mascot — canvas with white bg removed */}
         <motion.div
           className="relative z-10"
           animate={{
             y: [0, -8, -3, -10, -2, 0],
             rotate: [0, 0.6, -0.4, 0.8, -0.2, 0],
+            scaleX: [1, 1.014, 1, 1.008, 1],
+            scaleY: [1, 1.022, 1, 1.014, 1],
           }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
           whileHover={{ y: -12, scale: 1.05, transition: { duration: 0.35 } }}
+          style={{
+            filter: isOpen
+              ? 'drop-shadow(0 0 14px rgba(190,24,93,0.55)) drop-shadow(0 4px 16px rgba(190,24,93,0.25))'
+              : 'drop-shadow(0 2px 12px rgba(190,24,93,0.25)) drop-shadow(0 6px 20px rgba(190,24,93,0.15))',
+          }}
         >
-          <motion.img
-            src={MASCOT_IMG}
-            alt="Nova"
-            style={{
-              width: 96,
-              height: 96,
-              objectFit: 'contain',
-              display: 'block',
-              mixBlendMode: 'multiply',
-              filter: isOpen
-                ? 'drop-shadow(0 0 14px rgba(190,24,93,0.50)) drop-shadow(0 4px 16px rgba(190,24,93,0.20))'
-                : 'drop-shadow(0 2px 12px rgba(190,24,93,0.22)) drop-shadow(0 6px 20px rgba(190,24,93,0.12))',
-            }}
-            animate={{
-              scaleX: [1, 1.014, 1, 1.008, 1],
-              scaleY: [1, 1.022, 1, 1.014, 1],
-            }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-          />
+          <MascotCanvas width={96} height={96} />
         </motion.div>
+
+        {/* Pink glow ring — rendered below the blended image layer */}
+        <motion.div
+          className="absolute pointer-events-none z-0"
+          animate={{ opacity: [0.3, 0.6, 0.3], scale: [0.95, 1.05, 0.95] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            bottom: 8, left: '50%', transform: 'translateX(-50%)',
+            width: 70, height: 70,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(190,24,93,0.18) 0%, transparent 70%)',
+            filter: 'blur(12px)',
+          }}
+        />
 
         {/* Active indicator */}
         {isOpen && (
