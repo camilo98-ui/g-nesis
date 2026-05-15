@@ -15,12 +15,6 @@ export default function MascotCanvas({ width = 64, height = 64 }) {
     canvas.width = width;
     canvas.height = height;
 
-    // Draw white circular background
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(width / 2, height / 2, width / 2, 0, Math.PI * 2);
-    ctx.fill();
-
     // Load and draw mascot image
     const img = new Image();
     img.crossOrigin = 'anonymous';
