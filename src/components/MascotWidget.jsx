@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import { X, Send, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
 
-const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/0811d99f8_generated_image.png";
+const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/98bba6e21_generated_image.png";
 
 const PAGE_CONTEXTS = {
   '/':              { name: 'Dashboard', focus: 'ventas del día, métricas generales de la tienda, cumplimiento de presupuesto y rendimiento del equipo.' },
@@ -126,9 +126,9 @@ function ChatMessage({ msg }) {
       className={`flex gap-2 ${isNova ? 'items-start' : 'items-end flex-row-reverse'}`}
     >
       {isNova && (
-        <div className="w-7 h-7 rounded-xl overflow-hidden flex-shrink-0 mt-0.5"
-          style={{ border: '1px solid rgba(244,114,182,0.25)', background: 'linear-gradient(145deg,#fff8fc,#fdf0f7)', boxShadow: '0 2px 6px rgba(244,114,182,0.12)' }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" style={{ objectPosition: 'center top' }} />
+        <div className="w-8 h-8 flex-shrink-0 mt-0.5 flex items-center justify-center">
+          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain"
+            style={{ filter: 'drop-shadow(0 2px 6px rgba(244,114,182,0.3))' }} />
         </div>
       )}
       <div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${isNova ? 'rounded-tl-sm' : 'rounded-tr-sm'}`}
@@ -157,6 +157,134 @@ function ChatMessage({ msg }) {
         )}
       </div>
     </motion.div>
+  );
+}
+
+function NovaFloatingMascot({ onClick, isOpen }) {
+  const containerRef = useRef(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Eye tracking — subtle head tilt toward cursor
+  const handleMouseMove = useCallback((e) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / window.innerWidth;
+    const dy = (e.clientY - cy) / window.innerHeight;
+    setMousePos({ x: dx * 6, y: dy * 6 });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [handleMouseMove]);
+
+  return (
+    <div ref={containerRef} className="relative flex items-center justify-center" style={{ width: 72, height: 88 }}>
+
+      {/* Ambient ground glow */}
+      <motion.div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full"
+        animate={{ opacity: [0.2, 0.5, 0.2], scaleX: [0.8, 1.1, 0.8] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ width: 48, height: 10, background: 'radial-gradient(ellipse, rgba(244,114,182,0.5) 0%, transparent 70%)', filter: 'blur(6px)' }}
+      />
+
+      {/* Floating holographic particles */}
+      {[...Array(5)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: i % 2 === 0 ? 3 : 2,
+            height: i % 2 === 0 ? 3 : 2,
+            background: i % 3 === 0 ? 'rgba(244,114,182,0.8)' : i % 3 === 1 ? 'rgba(216,180,254,0.7)' : 'rgba(255,255,255,0.9)',
+            left: `${15 + i * 14}%`,
+            top: `${20 + (i % 3) * 20}%`,
+            boxShadow: '0 0 4px rgba(244,114,182,0.6)',
+          }}
+          animate={{
+            y: [0, -(8 + i * 3), 0],
+            x: [0, (i % 2 === 0 ? 3 : -3), 0],
+            opacity: [0, 0.9, 0],
+            scale: [0.5, 1.2, 0.5],
+          }}
+          transition={{
+            duration: 2 + i * 0.5,
+            repeat: Infinity,
+            delay: i * 0.4,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+
+      {/* The mascot itself — completely frameless, freely floating */}
+      <motion.button
+        onClick={onClick}
+        className="relative cursor-pointer outline-none border-0 bg-transparent p-0"
+        style={{ width: 72, height: 80 }}
+        // Primary float
+        animate={{
+          y: [0, -6, 0],
+          rotate: [-0.5, 0.5, -0.5],
+        }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+        whileHover={{ scale: 1.12 }}
+        whileTap={{ scale: 0.93 }}
+      >
+        {/* Hover glow aura */}
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{ background: 'radial-gradient(circle, rgba(244,114,182,0.25) 0%, transparent 70%)', filter: 'blur(8px)' }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Reactive glow pulse */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{ opacity: [0.0, 0.18, 0.0] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+          style={{ background: 'radial-gradient(circle at 50% 40%, rgba(244,114,182,0.4) 0%, transparent 65%)', filter: 'blur(6px)', borderRadius: '50%' }}
+        />
+
+        {/* Subtle eye-tracking head tilt */}
+        <motion.img
+          src={MASCOT_IMG}
+          alt="Nova"
+          className="w-full h-full select-none"
+          style={{
+            objectFit: 'contain',
+            objectPosition: 'center',
+            filter: 'drop-shadow(0 4px 16px rgba(244,114,182,0.3)) drop-shadow(0 0 8px rgba(244,114,182,0.15))',
+            pointerEvents: 'none',
+          }}
+          animate={{
+            rotateY: mousePos.x,
+            rotateX: -mousePos.y * 0.5,
+          }}
+          transition={{ type: 'spring', damping: 20, stiffness: 120 }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          draggable={false}
+        />
+
+        {/* Live status dot */}
+        <motion.div
+          className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-400"
+          animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ boxShadow: '0 0 8px rgba(52,211,153,0.9), 0 0 3px rgba(52,211,153,1)' }}
+        />
+      </motion.button>
+    </div>
   );
 }
 
@@ -277,13 +405,9 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto �
                 borderBottom: '1px solid rgba(244,114,182,0.12)',
                 backdropFilter: 'blur(20px)',
               }}>
-              <div className="w-9 h-9 rounded-2xl overflow-hidden flex-shrink-0"
-                style={{
-                  border: '1.5px solid rgba(244,114,182,0.3)',
-                  background: 'linear-gradient(145deg, #fff8fc, #fdf0f7)',
-                  boxShadow: '0 2px 8px rgba(244,114,182,0.15)',
-                }}>
-                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" style={{ objectPosition: 'center top' }} />
+              <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
+                <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain"
+                  style={{ filter: 'drop-shadow(0 2px 8px rgba(244,114,182,0.35))' }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -320,9 +444,9 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto �
               {isLoading && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   className="flex items-start gap-2">
-                  <div className="w-7 h-7 rounded-xl overflow-hidden flex-shrink-0"
-                    style={{ border: '1px solid rgba(244,114,182,0.25)', background: 'linear-gradient(145deg,#fff8fc,#fdf0f7)', boxShadow: '0 2px 6px rgba(244,114,182,0.12)' }}>
-                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover" style={{ objectPosition: 'center top' }} />
+                  <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center">
+                    <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain"
+                      style={{ filter: 'drop-shadow(0 2px 6px rgba(244,114,182,0.3))' }} />
                   </div>
                   <div className="rounded-xl rounded-tl-sm"
                     style={{ background: 'rgba(248,248,250,0.9)', border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -404,45 +528,8 @@ Responde ahora. Natural, inteligente, directo. Adapta la longitud al contexto �
         )}
       </AnimatePresence>
 
-      {/* Nova Button — Ultra premium */}
-      <motion.button
-        onClick={() => { setIsOpen(o => !o); setShowBubble(false); }}
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.94 }}
-        className="relative w-14 h-14"
-      >
-        {/* Outer cinematic glow ring */}
-        <motion.div className="absolute -inset-2 rounded-full"
-          animate={{ opacity: [0.3, 0.7, 0.3], scale: [0.95, 1.05, 0.95] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ background: 'radial-gradient(circle, rgba(244,114,182,0.35) 0%, rgba(216,180,254,0.12) 60%, transparent 75%)' }}
-        />
-        {/* Soft energy ring */}
-        <motion.div className="absolute -inset-0.5 rounded-full"
-          animate={{ opacity: [0.4, 0.9, 0.4] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-          style={{ background: 'conic-gradient(from 0deg, rgba(244,114,182,0.6), rgba(248,187,217,0.1), rgba(244,114,182,0.6))', filter: 'blur(2px)' }}
-        />
-        {/* Avatar shell */}
-        <motion.div
-          className="relative w-14 h-14 rounded-full overflow-hidden"
-          animate={{ y: [0, -3, 0] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{
-            border: '1.5px solid rgba(244,114,182,0.45)',
-            boxShadow: '0 4px 24px rgba(244,114,182,0.25), 0 0 0 1px rgba(255,255,255,0.6) inset, 0 8px 32px rgba(0,0,0,0.08)',
-            background: 'linear-gradient(145deg, #fff8fc 0%, #fdf0f7 100%)',
-          }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-cover"
-            style={{ objectPosition: 'center top' }} />
-        </motion.div>
-        {/* Live pulse dot */}
-        <motion.div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white"
-          animate={{ scale: [1, 1.3, 1], opacity: [0.8, 1, 0.8] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ boxShadow: '0 0 8px rgba(52,211,153,0.8)' }}
-        />
-      </motion.button>
+      {/* Nova — Free-floating mascot, no container */}
+      <NovaFloatingMascot onClick={() => { setIsOpen(o => !o); setShowBubble(false); }} isOpen={isOpen} />
     </div>
   );
 }
