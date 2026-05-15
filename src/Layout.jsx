@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import MascotWidget from '@/components/MascotWidget';
+import AIBackground from '@/components/AIBackground';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
@@ -102,12 +103,9 @@ export default function Layout({ children, currentPageName }) {
         <div className="min-h-screen app-container">
           {/* Main Content */}
           <main className="min-h-screen relative overflow-y-auto">
-          {/* Gradient Background - Optimizado para móvil */}
-          <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-            {/* Base gradient simple */}
-            <div className="absolute inset-0 bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100" />
-          </div>
+          {/* AI Background is injected via AIBackground component */}
 
+          <AIBackground />
           <div className="w-full relative z-10 overflow-y-auto">
             {children}
           </div>

@@ -244,24 +244,24 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
   };
 
   return (
-    <div className="fixed bottom-5 right-4 z-[9999] flex flex-col items-end gap-1.5">
+    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end gap-0">
 
       {/* ── Chat Panel ── */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.94, y: 12 }}
+            initial={{ opacity: 0, scale: 0.92, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.94, y: 12 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320, duration: 0.35 }}
-            className="w-64 flex flex-col rounded-2xl overflow-hidden"
+            exit={{ opacity: 0, scale: 0.92, y: 16 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+            className="w-64 flex flex-col rounded-2xl overflow-hidden mb-1"
             style={{
-              height: 380,
-              background: 'rgba(255,255,255,0.96)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
-              border: '1px solid rgba(0,0,0,0.07)',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(190,24,93,0.08)',
+              height: 390,
+              background: 'rgba(255,255,255,0.94)',
+              backdropFilter: 'blur(48px) saturate(160%)',
+              WebkitBackdropFilter: 'blur(48px) saturate(160%)',
+              border: '1px solid rgba(255,255,255,0.6)',
+              boxShadow: '0 24px 64px rgba(0,0,0,0.12), 0 4px 16px rgba(190,24,93,0.10), inset 0 1px 0 rgba(255,255,255,0.8)',
             }}
           >
             {/* Header */}
@@ -282,8 +282,7 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
                     style={{ background: 'rgba(190,24,93,0.08)', letterSpacing: '0.04em' }}>
                     AI
                   </span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-auto"
-                    style={{ boxShadow: '0 0 4px rgba(52,211,153,0.8)' }} />
+                  <div className="live-dot ml-auto" />
                 </div>
                 <p className="text-[9px] text-slate-400 font-medium tracking-wide">{pageCtx.name}</p>
               </div>
@@ -392,30 +391,96 @@ Responde ahora. Natural, inteligente, directo. Cuando hables de la tienda, usa l
         )}
       </AnimatePresence>
 
-      {/* Nova Button — Minimalista y elegante */}
+      {/* Nova — Free-floating mascot, no container */}
       <motion.button
         onClick={() => { setIsOpen(o => !o); setShowBubble(false); }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
-        className="relative w-10 h-10 rounded-full"
+        whileTap={{ scale: 0.93 }}
+        className="relative flex items-end justify-center"
+        style={{ width: 72, height: 80, background: 'none', border: 'none', padding: 0 }}
       >
-        {/* Glow muy sutil */}
-        <motion.div className="absolute -inset-1 rounded-full"
-          animate={{ opacity: [0.08, 0.16, 0.08] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ background: 'radial-gradient(circle, rgba(190,24,93,0.15) 0%, transparent 70%)' }}
-        />
-        
-        {/* Avatar */}
-        <div className="relative w-10 h-10 rounded-full overflow-hidden"
+        {/* Ambient glow beneath mascot */}
+        <motion.div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2"
+          animate={{ opacity: [0.15, 0.35, 0.15], scaleX: [0.7, 1, 0.7] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           style={{
-            border: '1.5px solid rgba(190,24,93,0.25)',
-            boxShadow: '0 2px 12px rgba(190,24,93,0.12)',
-            background: 'white',
-          }}>
-          <img src={MASCOT_IMG} alt="Nova" className="w-full h-full object-contain scale-[1.5]"
-            style={{ objectPosition: 'center center' }} />
-        </div>
+            width: 60, height: 20,
+            background: 'radial-gradient(ellipse, rgba(190,24,93,0.25) 0%, transparent 70%)',
+            filter: 'blur(8px)',
+            borderRadius: '50%',
+          }}
+        />
+
+        {/* Floating holographic particles around Nova */}
+        {[0,1,2].map(i => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: i === 1 ? 4 : 3,
+              height: i === 1 ? 4 : 3,
+              background: 'rgba(190,24,93,0.5)',
+              filter: 'blur(0.5px)',
+              left: [8, 56, 28][i],
+              top: [20, 35, 8][i],
+            }}
+            animate={{
+              y: [-4, -12, -4],
+              x: [0, i % 2 === 0 ? 4 : -4, 0],
+              opacity: [0.3, 0.8, 0.3],
+              scale: [0.8, 1.2, 0.8],
+            }}
+            transition={{
+              duration: 2.5 + i * 0.7,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: i * 0.9,
+            }}
+          />
+        ))}
+
+        {/* The mascot — free, no container, fully visible */}
+        <motion.div
+          className="relative z-10"
+          animate={{
+            y: [0, -7, -3, -8, 0],
+            rotate: [0, 0.8, -0.4, 0.6, 0],
+          }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+          whileHover={{
+            y: -10,
+            rotate: 3,
+            transition: { duration: 0.3 },
+          }}
+        >
+          <motion.img
+            src={MASCOT_IMG}
+            alt="Nova"
+            style={{
+              width: 68,
+              height: 'auto',
+              objectFit: 'contain',
+              filter: isOpen
+                ? 'drop-shadow(0 0 16px rgba(190,24,93,0.45)) drop-shadow(0 4px 12px rgba(0,0,0,0.12))'
+                : 'drop-shadow(0 6px 16px rgba(190,24,93,0.22)) drop-shadow(0 2px 6px rgba(0,0,0,0.08))',
+            }}
+            animate={{
+              scaleX: [1, 1.012, 1, 1.008, 1],
+              scaleY: [1, 1.018, 1, 1.012, 1],
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </motion.div>
+
+        {/* Active indicator */}
+        {isOpen && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-400"
+            style={{ boxShadow: '0 0 8px rgba(52,211,153,0.8)' }}
+          />
+        )}
       </motion.button>
     </div>
   );

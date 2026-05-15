@@ -55,13 +55,8 @@ function KPICard({ label, value, change, icon: Icon, color, chartData, delay = 0
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
       whileHover={{ y: -2, transition: { duration: 0.18 } }}
-      className="relative rounded-2xl p-4 cursor-default group"
-      style={{
-        background: 'rgba(255,255,255,0.82)',
-        backdropFilter: 'blur(24px)',
-        border: '1px solid rgba(0,0,0,0.06)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04)'
-      }}>
+      className="relative rounded-2xl p-4 cursor-default group glass-card hover-lift card-accent-top"
+    >
       
       {/* Top row: icon + delta */}
       <div className="flex items-center justify-between mb-3">
@@ -102,11 +97,17 @@ function NavItem({ item, isActive, onClick }) {
       whileHover={{ x: 2 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-colors"
+      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left"
       style={isActive ? {
         background: 'rgba(194,24,117,0.07)',
-        border: '1px solid rgba(194,24,117,0.12)'
-      } : { background: 'transparent', border: '1px solid transparent' }}>
+        border: '1px solid rgba(194,24,117,0.14)',
+        boxShadow: '0 2px 8px rgba(194,24,117,0.06)',
+        backdropFilter: 'blur(8px)',
+      } : {
+        background: 'transparent',
+        border: '1px solid transparent',
+        transition: 'all 0.2s cubic-bezier(0.23,1,0.32,1)',
+      }}>
       
       <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
       style={isActive ?
@@ -542,31 +543,21 @@ export default function HomeWorkspace({
 
 
   return (
-    <motion.div className="min-h-screen flex"
-    animate={{
-      backgroundPosition: ['0% 0%', '50% 50%', '0% 0%']
-    }}
-    transition={{
-      duration: 15,
-      repeat: Infinity,
-      ease: 'easeInOut'
-    }}
-    style={{
-      background: 'linear-gradient(155deg, #FAFBFF 0%, #FFFFFF 45%, #F8F8FC 100%, #FFFBFE 100%)',
-      backgroundSize: '300% 300%'
-    }}>
+    <motion.div
+      className="min-h-screen flex"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      style={{ background: 'transparent', position: 'relative', zIndex: 1 }}
+    >
 
       {/* ── LEFT SIDEBAR ── */}
       <motion.aside
-        initial={{ x: -20, opacity: 0 }}
+        initial={{ x: -24, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
-        className="hidden lg:flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20"
-        style={{
-          background: 'rgba(255,255,255,0.75)',
-          backdropFilter: 'blur(32px)',
-          borderRight: '1px solid rgba(0,0,0,0.05)'
-        }}>
+        transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
+        className="hidden lg:flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20 glass-sidebar"
+      >
         
         {/* Logo */}
         <div className="px-4 pt-5 pb-4">
@@ -613,7 +604,7 @@ export default function HomeWorkspace({
             <div className="flex-1 min-w-0">
               <p className="text-[10.5px] font-semibold text-slate-600">Nova AI</p>
               <div className="flex items-center gap-1">
-                <div className="w-1 h-1 rounded-full bg-emerald-400" />
+                <div className="live-dot" style={{ width: 6, height: 6 }} />
                 <p className="text-[9px] text-slate-400">En línea</p>
               </div>
             </div>
@@ -701,14 +692,11 @@ export default function HomeWorkspace({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative overflow-hidden rounded-2xl backdrop-blur-xl"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.88) 100%)',
-                backdropFilter: 'blur(48px) saturate(120%)',
-                border: '1px solid rgba(194, 24, 117, 0.08)',
-                boxShadow: '0 8px 32px rgba(194, 24, 117, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.5)'
-              }}>
+              className="relative overflow-hidden rounded-2xl glass-card border-animated"
+            >
               
+              {/* Subtle top glow line */}
+              <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(194,24,117,0.25), transparent)' }} />
               <div className="flex items-center h-16 px-6 gap-4">
                 
                 {/* Avatar Nova Mascota */}
@@ -1070,7 +1058,11 @@ export default function HomeWorkspace({
                         transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
                         onClick={e => e.stopPropagation()}
                         className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
-                        style={{ background: '#fff', boxShadow: '0 32px 80px rgba(0,0,0,0.18)' }}>
+                        style={{
+                          background: 'rgba(255,255,255,0.96)',
+                          backdropFilter: 'blur(48px)',
+                          boxShadow: '0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.5)',
+                        }}>
                         
                         {/* Colored header band */}
                         <div className="relative p-5 pb-4" style={{ background: `linear-gradient(135deg, ${activeModal.color}10, ${activeModal.color}04)`, borderBottom: `1px solid ${activeModal.color}15` }}>
@@ -1131,12 +1123,8 @@ export default function HomeWorkspace({
                       transition={{ delay: c.delay, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                       whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0,0,0,0.08)', transition: { duration: 0.18 } }}
                       onClick={() => setKpiModal(c.key)}
-                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden cursor-pointer"
-                      style={{
-                        background: '#ffffff',
-                        border: '1px solid #F3F4F6',
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',
-                      }}>
+                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden cursor-pointer glass-card card-accent-top"
+                    >
                       {/* Top accent bar */}
                       <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}60, ${c.accent}20)` }} />
 
@@ -1338,9 +1326,9 @@ export default function HomeWorkspace({
               const isHot = temp > 26;
               const accentColor = isHot ? '#f97316' : '#38bdf8';
               return (
-                <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                  <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-[8px] sm:text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Temperatura · 7 días</p>
+                <div className="rounded-2xl p-4 glass-card hover-lift">
+                 <div className="flex items-center justify-between mb-0.5">
+                   <p className="label-premium">Temperatura · 7 días</p>
                     <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : '🌤 Fresco'}</span>
                   </div>
                   <div className="flex items-baseline gap-1 mb-1">
@@ -1373,9 +1361,9 @@ export default function HomeWorkspace({
               const rainLevel = totalRain > 20 ? 'Alta' : totalRain > 5 ? 'Moderada' : 'Baja';
               const rainColor = totalRain > 20 ? '#6366f1' : totalRain > 5 ? '#38bdf8' : '#94a3b8';
               return (
-                <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                  <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-[8px] sm:text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Lluvia · 7 días</p>
+                <div className="rounded-2xl p-4 glass-card hover-lift">
+                 <div className="flex items-center justify-between mb-0.5">
+                   <p className="label-premium">Lluvia · 7 días</p>
                     <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
                   </div>
                   <div className="flex items-baseline gap-1 mb-1">
@@ -1415,9 +1403,9 @@ export default function HomeWorkspace({
               const circ = 2 * Math.PI * 16;
               let cumulative = 0;
               return (
-                <div className="rounded-2xl p-4 flex flex-col" style={{ background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
-                  <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-[8px] sm:text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Condición · semana</p>
+                <div className="rounded-2xl p-4 flex flex-col glass-card hover-lift">
+                 <div className="flex items-center justify-between mb-0.5">
+                   <p className="label-premium">Condición · semana</p>
                   </div>
                   <p className="text-base sm:text-[18px] font-black text-slate-800 leading-none mb-2">{humidity > 0 ? `${Math.round(humidity)}% 💧` : '—'}</p>
                   <div className="flex items-center gap-3 flex-1">
