@@ -785,30 +785,41 @@ export default function HomeWorkspace({
               const isPos = gap >= 0;
               const projPct = budgetData.monthProjectionCompliance ?? 0;
 
-              // Mini sparkline SVG inline
+              // Mini sparkline SVG — smooth bezier, full-width
               const Spark = ({ points, color }) => {
                 if (!points || points.length < 2) return null;
-                const max = Math.max(...points, 1);
-                const min = Math.min(...points, 0);
+                const W = 200, H = 52;
+                const pad = 4;
+                const max = Math.max(...points);
+                const min = Math.min(...points);
                 const range = max - min || 1;
-                const w = 120, h = 44;
-                const coords = points.map((v, i) => [
-                  (i / (points.length - 1)) * w,
-                  h - ((v - min) / range) * (h - 6) - 3
-                ]);
-                const d = coords.map((c, i) => `${i === 0 ? 'M' : 'L'}${c[0].toFixed(1)},${c[1].toFixed(1)}`).join(' ');
-                const areaD = `${d} L${w},${h} L0,${h} Z`;
-                const gradId = `spark-${color.replace('#','')}`;
+                const toX = (i) => pad + (i / (points.length - 1)) * (W - pad * 2);
+                const toY = (v) => H - pad - ((v - min) / range) * (H - pad * 2 - 6);
+                // Build smooth bezier path
+                const coords = points.map((v, i) => [toX(i), toY(v)]);
+                let d = `M${coords[0][0].toFixed(1)},${coords[0][1].toFixed(1)}`;
+                for (let i = 1; i < coords.length; i++) {
+                  const [x0, y0] = coords[i - 1];
+                  const [x1, y1] = coords[i];
+                  const cx = (x0 + x1) / 2;
+                  d += ` C${cx.toFixed(1)},${y0.toFixed(1)} ${cx.toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+                }
+                const areaD = `${d} L${coords[coords.length-1][0]},${H} L${coords[0][0]},${H} Z`;
+                const gradId = `sg-${color.replace(/[^a-z0-9]/gi,'')}`;
+                // Dot at last point
+                const [lx, ly] = coords[coords.length - 1];
                 return (
-                  <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" className="flex-shrink-0">
+                  <svg viewBox={`0 0 ${W} ${H}`} fill="none" preserveAspectRatio="none" className="w-full h-full">
                     <defs>
                       <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity="0.12" />
-                        <stop offset="100%" stopColor={color} stopOpacity="0" />
+                        <stop offset="0%" stopColor={color} stopOpacity="0.18" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0.01" />
                       </linearGradient>
                     </defs>
                     <path d={areaD} fill={`url(#${gradId})`} />
-                    <path d={d} stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+                    <path d={d} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx={lx} cy={ly} r="3" fill={color} opacity="0.9" />
+                    <circle cx={lx} cy={ly} r="5.5" fill={color} opacity="0.15" />
                   </svg>
                 );
               };
@@ -866,11 +877,11 @@ export default function HomeWorkspace({
                         border: '1px solid #F3F4F6',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',
                       }}>
-                      {/* Top accent line */}
-                      <div className="absolute top-0 left-4 right-4 h-px" style={{ background: `linear-gradient(90deg, transparent, ${c.accent}30, transparent)` }} />
+                      {/* Top accent bar */}
+                      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}60, ${c.accent}20)` }} />
 
                       {/* Header row: label + badge */}
-                      <div className="flex items-center justify-between gap-1 mb-2">
+                      <div className="flex items-center justify-between gap-1 mb-1">
                         <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 truncate">{c.label}</p>
                         <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
                           style={{ background: `${c.accent}12`, color: c.accent }}>
@@ -878,18 +889,16 @@ export default function HomeWorkspace({
                         </span>
                       </div>
 
-                      {/* KPI + sparkline side by side */}
-                      <div className="flex items-end justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-base sm:text-xl font-black leading-none tabular-nums" style={{ color: c.accent }}>
-                            {c.prefix && <span className="text-[11px] sm:text-sm mr-0.5 font-bold">{c.prefix}</span>}
-                            {c.value}
-                          </p>
-                          <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium mt-1.5 truncate">{c.sub}</p>
-                        </div>
-                        <div className="flex-shrink-0">
-                          <Spark points={c.spark} color={c.accent} />
-                        </div>
+                      {/* KPI value */}
+                      <p className="text-base sm:text-xl font-black leading-none tabular-nums mb-0.5" style={{ color: c.accent }}>
+                        {c.prefix && <span className="text-[11px] sm:text-sm mr-0.5 font-bold">{c.prefix}</span>}
+                        {c.value}
+                      </p>
+                      <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium truncate mb-2">{c.sub}</p>
+
+                      {/* Full-width sparkline at bottom */}
+                      <div className="w-full" style={{ height: 48 }}>
+                        <Spark points={c.spark} color={c.accent} />
                       </div>
                     </motion.div>
                   ))}
