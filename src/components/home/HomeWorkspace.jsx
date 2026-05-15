@@ -467,24 +467,51 @@ export default function HomeWorkspace({
   useEffect(() => {
     if (!setPageData || !selectedStore) return;
     const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
+    
+    // Datos de hoy
     const todaySalesValue = latest?.total_sales || 0;
     const todayTransactions = latest?.total_transactions || 0;
     const todayTicket = todayTransactions > 0 ? todaySalesValue / todayTransactions : 0;
     const pptHoy = budgetData?.excelBudgetForToday || (budgetData?.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
+    
+    // Análisis histórico de últimos 7 días
+    const last7Sales = todaySales.slice(-7).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const totalSales7d = last7Sales.reduce((sum, d) => sum + (d.total_sales || 0), 0);
+    const avgDaily7d = last7Sales.length > 0 ? totalSales7d / last7Sales.length : 0;
+    const totalTxn7d = last7Sales.reduce((sum, d) => sum + (d.total_transactions || 0), 0);
+    const maxDay7d = Math.max(...last7Sales.map(d => d.total_sales || 0), 0);
+    const minDay7d = Math.min(...last7Sales.filter(d => d.total_sales).map(d => d.total_sales), todaySalesValue || 1);
+    
+    // Análisis de últimos 30 días si existen
+    const last30Sales = todaySales.slice(-30).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const totalSales30d = last30Sales.reduce((sum, d) => sum + (d.total_sales || 0), 0);
+    const avgDaily30d = last30Sales.length > 0 ? totalSales30d / last30Sales.length : 0;
+    
+    // Presupuesto y brecha
     const gap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
     const isPos = gap >= 0;
     const projPct = budgetData?.monthProjectionCompliance ?? 0;
+    const dailyBudget = budgetData?.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
+    const budgetCompliance = dailyBudget > 0 ? (todaySalesValue / dailyBudget * 100) : 0;
+    
+    // Tendencias
+    const trend7d = last7Sales.length >= 2 
+      ? ((last7Sales[0].total_sales || 0) - (last7Sales[last7Sales.length - 1].total_sales || 0)) / (last7Sales[last7Sales.length - 1].total_sales || 1) * 100
+      : 0;
 
     setPageData({
       page: 'Home',
       store: storeName,
       storeCode: selectedStore,
+      
       // Venta de hoy
       venta_hoy: todaySalesValue,
       venta_hoy_fmt: fmt(todaySalesValue),
       transacciones_hoy: todayTransactions,
       ticket_promedio_hoy: todayTicket,
       variacion_vs_ayer: salesChange,
+      cumplimiento_diario: budgetCompliance.toFixed(1),
+      
       // Presupuesto
       ppt_dia: pptHoy,
       presupuesto_mes: budgetData?.monthlyBudget || activeBudget?.sales_budget || 0,
@@ -494,9 +521,24 @@ export default function HomeWorkspace({
       cumplimiento_proyeccion: budgetData?.monthProjectionCompliance || 0,
       venta_diaria_requerida: budgetData?.dailyRequiredSales || 0,
       dias_restantes: budgetData?.remainingDays || 0,
+      
+      // Análisis últimos 7 días
+      sales_7d_total: totalSales7d,
+      sales_7d_avg: avgDaily7d,
+      sales_7d_max: maxDay7d,
+      sales_7d_min: minDay7d,
+      txn_7d_total: totalTxn7d,
+      trend_7d: trend7d.toFixed(1),
+      
+      // Análisis últimos 30 días
+      sales_30d_total: totalSales30d,
+      sales_30d_avg: avgDaily30d,
+      days_with_data: last30Sales.length,
+      
       // Equipo
       cajeros_activos: cashiers.length,
-      // KPI Card data (for Nova to know button values)
+      
+      // KPI Card data
       kpi_ppt: fmt(pptHoy),
       kpi_ppt_meta: `Meta: ${fmt(pptHoy)}`,
       kpi_ppt_sub: budgetData?.gapRecoveryIncrement > 0 && budgetData?.excelBudgetForToday > 0 ? `+${budgetData.incrementPct}% recuperación` : 'meta diaria',
@@ -507,7 +549,7 @@ export default function HomeWorkspace({
       kpi_proyeccion_meta: `${fmt(budgetData?.monthProjection || 0)} / ${fmt(budgetData?.monthlyBudget || 0)}`,
       kpi_proyeccion_sub: `Cumplimiento: ${projPct.toFixed(1)}%`,
     });
-  }, [latest, budgetData, selectedStore, cashiers, salesChange, setPageData, storeName, activeBudget]);
+  }, [latest, budgetData, selectedStore, cashiers, salesChange, setPageData, storeName, activeBudget, todaySales]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });

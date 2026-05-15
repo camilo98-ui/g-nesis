@@ -63,7 +63,21 @@ Eres una IA de clase mundial, como ChatGPT. Puedes responder sobre cualquier tem
 CÓMO HABLAS:
 Natural, inteligente y directo. Sin rodeos, sin relleno corporativo, sin motivación vacía. Eres como un colega brillante que sabe de todo y habla de frente.
 
-Cuando el tema sea de la app o el negocio, dale contexto operativo de Popsy (ventas, cajeros, presupuesto, turnos, etc). Cuando sea un tema general, responde como lo haría un experto en ese tema.
+Cuando el tema sea de la app o el negocio, usa SIEMPRE los datos exactos que ves en la sección DATOS REALES. Cita números específicos, compara tendencias, analiza brechas. Cuando sea un tema general, responde como lo haría un experto en ese tema.
+
+ANÁLISIS OPERATIVO:
+Tienes acceso a datos en tiempo real de:
+- Desempeño diario (ventas, transacciones, ticket promedio)
+- Presupuesto mensual y cumplimiento
+- Análisis histórico (últimos 7 y 30 días)
+- Proyecciones de cierre
+- KPIs principales (PPT, Brecha, Proyección)
+
+Usa estos datos para:
+• Detectar tendencias y anomalías
+• Evaluar riesgo de incumplimiento
+• Justificar recomendaciones con números reales
+• Hacer proyecciones precisas basadas en el ritmo actual
 
 Varía cómo empiezas cada respuesta. No repitas estructuras. Sé espontánea dentro de la inteligencia.
 
@@ -73,6 +87,7 @@ REGLAS IRROMPIBLES:
 - No uses motivación vacía: "¡vamos!", "excelente", "tú puedes".
 - No escribas como reporte. Escribe como una conversación inteligente.
 - Mantén el hilo de la conversación.
+- Cuando hables de cifras, usa números exactos del bloque DATOS REALES, no aproximaciones.
 
 LONGITUD:
 - Corta (1-2 líneas): saludos, preguntas simples, confirmaciones.
@@ -80,7 +95,7 @@ LONGITUD:
 - Profunda (4-8 líneas): estrategia, temas complejos, múltiples puntos.
 Nunca más largo de lo necesario.
 
-Usa **negritas** para conceptos clave y cifras importantes. Sin introducciones ni despedidas innecesarias.
+Usa **negritas** para cifras, métricas y conclusiones clave. Sin introducciones ni despedidas innecesarias.
 
 CONTEXTO DE LA APP: Popsy Colombia — retail de helados premium. Usuarios: líderes, embajadores, gerentes, directores.`;
 
@@ -230,25 +245,44 @@ export default function MascotWidget() {
     const d = pageData || {};
     const dataBlock = pageData ? `
 DATOS REALES DE LA TIENDA (usa estos números exactos al responder):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IDENTIFICACIÓN
 - Tienda: ${d.store} (${d.storeCode})
-${d.venta_hoy != null ? `- Venta de hoy: ${fmt(d.venta_hoy)} · ${d.transacciones_hoy ?? 0} transacciones · ticket promedio ${fmt(d.ticket_promedio_hoy)} · variación vs ayer: ${d.variacion_vs_ayer > 0 ? '+' : ''}${d.variacion_vs_ayer ?? 0}%` : ''}
-${d.ventas_acumuladas != null ? `- Ventas acumuladas mes: ${fmt(d.ventas_acumuladas)}` : ''}
-${d.presupuesto_mes ? `- Presupuesto mensual: ${fmt(d.presupuesto_mes)}` : ''}
-${d.ppt_dia ? `- PPT del día: ${fmt(d.ppt_dia)}` : ''}
-${d.cumplimiento_pct != null ? `- Cumplimiento vs PPT: ${d.cumplimiento_pct}%` : ''}
-${d.cumplimiento_proyeccion != null ? `- Cumplimiento proyectado: ${d.cumplimiento_proyeccion?.toFixed ? d.cumplimiento_proyeccion.toFixed(1) : d.cumplimiento_proyeccion}%` : ''}
-${d.ticket_promedio ? `- Ticket promedio: ${fmt(d.ticket_promedio)} | Meta: ${fmt(d.ticket_meta)}` : ''}
-${d.transacciones != null ? `- Transacciones mes: ${d.transacciones?.toLocaleString()} | Meta: ${d.transacciones_meta?.toLocaleString()}` : ''}
-${d.sugeridos != null ? `- Sugeridos vendidos: ${d.sugeridos?.toLocaleString()} | Meta: ${d.sugeridos_meta?.toLocaleString()}` : ''}
-${d.proyeccion_cierre ? `- Proyección cierre del mes: ${fmt(d.proyeccion_cierre)}` : ''}
-${d.brecha != null ? `- Brecha acumulada vs presupuesto: ${fmt(d.brecha_mes ?? d.brecha)} ${(d.brecha_mes ?? d.brecha) < 0 ? '(por debajo)' : '(por encima)'}` : ''}
+- Equipo activo: ${d.cajeros_activos ?? '?'} cajeros
+
+DESEMPEÑO DEL DÍA
+${d.venta_hoy != null ? `- Venta de hoy: ${fmt(d.venta_hoy)} · ${d.transacciones_hoy ?? 0} transacciones` : '- Sin datos de ventas hoy'}
+${d.ticket_promedio_hoy ? `- Ticket promedio hoy: ${fmt(d.ticket_promedio_hoy)}` : ''}
+${d.variacion_vs_ayer != null ? `- Variación vs ayer: ${d.variacion_vs_ayer > 0 ? '+' : ''}${d.variacion_vs_ayer}%` : ''}
+${d.cumplimiento_diario != null ? `- Cumplimiento PPT hoy: ${d.cumplimiento_diario}%` : ''}
+
+PRESUPUESTO Y METAS
+- Presupuesto mensual: ${fmt(d.presupuesto_mes || 0)}
+- PPT diario: ${fmt(d.ppt_dia || 0)}
+${d.ventas_acumuladas != null ? `- Ventas acumuladas (hasta ayer): ${fmt(d.ventas_acumuladas)}` : ''}
+${d.brecha_mes != null ? `- Brecha acumulada: ${fmt(d.brecha_mes)} ${d.brecha_mes >= 0 ? '(por encima de meta)' : '(por debajo de meta)'}` : ''}
 ${d.venta_diaria_requerida ? `- Venta diaria requerida para cerrar: ${fmt(d.venta_diaria_requerida)}` : ''}
 ${d.dias_restantes ? `- Días restantes del mes: ${d.dias_restantes}` : ''}
-${d.promedio_diario ? `- Promedio diario actual: ${fmt(d.promedio_diario)}` : ''}
-- Equipo: ${d.cajeros_activos ?? '?'} cajeros activos${d.total_cajeros ? ` de ${d.total_cajeros} totales` : ''}
-${d.kpi_ppt ? `\nKPI PPT DEL DÍA: ${d.kpi_ppt}${d.kpi_ppt_meta ? ` | Meta: ${d.kpi_ppt_meta}` : ''}${d.kpi_ppt_sub ? ` | ${d.kpi_ppt_sub}` : ''}` : ''}
-${d.kpi_brecha ? `KPI BRECHA DEL MES: ${d.kpi_brecha}${d.kpi_brecha_meta ? ` | Meta: ${d.kpi_brecha_meta}` : ''}${d.kpi_brecha_sub ? ` | ${d.kpi_brecha_sub}` : ''}` : ''}
-${d.kpi_proyeccion ? `KPI PROYECCIÓN CIERRE: ${d.kpi_proyeccion}${d.kpi_proyeccion_meta ? ` | Meta: ${d.kpi_proyeccion_meta}` : ''}${d.kpi_proyeccion_sub ? ` | ${d.kpi_proyeccion_sub}` : ''}` : ''}
+
+PROYECCIONES
+- Proyección cierre del mes: ${fmt(d.proyeccion_cierre || 0)}
+- Cumplimiento proyectado: ${d.cumplimiento_proyeccion?.toFixed ? d.cumplimiento_proyeccion.toFixed(1) : d.cumplimiento_proyeccion}%
+
+ANÁLISIS HISTÓRICO
+${d.sales_7d_total != null ? `- Últimos 7 días: ${fmt(d.sales_7d_total)} · promedio diario ${fmt(d.sales_7d_avg)} · máximo ${fmt(d.sales_7d_max)} · mínimo ${fmt(d.sales_7d_min)}` : ''}
+${d.trend_7d != null ? `- Tendencia 7 días: ${parseFloat(d.trend_7d) > 0 ? '+' : ''}${d.trend_7d}%` : ''}
+${d.txn_7d_total != null ? `- Transacciones últimos 7 días: ${d.txn_7d_total}` : ''}
+${d.sales_30d_total != null && d.days_with_data ? `- Últimos 30 días: ${fmt(d.sales_30d_total)} en ${d.days_with_data} días · promedio ${fmt(d.sales_30d_avg)} diario` : ''}
+
+KPI PRINCIPAL (PPT DEL DÍA)
+${d.kpi_ppt ? `- Valor: ${d.kpi_ppt} ${d.kpi_ppt_sub ? ` · ${d.kpi_ppt_sub}` : ''}` : ''}
+
+KPI BRECHA ACUMULADA
+${d.kpi_brecha ? `- Valor: ${d.kpi_brecha} ${d.kpi_brecha_meta ? ` · ${d.kpi_brecha_meta}` : ''} ${d.kpi_brecha_sub ? ` · ${d.kpi_brecha_sub}` : ''}` : ''}
+
+KPI PROYECCIÓN CIERRE
+${d.kpi_proyeccion ? `- Valor: ${d.kpi_proyeccion} ${d.kpi_proyeccion_meta ? ` · ${d.kpi_proyeccion_meta}` : ''} ${d.kpi_proyeccion_sub ? ` · ${d.kpi_proyeccion_sub}` : ''}` : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ` : '';
 
     const contextPrompt = `${SYSTEM_PROMPT}
