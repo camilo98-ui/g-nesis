@@ -246,6 +246,9 @@ ${d.venta_diaria_requerida ? `- Venta diaria requerida para cerrar: ${fmt(d.vent
 ${d.dias_restantes ? `- Días restantes del mes: ${d.dias_restantes}` : ''}
 ${d.promedio_diario ? `- Promedio diario actual: ${fmt(d.promedio_diario)}` : ''}
 - Equipo: ${d.cajeros_activos ?? '?'} cajeros activos${d.total_cajeros ? ` de ${d.total_cajeros} totales` : ''}
+${d.kpi_ppt ? `\nKPI PPT DEL DÍA: ${d.kpi_ppt}${d.kpi_ppt_meta ? ` | Meta: ${d.kpi_ppt_meta}` : ''}${d.kpi_ppt_sub ? ` | ${d.kpi_ppt_sub}` : ''}` : ''}
+${d.kpi_brecha ? `KPI BRECHA DEL MES: ${d.kpi_brecha}${d.kpi_brecha_meta ? ` | Meta: ${d.kpi_brecha_meta}` : ''}${d.kpi_brecha_sub ? ` | ${d.kpi_brecha_sub}` : ''}` : ''}
+${d.kpi_proyeccion ? `KPI PROYECCIÓN CIERRE: ${d.kpi_proyeccion}${d.kpi_proyeccion_meta ? ` | Meta: ${d.kpi_proyeccion_meta}` : ''}${d.kpi_proyeccion_sub ? ` | ${d.kpi_proyeccion_sub}` : ''}` : ''}
 ` : '';
 
     const contextPrompt = `${SYSTEM_PROMPT}

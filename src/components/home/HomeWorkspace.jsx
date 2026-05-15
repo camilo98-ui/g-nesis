@@ -472,6 +472,8 @@ export default function HomeWorkspace({
     const todayTicket = todayTransactions > 0 ? todaySalesValue / todayTransactions : 0;
     const pptHoy = budgetData?.excelBudgetForToday || (budgetData?.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
     const gap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
+    const isPos = gap >= 0;
+    const projPct = budgetData?.monthProjectionCompliance ?? 0;
 
     setPageData({
       page: 'Home',
@@ -494,6 +496,16 @@ export default function HomeWorkspace({
       dias_restantes: budgetData?.remainingDays || 0,
       // Equipo
       cajeros_activos: cashiers.length,
+      // KPI Card data (for Nova to know button values)
+      kpi_ppt: fmt(pptHoy),
+      kpi_ppt_meta: `Meta: ${fmt(pptHoy)}`,
+      kpi_ppt_sub: budgetData?.gapRecoveryIncrement > 0 && budgetData?.excelBudgetForToday > 0 ? `+${budgetData.incrementPct}% recuperación` : 'meta diaria',
+      kpi_brecha: fmt(gap),
+      kpi_brecha_meta: budgetData?.monthlyBudget > 0 ? `${isPos ? 'Sobre' : 'Bajo'} meta` : '',
+      kpi_brecha_sub: `${Math.abs((gap / (budgetData?.monthlyBudget || 1) * 100)).toFixed(0)}%`,
+      kpi_proyeccion: `${projPct.toFixed(0)}%`,
+      kpi_proyeccion_meta: `${fmt(budgetData?.monthProjection || 0)} / ${fmt(budgetData?.monthlyBudget || 0)}`,
+      kpi_proyeccion_sub: `Cumplimiento: ${projPct.toFixed(1)}%`,
     });
   }, [latest, budgetData, selectedStore, cashiers, salesChange, setPageData, storeName, activeBudget]);
 
