@@ -20,6 +20,7 @@ import DailyMetricsPanel from './DailyMetricsPanel';
 import PremiumMainChart from './PremiumMainChart';
 import { calculateBudgetData } from '@/lib/budgetCalculations';
 import AIExecutiveReport from './AIExecutiveReport';
+import { useNova } from '@/components/NovaContext';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -274,6 +275,7 @@ export default function HomeWorkspace({
 }) {
   const greeting = getGreeting();
   const GreetIcon = greeting.icon;
+  const { setPageData } = useNova() || {};
   const [activeNav, setActiveNav] = useState('Dashboard');
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [inputVal, setInputVal] = useState('');
@@ -428,6 +430,40 @@ export default function HomeWorkspace({
 
     return phrases.length > 0 ? phrases[Math.floor(Math.random() * phrases.length)] : "La operación sigue su marcha.";
   };
+
+  // Inyectar datos reales en el contexto de Nova
+  useEffect(() => {
+    if (!setPageData || !selectedStore) return;
+    const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
+    const todaySalesValue = latest?.total_sales || 0;
+    const todayTransactions = latest?.total_transactions || 0;
+    const todayTicket = todayTransactions > 0 ? todaySalesValue / todayTransactions : 0;
+    const pptHoy = budgetData?.excelBudgetForToday || (budgetData?.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
+    const gap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
+
+    setPageData({
+      page: 'Home',
+      store: storeName,
+      storeCode: selectedStore,
+      // Venta de hoy
+      venta_hoy: todaySalesValue,
+      venta_hoy_fmt: fmt(todaySalesValue),
+      transacciones_hoy: todayTransactions,
+      ticket_promedio_hoy: todayTicket,
+      variacion_vs_ayer: salesChange,
+      // Presupuesto
+      ppt_dia: pptHoy,
+      presupuesto_mes: budgetData?.monthlyBudget || activeBudget?.sales_budget || 0,
+      ventas_acumuladas: budgetData?.salesUntilYesterday || 0,
+      brecha_mes: gap,
+      proyeccion_cierre: budgetData?.monthProjection || 0,
+      cumplimiento_proyeccion: budgetData?.monthProjectionCompliance || 0,
+      venta_diaria_requerida: budgetData?.dailyRequiredSales || 0,
+      dias_restantes: budgetData?.remainingDays || 0,
+      // Equipo
+      cajeros_activos: cashiers.length,
+    });
+  }, [latest, budgetData, selectedStore, cashiers, salesChange, setPageData, storeName, activeBudget]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -194,21 +194,25 @@ export default function MascotWidget() {
 
     const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
     
+    const d = pageData || {};
     const dataBlock = pageData ? `
 DATOS REALES DE LA TIENDA (usa estos números exactos al responder):
-- Tienda: ${pageData.store} (${pageData.storeCode})
-- Ventas acumuladas mes: ${fmt(pageData.ventas_acumuladas)}
-- Presupuesto mensual: ${fmt(pageData.presupuesto_mes)}
-- Cumplimiento vs PPT: ${pageData.cumplimiento_pct}%
-- Ticket promedio actual: ${fmt(pageData.ticket_promedio)} | Meta ticket: ${fmt(pageData.ticket_meta)}
-- Transacciones: ${pageData.transacciones?.toLocaleString()} | Meta: ${pageData.transacciones_meta?.toLocaleString()}
-- Sugeridos vendidos: ${pageData.sugeridos?.toLocaleString()} | Meta: ${pageData.sugeridos_meta?.toLocaleString()}
-- Proyección de cierre del mes: ${fmt(pageData.proyeccion_cierre)}
-- Brecha vs presupuesto: ${fmt(pageData.brecha)} ${pageData.brecha < 0 ? '(por debajo)' : '(por encima)'}
-- Venta diaria requerida para cerrar: ${fmt(pageData.venta_diaria_requerida)}
-- Días restantes del mes: ${pageData.dias_restantes}
-- Promedio diario actual: ${fmt(pageData.promedio_diario)}
-- Equipo: ${pageData.cajeros_activos} cajeros activos de ${pageData.total_cajeros} totales
+- Tienda: ${d.store} (${d.storeCode})
+${d.venta_hoy != null ? `- Venta de hoy: ${fmt(d.venta_hoy)} · ${d.transacciones_hoy ?? 0} transacciones · ticket promedio ${fmt(d.ticket_promedio_hoy)} · variación vs ayer: ${d.variacion_vs_ayer > 0 ? '+' : ''}${d.variacion_vs_ayer ?? 0}%` : ''}
+${d.ventas_acumuladas != null ? `- Ventas acumuladas mes: ${fmt(d.ventas_acumuladas)}` : ''}
+${d.presupuesto_mes ? `- Presupuesto mensual: ${fmt(d.presupuesto_mes)}` : ''}
+${d.ppt_dia ? `- PPT del día: ${fmt(d.ppt_dia)}` : ''}
+${d.cumplimiento_pct != null ? `- Cumplimiento vs PPT: ${d.cumplimiento_pct}%` : ''}
+${d.cumplimiento_proyeccion != null ? `- Cumplimiento proyectado: ${d.cumplimiento_proyeccion?.toFixed ? d.cumplimiento_proyeccion.toFixed(1) : d.cumplimiento_proyeccion}%` : ''}
+${d.ticket_promedio ? `- Ticket promedio: ${fmt(d.ticket_promedio)} | Meta: ${fmt(d.ticket_meta)}` : ''}
+${d.transacciones != null ? `- Transacciones mes: ${d.transacciones?.toLocaleString()} | Meta: ${d.transacciones_meta?.toLocaleString()}` : ''}
+${d.sugeridos != null ? `- Sugeridos vendidos: ${d.sugeridos?.toLocaleString()} | Meta: ${d.sugeridos_meta?.toLocaleString()}` : ''}
+${d.proyeccion_cierre ? `- Proyección cierre del mes: ${fmt(d.proyeccion_cierre)}` : ''}
+${d.brecha != null ? `- Brecha acumulada vs presupuesto: ${fmt(d.brecha_mes ?? d.brecha)} ${(d.brecha_mes ?? d.brecha) < 0 ? '(por debajo)' : '(por encima)'}` : ''}
+${d.venta_diaria_requerida ? `- Venta diaria requerida para cerrar: ${fmt(d.venta_diaria_requerida)}` : ''}
+${d.dias_restantes ? `- Días restantes del mes: ${d.dias_restantes}` : ''}
+${d.promedio_diario ? `- Promedio diario actual: ${fmt(d.promedio_diario)}` : ''}
+- Equipo: ${d.cajeros_activos ?? '?'} cajeros activos${d.total_cajeros ? ` de ${d.total_cajeros} totales` : ''}
 ` : '';
 
     const contextPrompt = `${SYSTEM_PROMPT}
