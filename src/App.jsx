@@ -12,6 +12,7 @@ import SalesReportView from './pages/SalesReportView';
 import PYGDashboard from './pages/PYGDashboard';
 import HourlyTransactions from './pages/HourlyTransactions';
 import BudgetNew from './pages/BudgetNew';
+import PowerBIReport from './pages/PowerBIReport';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
       <Route path="/PYGDashboard" element={<LayoutWrapper currentPageName="PYGDashboard"><PYGDashboard /></LayoutWrapper>} />
       <Route path="/HourlyTransactions" element={<HourlyTransactions />} />
       <Route path="/Budget" element={<LayoutWrapper currentPageName="Budget"><BudgetNew /></LayoutWrapper>} />
+      <Route path="/PowerBIReport" element={<LayoutWrapper currentPageName="PowerBIReport"><PowerBIReport /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

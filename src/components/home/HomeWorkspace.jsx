@@ -38,7 +38,8 @@ const NAV_ITEMS = [
 { icon: FileText, label: 'Informe', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: Clock, label: 'Txn por hora', path: 'HourlyTransactions', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: BarChart3, label: 'Participación', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
-{ icon: Snowflake, label: 'Mapa Nevera', path: 'FreezerMap', color: '#374151', roles: ['lider', 'embajador', 'gerente'] }];
+{ icon: Snowflake, label: 'Mapa Nevera', path: 'FreezerMap', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
+{ icon: BarChart3, label: 'Producto para llevar', path: 'PowerBIReport', color: '#C21875', roles: ['lider', 'embajador', 'gerente'] }];
 
 
 // ── PREMIUM KPI CARD ─────────────────────────────────────────────────────────
