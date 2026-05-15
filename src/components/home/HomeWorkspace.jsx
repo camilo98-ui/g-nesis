@@ -582,6 +582,41 @@ export default function HomeWorkspace({
       style={{ background: 'transparent', position: 'relative', zIndex: 1 }}
     >
 
+      {/* ── MOBILE NAV (visible only on mobile) ── */}
+      <motion.div
+        initial={{ y: -24, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
+        className="lg:hidden w-full bg-white/80 backdrop-blur-md border-b border-black/5 px-3 py-3 flex gap-2 overflow-x-auto scrollbar-hide order-first">
+        {filteredNav.filter(n => ['Tienda', 'Mapa Nevera', 'Participación'].includes(n.label)).map((item) => {
+          const handleClick = () => {
+            if (!item.path) {
+              if (item.onClick === 'onShowPYGModal') onShowPYGModal?.();
+              return;
+            }
+            setActiveNav(item.path);
+            window.location.href = `/${item.path}`;
+          };
+          const Icon = item.icon;
+          return (
+            <motion.button
+              key={item.label}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={handleClick}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold flex-shrink-0 whitespace-nowrap transition-all"
+              style={{
+                background: activeNav === item.path ? 'rgba(194,24,117,0.12)' : 'rgba(0,0,0,0.03)',
+                border: activeNav === item.path ? '1px solid rgba(194,24,117,0.2)' : '1px solid rgba(0,0,0,0.06)',
+                color: activeNav === item.path ? '#C21875' : '#64748b'
+              }}>
+              <Icon style={{ width: 12, height: 12 }} />
+              {item.label}
+            </motion.button>
+          );
+        })}
+      </motion.div>
+
       {/* ── LEFT SIDEBAR ── */}
       <motion.aside
         initial={{ x: -24, opacity: 0 }}
