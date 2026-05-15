@@ -785,50 +785,72 @@ export default function HomeWorkspace({
               const isPos = gap >= 0;
               const projPct = budgetData.monthProjectionCompliance ?? 0;
 
-              // Mini sparkline SVG — smooth bezier, full-width
+              // Sparkline ultra delgada y elegante — sin relleno exagerado
               const Spark = ({ points, color }) => {
                 if (!points || points.length < 2) return null;
-                const W = 200, H = 52;
-                const pad = 4;
-                const max = Math.max(...points);
-                const min = Math.min(...points);
+                const W = 200, H = 40;
+                const padX = 2, padY = 6;
+                const vals = points.filter(v => v != null && !isNaN(v));
+                if (vals.length < 2) return null;
+                const max = Math.max(...vals);
+                const min = Math.min(...vals);
                 const range = max - min || 1;
-                const toX = (i) => pad + (i / (points.length - 1)) * (W - pad * 2);
-                const toY = (v) => H - pad - ((v - min) / range) * (H - pad * 2 - 6);
-                // Build smooth bezier path
-                const coords = points.map((v, i) => [toX(i), toY(v)]);
+                const toX = (i) => padX + (i / (vals.length - 1)) * (W - padX * 2);
+                const toY = (v) => H - padY - ((v - min) / range) * (H - padY * 2);
+                const coords = vals.map((v, i) => [toX(i), toY(v)]);
+                // Catmull-Rom → cubic bezier
                 let d = `M${coords[0][0].toFixed(1)},${coords[0][1].toFixed(1)}`;
-                for (let i = 1; i < coords.length; i++) {
-                  const [x0, y0] = coords[i - 1];
-                  const [x1, y1] = coords[i];
-                  const cx = (x0 + x1) / 2;
-                  d += ` C${cx.toFixed(1)},${y0.toFixed(1)} ${cx.toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+                for (let i = 0; i < coords.length - 1; i++) {
+                  const p0 = coords[Math.max(i - 1, 0)];
+                  const p1 = coords[i];
+                  const p2 = coords[i + 1];
+                  const p3 = coords[Math.min(i + 2, coords.length - 1)];
+                  const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+                  const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+                  const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+                  const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+                  d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
                 }
-                const areaD = `${d} L${coords[coords.length-1][0]},${H} L${coords[0][0]},${H} Z`;
-                const gradId = `sg-${color.replace(/[^a-z0-9]/gi,'')}`;
-                // Dot at last point
                 const [lx, ly] = coords[coords.length - 1];
+                const gradId = `sg${color.replace(/[^a-z0-9]/gi, '')}`;
+                const areaD = `${d} L${lx.toFixed(1)},${H} L${coords[0][0].toFixed(1)},${H} Z`;
                 return (
                   <svg viewBox={`0 0 ${W} ${H}`} fill="none" preserveAspectRatio="none" className="w-full h-full">
                     <defs>
                       <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity="0.18" />
-                        <stop offset="100%" stopColor={color} stopOpacity="0.01" />
+                        <stop offset="0%" stopColor={color} stopOpacity="0.08" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0" />
                       </linearGradient>
                     </defs>
                     <path d={areaD} fill={`url(#${gradId})`} />
-                    <path d={d} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx={lx} cy={ly} r="3" fill={color} opacity="0.9" />
-                    <circle cx={lx} cy={ly} r="5.5" fill={color} opacity="0.15" />
+                    <path d={d} stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx={lx} cy={ly} r="2.2" fill={color} />
+                    <circle cx={lx} cy={ly} r="4.5" fill={color} opacity="0.12" />
                   </svg>
                 );
               };
 
-              // Generar sparklines desde ventas reales
-              const spark7 = [...todaySales]
-                .sort((a, b) => new Date(a.date) - new Date(b.date))
-                .slice(-7)
-                .map(d => d.total_sales || 0);
+              // Tendencias ÚNICAS por card
+              const sorted14 = [...todaySales].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-14);
+
+              // PPT: presupuesto diario acumulado vs real (ventas diarias últimos 14d)
+              const sparkPPT = sorted14.map(d => d.total_sales || 0);
+
+              // Brecha: diferencia diaria acumulada ventas - presupuesto (acumulado día a día)
+              const sparkGap = sorted14.map((d, i, arr) => {
+                const accSales = arr.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0);
+                const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0;
+                const accBudget = dailyBudgetBase * (i + 1);
+                return accSales - accBudget;
+              });
+
+              // Proyección: compliance acumulado día a día (% ventas acumuladas / presupuesto esperado)
+              const sparkProj = sorted14.map((d, i, arr) => {
+                const accSales = arr.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0);
+                const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 1;
+                const accBudget = dailyBudgetBase * (i + 1);
+                return accBudget > 0 ? (accSales / accBudget) * 100 : 0;
+              });
 
               const cards = [
                 {
@@ -838,7 +860,7 @@ export default function HomeWorkspace({
                     ? `+${budgetData.incrementPct}% recuperación`
                     : 'meta diaria',
                   accent: '#C21875',
-                  spark: spark7,
+                  spark: sparkPPT,
                   delay: 0.05,
                 },
                 {
@@ -848,7 +870,7 @@ export default function HomeWorkspace({
                     ? `${isPos ? 'Sobre' : 'Bajo'} meta · ${Math.abs((gap / budgetData.monthlyBudget * 100)).toFixed(0)}%`
                     : '',
                   accent: isPos ? '#059669' : '#e11d48',
-                  spark: spark7,
+                  spark: sparkGap,
                   delay: 0.1,
                   prefix: isPos ? '▲' : '▼',
                 },
@@ -857,7 +879,7 @@ export default function HomeWorkspace({
                   value: `${projPct.toFixed(0)}%`,
                   sub: `${fmt(budgetData.monthProjection)} / ${fmt(budgetData.monthlyBudget)}`,
                   accent: '#7c3aed',
-                  spark: spark7,
+                  spark: sparkProj,
                   delay: 0.15,
                 },
               ];
