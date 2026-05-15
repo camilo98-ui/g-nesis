@@ -358,8 +358,8 @@ export default function HomeWorkspace({
 
   const budgetData = useMemo(() => {
     if (!activeBudget?.sales_budget) return null;
-    return calculateBudgetData(activeBudget, todaySales, dailyBudgets, storeEntityId);
-  }, [activeBudget, todaySales, dailyBudgets, storeEntityId]);
+    return calculateBudgetData(activeBudget, todaySales, dailyBudgets, selectedStore);
+  }, [activeBudget, todaySales, dailyBudgets, selectedStore]);
 
   const { data: weatherData } = useQuery({
     queryKey: ['home-weather-real'],
