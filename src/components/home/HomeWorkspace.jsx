@@ -914,8 +914,8 @@ export default function HomeWorkspace({
                           </p>
                           <p className="text-[8px] sm:text-[10px] text-slate-400 font-medium mt-1.5">{c.sub}</p>
                         </div>
-                        {/* Sparkline al lado derecho — mismo height que el texto */}
-                        <div className="flex-shrink-0" style={{ width: 80, height: 40 }}>
+                        {/* Sparkline al lado derecho — ocupa el espacio restante */}
+                        <div className="flex-shrink-0" style={{ width: '45%', height: 44 }}>
                           <Spark points={c.spark} color={c.accent} />
                         </div>
                       </div>
