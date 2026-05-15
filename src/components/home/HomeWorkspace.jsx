@@ -501,11 +501,23 @@ export default function HomeWorkspace({
     
     // Análisis de productos más vendidos
     const topProducts = salesReports.length > 0
-      ? salesReports.sort((a, b) => (b.quantity || 0) - (a.quantity || 0)).slice(0, 5)
+      ? salesReports.sort((a, b) => (b.sales_amount || b.quantity || 0) - (a.sales_amount || a.quantity || 0)).slice(0, 10)
       : [];
     const topProductsList = topProducts.length > 0
-      ? topProducts.map((p, i) => `${i + 1}. ${p.product_name || 'Producto sin nombre'} - ${p.quantity || 0} unidades${p.sales_amount ? ` · ${fmt(p.sales_amount)}` : ''}`).join(' | ')
+      ? topProducts.map((p, i) => `${i + 1}. ${p.product_name || 'Producto sin nombre'} - ${fmt(p.sales_amount || 0)}${p.quantity ? ` (${p.quantity} unidades)` : ''}`).join(' | ')
       : 'Sin datos de productos';
+    
+    // Participación de top 5 productos en ventas totales
+    const top5ProductsSales = topProducts.slice(0, 5).reduce((sum, p) => sum + (p.sales_amount || 0), 0);
+    const top5Participation = todaySalesValue > 0 ? (top5ProductsSales / todaySalesValue * 100) : 0;
+    
+    // Productos con datos adicionales
+    const productsDetail = topProducts.slice(0, 5).map(p => ({
+      name: p.product_name || 'Producto sin nombre',
+      sales: fmt(p.sales_amount || 0),
+      quantity: p.quantity || 0,
+      percentage: todaySalesValue > 0 ? ((p.sales_amount || 0) / todaySalesValue * 100).toFixed(1) : 0
+    }));
 
     setPageData({
       page: 'Home',
@@ -546,9 +558,11 @@ export default function HomeWorkspace({
       // Equipo
       cajeros_activos: cashiers.length,
       
-      // Productos más vendidos
+      // Productos más vendidos (con detalles completos)
       top_products: topProductsList,
       top_products_count: topProducts.length,
+      top_5_products_list: productsDetail.map(p => `${p.name}: ${p.sales} (${p.quantity} unidades, ${p.percentage}% de ventas)`).join(' | '),
+      top_5_products_participation: top5Participation.toFixed(1),
       
       // KPI Card data
       kpi_ppt: fmt(pptHoy),

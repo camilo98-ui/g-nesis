@@ -275,8 +275,9 @@ ${d.txn_7d_total != null ? `- Transacciones últimos 7 días: ${d.txn_7d_total}`
 ${d.sales_30d_total != null && d.days_with_data ? `- Últimos 30 días: ${fmt(d.sales_30d_total)} en ${d.days_with_data} días · promedio ${fmt(d.sales_30d_avg)} diario` : ''}
 
 PRODUCTOS Y PARTICIPACIÓN
-${d.top_products ? `- Galletas/Productos más vendidos: ${d.top_products}` : '- Sin datos de productos disponibles'}
-${d.top_products_count ? `- Total productos en reporte: ${d.top_products_count}` : ''}
+${d.top_5_products_list ? `- Top 5 productos más vendidos: ${d.top_5_products_list}` : d.top_products ? `- Productos: ${d.top_products}` : '- Sin datos de productos disponibles'}
+${d.top_5_products_participation ? `- Participación Top 5: ${d.top_5_products_participation}% de las ventas del día` : ''}
+${d.top_products_count ? `- Productos en reporte: ${d.top_products_count}` : ''}
 
 KPI PRINCIPAL (PPT DEL DÍA)
 ${d.kpi_ppt ? `- Valor: ${d.kpi_ppt} ${d.kpi_ppt_sub ? ` · ${d.kpi_ppt_sub}` : ''}` : ''}
