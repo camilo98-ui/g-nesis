@@ -649,10 +649,10 @@ export default function HomeWorkspace({
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh' }}>
+      <main className="flex-1 min-w-0 flex flex-col md:flex-row overflow-hidden" style={{ height: '100vh' }}>
 
         {/* CENTER — scrollable */}
-        <div className="flex-1 min-w-0 overflow-y-auto p-2 sm:p-4 lg:p-7">
+        <div className="flex-1 min-w-0 overflow-y-auto p-3 sm:p-4 lg:p-7 order-first md:order-2">
 
           {/* TOP BAR */}
           <motion.div
