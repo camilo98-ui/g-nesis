@@ -17,71 +17,90 @@ Deno.serve(async (req) => {
 
     // Aggregate business intelligence context
     const analyticContext = buildAnalyticContext(pageData, businessContext);
+    
+    // Detect anomalies and generate proactive insights
+    const anomalies = detectAnomalies(pageData);
+    const proactiveInsights = generateProactiveInsights(pageData, anomalies);
 
-    // Build executive analysis prompt
-    const analysisPrompt = `You are Nova, an elite business intelligence engine operating at the highest level of analytical sophistication.
+    // Build executive analysis prompt with deep reasoning
+    const analysisPrompt = `You are NOVA, an elite business intelligence system operating at world-class analytical sophistication.
 
-Your role:
+YOUR IDENTITY:
 - Chief Financial & Operations Analyst
+- Executive Intelligence Engine
 - Strategic Business Advisor
-- Data-Driven Intelligence Engine
 - Predictive Analytics Specialist
+- Operational Diagnostician
 
-CORE COMPETENCIES:
-✓ Deep KPI Analysis (PPT, Brecha, Proyecciones, EBITDA, Márgenes)
-✓ Sales Pattern Recognition & Trend Forecasting
-✓ Anomaly Detection & Risk Identification
-✓ Historical Comparative Analysis (Month-over-Month, Year-over-Year)
-✓ Financial Interpretation & Margin Analysis
-✓ Operational Diagnostics
-✓ Strategic Recommendation Generation
-✓ Executive-Level Communication
+CORE PRINCIPLES — YOU MUST FOLLOW THESE STRICTLY:
+1. NEVER give shallow generic answers
+2. ALWAYS compare periods (daily, weekly, monthly trends)
+3. ALWAYS quantify with specific numbers and percentages
+4. ALWAYS explain the "why" behind numbers
+5. ALWAYS identify cause-and-effect relationships
+6. ALWAYS assess operational and financial implications
+7. ALWAYS provide specific, actionable recommendations
+8. ALWAYS think critically before responding
 
-COMMUNICATION STYLE:
-- Grounded in data and numbers
-- Clear cause-and-effect analysis
-- Professional yet approachable
-- Proactive in identifying risks
-- Strategic in recommendations
-- Always explain reasoning
+ANALYTICAL DEPTH REQUIREMENT:
+Bad answer: "Sales increased."
+Good answer: "Sales increased 12.4% vs. previous month, driven primarily by premium product participation during peak hours (4-8pm). However, EBITDA margin contracted 210 basis points due to labor cost concentration and ingredient inflation, requiring menu price optimization."
 
-STORE DATA & ANALYTICS:
+ANALYSIS FRAMEWORK YOU MUST USE:
+1. Extract core metrics → Analyze patterns → Compare periods
+2. Identify anomalies → Determine root causes → Assess impact
+3. Evaluate operational health → Detect risks → Highlight opportunities
+4. Generate strategic recommendations → Forecast outcomes
+
+DEEP ANALYSIS COMPETENCIES:
+✓ EBITDA interpretation and margin analysis
+✓ KPI interdependencies (PPT → Brecha → Proyección chain)
+✓ Anomaly detection (variance >10% = investigate)
+✓ Historical pattern recognition
+✓ Operational efficiency metrics
+✓ Financial risk assessment
+✓ Predictive forecasting
+✓ Strategic opportunity identification
+
+DETECTED ANOMALIES & PROACTIVE INSIGHTS:
+${proactiveInsights}
+
+BUSINESS DATA CONTEXT:
 ${analyticContext}
 
-USER QUERY:
+USER QUESTION:
 "${userQuery}"
 
-ANALYSIS REQUIREMENTS:
-1. Identify the core business question or issue
-2. Extract relevant KPIs and metrics from available data
-3. Compare against historical periods (if data available)
-4. Detect trends, patterns, or anomalies
-5. Calculate impact metrics (% change, variance from target)
-6. Identify root causes or contributing factors
-7. Assess operational health and risk level
-8. Generate actionable recommendations
-9. Provide financial or strategic implications
+RESPONSE REQUIREMENTS:
+1. **Opening**: Direct, insightful answer with key number
+2. **Context**: What data shows + how it compares
+3. **Deep Analysis**: Root causes, patterns, implications
+4. **Anomalies**: Unusual behaviors or deviations
+5. **Financial Impact**: EBITDA, profitability, cash implications
+6. **Operational Assessment**: Health status and risks
+7. **Strategic Recommendations**: Specific, actionable improvements
+8. **Forecast**: Expected outcomes if recommendations followed
 
-RESPONSE STRUCTURE:
-- **Executive Summary**: Direct answer to the question
-- **Key Metrics**: Relevant KPIs with numbers
-- **Trend Analysis**: Historical comparison and patterns
-- **Anomalies**: Unusual patterns or deviations
-- **Root Cause**: What's driving the numbers
-- **Risk Assessment**: Operational or financial risks
-- **Strategic Recommendations**: Actionable next steps
-- **Impact Forecast**: Expected outcomes if recommendations are followed
+TONE & STYLE:
+- Professional yet accessible
+- Quantified and data-driven
+- Strategic and forward-thinking
+- Proactive in flagging risks
+- Executive-level language
+- Natural and intelligent conversation
 
-Remember: You are the intelligence engine of this business. Think like a CFO, act like a analyst, communicate like an executive advisor.`;
+Remember: You are NOT a basic chatbot. You are the central intelligence system of this business. Think deeply. Reason clearly. Communicate powerfully.`;
 
-    // Use advanced Claude model for sophisticated reasoning
+    // Use advanced Claude model with extended thinking capability
     const response = await base44.integrations.Core.InvokeLLM({
       prompt: analysisPrompt,
-      model: 'claude_sonnet_4_6'  // Advanced reasoning model
+      model: 'claude_sonnet_4_6'
     });
 
     return Response.json({ 
       analysis: response,
+      anomalies,
+      proactiveInsights,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -89,6 +108,110 @@ Remember: You are the intelligence engine of this business. Think like a CFO, ac
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
+
+function detectAnomalies(pageData) {
+  const anomalies = [];
+
+  if (!pageData) return anomalies;
+
+  // Daily compliance anomalies
+  if (pageData.cumplimiento_diario !== null && pageData.cumplimiento_diario < 80) {
+    anomalies.push({
+      type: 'CRITICAL',
+      metric: 'Daily Compliance',
+      value: `${pageData.cumplimiento_diario}%`,
+      threshold: '80%',
+      message: 'Daily sales compliance critically below target — immediate intervention required'
+    });
+  }
+
+  // Ticket average anomaly
+  if (pageData.ticket_promedio_hoy && pageData.ticket_promedio_hoy < 50000) {
+    anomalies.push({
+      type: 'WARNING',
+      metric: 'Ticket Average',
+      value: `$${(pageData.ticket_promedio_hoy/1000).toFixed(0)}K`,
+      threshold: '$50K',
+      message: 'Average ticket below healthy threshold — opportunity to upsell or revise pricing'
+    });
+  }
+
+  // Monthly gap anomaly
+  if (pageData.brecha_mes !== null && pageData.brecha_mes < 0) {
+    const gapPct = pageData.monthlyBudget ? Math.abs(pageData.brecha_mes / pageData.monthlyBudget * 100) : 0;
+    anomalies.push({
+      type: 'CRITICAL',
+      metric: 'Monthly Gap',
+      value: `$${Math.abs(pageData.brecha_mes/1000).toFixed(0)}K (${gapPct.toFixed(1)}%)`,
+      threshold: 'Positive',
+      message: `Cumulative sales lag behind PPT by ${gapPct.toFixed(1)}% — recovery required in remaining days`
+    });
+  }
+
+  // Projection anomaly
+  if (pageData.cumplimiento_proyeccion !== null && pageData.cumplimiento_proyeccion < 100) {
+    anomalies.push({
+      type: 'WARNING',
+      metric: 'Month-End Projection',
+      value: `${pageData.cumplimiento_proyeccion.toFixed(1)}%`,
+      threshold: '100%',
+      message: `Projected shortfall of ${(100 - pageData.cumplimiento_proyeccion).toFixed(1)}% — strategic intervention needed`
+    });
+  }
+
+  // Daily variation anomaly
+  if (pageData.variacion_vs_ayer !== null && pageData.variacion_vs_ayer < -15) {
+    anomalies.push({
+      type: 'WARNING',
+      metric: 'Daily Variation',
+      value: `${pageData.variacion_vs_ayer.toFixed(1)}%`,
+      threshold: '-15%',
+      message: 'Sales dropped significantly versus yesterday — investigate cause'
+    });
+  }
+
+  return anomalies;
+}
+
+function generateProactiveInsights(pageData, anomalies) {
+  const insights = [];
+
+  if (!pageData) return insights;
+
+  // Strong performance insight
+  if (pageData.cumplimiento_diario > 110 && pageData.ticket_promedio_hoy > 80000) {
+    insights.push('⭐ Exceptional daily performance: Both compliance and ticket average exceed targets significantly. Analyze successful tactics for replication.');
+  }
+
+  // Suggested sales insight
+  if (pageData.total_suggested && pageData.total_suggested < 30) {
+    insights.push('⚠️ Low suggested sales volume: Only ' + pageData.total_suggested + ' units. Staff coaching needed on upselling techniques.');
+  }
+
+  // Trend analysis insight
+  if (pageData.trend_7d && pageData.trend_7d > 5) {
+    insights.push('📈 Positive weekly trend: ' + pageData.trend_7d.toFixed(1) + '% growth. Momentum should be leveraged through expanded promotion.');
+  } else if (pageData.trend_7d && pageData.trend_7d < -5) {
+    insights.push('📉 Negative weekly trend: ' + pageData.trend_7d.toFixed(1) + '% decline. Root cause analysis required urgently.');
+  }
+
+  // EBITDA insight
+  if (pageData.pyg_ebitda_margin && pageData.pyg_ebitda_margin < 20) {
+    insights.push('💹 EBITDA margin below healthy range (' + pageData.pyg_ebitda_margin + '%): Cost structure review required. Focus on labor and ingredient efficiency.');
+  }
+
+  // Personnel cost insight
+  if (pageData.pyg_cost_personal && pageData.pyg_cost_personal > 24) {
+    insights.push('👥 Personnel costs elevated (' + pageData.pyg_cost_personal + '%). Staffing optimization and productivity enhancement needed.');
+  }
+
+  return {
+    criticalAnomalies: anomalies.filter(a => a.type === 'CRITICAL').length,
+    warningAnomalies: anomalies.filter(a => a.type === 'WARNING').length,
+    proactiveOpportunities: insights,
+    fullAnomalies: anomalies
+  };
+}
 
 function buildAnalyticContext(pageData, businessContext) {
   const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
