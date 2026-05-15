@@ -991,17 +991,22 @@ export default function HomeWorkspace({
                     { label: 'Incremento recup.', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : 'Sin brecha', color: '#10b981' },
                   ],
                   chart: (
-                    <ResponsiveContainer width="100%" height={160}>
-                      <BarChart data={chartSales14} barGap={2}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                        <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : `${(v/1e3).toFixed(0)}K`} width={38} />
-                        <Tooltip formatter={(v, n) => [fmt(v), n === 'ventas' ? 'Ventas' : 'PPT']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
-                        <ReferenceLine y={dailyBudgetBase} stroke="#C21875" strokeDasharray="4 3" strokeWidth={1.5} />
-                        <Bar dataKey="ventas" fill="#C21875" opacity={0.85} radius={[3,3,0,0]} />
-                        <Bar dataKey="ppt" fill="#f9a8d4" opacity={0.4} radius={[3,3,0,0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
+                   <ResponsiveContainer width="100%" height={160}>
+                     <LineChart data={chartSales14}>
+                       <defs>
+                         <linearGradient id="gradPPT" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="0%" stopColor="#C21875" stopOpacity={0.15} />
+                           <stop offset="100%" stopColor="#C21875" stopOpacity={0} />
+                         </linearGradient>
+                       </defs>
+                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                       <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                       <YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} width={32} />
+                       <Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
+                       <ReferenceLine y={100} stroke="#C21875" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: '100%', position: 'right', fontSize: 9, fill: '#C21875' }} />
+                       <Line type="monotone" dataKey="cumplimiento" stroke="#C21875" strokeWidth={2.5} dot={{ r: 3, fill: '#C21875' }} activeDot={{ r: 5 }} />
+                     </LineChart>
+                   </ResponsiveContainer>
                   ),
                 },
                 gap: {
