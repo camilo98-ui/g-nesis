@@ -6,41 +6,7 @@ import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
 import NovaAlerts from '@/components/NovaAlerts';
-
-const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
-
-// Renders the mascot on a canvas with white background removed
-function MascotCanvas({ width = 96, height = 96, style = {} }) {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      ctx.drawImage(img, 0, 0);
-      const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const d = data.data;
-      for (let i = 0; i < d.length; i += 4) {
-        const r = d[i], g = d[i+1], b = d[i+2];
-        // Remove near-white pixels (checkerboard / white bg)
-        if (r > 220 && g > 220 && b > 220) {
-          d[i+3] = 0; // fully transparent
-        } else if (r > 180 && g > 180 && b > 180) {
-          // Semi-transparent for soft edges
-          const brightness = (r + g + b) / 3;
-          d[i+3] = Math.round(255 * (1 - (brightness - 180) / 75));
-        }
-      }
-      ctx.putImageData(data, 0, 0);
-    };
-    img.src = MASCOT_IMG;
-  }, []);
-  return <canvas ref={canvasRef} style={{ width, height, display: 'block', objectFit: 'contain', ...style }} />;
-}
+import MascotCanvas from '@/components/MascotCanvas';
 
 const PAGE_CONTEXTS = {
   '/':              { name: 'Dashboard', focus: 'ventas del día, métricas generales de la tienda, cumplimiento de presupuesto y rendimiento del equipo.' },
