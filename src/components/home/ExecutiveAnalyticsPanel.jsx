@@ -703,30 +703,28 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                     </AreaChart>
                   </ResponsiveContainer>
 
-                  {/* Ventas por mes */}
-                  {monthData.length > 0 &&
-                  <div className="mt-3 pt-2 hidden" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-                      <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Venta por mes · {currentYear}</p>
-                      <div className="space-y-1.5">
-                        {[...monthData].sort((a, b) => b.totalSales - a.totalSales).slice(0, 4).map((m, i) =>
-                      <div key={m.label} className="flex items-center gap-2">
-                            <span className="text-[9px] font-bold w-6 flex-shrink-0" style={{ color: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}>{m.label}</span>
-                            <div className="flex-1 h-2 rounded-full bg-pink-50 overflow-hidden">
-                              <motion.div
-                            className="h-full rounded-full"
-                            style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${m.totalSales / maxMonthSales * 100}%` }}
-                            transition={{ delay: 0.6 + i * 0.06, duration: 0.7 }} />
-                          
-                            </div>
-                            <span className="text-[9px] font-bold tabular-nums flex-shrink-0" style={{ color: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}>{fmt(m.totalSales)}</span>
-                            <span className="text-[8px] text-slate-300 flex-shrink-0">{totalYearSales > 0 ? Math.round(m.totalSales / totalYearSales * 100) : 0}%</span>
+                  {/* Mini KPIs debajo de tendencia de ticket */}
+                  {(() => {
+                    const withTicket = sorted30.filter((d) => d.ticket > 0);
+                    const avgTk = withTicket.length > 0 ? Math.round(withTicket.reduce((s, d) => s + d.ticket, 0) / withTicket.length) : 0;
+                    const topDept = realDepts[0];
+                    const daysAbove = withTicket.filter((d) => d.ticket >= 25000).length;
+                    const kpis = [
+                      { label: 'Ticket Prom.', value: avgTk > 0 ? fmt(avgTk) : '—', color: '#FF4D8D' },
+                      { label: 'Top Categoría', value: topDept ? topDept.name : '—', color: PARTICIPATION_COLORS[0] },
+                      { label: 'Días ≥ Meta', value: `${daysAbove}/${withTicket.length}`, color: daysAbove / (withTicket.length || 1) >= 0.5 ? '#10b981' : '#f59e0b' },
+                    ];
+                    return (
+                      <div className="mt-3 pt-2.5 grid grid-cols-3 gap-1.5" style={{ borderTop: '1px solid rgba(255,77,141,0.1)' }}>
+                        {kpis.map((k) => (
+                          <div key={k.label} className="rounded-lg px-2 py-1.5 text-center" style={{ background: 'rgba(255,77,141,0.04)' }}>
+                            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase leading-tight mb-0.5">{k.label}</p>
+                            <p className="text-[10px] font-black leading-tight truncate" style={{ color: k.color }}>{k.value}</p>
                           </div>
-                      )}
+                        ))}
                       </div>
-                    </div>
-                  }
+                    );
+                  })()}
                 </div>
               </>);
 
