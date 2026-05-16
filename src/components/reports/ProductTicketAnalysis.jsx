@@ -21,6 +21,62 @@ import { STORES } from '@/components/StoreSelector';
 const fmt = (v) => '$' + Math.round(v || 0).toLocaleString('es-CO');
 const fmtPct = (v) => (v || 0).toFixed(2) + '%';
 
+// CustomBar con efecto premium al hover
+const CustomBar = (props) => {
+  const { fill, x, y, width, height } = props;
+  const [isHovered, setIsHovered] = React.useState(false);
+  
+  if (!width || !height || width <= 0 || height <= 0) return null;
+  
+  return (
+    <g
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)', cursor: 'pointer' }}
+    >
+      {/* Glow Background */}
+      {isHovered && (
+        <rect
+          x={x - 3}
+          y={y - 5}
+          width={width + 6}
+          height={height + 8}
+          fill="rgba(255,77,141,0.15)"
+          rx="12"
+          opacity={0.5}
+        />
+      )}
+      
+      {/* Barra Principal */}
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill={fill}
+        rx="12"
+        ry="4"
+        opacity={isHovered ? 1 : 0.92}
+        style={{
+          filter: isHovered ? 'drop-shadow(0 12px 28px rgba(255,77,141,0.22))' : 'drop-shadow(0 6px 16px rgba(255,77,141,0.12))',
+          transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
+        }}
+      />
+      
+      {/* Highlight Superior */}
+      <rect
+        x={x + 1}
+        y={y + 1}
+        width={width - 2}
+        height={3}
+        fill="rgba(255,255,255,0.4)"
+        rx="11"
+        opacity={isHovered ? 0.6 : 0.3}
+      />
+    </g>
+  );
+};
+
 function extractStoreCode(sid) {
   if (!sid) return null;
   const m = sid.toUpperCase().match(/(BTA\s*\d+|TUNJA\s*\d+)/);
@@ -553,41 +609,18 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                         pointerEvents: 'none',
                       }} />
                       
-                      <ResponsiveContainer width="100%" height={200}>
-                        <ComposedChart data={monthsWithPart} margin={{ top: 20, right: 24, left: 0, bottom: 12 }}>
+                      <ResponsiveContainer width="100%" height={160}>
+                        <BarChart data={monthsWithPart} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
                           <defs>
-                            {/* Gradientes Profesionales Multicapa */}
-                            <linearGradient id="areaPrimary" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#FF4D8D" stopOpacity={0.4} />
-                              <stop offset="50%" stopColor="#FF8FB8" stopOpacity={0.2} />
-                              <stop offset="100%" stopColor="#FFD1E3" stopOpacity={0.05} />
-                            </linearGradient>
-                            <linearGradient id="areaSecondary" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.25} />
-                              <stop offset="100%" stopColor="#E9D5FF" stopOpacity={0.02} />
-                            </linearGradient>
-                            <linearGradient id="areaTertiary" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#06B6D4" stopOpacity={0.2} />
-                              <stop offset="100%" stopColor="#CFFAFE" stopOpacity={0.01} />
-                            </linearGradient>
-                            <linearGradient id="trendGrad" x1="0" y1="0" x2="1" y2="0">
-                              <stop offset="0%" stopColor="#8B5CF6" />
-                              <stop offset="50%" stopColor="#6366F1" />
-                              <stop offset="100%" stopColor="#06B6D4" />
+                            {/* Gradientes Premium Rosado */}
+                            <linearGradient id="barGradientPremium" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#FF4D8D" stopOpacity={1} />
+                              <stop offset="100%" stopColor="#FF8FB8" stopOpacity={0.85} />
                             </linearGradient>
                             
-                            {/* Neón Glow Filter para línea */}
-                            <filter id="neonGlow">
-                              <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-                              <feMerge>
-                                <feMergeNode in="coloredBlur" />
-                                <feMergeNode in="SourceGraphic" />
-                              </feMerge>
-                            </filter>
-                            
-                            {/* Glow para puntos */}
-                            <filter id="dotGlow">
-                              <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
+                            {/* Glow para barras */}
+                            <filter id="barGlow">
+                              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
                               <feMerge>
                                 <feMergeNode in="coloredBlur" />
                                 <feMergeNode in="SourceGraphic" />
@@ -596,113 +629,68 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                           </defs>
                           
                           <CartesianGrid 
-                            stroke="rgba(200,200,200,0.08)" 
-                            strokeDasharray="3 3" 
+                            stroke="rgba(200,200,200,0.06)" 
+                            horizontal={true}
                             vertical={false}
-                            opacity={0.6}
+                            strokeDasharray="0"
+                            opacity={0.5}
                           />
                           
                           <XAxis
                             dataKey="label"
                             tick={({ x, y, payload }) => (
-                              <text x={x} y={y + 14} textAnchor="middle" fontSize={11} fill={P.textSub} fontFamily="Inter, -apple-system, sans-serif" fontWeight={600} letterSpacing="0.5px">
+                              <text 
+                                x={x} 
+                                y={y + 12} 
+                                textAnchor="middle" 
+                                fontSize={9} 
+                                fill={P.textSub} 
+                                fontFamily="Inter, -apple-system, sans-serif" 
+                                fontWeight={500}
+                                letterSpacing="0px"
+                              >
                                 {payload.value}
                               </text>
                             )}
                             axisLine={false}
                             tickLine={false}
                           />
-                          <YAxis yAxisId="left" hide />
-                          <YAxis yAxisId="right" hide orientation="right" />
+                          <YAxis hide />
                           
-                          {/* Tooltip Minimalista tipo Linear/Raycast */}
+                          {/* Tooltip Premium */}
                           <RechartsTooltip
-                            cursor={{ stroke: 'rgba(255,77,141,0.25)', strokeWidth: 2, strokeDasharray: '4 4' }}
+                            cursor={{ fill: 'rgba(255,77,141,0.08)', radius: 8 }}
                             content={({ active, payload }) => {
                               if (!active || !payload?.length) return null;
                               const d = payload[0].payload;
                               return (
                                 <div style={{
-                                  background: 'rgba(255,255,255,0.92)',
-                                  backdropFilter: 'blur(24px)',
-                                  border: `1px solid rgba(255,77,141,0.18)`,
-                                  borderRadius: 12,
-                                  padding: '10px 13px',
-                                  boxShadow: `0 8px 32px rgba(255,77,141,0.12), 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)`,
-                                  minWidth: 'auto',
+                                  background: 'rgba(255,255,255,0.95)',
+                                  backdropFilter: 'blur(20px)',
+                                  border: `1px solid rgba(255,77,141,0.2)`,
+                                  borderRadius: 10,
+                                  padding: '8px 11px',
+                                  boxShadow: `0 10px 35px rgba(255,77,141,0.15), inset 0 1px 0 rgba(255,255,255,0.85)`,
                                   fontSize: '11px',
                                 }}>
-                                  <p style={{ fontSize: 10, fontWeight: 700, color: P.textSub, margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.09em' }}>{d.label}</p>
-                                  <p style={{ fontSize: 15, fontWeight: 700, color: '#FF4D8D', margin: '0 0 2px', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{fmt(d.totalSales)}</p>
-                                  {d.compliance != null && (
-                                    <p style={{ fontSize: 9, color: P.textSub, margin: 0, fontVariantNumeric: 'tabular-nums' }}>Cumplimiento: {d.compliance}%</p>
-                                  )}
+                                  <p style={{ fontSize: 9, fontWeight: 700, color: P.textSub, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{d.label}</p>
+                                  <p style={{ fontSize: 13, fontWeight: 700, color: '#FF4D8D', margin: '0', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{fmt(d.totalSales)}</p>
                                 </div>
                               );
                             }}
                           />
                           
-                          {/* Área Base Terciaria (Cyan suave) */}
-                          <Area
-                            yAxisId="left"
-                            type="monotone"
-                            dataKey="trendline"
-                            fill="url(#areaTertiary)"
-                            stroke="none"
-                            isAnimationActive={true}
-                            animationDuration={1600}
-                            opacity={0.7}
-                          />
-
-                          {/* Área Secundaria (Violeta profesional) */}
-                          <Area
-                            yAxisId="left"
-                            type="monotone"
-                            dataKey="participation"
-                            fill="url(#areaSecondary)"
-                            stroke="none"
-                            isAnimationActive={true}
-                            animationDuration={1500}
-                            opacity={0.6}
-                          />
-
-                          {/* Línea de Tendencia Suave */}
-                          <Line
-                            yAxisId="left"
-                            type="monotone"
-                            dataKey="trendline"
-                            stroke="url(#trendGrad)"
-                            strokeWidth={2.5}
-                            dot={false}
-                            isAnimationActive={true}
-                            animationDuration={1400}
-                            opacity={0.8}
-                            strokeLinecap="round"
-                          />
-
-                          {/* Área Principal (Rosa premium) */}
-                          <Area
-                            yAxisId="left"
-                            type="monotone"
+                          {/* Barras Premium con Glow */}
+                          <Bar
                             dataKey="totalSales"
-                            fill="url(#areaPrimary)"
-                            stroke="#FF4D8D"
-                            strokeWidth={3}
+                            fill="url(#barGradientPremium)"
+                            radius={[12, 12, 4, 4]}
                             isAnimationActive={true}
-                            animationDuration={1300}
-                            dot={(props) => {
-                              const { cx, cy, payload } = props;
-                              return (
-                                <g key={`dot-${payload.key}`}>
-                                  <circle cx={cx} cy={cy} r={7} fill="rgba(255,77,141,0.12)" opacity={0.4} />
-                                  <circle cx={cx} cy={cy} r={5} fill="#FFF7FA" opacity={0.99} />
-                                  <circle cx={cx} cy={cy} r={5} fill="none" stroke="#FF4D8D" strokeWidth={1.8} />
-                                  <circle cx={cx} cy={cy} r={2.2} fill="#FF4D8D" />
-                                </g>
-                              );
-                            }}
+                            animationDuration={1200}
+                            filter="url(#barGlow)"
+                            shape={<CustomBar />}
                           />
-                        </ComposedChart>
+                        </BarChart>
                       </ResponsiveContainer>
                       
                       {/* Mini Stats Footer */}
