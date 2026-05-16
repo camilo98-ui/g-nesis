@@ -636,7 +636,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                     </ResponsiveContainer>
 
                     {/* KPI Cards */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, padding: '12px 0 6px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, padding: '12px 0 6px' }}>
                       {(() => {
                         const maxMonth = monthsWithPart.reduce((a, b) => (a.totalSales > b.totalSales ? a : b), monthsWithPart[0]);
                         const minMonth = monthsWithPart.reduce((a, b) => (a.totalSales < b.totalSales ? a : b), monthsWithPart[0]);
