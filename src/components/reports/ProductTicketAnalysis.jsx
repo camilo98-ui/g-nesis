@@ -259,25 +259,30 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
         return <>
       <div className="grid md:grid-cols-2 gap-4">
         {/* ── Top 10 Productos — Luxury Pink AI SaaS ── */}
-        <div style={{
-              background: `linear-gradient(160deg, rgba(255,247,250,0.97) 0%, rgba(252,231,243,0.6) 100%)`,
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              borderRadius: 22,
-              border: `1px solid ${P.borderSoft}`,
-              boxShadow: `0 2px 8px ${P.glowSoft}, 0 16px 48px rgba(255,77,141,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
+        <div
+          style={{
+            background: '#ffffff',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            borderRadius: 22,
+            border: `1px solid rgba(255,143,184,0.15)`,
+            boxShadow: `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)`,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            transition: 'box-shadow 0.3s, border-color 0.3s, background 0.3s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,247,250,0.97)'; e.currentTarget.style.borderColor = 'rgba(255,77,141,0.2)'; e.currentTarget.style.boxShadow = `0 4px 20px rgba(255,77,141,0.10), 0 16px 48px rgba(255,77,141,0.07), inset 0 1px 0 rgba(255,255,255,1)`; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)'; e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)`; }}
+        >
           {/* Header */}
           <div style={{
                 padding: '18px 20px 13px',
-                borderBottom: `1px solid ${P.borderSoft}`,
-                background: 'linear-gradient(90deg, rgba(255,77,141,0.04) 0%, rgba(233,213,255,0.08) 100%)'
+                borderBottom: `1px solid rgba(255,143,184,0.12)`,
+                background: 'transparent'
               }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div>
                 
 
 
@@ -287,8 +292,8 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
 
                     
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: P.text, letterSpacing: '-0.02em', margin: 0, lineHeight: 1.2 }}>Top 10 Productos</p>
-                  <p style={{ fontSize: 10, color: P.textSub, margin: 0, marginTop: 2 }}>Por participación en ventas</p>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: P.textSub, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0, lineHeight: 1.3 }}>Top 10 Productos</p>
+                  <p style={{ fontSize: 14, fontWeight: 500, color: P.text, margin: 0, marginTop: 3, letterSpacing: '-0.01em', lineHeight: 1.3 }}>Por participación en ventas</p>
                 </div>
               </div>
               <span style={{
@@ -470,25 +475,28 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
               };
 
               return (
-                <div style={{
-                  background: `linear-gradient(160deg, rgba(255,247,250,0.97) 0%, rgba(252,231,243,0.6) 100%)`,
-                  backdropFilter: 'blur(24px)',
-                  WebkitBackdropFilter: 'blur(24px)',
-                  borderRadius: 22,
-                  border: `1px solid ${P.borderSoft}`,
-                  boxShadow: `0 2px 8px ${P.glowSoft}, 0 16px 48px rgba(255,77,141,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`,
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}>
+                <div
+                  style={{
+                    background: '#ffffff',
+                    borderRadius: 22,
+                    border: `1px solid rgba(255,143,184,0.15)`,
+                    boxShadow: `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)`,
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'box-shadow 0.3s, border-color 0.3s, background 0.3s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,247,250,0.97)'; e.currentTarget.style.borderColor = 'rgba(255,77,141,0.2)'; e.currentTarget.style.boxShadow = `0 4px 20px rgba(255,77,141,0.10), 0 16px 48px rgba(255,77,141,0.07)`; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)'; e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05)`; }}
+                >
               {/* Header */}
               <div style={{
                     padding: '18px 20px 13px',
-                    borderBottom: `1px solid ${P.borderSoft}`,
-                    background: 'linear-gradient(90deg, rgba(255,77,141,0.04) 0%, rgba(233,213,255,0.06) 100%)'
+                    borderBottom: `1px solid rgba(255,143,184,0.12)`,
+                    background: 'transparent'
                   }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div>
                     
 
 
@@ -498,21 +506,16 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
 
                         
                     <div>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: P.text, letterSpacing: '-0.02em', margin: 0, lineHeight: 1.2 }}>Venta por Mes</p>
-                      <p style={{ fontSize: 10, color: P.textSub, margin: 0, marginTop: 2 }}>Ene – {MONTH_NAMES[new Date().getMonth()]} {currentYear}</p>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: P.textSub, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0, lineHeight: 1.3 }}>Venta por Mes</p>
+                      <p style={{ fontSize: 14, fontWeight: 500, color: P.text, margin: 0, marginTop: 3, letterSpacing: '-0.01em', lineHeight: 1.3 }}>Ene – {MONTH_NAMES[new Date().getMonth()]} · {currentYear}</p>
                     </div>
                   </div>
                   {totalYearSales > 0 &&
-                      <div style={{ textAlign: 'right' }}>
-                      <p style={{
-                          fontSize: 19, fontWeight: 800, margin: 0, letterSpacing: '-0.03em',
-                          fontVariantNumeric: 'tabular-nums',
-                          background: `linear-gradient(135deg, ${P.magenta}, ${P.primary})`,
-                          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'
-                        }}>{fmt(totalYearSales)}</p>
-                      <p style={{ fontSize: 9, color: P.textSub, margin: 0, marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Total acumulado</p>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: P.textSub, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 3px' }}>Total acumulado</p>
+                      <p style={{ fontSize: 19, fontWeight: 700, color: P.text, margin: 0, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{fmt(totalYearSales)}</p>
                     </div>
-                      }
+                  }
                 </div>
               </div>
 
