@@ -37,7 +37,7 @@ function classifyImpact(participation, venta, avgTicketRatio) {
   return { label: 'Estable', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200', icon: '➡️' };
 }
 
-export default function ProductTicketAnalysis({ storeId }) {
+export default function ProductTicketAnalysis({ storeId, budget = [] }) {
   const [selectedDept, setSelectedDept] = useState('all');
   const [sortBy, setSortBy] = useState('participation');
   const [expandedRow, setExpandedRow] = useState(null);
@@ -340,10 +340,18 @@ export default function ProductTicketAnalysis({ storeId }) {
             .sort((a, b) => a.month - b.month);
           const totalYearSales = monthData.reduce((s, m) => s + m.totalSales, 0);
           const maxMonthSales = Math.max(...monthData.map(m => m.totalSales), 1);
-          const monthsWithPart = monthData.map(m => ({
-            ...m,
-            participation: totalYearSales > 0 ? m.totalSales / totalYearSales * 100 : 0
-          }));
+          const monthsWithPart = monthData.map(m => {
+            // Buscar presupuesto de ese mes
+            const budgetEntry = budget.find(b => Number(b.month) === m.month && Number(b.year) === m.year);
+            const pptMes = budgetEntry?.sales_budget || 0;
+            const compliance = pptMes > 0 ? Math.round(m.totalSales / pptMes * 100) : null;
+            return {
+              ...m,
+              participation: totalYearSales > 0 ? m.totalSales / totalYearSales * 100 : 0,
+              pptMes,
+              compliance
+            };
+          });
 
           return (
             <Card className="border-0 shadow-sm bg-white flex flex-col overflow-hidden">
@@ -388,68 +396,73 @@ export default function ProductTicketAnalysis({ storeId }) {
                         />
                         <YAxis hide />
                         <RechartsTooltip
-                          cursor={{ fill: 'rgba(249,168,212,0.10)' }}
-                          content={({ active, payload }) => {
-                            if (!active || !payload?.length) return null;
-                            const d = payload[0].payload;
-                            return (
-                              <div style={{ background: '#fff', border: '1px solid #fce7f3', borderRadius: 10, padding: '8px 12px', boxShadow: '0 4px 20px rgba(233,30,140,0.12)' }}>
-                                <p style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>{d.label} {d.year}</p>
-                                <p style={{ fontSize: 13, fontWeight: 800, color: '#E91E8C' }}>{fmt(d.totalSales)}</p>
-                                <p style={{ fontSize: 10, color: '#94a3b8' }}>{d.participation.toFixed(1)}% del año</p>
-                              </div>
-                            );
-                          }}
+                         cursor={{ fill: 'rgba(249,168,212,0.10)' }}
+                         content={({ active, payload }) => {
+                           if (!active || !payload?.length) return null;
+                           const d = payload[0].payload;
+                           const compColor = d.compliance == null ? '#94a3b8' : d.compliance >= 100 ? '#10b981' : d.compliance >= 85 ? '#f59e0b' : '#ef4444';
+                           return (
+                             <div style={{ background: '#fff', border: '1px solid #fce7f3', borderRadius: 10, padding: '8px 12px', boxShadow: '0 4px 20px rgba(233,30,140,0.12)' }}>
+                               <p style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>{d.label} {d.year}</p>
+                               <p style={{ fontSize: 13, fontWeight: 800, color: '#E91E8C' }}>{fmt(d.totalSales)}</p>
+                               {d.pptMes > 0 && <p style={{ fontSize: 10, color: '#94a3b8' }}>PPT: {fmt(d.pptMes)}</p>}
+                               {d.compliance != null && <p style={{ fontSize: 11, fontWeight: 800, color: compColor }}>Cumplimiento: {d.compliance}%</p>}
+                             </div>
+                           );
+                         }}
                         />
                         <Bar dataKey="totalSales" radius={[5, 5, 0, 0]}>
-                          {monthsWithPart.map((m, i) => {
-                            const isCurrentMonth = m.month === new Date().getMonth() + 1;
-                            return (
-                              <Cell
-                                key={i}
-                                fill={isCurrentMonth ? 'url(#barGradPink)' : `rgba(233,30,140,${0.15 + (m.participation / 100) * 0.6})`}
-                              />
-                            );
-                          })}
-                          <LabelList
-                            dataKey="participation"
-                            position="top"
-                            formatter={(v) => v >= 5 ? `${v.toFixed(0)}%` : ''}
-                            style={{ fontSize: 8, fontWeight: 700, fill: '#E91E8C', fontFamily: 'Inter, sans-serif' }}
-                          />
+                         {monthsWithPart.map((m, i) => {
+                           const isCurrentMonth = m.month === new Date().getMonth() + 1;
+                           const compColor = m.compliance == null ? null : m.compliance >= 100 ? '#10b981' : m.compliance >= 85 ? '#f59e0b' : '#ef4444';
+                           return (
+                             <Cell
+                               key={i}
+                               fill={compColor || (isCurrentMonth ? 'url(#barGradPink)' : `rgba(233,30,140,${0.15 + (m.participation / 100) * 0.6})`)}
+                             />
+                           );
+                         })}
+                         <LabelList
+                           dataKey="compliance"
+                           position="top"
+                           formatter={(v) => v != null ? `${v}%` : ''}
+                           style={{ fontSize: 8, fontWeight: 700, fill: '#475569', fontFamily: 'Inter, sans-serif' }}
+                         />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
 
-                    {/* Ranking mensual */}
+                    {/* Ranking mensual por cumplimiento */}
                     <div className="mx-3 mt-2 rounded-xl overflow-hidden border border-pink-50">
-                      <div className="grid grid-cols-[20px_1fr_auto_36px] gap-x-2 px-3 py-1.5 bg-pink-50/60">
-                        <span className="text-[9px] font-bold text-pink-300 uppercase">#</span>
-                        <span className="text-[9px] font-bold text-pink-300 uppercase">Mes</span>
-                        <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Venta bruta</span>
-                        <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Part.</span>
-                      </div>
-                      {[...monthsWithPart].sort((a, b) => b.totalSales - a.totalSales).slice(0, 5).map((m, i) => (
-                        <div
-                          key={m.key}
-                          className="grid grid-cols-[20px_1fr_auto_36px] gap-x-2 px-3 py-1.5 items-center"
-                          style={{ background: i % 2 === 0 ? 'rgba(253,242,248,0.5)' : 'white' }}
-                        >
-                          <span className="text-[10px] font-black leading-none"
-                            style={{ color: i === 0 ? '#E91E8C' : i === 1 ? '#f06292' : '#d1b3c4' }}>
-                            {i + 1}
-                          </span>
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-medium text-slate-700 leading-tight">{m.label} {m.year}</p>
-                            <div className="mt-0.5 h-[3px] rounded-full bg-pink-100 overflow-hidden">
-                              <div className="h-full rounded-full"
-                                style={{ width: `${(m.totalSales / maxMonthSales) * 100}%`, background: i === 0 ? '#E91E8C' : `rgba(233,30,140,${0.55 - i * 0.08})` }} />
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-bold text-right" style={{ color: '#E91E8C' }}>{fmt(m.totalSales)}</span>
-                          <span className="text-[9px] text-slate-400 text-right">{m.participation.toFixed(1)}%</span>
-                        </div>
-                      ))}
+                     <div className="grid grid-cols-[20px_1fr_auto_44px] gap-x-2 px-3 py-1.5 bg-pink-50/60">
+                       <span className="text-[9px] font-bold text-pink-300 uppercase">#</span>
+                       <span className="text-[9px] font-bold text-pink-300 uppercase">Mes</span>
+                       <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Venta</span>
+                       <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Cumpl.</span>
+                     </div>
+                     {[...monthsWithPart].sort((a, b) => a.month - b.month).map((m, i) => {
+                       const compColor = m.compliance == null ? '#94a3b8' : m.compliance >= 100 ? '#10b981' : m.compliance >= 85 ? '#f59e0b' : '#ef4444';
+                       return (
+                       <div
+                         key={m.key}
+                         className="grid grid-cols-[20px_1fr_auto_44px] gap-x-2 px-3 py-1.5 items-center"
+                         style={{ background: i % 2 === 0 ? 'rgba(253,242,248,0.5)' : 'white' }}
+                       >
+                         <span className="text-[10px] font-bold leading-none text-slate-400">{m.month}</span>
+                         <div className="min-w-0">
+                           <p className="text-[10px] font-medium text-slate-700 leading-tight">{m.label}</p>
+                           <div className="mt-0.5 h-[3px] rounded-full bg-pink-100 overflow-hidden">
+                             <div className="h-full rounded-full"
+                               style={{ width: `${Math.min(100, m.compliance || (m.totalSales / maxMonthSales) * 100)}%`, background: compColor }} />
+                           </div>
+                         </div>
+                         <span className="text-[10px] font-bold text-right" style={{ color: '#E91E8C' }}>{fmt(m.totalSales)}</span>
+                         <span className="text-[10px] font-black text-right" style={{ color: compColor }}>
+                           {m.compliance != null ? `${m.compliance}%` : '—'}
+                         </span>
+                       </div>
+                       );
+                     })}
                     </div>
                   </>
                 )}
