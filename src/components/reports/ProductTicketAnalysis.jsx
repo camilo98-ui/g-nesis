@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  ResponsiveContainer, BarChart, Bar, Cell, Legend, LabelList, AreaChart, Area } from
+  ResponsiveContainer, BarChart, Bar, Cell, Legend, LabelList, AreaChart, Area, ComposedChart, Line } from
 'recharts';
 import { STORES } from '@/components/StoreSelector';
 
@@ -420,7 +420,19 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
               sort((a, b) => a.month - b.month);
               const totalYearSales = monthData.reduce((s, m) => s + m.totalSales, 0);
               const maxMonthSales = Math.max(...monthData.map((m) => m.totalSales), 1);
-              const monthsWithPart = monthData.map((m) => {
+              // Calcular línea de tendencia (media móvil simple)
+              const calculateTrendline = (data) => {
+                const window = 3;
+                return data.map((d, i) => {
+                  if (i < window - 1) return d.totalSales;
+                  const sum = data.slice(i - window + 1, i + 1).reduce((s, x) => s + x.totalSales, 0);
+                  return Math.round(sum / window);
+                });
+              };
+
+              const trendline = calculateTrendline(monthData);
+
+              const monthsWithPart = monthData.map((m, i) => {
                 // Buscar presupuesto de ese mes
                 const budgetEntry = budget.find((b) => Number(b.month) === m.month && Number(b.year) === m.year);
                 const pptMes = budgetEntry?.sales_budget || 0;
@@ -429,7 +441,8 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                   ...m,
                   participation: totalYearSales > 0 ? m.totalSales / totalYearSales * 100 : 0,
                   pptMes,
-                  compliance
+                  compliance,
+                  trendline: trendline[i]
                 };
               });
 
@@ -541,13 +554,17 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                       }} />
                       
                       <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={monthsWithPart} margin={{ top: 20, right: 24, left: 0, bottom: 12 }}>
+                        <ComposedChart data={monthsWithPart} margin={{ top: 20, right: 24, left: 0, bottom: 12 }}>
                           <defs>
-                            {/* Clean Premium Gradient */}
-                            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#FF4D8D" stopOpacity={0.35} />
-                              <stop offset="50%" stopColor="#FF8FB8" stopOpacity={0.12} />
-                              <stop offset="100%" stopColor="#FCE7F3" stopOpacity={0.02} />
+                            {/* Gradientes Premium */}
+                            <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#FFB3D9" stopOpacity={0.6} />
+                              <stop offset="100%" stopColor="#FF8FB8" stopOpacity={0.35} />
+                            </linearGradient>
+                            <linearGradient id="trendGrad" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#8B5CF6" />
+                              <stop offset="50%" stopColor="#6366F1" />
+                              <stop offset="100%" stopColor="#06B6D4" />
                             </linearGradient>
                             
                             {/* Neón Glow Filter para línea */}
@@ -569,7 +586,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             </filter>
                           </defs>
                           
-                          <CartesianGrid stroke="rgba(255,143,184,0.08)" strokeDasharray="0" vertical={false} />
+                          <CartesianGrid stroke="rgba(200,200,200,0.1)" strokeDasharray="4 4" vertical={false} />
                           
                           <XAxis
                             dataKey="label"
@@ -581,7 +598,8 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             axisLine={false}
                             tickLine={false}
                           />
-                          <YAxis hide />
+                          <YAxis yAxisId="left" hide />
+                          <YAxis yAxisId="right" hide orientation="right" />
                           
                           {/* Tooltip Minimalista tipo Linear/Raycast */}
                           <RechartsTooltip
@@ -610,37 +628,45 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             }}
                           />
                           
-                          {/* Línea Principal + Glassmorphism Dots */}
-                          <Area
+                          {/* Barras de Volumen de Fondo */}
+                          <Bar yAxisId="left" dataKey="participation" fill="url(#barGrad)" radius={[8, 8, 0, 0]} opacity={0.4} />
+
+                          {/* Línea de Tendencia Suave */}
+                          <Line
+                            yAxisId="left"
+                            type="monotone"
+                            dataKey="trendline"
+                            stroke="url(#trendGrad)"
+                            strokeWidth={3}
+                            dot={false}
+                            isAnimationActive={true}
+                            animationDuration={1400}
+                            opacity={0.85}
+                            strokeLinecap="round"
+                          />
+
+                          {/* Línea Principal con Puntos */}
+                          <Line
+                            yAxisId="left"
                             type="monotone"
                             dataKey="totalSales"
                             stroke="#FF4D8D"
-                            strokeWidth={2.8}
-                            fill="url(#areaGrad)"
-                            filter="url(#neonGlow)"
+                            strokeWidth={3.2}
                             isAnimationActive={true}
                             animationDuration={1200}
-                            animationEasing="ease-in-out"
                             dot={(props) => {
                               const { cx, cy, payload } = props;
                               return (
                                 <g key={`dot-${payload.key}`}>
-                                  <circle cx={cx} cy={cy} r={7} fill="rgba(255,77,141,0.12)" opacity={0.5} />
-                                  <circle cx={cx} cy={cy} r={4.5} fill="#FFF7FA" opacity={0.95} />
-                                  <circle cx={cx} cy={cy} r={4.5} fill="none" stroke="rgba(255,77,141,0.35)" strokeWidth={1.5} />
-                                  <circle cx={cx} cy={cy} r={2} fill="rgba(255,255,255,0.85)" opacity={0.7} />
+                                  <circle cx={cx} cy={cy} r={8} fill="rgba(255,77,141,0.15)" opacity={0.5} />
+                                  <circle cx={cx} cy={cy} r={5} fill="#FFF7FA" opacity={0.98} />
+                                  <circle cx={cx} cy={cy} r={5} fill="none" stroke="#FF4D8D" strokeWidth={2} />
+                                  <circle cx={cx} cy={cy} r={2.5} fill="#FF4D8D" />
                                 </g>
                               );
                             }}
-                            activeDot={{
-                              r: 7,
-                              fill: '#FF4D8D',
-                              stroke: '#FFF7FA',
-                              strokeWidth: 2.5,
-                              filter: 'url(#dotGlow)',
-                            }}
                           />
-                        </AreaChart>
+                        </ComposedChart>
                       </ResponsiveContainer>
                       
                       {/* Mini Stats Footer */}
