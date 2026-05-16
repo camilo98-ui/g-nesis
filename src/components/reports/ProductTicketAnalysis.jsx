@@ -741,8 +741,8 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
 
                       {/* Mini Gráfica Tendencia Cumplimiento */}
                       <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(255,143,184,0.08)' }}>
-                        <p style={{ fontSize: 7.5, fontWeight: 700, color: P.textSub, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Tendencia Cumplimiento</p>
-                        <ResponsiveContainer width="100%" height={65}>
+                        <p style={{ fontSize: 7.5, fontWeight: 700, color: P.textSub, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Tendencia Cumplimiento</p>
+                        <ResponsiveContainer width="100%" height={72}>
                           <AreaChart data={monthsWithPart.map((m) => ({ ...m, compliance: m.compliance || 0 }))}>
                             <defs>
                               <linearGradient id="complianceGrad" x1="0" y1="0" x2="0" y2="1">
@@ -750,9 +750,13 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                                 <stop offset="100%" stopColor="#FF4D8D" stopOpacity={0.02} />
                               </linearGradient>
                             </defs>
-                            <CartesianGrid stroke="none" vertical={false} />
+                            <CartesianGrid stroke="rgba(255,77,141,0.08)" vertical={true} horizontalPoints={[]} strokeDasharray="2" />
                             <XAxis dataKey="label" tick={false} axisLine={false} height={0} margin={0} />
                             <YAxis hide domain={[0, 120]} />
+                            <Tooltip 
+                              contentStyle={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 6, fontSize: 10, fontWeight: 600 }}
+                              formatter={(value) => [`${value}%`, 'Cumplimiento']}
+                            />
                             <Area
                               type="monotone"
                               dataKey="compliance"
@@ -761,7 +765,18 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                               strokeWidth={1.8}
                               isAnimationActive={true}
                               animationDuration={1200}
-                              dot={false}
+                              dot={(props) => {
+                                const { cx, cy, payload } = props;
+                                if (!payload) return null;
+                                return (
+                                  <g key={`dot-${payload.label}`}>
+                                    <circle cx={cx} cy={cy} r={2.5} fill="#FF4D8D" opacity={0.8} />
+                                    <text x={cx} y={cy - 10} textAnchor="middle" fontSize={7} fontWeight={700} fill="#D81B60">
+                                      {payload.compliance}%
+                                    </text>
+                                  </g>
+                                );
+                              }}
                             />
                           </AreaChart>
                         </ResponsiveContainer>
