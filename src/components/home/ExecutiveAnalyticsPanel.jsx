@@ -1,190 +1,12 @@
-import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useAnimationFrame } from 'framer-motion';
-import { AnimatedChartWrapper, AnimatedProgressBar } from '@/components/dashboard/AnimatedChartWrapper';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, LineChart, Line, BarChart, Bar
 } from
 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Trophy } from 'lucide-react';
-
-// ── LIVE TRADING LINE CHART ────────────────────────────────────────────────────
-function LiveTradingChart({ data, height = 140 }) {
-  const canvasRef = useRef(null);
-  const offsetRef = useRef(0);
-  const frameRef = useRef(null);
-
-  // Build base points from real data
-  const points = useMemo(() => {
-    if (!data || data.length === 0) return [];
-    return data.map(d => d.ticket || 0);
-  }, [data]);
-
-  const pptValue = 25000;
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || points.length < 2) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const W = canvas.offsetWidth;
-    const H = height;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-
-    const minVal = Math.min(...points, pptValue) * 0.92;
-    const maxVal = Math.max(...points, pptValue) * 1.08;
-    const range = maxVal - minVal || 1;
-
-    const toY = (v) => H - ((v - minVal) / range) * (H * 0.8) - H * 0.1;
-
-    // Extend points with small noise for live feel
-    const extendedPoints = [...points];
-    for (let i = 0; i < 20; i++) {
-      const last = extendedPoints[extendedPoints.length - 1];
-      const noise = (Math.random() - 0.48) * last * 0.015;
-      extendedPoints.push(Math.max(minVal + range * 0.05, last + noise));
-    }
-
-    const totalPoints = extendedPoints.length;
-    const visibleCount = Math.min(points.length, 30);
-    const step = W / (visibleCount - 1);
-
-    let tick = 0;
-
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H);
-
-      const offset = offsetRef.current;
-      const startIdx = Math.floor(offset) % (totalPoints - visibleCount);
-      const slice = extendedPoints.slice(startIdx, startIdx + visibleCount);
-      if (slice.length < 2) { frameRef.current = requestAnimationFrame(draw); return; }
-
-      // PPT reference line
-      const pptY = toY(pptValue);
-      ctx.save();
-      ctx.setLineDash([6, 5]);
-      ctx.strokeStyle = 'rgba(99,102,241,0.5)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(0, pptY);
-      ctx.lineTo(W, pptY);
-      ctx.stroke();
-      ctx.restore();
-
-      // Build path
-      const pathPoints = slice.map((v, i) => ({ x: i * step, y: toY(v) }));
-
-      // Gradient fill under line
-      const grad = ctx.createLinearGradient(0, 0, 0, H);
-      grad.addColorStop(0, 'rgba(255,77,141,0.28)');
-      grad.addColorStop(0.6, 'rgba(255,77,141,0.08)');
-      grad.addColorStop(1, 'rgba(255,77,141,0)');
-
-      ctx.beginPath();
-      ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
-      for (let i = 1; i < pathPoints.length - 1; i++) {
-        const cpx = (pathPoints[i].x + pathPoints[i + 1].x) / 2;
-        const cpy = (pathPoints[i].y + pathPoints[i + 1].y) / 2;
-        ctx.quadraticCurveTo(pathPoints[i].x, pathPoints[i].y, cpx, cpy);
-      }
-      const last = pathPoints[pathPoints.length - 1];
-      ctx.lineTo(last.x, last.y);
-      ctx.lineTo(last.x, H);
-      ctx.lineTo(pathPoints[0].x, H);
-      ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      // Glow shadow
-      ctx.save();
-      ctx.shadowColor = 'rgba(255,77,141,0.6)';
-      ctx.shadowBlur = 8;
-
-      // Main line
-      ctx.beginPath();
-      ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
-      for (let i = 1; i < pathPoints.length - 1; i++) {
-        const cpx = (pathPoints[i].x + pathPoints[i + 1].x) / 2;
-        const cpy = (pathPoints[i].y + pathPoints[i + 1].y) / 2;
-        ctx.quadraticCurveTo(pathPoints[i].x, pathPoints[i].y, cpx, cpy);
-      }
-      ctx.lineTo(last.x, last.y);
-
-      const lineGrad = ctx.createLinearGradient(0, 0, W, 0);
-      lineGrad.addColorStop(0, 'rgba(255,77,141,0.4)');
-      lineGrad.addColorStop(0.6, '#FF4D8D');
-      lineGrad.addColorStop(1, '#FF1A6E');
-      ctx.strokeStyle = lineGrad;
-      ctx.lineWidth = 2.5;
-      ctx.lineJoin = 'round';
-      ctx.stroke();
-      ctx.restore();
-
-      // Live dot at end
-      const liveX = last.x;
-      const liveY = last.y;
-      const pulse = 0.5 + 0.5 * Math.sin(tick * 0.08);
-      ctx.beginPath();
-      ctx.arc(liveX, liveY, 5 + pulse * 3, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,77,141,${0.15 * pulse})`;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(liveX, liveY, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#FF4D8D';
-      ctx.shadowColor = 'rgba(255,77,141,0.9)';
-      ctx.shadowBlur = 10;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(liveX, liveY, 2, 0, Math.PI * 2);
-      ctx.fillStyle = '#fff';
-      ctx.shadowBlur = 0;
-      ctx.fill();
-
-      // Live value label
-      const liveVal = slice[slice.length - 1];
-      const label = liveVal >= 1000 ? `$${Math.round(liveVal / 1000)}K` : `$${liveVal}`;
-      ctx.save();
-      ctx.font = 'bold 10px Inter, sans-serif';
-      const labelW = ctx.measureText(label).width + 12;
-      const labelX = Math.min(liveX - labelW / 2, W - labelW - 4);
-      const labelY = liveY - 16;
-      ctx.fillStyle = '#FF1A6E';
-      ctx.beginPath();
-      ctx.roundRect(labelX, labelY - 10, labelW, 14, 4);
-      ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.textAlign = 'left';
-      ctx.fillText(label, labelX + 6, labelY);
-      ctx.restore();
-
-      tick++;
-      offsetRef.current += 0.18;
-      if (offsetRef.current >= totalPoints - visibleCount - 1) offsetRef.current = 0;
-
-      frameRef.current = requestAnimationFrame(draw);
-    };
-
-    frameRef.current = requestAnimationFrame(draw);
-    return () => { if (frameRef.current) cancelAnimationFrame(frameRef.current); };
-  }, [points, height]);
-
-  return (
-    <div className="relative w-full" style={{ height }}>
-      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block', borderRadius: 8 }} />
-      <div className="absolute top-2 right-3 flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider">Live</span>
-      </div>
-      <div className="absolute bottom-2 right-3 flex items-center gap-1.5">
-        <div className="w-3 h-px border-t-2 border-dashed border-indigo-400 opacity-60" />
-        <span className="text-[8px] text-indigo-400 font-medium">PPT $25K</span>
-      </div>
-    </div>
-  );
-}
+import { AnimatedChartWrapper, AnimatedProgressBar } from '@/components/dashboard/AnimatedChartWrapper';
 
 // ── ANIMATED COUNTER ──────────────────────────────────────────────────────────
 function AnimatedCounter({ value, format = (v) => v, delay = 0, duration = 2 }) {
@@ -667,7 +489,33 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 })()}
               </div>
 
-              <LiveTradingChart data={sorted30} height={140} />
+              <AnimatedChartWrapper label="Ticket Promedio">
+                <ResponsiveContainer width="100%" height={140}>
+                  <ComposedChart data={sorted30} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                     <defs>
+                       <linearGradient id="ticketGrad" x1="0" y1="0" x2="0" y2="1">
+                         <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.35" />
+                         <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
+                       </linearGradient>
+                       <filter id="ticketGlow">
+                         <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                         <feMerge>
+                           <feMergeNode in="coloredBlur" />
+                           <feMergeNode in="SourceGraphic" />
+                         </feMerge>
+                       </filter>
+                     </defs>
+                     <CartesianGrid strokeDasharray="0" stroke="rgba(255,77,141,0.08)" vertical={false} />
+                     <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
+                     <YAxis hide />
+                     <Tooltip
+                       contentStyle={{ background: '#fff', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 12, fontSize: 11 }}
+                       formatter={(v, name) => [fmt(v), name]} />
+                     <Area type="monotone" dataKey="ticket" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ticketGrad)" dot={false} name="Ticket Real" isAnimationActive={true} animationDuration={1200} />
+                     <Line type="monotone" dataKey="ticketPPT" stroke="#6366f1" strokeWidth={2} strokeDasharray="5,5" dot={false} name="Meta Ticket $25K" isAnimationActive={true} animationDuration={1200} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </AnimatedChartWrapper>
 
               <div className="flex gap-6 mt-3 text-[10px]">
                 <div className="flex items-center gap-2">
@@ -675,7 +523,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                   <span className="text-[#8F96A3]">Ticket Real</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-1 rounded-full border-t-2 border-dashed border-indigo-400" />
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#6366f1' }} />
                   <span className="text-[#8F96A3]">Meta Ticket (PPT)</span>
                 </div>
               </div>
