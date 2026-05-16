@@ -753,10 +753,6 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             <CartesianGrid stroke="rgba(255,77,141,0.08)" vertical={true} horizontalPoints={[]} strokeDasharray="2" />
                             <XAxis dataKey="label" tick={false} axisLine={false} height={0} margin={0} />
                             <YAxis hide domain={[0, 120]} />
-                            <Tooltip 
-                              contentStyle={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 6, fontSize: 10, fontWeight: 600 }}
-                              formatter={(value) => [`${value}%`, 'Cumplimiento']}
-                            />
                             <Area
                               type="monotone"
                               dataKey="compliance"
