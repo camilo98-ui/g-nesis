@@ -647,66 +647,91 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
         {/* Participación */}
          <AnalyticsCard title="Participación" subtitle="Mix del negocio por categoría" delay={0.3}>
-          <DonutChart data={PARTICIPATION_SEGMENTS} />
-          <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-            <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Tendencia de Ticket</p>
-            <ResponsiveContainer width="100%" height={100}>
-              <AreaChart data={sorted30} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
-                <defs>
-                  <linearGradient id="ticketMiniGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey="ticket" stroke="#6366f1" strokeWidth={1.5} fill="url(#ticketMiniGrad)" dot={false} />
-                {/* Línea de meta $25K */}
-                <Line type="monotone" dataKey="ticketPPT" stroke="#FFB4C9" strokeWidth={1} strokeDasharray="3,3" dot={false} />
-                <Tooltip
-                   contentStyle={{ background: 'rgba(15,15,20,0.9)', border: 'none', borderRadius: 8, fontSize: 10, padding: '4px 8px' }}
-                   formatter={(v) => [fmt(v), 'Ticket']}
-                   labelFormatter={(l) => l}
-                 />
-                </AreaChart>
-                </ResponsiveContainer>
+          {(() => {
+            // Build real dept data from products prop
+            const deptMap = {};
+            (products || []).forEach(p => {
+              const dept = p.department || 'Otros';
+              if (!deptMap[dept]) deptMap[dept] = 0;
+              deptMap[dept] += p.total_sales || 0;
+            });
+            const totalDeptSales = Object.values(deptMap).reduce((s, v) => s + v, 0);
+            const realDepts = Object.entries(deptMap)
+              .map(([name, sales]) => ({ name, value: totalDeptSales > 0 ? Math.round(sales / totalDeptSales * 100) : 0, sales }))
+              .filter(d => d.value > 0)
+              .sort((a, b) => b.value - a.value)
+              .slice(0, 5);
+            const donutData = realDepts.length > 0 ? realDepts : PARTICIPATION_SEGMENTS;
 
-                {/* Top 3 Productos Más Vendidos */}
-                <div className="mt-3 pt-2 grid grid-cols-3 gap-1.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
-                  {(() => {
-                    const grouped = (products || []).filter(p => p.total_sales > 0 && p.level === 'product' && p.product).reduce((acc, p) => {
-                      const existing = acc.find(item => item.product === p.product);
-                      if (existing) existing.total_sales += p.total_sales;
-                      else acc.push({ ...p });
-                      return acc;
-                    }, []);
-                    const top3 = grouped.sort((a, b) => b.total_sales - a.total_sales).slice(0, 3);
-                    const maxSales = top3[0]?.total_sales || 1;
-                    return top3.map((prod, i) => {
-                       const pct = (prod.total_sales / maxSales) * 100;
-                       return (
-                         <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 + i * 0.05 }}
-                           className="p-1.5 rounded-lg text-center relative" style={{ background: `${PARTICIPATION_COLORS[i]}15` }}>
-                           <div className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-black text-white flex-shrink-0"
-                             style={{ background: PARTICIPATION_COLORS[i] }}>
-                             {i + 1}
-                           </div>
-                           <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1 line-clamp-2 min-h-5 break-words">{prod.product}</p>
-                           <p className="text-[10px] font-black" style={{ color: PARTICIPATION_COLORS[i] }} className="mb-1">{fmt(prod.total_sales)}</p>
-                           <div className="h-0.5 rounded-full mx-auto w-10" style={{ background: 'rgba(0,0,0,0.08)' }}>
-                             <motion.div 
-                               className="h-full rounded-full" 
-                               style={{ background: PARTICIPATION_COLORS[i] }}
-                               initial={{ width: 0 }}
-                               animate={{ width: `${pct}%` }}
-                               transition={{ delay: 0.65 + i * 0.05, duration: 0.8 }}
-                             />
-                           </div>
-                         </motion.div>
-                       );
-                     });
-                   })()}
-                 </div>
+            // Monthly sales from todaySales
+            const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+            const monthMap = {};
+            const currentYear = new Date().getFullYear();
+            (todaySales || []).forEach(d => {
+              if (!d.date) return;
+              try {
+                const dt = new Date(d.date);
+                if (dt.getFullYear() !== currentYear) return;
+                const key = dt.getMonth();
+                if (!monthMap[key]) monthMap[key] = { label: MONTH_NAMES[key], month: key, totalSales: 0 };
+                monthMap[key].totalSales += d.total_sales || 0;
+              } catch(e) {}
+            });
+            const monthData = Object.values(monthMap).sort((a, b) => a.month - b.month);
+            const maxMonthSales = Math.max(...monthData.map(m => m.totalSales), 1);
+            const totalYearSales = monthData.reduce((s, m) => s + m.totalSales, 0);
+
+            return (
+              <>
+                <DonutChart data={donutData} />
+                <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+                  <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Tendencia de Ticket</p>
+                  <ResponsiveContainer width="100%" height={80}>
+                    <AreaChart data={sorted30} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
+                      <defs>
+                        <linearGradient id="ticketMiniGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <Area type="monotone" dataKey="ticket" stroke="#6366f1" strokeWidth={1.5} fill="url(#ticketMiniGrad)" dot={false} />
+                      <Tooltip
+                        contentStyle={{ background: 'rgba(15,15,20,0.9)', border: 'none', borderRadius: 8, fontSize: 10, padding: '4px 8px' }}
+                        formatter={(v) => [fmt(v), 'Ticket']}
+                        labelFormatter={(l) => l}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+
+                  {/* Ventas por mes */}
+                  {monthData.length > 0 && (
+                    <div className="mt-3 pt-2" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+                      <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Venta por mes · {currentYear}</p>
+                      <div className="space-y-1.5">
+                        {[...monthData].sort((a, b) => b.totalSales - a.totalSales).slice(0, 4).map((m, i) => (
+                          <div key={m.label} className="flex items-center gap-2">
+                            <span className="text-[9px] font-bold w-6 flex-shrink-0" style={{ color: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}>{m.label}</span>
+                            <div className="flex-1 h-2 rounded-full bg-pink-50 overflow-hidden">
+                              <motion.div
+                                className="h-full rounded-full"
+                                style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(m.totalSales / maxMonthSales) * 100}%` }}
+                                transition={{ delay: 0.6 + i * 0.06, duration: 0.7 }}
+                              />
+                            </div>
+                            <span className="text-[9px] font-bold tabular-nums flex-shrink-0" style={{ color: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}>{fmt(m.totalSales)}</span>
+                            <span className="text-[8px] text-slate-300 flex-shrink-0">{totalYearSales > 0 ? Math.round(m.totalSales / totalYearSales * 100) : 0}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                </AnalyticsCard>
+              </>
+            );
+          })()}
+        </AnalyticsCard>
 
         {/* Mejores Días de Venta */}
         <AnalyticsCard title="Mejores Días" subtitle="Top días de venta del mes actual" delay={0.34}>
