@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  ResponsiveContainer, BarChart, Bar, Cell, Legend, LabelList } from
+  ResponsiveContainer, BarChart, Bar, Cell, Legend, LabelList, AreaChart, Area } from
 'recharts';
 import { STORES } from '@/components/StoreSelector';
 
@@ -519,171 +519,177 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                 </div>
               </div>
 
-              <div style={{ padding: '8px 4px 0' }}>
-                {monthsWithPart.length === 0 ?
-                    <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 11, color: P.textSub }}>Sin datos de ventas mensuales</div> :
-
-                    <>
-                    <ResponsiveContainer width="100%" height={190}>
-                      <BarChart data={monthsWithPart} margin={{ top: 26, right: 12, left: 8, bottom: 4 }} barCategoryGap="16%">
+              <div style={{ padding: '12px 0 0' }}>
+                {monthsWithPart.length === 0 ? (
+                  <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 11, color: P.textSub }}>Sin datos de ventas mensuales</div>
+                ) : (
+                  <>
+                    {/* Premium Area Chart */}
+                    <ResponsiveContainer width="100%" height={280}>
+                      <AreaChart data={monthsWithPart} margin={{ top: 16, right: 20, left: 0, bottom: 0 }}>
                         <defs>
-                          <linearGradient id="lpGradMagenta" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#D81B60" stopOpacity={1} />
-                            <stop offset="100%" stopColor="#FF4D8D" stopOpacity={0.5} />
+                          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#FF4D8D" stopOpacity={0.35} />
+                            <stop offset="100%" stopColor="#FF4D8D" stopOpacity={0.02} />
                           </linearGradient>
-                          <linearGradient id="lpGradPrimary" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#FF4D8D" stopOpacity={1} />
-                            <stop offset="100%" stopColor="#FF8FB8" stopOpacity={0.5} />
-                          </linearGradient>
-                          <linearGradient id="lpGradSoft" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#FF8FB8" stopOpacity={0.9} />
-                            <stop offset="100%" stopColor="#fce7f3" stopOpacity={0.4} />
-                          </linearGradient>
-                          <linearGradient id="lpGradLila" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#E9D5FF" stopOpacity={1} />
-                            <stop offset="100%" stopColor="#d8b4fe" stopOpacity={0.5} />
-                          </linearGradient>
+                          <filter id="glowFilter">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                            <feMerge>
+                              <feMergeNode in="coloredBlur" />
+                              <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                          </filter>
                         </defs>
-                        <CartesianGrid vertical={false} stroke="rgba(255,143,184,0.12)" strokeDasharray="4 4" />
+                        <CartesianGrid stroke="rgba(255,143,184,0.08)" strokeDasharray="0" vertical={false} />
                         <XAxis
-                            dataKey="label"
-                            tick={({ x, y, payload }) =>
-                            <text x={x} y={y + 10} textAnchor="middle" fontSize={9.5} fill={P.textSub} fontFamily="Inter, -apple-system, sans-serif" fontWeight={500}>
+                          dataKey="label"
+                          tick={({ x, y, payload }) => (
+                            <text x={x} y={y + 12} textAnchor="middle" fontSize={10} fill={P.textSub} fontFamily="Inter, -apple-system, sans-serif" fontWeight={500}>
                               {payload.value}
                             </text>
-                            }
-                            axisLine={false} tickLine={false} />
-                          
+                          )}
+                          axisLine={false}
+                          tickLine={false}
+                        />
                         <YAxis hide />
                         <RechartsTooltip
-                            cursor={{ fill: 'rgba(255,77,141,0.04)', radius: 6 }}
-                            content={({ active, payload }) => {
-                              if (!active || !payload?.length) return null;
-                              const d = payload[0].payload;
-                              const cs = getLCS(d.compliance);
-                              return (
-                                <div style={{
-                                  background: 'rgba(255,247,250,0.97)',
-                                  backdropFilter: 'blur(16px)',
-                                  border: `1px solid ${P.borderSoft}`,
-                                  borderRadius: 14,
-                                  padding: '11px 15px',
-                                  boxShadow: `0 8px 32px rgba(255,77,141,0.12), 0 2px 8px rgba(0,0,0,0.05)`,
-                                  minWidth: 148
-                                }}>
-                                <p style={{ fontSize: 11, fontWeight: 700, color: P.text, margin: '0 0 5px', letterSpacing: '-0.01em' }}>{d.label} {d.year}</p>
-                                <p style={{
-                                    fontSize: 16, fontWeight: 800, margin: '0 0 5px',
-                                    letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums',
-                                    background: `linear-gradient(135deg, ${P.magenta}, ${P.primary})`,
-                                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'
-                                  }}>{fmt(d.totalSales)}</p>
-                                {d.pptMes > 0 && <p style={{ fontSize: 10, color: P.textSub, margin: '0 0 5px', fontVariantNumeric: 'tabular-nums' }}>PPT: {fmt(d.pptMes)}</p>}
-                                {d.compliance != null &&
-                                  <span style={{
-                                    display: 'inline-block', fontSize: 11, fontWeight: 700,
-                                    color: cs.badge.color, background: cs.badge.bg,
-                                    border: `1px solid ${cs.badge.border}`,
-                                    padding: '2px 9px', borderRadius: 20, marginTop: 2
-                                  }}>{d.compliance}%</span>
-                                  }
-                              </div>);
-
-                            }} />
-                          
-                        <Bar dataKey="totalSales" radius={[7, 7, 0, 0]} maxBarSize={34}>
-                          {monthsWithPart.map((m, i) => <Cell key={i} fill={getLCS(m.compliance).grad} />)}
-                          <LabelList
-                              dataKey="compliance"
-                              position="top"
-                              formatter={(v) => v != null ? `${v}%` : ''}
-                              style={{ fontSize: 9, fontWeight: 700, fill: P.magenta, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }} />
-                            
-                        </Bar>
-                      </BarChart>
+                          cursor={{ stroke: 'rgba(255,77,141,0.2)', strokeWidth: 2 }}
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const d = payload[0].payload;
+                            return (
+                              <div
+                                style={{
+                                  background: 'rgba(255,255,255,0.95)',
+                                  backdropFilter: 'blur(20px)',
+                                  border: `1px solid rgba(255,77,141,0.2)`,
+                                  borderRadius: 16,
+                                  padding: '12px 16px',
+                                  boxShadow: `0 12px 48px rgba(255,77,141,0.15), 0 2px 12px rgba(0,0,0,0.06)`,
+                                  minWidth: 180,
+                                }}
+                              >
+                                <p style={{ fontSize: 11, fontWeight: 600, color: P.textSub, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{d.label} {d.year}</p>
+                                <p
+                                  style={{
+                                    fontSize: 18,
+                                    fontWeight: 700,
+                                    color: P.primary,
+                                    margin: '3px 0 8px',
+                                    letterSpacing: '-0.02em',
+                                    fontVariantNumeric: 'tabular-nums',
+                                  }}
+                                >
+                                  {fmt(d.totalSales)}
+                                </p>
+                                {d.pptMes > 0 && (
+                                  <p style={{ fontSize: 9, color: P.textSub, margin: '0 0 3px', fontVariantNumeric: 'tabular-nums' }}>Meta: {fmt(d.pptMes)}</p>
+                                )}
+                                {d.compliance != null && (
+                                  <span
+                                    style={{
+                                      display: 'inline-block',
+                                      fontSize: 10,
+                                      fontWeight: 700,
+                                      color: d.compliance >= 100 ? P.primary : d.compliance >= 80 ? P.magenta : P.textSub,
+                                      background: d.compliance >= 100 ? 'rgba(255,77,141,0.1)' : 'rgba(255,143,184,0.08)',
+                                      border: `1px solid ${d.compliance >= 100 ? 'rgba(255,77,141,0.2)' : 'rgba(255,143,184,0.15)'}`,
+                                      padding: '2px 8px',
+                                      borderRadius: 20,
+                                      marginTop: 4,
+                                    }}
+                                  >
+                                    {d.compliance}% cumplimiento
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="totalSales"
+                          stroke="#FF4D8D"
+                          strokeWidth={2.5}
+                          fill="url(#areaGrad)"
+                          isAnimationActive={true}
+                          animationDuration={1200}
+                          dot={(props) => {
+                            const { cx, cy, payload } = props;
+                            return (
+                              <g key={`dot-${payload.key}`}>
+                                <circle cx={cx} cy={cy} r={4.5} fill="#FF4D8D" opacity={0.95} />
+                                <circle cx={cx} cy={cy} r={4.5} fill="none" stroke="rgba(255,77,141,0.4)" strokeWidth={1.5} />
+                                <circle cx={cx} cy={cy} r={6.5} fill="none" stroke="rgba(255,77,141,0.15)" strokeWidth={1} opacity={0} style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+                              </g>
+                            );
+                          }}
+                          activeDot={{
+                            r: 6,
+                            fill: '#FF4D8D',
+                            stroke: '#FFF7FA',
+                            strokeWidth: 2,
+                            filter: 'url(#glowFilter)',
+                          }}
+                        />
+                      </AreaChart>
                     </ResponsiveContainer>
 
-                    {/* Leyenda pink */}
-                    <div style={{ display: 'flex', gap: 14, padding: '0 16px 10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                      {[
-                        { dot: '#D81B60', label: '≥100%' },
-                        { dot: '#FF4D8D', label: '90–99%' },
-                        { dot: '#FF8FB8', label: '80–89%' },
-                        { dot: '#E9D5FF', label: '<80%' }].
-                        map(({ dot, label }) =>
-                        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: dot, boxShadow: `0 0 6px ${dot}66` }} />
-                          <span style={{ fontSize: 9.5, color: P.textSub, fontWeight: 500 }}>{label}</span>
-                        </div>
-                        )}
+                    {/* KPI Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, padding: '20px 0 12px' }}>
+                      {(() => {
+                        const maxMonth = monthsWithPart.reduce((a, b) => (a.totalSales > b.totalSales ? a : b), monthsWithPart[0]);
+                        const minMonth = monthsWithPart.reduce((a, b) => (a.totalSales < b.totalSales ? a : b), monthsWithPart[0]);
+                        const avgSales = monthsWithPart.reduce((s, m) => s + m.totalSales, 0) / monthsWithPart.length;
+                        const lastMonth = monthsWithPart[monthsWithPart.length - 1];
+                        const prevMonth = monthsWithPart[monthsWithPart.length - 2];
+                        const varPct = prevMonth ? ((lastMonth.totalSales - prevMonth.totalSales) / prevMonth.totalSales * 100) : 0;
+
+                        return [
+                          { label: 'Mejor mes', value: fmt(maxMonth.totalSales), detail: maxMonth.label, icon: '📈' },
+                          { label: 'Promedio', value: fmt(avgSales), detail: 'mensual', icon: '📊' },
+                          { label: 'Peor mes', value: fmt(minMonth.totalSales), detail: minMonth.label, icon: '📉' },
+                          { label: 'Variación', value: `${varPct > 0 ? '+' : ''}${varPct.toFixed(1)}%`, detail: 'vs anterior', icon: '🔄', color: varPct > 0 ? P.primary : P.textSub },
+                        ].map((kpi, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              background: '#ffffff',
+                              backdropFilter: 'blur(20px)',
+                              border: `1px solid rgba(255,143,184,0.15)`,
+                              borderRadius: 14,
+                              padding: '12px 14px',
+                              boxShadow: `0 4px 16px rgba(255,77,141,0.08)`,
+                              transition: 'all 0.3s ease',
+                              cursor: 'default',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'rgba(255,247,250,0.95)';
+                              e.currentTarget.style.borderColor = 'rgba(255,77,141,0.2)';
+                              e.currentTarget.style.boxShadow = `0 8px 24px rgba(255,77,141,0.12)`;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = '#ffffff';
+                              e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)';
+                              e.currentTarget.style.boxShadow = `0 4px 16px rgba(255,77,141,0.08)`;
+                            }}
+                          >
+                            <p style={{ fontSize: 9, fontWeight: 700, color: P.textSub, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.09em' }}>{kpi.icon} {kpi.label}</p>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: kpi.color || P.primary, margin: '0 0 2px', fontVariantNumeric: 'tabular-nums' }}>{kpi.value}</p>
+                            <p style={{ fontSize: 8.5, color: P.textSub, margin: 0 }}>{kpi.detail}</p>
+                          </div>
+                        ));
+                      })()}
                     </div>
 
-                    {/* Tabla mensual — Luxury Pink */}
-                    <div style={{ margin: '0 12px 14px', borderRadius: 14, overflow: 'hidden', border: `1px solid ${P.borderSoft}` }}>
-                      <div style={{
-                          display: 'grid', gridTemplateColumns: '24px 1fr auto 52px',
-                          gap: '0 8px', padding: '7px 12px',
-                          background: 'linear-gradient(90deg, rgba(255,77,141,0.05), rgba(233,213,255,0.06))',
-                          borderBottom: `1px solid ${P.borderSoft}`
-                        }}>
-                        {['#', 'Mes', 'Venta', 'Cumpl.'].map((h, hi) =>
-                          <span key={h} style={{
-                            fontSize: 9, fontWeight: 700, color: P.textSub,
-                            textTransform: 'uppercase', letterSpacing: '0.09em',
-                            textAlign: hi >= 2 ? 'right' : 'left'
-                          }}>{h}</span>
-                          )}
-                      </div>
-                      {[...monthsWithPart].sort((a, b) => a.month - b.month).map((m, i) => {
-                          const cs = getLCS(m.compliance);
-                          const barPct = Math.min(100, m.compliance != null ? Math.min(m.compliance, 100) : m.totalSales / maxMonthSales * 100);
-                          return (
-                            <div
-                              key={m.key}
-                              style={{
-                                display: 'grid', gridTemplateColumns: '24px 1fr auto 52px',
-                                gap: '0 8px', padding: '6px 12px', alignItems: 'center',
-                                background: i % 2 === 0 ? 'rgba(255,247,250,0.7)' : 'rgba(255,255,255,0.5)',
-                                transition: 'background 0.18s',
-                                cursor: 'default'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,77,141,0.05)'}
-                              onMouseLeave={(e) => e.currentTarget.style.background = i % 2 === 0 ? 'rgba(255,247,250,0.7)' : 'rgba(255,255,255,0.5)'}>
-                              
-                            <span style={{ fontSize: 10, fontWeight: 600, color: P.textSub, fontVariantNumeric: 'tabular-nums' }}>{m.month}</span>
-                            <div style={{ minWidth: 0 }}>
-                              <p style={{ fontSize: 10.5, fontWeight: 600, color: P.text, margin: '0 0 3px', letterSpacing: '-0.005em' }}>{m.label}</p>
-                              <div style={{ height: 3, borderRadius: 9999, background: 'rgba(255,143,184,0.15)', overflow: 'hidden' }}>
-                                <div style={{
-                                    height: '100%', borderRadius: 9999,
-                                    width: `${barPct}%`,
-                                    background: cs.barLine,
-                                    boxShadow: `0 0 8px ${cs.dot}55`,
-                                    transition: 'width 0.7s cubic-bezier(0.34,1.56,0.64,1)'
-                                  }} />
-                              </div>
-                            </div>
-                            <span style={{ fontSize: 10.5, fontWeight: 600, color: P.text, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                              {fmt(m.totalSales)}
-                            </span>
-                            {m.compliance != null ?
-                              <span style={{
-                                fontSize: 10, fontWeight: 800,
-                                color: cs.badge.color, background: cs.badge.bg,
-                                border: `1px solid ${cs.badge.border}`,
-                                padding: '2px 5px', borderRadius: 8,
-                                textAlign: 'center', display: 'block',
-                                fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em'
-                              }}>{m.compliance}%</span> :
-
-                              <span style={{ fontSize: 10, color: P.textSub, textAlign: 'right', display: 'block' }}>—</span>
-                              }
-                          </div>);
-
-                        })}
-                    </div>
+                    <style>{`
+                      @keyframes pulse {
+                        0%, 100% { r: 6.5; opacity: 0; }
+                        50% { r: 10; opacity: 0.2; }
+                      }
+                    `}</style>
                   </>
-                    }
+                )}
               </div>
             </div>);
 
