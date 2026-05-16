@@ -240,94 +240,109 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
         const PASTEL = ['#f9a8d4','#fbcfe8','#fda4af','#fecdd3','#f0abfc','#e9d5ff','#fbb6ce','#fcd5ce'];
         const PASTEL_DARK = ['#db2777','#be185d','#e11d48','#c026d3','#7c3aed','#d946ef','#f43f5e','#ec4899'];
 
+      // ─── Luxury Pink AI SaaS — token palette ───
+      const P = {
+        primary:   '#FF4D8D',
+        soft:      '#FF8FB8',
+        glass:     '#FCE7F3',
+        magenta:   '#D81B60',
+        lila:      '#E9D5FF',
+        bg:        '#FFF7FA',
+        text:      '#3A2E39',
+        textSub:   '#8F7A86',
+        border:    'rgba(255,77,141,0.12)',
+        borderSoft:'rgba(255,143,184,0.18)',
+        glow:      'rgba(255,77,141,0.18)',
+        glowSoft:  'rgba(255,77,141,0.08)',
+      };
+
       return (<>
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Chart 1: Top 10 productos más vendidos — PREMIUM */}
+        {/* ── Top 10 Productos — Luxury Pink AI SaaS ── */}
         <div style={{
-          background: 'linear-gradient(145deg, #ffffff 0%, #F8FAFC 100%)',
-          borderRadius: 20,
-          border: '1px solid rgba(226,232,240,0.8)',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)',
+          background: `linear-gradient(160deg, rgba(255,247,250,0.97) 0%, rgba(252,231,243,0.6) 100%)`,
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderRadius: 22,
+          border: `1px solid ${P.borderSoft}`,
+          boxShadow: `0 2px 8px ${P.glowSoft}, 0 16px 48px rgba(255,77,141,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`,
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
         }}>
           {/* Header */}
-          <div style={{ padding: '18px 20px 12px', borderBottom: '1px solid rgba(241,245,249,1)' }}>
+          <div style={{
+            padding: '18px 20px 13px',
+            borderBottom: `1px solid ${P.borderSoft}`,
+            background: 'linear-gradient(90deg, rgba(255,77,141,0.04) 0%, rgba(233,213,255,0.08) 100%)',
+          }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{
-                  width: 28, height: 28, borderRadius: 8,
-                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  width: 30, height: 30, borderRadius: 9,
+                  background: `linear-gradient(135deg, ${P.primary} 0%, ${P.soft} 100%)`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(99,102,241,0.3)'
+                  boxShadow: `0 3px 12px ${P.glow}`,
                 }}>
                   <BarChart3 style={{ width: 14, height: 14, color: '#fff' }} />
                 </div>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em', margin: 0 }}>Top 10 Productos</p>
-                  <p style={{ fontSize: 10, color: '#94a3b8', margin: 0, marginTop: 1 }}>Por participación en ventas</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: P.text, letterSpacing: '-0.02em', margin: 0, lineHeight: 1.2 }}>Top 10 Productos</p>
+                  <p style={{ fontSize: 10, color: P.textSub, margin: 0, marginTop: 2 }}>Por participación en ventas</p>
                 </div>
               </div>
               <span style={{
-                fontSize: 10, fontWeight: 600, color: '#6366f1',
-                background: 'rgba(99,102,241,0.08)', padding: '3px 8px',
-                borderRadius: 20, border: '1px solid rgba(99,102,241,0.15)'
+                fontSize: 10, fontWeight: 600, color: P.magenta,
+                background: 'rgba(216,27,96,0.08)', padding: '3px 9px',
+                borderRadius: 20, border: `1px solid rgba(216,27,96,0.15)`,
               }}>{products.length} productos</span>
             </div>
           </div>
+
           {/* List */}
           <div style={{ padding: '12px 16px 16px' }}>
             {(() => {
               const top10 = [...products].sort((a, b) => b.totalSales - a.totalSales).slice(0, 10);
               const maxSales = top10[0]?.totalSales || 1;
-              const rankColors = [
-                { bar: 'linear-gradient(90deg, #6366f1, #8b5cf6)', num: '#6366f1', bg: 'rgba(99,102,241,0.06)' },
-                { bar: 'linear-gradient(90deg, #8b5cf6, #a78bfa)', num: '#8b5cf6', bg: 'rgba(139,92,246,0.05)' },
-                { bar: 'linear-gradient(90deg, #06b6d4, #22d3ee)', num: '#06b6d4', bg: 'rgba(6,182,212,0.05)' },
-              ];
+              // Rank color ramp — all rosé/pink/magenta
+              const getRankStyle = (i) => {
+                if (i === 0) return { bar: `linear-gradient(90deg, ${P.primary}, ${P.soft})`, num: P.primary, hoverBg: 'rgba(255,77,141,0.08)', badge: P.primary };
+                if (i === 1) return { bar: `linear-gradient(90deg, ${P.soft}, #ffcce0)`, num: P.soft, hoverBg: 'rgba(255,143,184,0.07)', badge: P.soft };
+                if (i === 2) return { bar: `linear-gradient(90deg, #E9D5FF, #d8b4fe)`, num: '#c084fc', hoverBg: 'rgba(233,213,255,0.12)', badge: '#c084fc' };
+                return { bar: `rgba(255,143,184,${0.55 - i * 0.04})`, num: P.textSub, hoverBg: `rgba(255,77,141,0.04)`, badge: P.textSub };
+              };
               return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                   {top10.map((p, i) => {
                     const pct = (p.totalSales / maxSales) * 100;
-                    const rc = rankColors[i] || { bar: `rgba(99,102,241,${0.7 - i * 0.06})`, num: '#94a3b8', bg: 'transparent' };
+                    const rs = getRankStyle(i);
                     return (
-                      <div key={p.product} style={{
-                        padding: '7px 10px', borderRadius: 10,
-                        background: rc.bg,
-                        transition: 'background 0.2s',
-                        cursor: 'default',
-                      }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.08)'}
-                        onMouseLeave={e => e.currentTarget.style.background = rc.bg}
+                      <div key={p.product}
+                        style={{ padding: '7px 10px', borderRadius: 11, background: 'transparent', transition: 'background 0.2s, box-shadow 0.2s', cursor: 'default' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = rs.hoverBg; e.currentTarget.style.boxShadow = `0 2px 12px rgba(255,77,141,0.08)`; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.boxShadow = 'none'; }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, paddingRight: 8 }}>
-                            <span style={{
-                              fontSize: 10, fontWeight: 800, color: rc.num,
-                              minWidth: 16, textAlign: 'right', fontVariantNumeric: 'tabular-nums'
-                            }}>{i + 1}</span>
-                            <span style={{
-                              fontSize: 11, color: '#1e293b', fontWeight: i < 3 ? 600 : 500,
-                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-                            }}>{p.product}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 7, flex: 1, minWidth: 0, paddingRight: 8 }}>
+                            <span style={{ fontSize: 10, fontWeight: 800, color: rs.num, minWidth: 16, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
+                            <span style={{ fontSize: 11, color: P.text, fontWeight: i < 3 ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.product}</span>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                            <span style={{ fontSize: 10, color: '#64748b', fontVariantNumeric: 'tabular-nums' }}>{fmt(p.totalSales)}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
+                            <span style={{ fontSize: 10, color: P.textSub, fontVariantNumeric: 'tabular-nums' }}>{fmt(p.totalSales)}</span>
                             <span style={{
-                              fontSize: 10, fontWeight: 700, color: '#6366f1',
-                              background: 'rgba(99,102,241,0.1)', padding: '1px 6px',
-                              borderRadius: 6, fontVariantNumeric: 'tabular-nums'
+                              fontSize: 10, fontWeight: 700, color: i < 2 ? P.magenta : P.textSub,
+                              background: i < 2 ? 'rgba(216,27,96,0.08)' : 'rgba(143,122,134,0.07)',
+                              padding: '1px 7px', borderRadius: 7, fontVariantNumeric: 'tabular-nums',
+                              border: `1px solid ${i < 2 ? 'rgba(216,27,96,0.14)' : 'rgba(143,122,134,0.1)'}`,
                             }}>{p.participation.toFixed(1)}%</span>
                           </div>
                         </div>
-                        <div style={{ height: 4, borderRadius: 9999, background: 'rgba(226,232,240,0.8)', overflow: 'hidden' }}>
+                        <div style={{ height: 4, borderRadius: 9999, background: 'rgba(255,143,184,0.15)', overflow: 'hidden' }}>
                           <div style={{
-                            height: '100%', borderRadius: 9999,
-                            width: `${pct}%`,
-                            background: rc.bar,
-                            boxShadow: i < 3 ? `0 0 8px rgba(99,102,241,0.3)` : 'none',
-                            transition: 'width 0.8s cubic-bezier(0.34,1.56,0.64,1)',
+                            height: '100%', borderRadius: 9999, width: `${pct}%`,
+                            background: rs.bar,
+                            boxShadow: i < 3 ? `0 0 10px rgba(255,77,141,0.25)` : 'none',
+                            transition: 'width 0.9s cubic-bezier(0.34,1.56,0.64,1)',
                           }} />
                         </div>
                       </div>
@@ -413,82 +428,78 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
             };
           });
 
-          // Paleta AI SaaS premium — violeta / lila / cyan / rosa
-          const CS = {
-            excellent: {  // >=100%
-              grad: 'url(#gradCyan)',
-              barLine: 'linear-gradient(90deg, #22D3EE, #67e8f9)',
-              badge: { bg: 'rgba(34,211,238,0.10)', color: '#0891b2', border: 'rgba(34,211,238,0.25)' },
-              dot: '#22D3EE',
+          // ─── Luxury Pink palette (scoped) ───
+          const LCS = {
+            excellent: { // >=100% — magenta premium
+              grad: 'url(#lpGradMagenta)',
+              barLine: `linear-gradient(90deg, #D81B60, #FF4D8D)`,
+              badge: { bg: 'rgba(216,27,96,0.09)', color: '#D81B60', border: 'rgba(216,27,96,0.22)' },
+              dot: '#D81B60',
             },
-            good: {        // 90–99%
-              grad: 'url(#gradViolet)',
-              barLine: 'linear-gradient(90deg, #6D5EF5, #9B8CFF)',
-              badge: { bg: 'rgba(109,94,245,0.10)', color: '#6D5EF5', border: 'rgba(109,94,245,0.25)' },
-              dot: '#6D5EF5',
+            good: { // 90–99% — rosa principal
+              grad: 'url(#lpGradPrimary)',
+              barLine: `linear-gradient(90deg, #FF4D8D, #FF8FB8)`,
+              badge: { bg: 'rgba(255,77,141,0.09)', color: '#FF4D8D', border: 'rgba(255,77,141,0.22)' },
+              dot: '#FF4D8D',
             },
-            mid: {         // 80–89%
-              grad: 'url(#gradLila)',
-              barLine: 'linear-gradient(90deg, #9B8CFF, #c4b8ff)',
-              badge: { bg: 'rgba(155,140,255,0.10)', color: '#7c6ef5', border: 'rgba(155,140,255,0.25)' },
-              dot: '#9B8CFF',
+            mid: { // 80–89% — rosa suave + lila
+              grad: 'url(#lpGradSoft)',
+              barLine: `linear-gradient(90deg, #FF8FB8, #E9D5FF)`,
+              badge: { bg: 'rgba(255,143,184,0.10)', color: '#c0587a', border: 'rgba(255,143,184,0.25)' },
+              dot: '#FF8FB8',
             },
-            low: {         // <80%
-              grad: 'url(#gradRosePremium)',
-              barLine: 'linear-gradient(90deg, #FF6BAA, #ffadd3)',
-              badge: { bg: 'rgba(255,107,170,0.10)', color: '#db2777', border: 'rgba(255,107,170,0.25)' },
-              dot: '#FF6BAA',
+            low: { // <80% — lila tenue
+              grad: 'url(#lpGradLila)',
+              barLine: `linear-gradient(90deg, #E9D5FF, #d8b4fe)`,
+              badge: { bg: 'rgba(233,213,255,0.18)', color: '#9333ea', border: 'rgba(233,213,255,0.4)' },
+              dot: '#c084fc',
             },
             neutral: {
-              grad: 'url(#gradNeutralPremium)',
-              barLine: 'linear-gradient(90deg, #9B8CFF, #c4b8ff)',
-              badge: { bg: 'rgba(155,140,255,0.08)', color: '#9B8CFF', border: 'rgba(155,140,255,0.2)' },
-              dot: '#9B8CFF',
+              grad: 'url(#lpGradSoft)',
+              barLine: `linear-gradient(90deg, #FF8FB8, #fce7f3)`,
+              badge: { bg: 'rgba(255,143,184,0.08)', color: P.textSub, border: 'rgba(255,143,184,0.18)' },
+              dot: '#FF8FB8',
             },
           };
-          const getCS = (c) => {
-            if (c == null) return CS.neutral;
-            if (c >= 100) return CS.excellent;
-            if (c >= 90) return CS.good;
-            if (c >= 80) return CS.mid;
-            return CS.low;
+          const getLCS = (c) => {
+            if (c == null) return LCS.neutral;
+            if (c >= 100) return LCS.excellent;
+            if (c >= 90) return LCS.good;
+            if (c >= 80) return LCS.mid;
+            return LCS.low;
           };
 
           return (
             <div style={{
-              background: 'linear-gradient(160deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.98) 100%)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              borderRadius: 20,
-              border: '1px solid rgba(155,140,255,0.15)',
-              boxShadow: '0 2px 8px rgba(109,94,245,0.06), 0 12px 40px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
+              background: `linear-gradient(160deg, rgba(255,247,250,0.97) 0%, rgba(252,231,243,0.6) 100%)`,
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              borderRadius: 22,
+              border: `1px solid ${P.borderSoft}`,
+              boxShadow: `0 2px 8px ${P.glowSoft}, 0 16px 48px rgba(255,77,141,0.07), inset 0 1px 0 rgba(255,255,255,0.9)`,
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
             }}>
               {/* Header */}
               <div style={{
-                padding: '18px 20px 14px',
-                borderBottom: '1px solid rgba(155,140,255,0.10)',
-                background: 'linear-gradient(90deg, rgba(109,94,245,0.03) 0%, rgba(34,211,238,0.02) 100%)',
+                padding: '18px 20px 13px',
+                borderBottom: `1px solid ${P.borderSoft}`,
+                background: 'linear-gradient(90deg, rgba(255,77,141,0.04) 0%, rgba(233,213,255,0.06) 100%)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{
                       width: 30, height: 30, borderRadius: 9,
-                      background: 'linear-gradient(135deg, #6D5EF5 0%, #22D3EE 100%)',
+                      background: `linear-gradient(135deg, ${P.magenta} 0%, ${P.primary} 100%)`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: '0 3px 10px rgba(109,94,245,0.35)',
+                      boxShadow: `0 3px 12px rgba(216,27,96,0.3)`,
                     }}>
                       <Target style={{ width: 14, height: 14, color: '#fff' }} />
                     </div>
                     <div>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em', margin: 0, lineHeight: 1.2 }}>
-                        Venta por Mes
-                      </p>
-                      <p style={{ fontSize: 10, color: '#9B8CFF', margin: 0, marginTop: 2, letterSpacing: '0.01em' }}>
-                        Ene – {MONTH_NAMES[new Date().getMonth()]} {currentYear}
-                      </p>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: P.text, letterSpacing: '-0.02em', margin: 0, lineHeight: 1.2 }}>Venta por Mes</p>
+                      <p style={{ fontSize: 10, color: P.textSub, margin: 0, marginTop: 2 }}>Ene – {MONTH_NAMES[new Date().getMonth()]} {currentYear}</p>
                     </div>
                   </div>
                   {totalYearSales > 0 && (
@@ -496,15 +507,10 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                       <p style={{
                         fontSize: 19, fontWeight: 800, margin: 0, letterSpacing: '-0.03em',
                         fontVariantNumeric: 'tabular-nums',
-                        background: 'linear-gradient(135deg, #6D5EF5, #22D3EE)',
-                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                      }}>
-                        {fmt(totalYearSales)}
-                      </p>
-                      <p style={{ fontSize: 9, color: '#9B8CFF', margin: 0, marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                        Total acumulado
-                      </p>
+                        background: `linear-gradient(135deg, ${P.magenta}, ${P.primary})`,
+                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                      }}>{fmt(totalYearSales)}</p>
+                      <p style={{ fontSize: 9, color: P.textSub, margin: 0, marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Total acumulado</p>
                     </div>
                   )}
                 </div>
@@ -512,38 +518,34 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
 
               <div style={{ padding: '8px 4px 0' }}>
                 {monthsWithPart.length === 0 ? (
-                  <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 11, color: '#c4b8ff' }}>Sin datos de ventas mensuales</div>
+                  <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 11, color: P.textSub }}>Sin datos de ventas mensuales</div>
                 ) : (
                   <>
                     <ResponsiveContainer width="100%" height={190}>
                       <BarChart data={monthsWithPart} margin={{ top: 26, right: 12, left: 8, bottom: 4 }} barCategoryGap="16%">
                         <defs>
-                          <linearGradient id="gradCyan" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#22D3EE" stopOpacity={1} />
-                            <stop offset="100%" stopColor="#67e8f9" stopOpacity={0.45} />
+                          <linearGradient id="lpGradMagenta" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#D81B60" stopOpacity={1} />
+                            <stop offset="100%" stopColor="#FF4D8D" stopOpacity={0.5} />
                           </linearGradient>
-                          <linearGradient id="gradViolet" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#6D5EF5" stopOpacity={1} />
-                            <stop offset="100%" stopColor="#9B8CFF" stopOpacity={0.5} />
+                          <linearGradient id="lpGradPrimary" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#FF4D8D" stopOpacity={1} />
+                            <stop offset="100%" stopColor="#FF8FB8" stopOpacity={0.5} />
                           </linearGradient>
-                          <linearGradient id="gradLila" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#9B8CFF" stopOpacity={1} />
-                            <stop offset="100%" stopColor="#c4b8ff" stopOpacity={0.45} />
+                          <linearGradient id="lpGradSoft" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#FF8FB8" stopOpacity={0.9} />
+                            <stop offset="100%" stopColor="#fce7f3" stopOpacity={0.4} />
                           </linearGradient>
-                          <linearGradient id="gradRosePremium" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#FF6BAA" stopOpacity={1} />
-                            <stop offset="100%" stopColor="#ffadd3" stopOpacity={0.45} />
-                          </linearGradient>
-                          <linearGradient id="gradNeutralPremium" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#9B8CFF" stopOpacity={0.65} />
-                            <stop offset="100%" stopColor="#c4b8ff" stopOpacity={0.25} />
+                          <linearGradient id="lpGradLila" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#E9D5FF" stopOpacity={1} />
+                            <stop offset="100%" stopColor="#d8b4fe" stopOpacity={0.5} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid vertical={false} stroke="rgba(155,140,255,0.08)" strokeDasharray="4 4" />
+                        <CartesianGrid vertical={false} stroke="rgba(255,143,184,0.12)" strokeDasharray="4 4" />
                         <XAxis
                           dataKey="label"
                           tick={({ x, y, payload }) => (
-                            <text x={x} y={y + 10} textAnchor="middle" fontSize={9.5} fill="#9B8CFF" fontFamily="Inter, -apple-system, sans-serif" fontWeight={500}>
+                            <text x={x} y={y + 10} textAnchor="middle" fontSize={9.5} fill={P.textSub} fontFamily="Inter, -apple-system, sans-serif" fontWeight={500}>
                               {payload.value}
                             </text>
                           )}
@@ -551,98 +553,86 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                         />
                         <YAxis hide />
                         <RechartsTooltip
-                          cursor={{ fill: 'rgba(109,94,245,0.04)', radius: 6 }}
+                          cursor={{ fill: 'rgba(255,77,141,0.04)', radius: 6 }}
                           content={({ active, payload }) => {
                             if (!active || !payload?.length) return null;
                             const d = payload[0].payload;
-                            const cs = getCS(d.compliance);
+                            const cs = getLCS(d.compliance);
                             return (
                               <div style={{
-                                background: 'rgba(255,255,255,0.96)',
+                                background: 'rgba(255,247,250,0.97)',
                                 backdropFilter: 'blur(16px)',
-                                border: '1px solid rgba(155,140,255,0.2)',
+                                border: `1px solid ${P.borderSoft}`,
                                 borderRadius: 14,
                                 padding: '11px 15px',
-                                boxShadow: '0 8px 32px rgba(109,94,245,0.12), 0 2px 8px rgba(0,0,0,0.06)',
+                                boxShadow: `0 8px 32px rgba(255,77,141,0.12), 0 2px 8px rgba(0,0,0,0.05)`,
                                 minWidth: 148,
                               }}>
-                                <p style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', margin: '0 0 5px', letterSpacing: '-0.01em' }}>
-                                  {d.label} {d.year}
-                                </p>
+                                <p style={{ fontSize: 11, fontWeight: 700, color: P.text, margin: '0 0 5px', letterSpacing: '-0.01em' }}>{d.label} {d.year}</p>
                                 <p style={{
                                   fontSize: 16, fontWeight: 800, margin: '0 0 5px',
                                   letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums',
-                                  background: 'linear-gradient(135deg, #6D5EF5, #22D3EE)',
+                                  background: `linear-gradient(135deg, ${P.magenta}, ${P.primary})`,
                                   WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-                                }}>
-                                  {fmt(d.totalSales)}
-                                </p>
-                                {d.pptMes > 0 && (
-                                  <p style={{ fontSize: 10, color: '#9B8CFF', margin: '0 0 5px', fontVariantNumeric: 'tabular-nums' }}>
-                                    PPT: {fmt(d.pptMes)}
-                                  </p>
-                                )}
+                                }}>{fmt(d.totalSales)}</p>
+                                {d.pptMes > 0 && <p style={{ fontSize: 10, color: P.textSub, margin: '0 0 5px', fontVariantNumeric: 'tabular-nums' }}>PPT: {fmt(d.pptMes)}</p>}
                                 {d.compliance != null && (
                                   <span style={{
                                     display: 'inline-block', fontSize: 11, fontWeight: 700,
                                     color: cs.badge.color, background: cs.badge.bg,
                                     border: `1px solid ${cs.badge.border}`,
                                     padding: '2px 9px', borderRadius: 20, marginTop: 2,
-                                  }}>
-                                    {d.compliance}%
-                                  </span>
+                                  }}>{d.compliance}%</span>
                                 )}
                               </div>
                             );
                           }}
                         />
                         <Bar dataKey="totalSales" radius={[7, 7, 0, 0]} maxBarSize={34}>
-                          {monthsWithPart.map((m, i) => (
-                            <Cell key={i} fill={getCS(m.compliance).grad} />
-                          ))}
+                          {monthsWithPart.map((m, i) => (<Cell key={i} fill={getLCS(m.compliance).grad} />))}
                           <LabelList
                             dataKey="compliance"
                             position="top"
                             formatter={(v) => v != null ? `${v}%` : ''}
-                            style={{ fontSize: 9, fontWeight: 700, fill: '#7c6ef5', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}
+                            style={{ fontSize: 9, fontWeight: 700, fill: P.magenta, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}
                           />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
 
-                    {/* Leyenda premium */}
+                    {/* Leyenda pink */}
                     <div style={{ display: 'flex', gap: 14, padding: '0 16px 10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                       {[
-                        { dot: '#22D3EE', label: '≥100%' },
-                        { dot: '#6D5EF5', label: '90–99%' },
-                        { dot: '#9B8CFF', label: '80–89%' },
-                        { dot: '#FF6BAA', label: '<80%' },
+                        { dot: '#D81B60', label: '≥100%' },
+                        { dot: '#FF4D8D', label: '90–99%' },
+                        { dot: '#FF8FB8', label: '80–89%' },
+                        { dot: '#E9D5FF', label: '<80%' },
                       ].map(({ dot, label }) => (
                         <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: dot, boxShadow: `0 0 6px ${dot}55` }} />
-                          <span style={{ fontSize: 9.5, color: '#9B8CFF', fontWeight: 500 }}>{label}</span>
+                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: dot, boxShadow: `0 0 6px ${dot}66` }} />
+                          <span style={{ fontSize: 9.5, color: P.textSub, fontWeight: 500 }}>{label}</span>
                         </div>
                       ))}
                     </div>
 
-                    {/* Tabla mensual — paleta premium */}
-                    <div style={{ margin: '0 12px 14px', borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(155,140,255,0.15)' }}>
+                    {/* Tabla mensual — Luxury Pink */}
+                    <div style={{ margin: '0 12px 14px', borderRadius: 14, overflow: 'hidden', border: `1px solid ${P.borderSoft}` }}>
                       <div style={{
                         display: 'grid', gridTemplateColumns: '24px 1fr auto 52px',
                         gap: '0 8px', padding: '7px 12px',
-                        background: 'linear-gradient(90deg, rgba(109,94,245,0.05), rgba(34,211,238,0.03))',
-                        borderBottom: '1px solid rgba(155,140,255,0.12)',
+                        background: 'linear-gradient(90deg, rgba(255,77,141,0.05), rgba(233,213,255,0.06))',
+                        borderBottom: `1px solid ${P.borderSoft}`,
                       }}>
                         {['#', 'Mes', 'Venta', 'Cumpl.'].map((h, hi) => (
                           <span key={h} style={{
-                            fontSize: 9, fontWeight: 700, color: '#9B8CFF',
+                            fontSize: 9, fontWeight: 700, color: P.textSub,
                             textTransform: 'uppercase', letterSpacing: '0.09em',
                             textAlign: hi >= 2 ? 'right' : 'left',
                           }}>{h}</span>
                         ))}
                       </div>
                       {[...monthsWithPart].sort((a, b) => a.month - b.month).map((m, i) => {
-                        const cs = getCS(m.compliance);
+                        const cs = getLCS(m.compliance);
                         const barPct = Math.min(100, m.compliance != null ? Math.min(m.compliance, 100) : (m.totalSales / maxMonthSales) * 100);
                         return (
                           <div
@@ -650,44 +640,40 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             style={{
                               display: 'grid', gridTemplateColumns: '24px 1fr auto 52px',
                               gap: '0 8px', padding: '6px 12px', alignItems: 'center',
-                              background: i % 2 === 0 ? 'rgba(255,255,255,0.7)' : 'rgba(248,250,252,0.7)',
+                              background: i % 2 === 0 ? 'rgba(255,247,250,0.7)' : 'rgba(255,255,255,0.5)',
                               transition: 'background 0.18s',
                               cursor: 'default',
                             }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(109,94,245,0.06)'}
-                            onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'rgba(255,255,255,0.7)' : 'rgba(248,250,252,0.7)'}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,77,141,0.05)'}
+                            onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'rgba(255,247,250,0.7)' : 'rgba(255,255,255,0.5)'}
                           >
-                            <span style={{ fontSize: 10, fontWeight: 600, color: '#c4b8ff', fontVariantNumeric: 'tabular-nums' }}>{m.month}</span>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: P.textSub, fontVariantNumeric: 'tabular-nums' }}>{m.month}</span>
                             <div style={{ minWidth: 0 }}>
-                              <p style={{ fontSize: 10.5, fontWeight: 600, color: '#334155', margin: '0 0 3px', letterSpacing: '-0.005em' }}>{m.label}</p>
-                              <div style={{ height: 3, borderRadius: 9999, background: 'rgba(155,140,255,0.12)', overflow: 'hidden' }}>
+                              <p style={{ fontSize: 10.5, fontWeight: 600, color: P.text, margin: '0 0 3px', letterSpacing: '-0.005em' }}>{m.label}</p>
+                              <div style={{ height: 3, borderRadius: 9999, background: 'rgba(255,143,184,0.15)', overflow: 'hidden' }}>
                                 <div style={{
                                   height: '100%', borderRadius: 9999,
                                   width: `${barPct}%`,
                                   background: cs.barLine,
-                                  boxShadow: `0 0 6px ${cs.dot}44`,
+                                  boxShadow: `0 0 8px ${cs.dot}55`,
                                   transition: 'width 0.7s cubic-bezier(0.34,1.56,0.64,1)',
                                 }} />
                               </div>
                             </div>
-                            <span style={{ fontSize: 10.5, fontWeight: 600, color: '#475569', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                            <span style={{ fontSize: 10.5, fontWeight: 600, color: P.text, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                               {fmt(m.totalSales)}
                             </span>
                             {m.compliance != null ? (
                               <span style={{
                                 fontSize: 10, fontWeight: 800,
-                                color: cs.badge.color,
-                                background: cs.badge.bg,
+                                color: cs.badge.color, background: cs.badge.bg,
                                 border: `1px solid ${cs.badge.border}`,
                                 padding: '2px 5px', borderRadius: 8,
                                 textAlign: 'center', display: 'block',
-                                fontVariantNumeric: 'tabular-nums',
-                                letterSpacing: '-0.01em',
-                              }}>
-                                {m.compliance}%
-                              </span>
+                                fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em',
+                              }}>{m.compliance}%</span>
                             ) : (
-                              <span style={{ fontSize: 10, color: '#c4b8ff', textAlign: 'right', display: 'block' }}>—</span>
+                              <span style={{ fontSize: 10, color: P.textSub, textAlign: 'right', display: 'block' }}>—</span>
                             )}
                           </div>
                         );
