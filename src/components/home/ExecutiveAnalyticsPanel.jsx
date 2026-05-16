@@ -1,6 +1,6 @@
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimationFrame } from 'framer-motion';
+import { AnimatedChartWrapper, AnimatedProgressBar } from '@/components/dashboard/AnimatedChartWrapper';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, LineChart, Line, BarChart, Bar
 } from
@@ -185,7 +185,6 @@ function LiveTradingChart({ data, height = 140 }) {
     </div>
   );
 }
-import { AnimatedChartWrapper, AnimatedProgressBar } from '@/components/dashboard/AnimatedChartWrapper';
 
 // ── ANIMATED COUNTER ──────────────────────────────────────────────────────────
 function AnimatedCounter({ value, format = (v) => v, delay = 0, duration = 2 }) {
