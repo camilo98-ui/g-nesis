@@ -372,7 +372,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                 <div className="flex items-end justify-between">
                   <CardTitle className="text-sm font-semibold text-slate-700">Enero – {MONTH_NAMES[new Date().getMonth()]} {currentYear}</CardTitle>
                   {totalYearSales > 0 && (
-                    <span className="text-lg font-extrabold pb-0.5" style={{ color: '#E91E8C' }}>
+                    <span className="text-lg font-bold pb-0.5 text-slate-700">
                       {fmt(totalYearSales)}
                     </span>
                   )}
@@ -391,15 +391,15 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                       >
                         <defs>
                           <linearGradient id="barGradPink" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#E91E8C" stopOpacity={1} />
-                            <stop offset="100%" stopColor="#F48FB1" stopOpacity={0.6} />
-                          </linearGradient>
+                              <stop offset="0%" stopColor="#6366f1" stopOpacity={0.85} />
+                              <stop offset="100%" stopColor="#a5b4fc" stopOpacity={0.4} />
+                            </linearGradient>
                         </defs>
-                        <CartesianGrid vertical={false} stroke="#fce7f3" strokeDasharray="3 3" />
+                        <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="3 3" />
                         <XAxis
                           dataKey="label"
                           tick={({ x, y, payload }) => (
-                            <text x={x} y={y + 8} textAnchor="middle" fontSize={9} fill="#c084a8" fontFamily="Inter, sans-serif">
+                            <text x={x} y={y + 8} textAnchor="middle" fontSize={9} fill="#94a3b8" fontFamily="Inter, sans-serif">
                               {payload.value}
                             </text>
                           )}
@@ -408,29 +408,32 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                         />
                         <YAxis hide />
                         <RechartsTooltip
-                         cursor={{ fill: 'rgba(249,168,212,0.10)' }}
+                         cursor={{ fill: 'rgba(99,102,241,0.06)' }}
                          content={({ active, payload }) => {
                            if (!active || !payload?.length) return null;
                            const d = payload[0].payload;
-                           const compColor = d.compliance == null ? '#94a3b8' : d.compliance >= 100 ? '#10b981' : d.compliance >= 85 ? '#f59e0b' : '#ef4444';
+                           const compColor = d.compliance == null ? '#94a3b8' : d.compliance >= 100 ? '#059669' : d.compliance >= 85 ? '#b45309' : '#b91c1c';
                            return (
-                             <div style={{ background: '#fff', border: '1px solid #fce7f3', borderRadius: 10, padding: '8px 12px', boxShadow: '0 4px 20px rgba(233,30,140,0.12)' }}>
+                             <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 10, padding: '8px 12px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
                                <p style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>{d.label} {d.year}</p>
-                               <p style={{ fontSize: 13, fontWeight: 800, color: '#E91E8C' }}>{fmt(d.totalSales)}</p>
+                               <p style={{ fontSize: 13, fontWeight: 800, color: '#6366f1' }}>{fmt(d.totalSales)}</p>
                                {d.pptMes > 0 && <p style={{ fontSize: 10, color: '#94a3b8' }}>PPT: {fmt(d.pptMes)}</p>}
-                               {d.compliance != null && <p style={{ fontSize: 11, fontWeight: 800, color: compColor }}>Cumplimiento: {d.compliance}%</p>}
+                               {d.compliance != null && <p style={{ fontSize: 11, fontWeight: 700, color: compColor }}>Cumplimiento: {d.compliance}%</p>}
                              </div>
                            );
                          }}
                         />
-                        <Bar dataKey="totalSales" radius={[5, 5, 0, 0]}>
+                        <Bar dataKey="totalSales" radius={[4, 4, 0, 0]}>
                          {monthsWithPart.map((m, i) => {
                            const isCurrentMonth = m.month === new Date().getMonth() + 1;
-                           const compColor = m.compliance == null ? null : m.compliance >= 100 ? '#10b981' : m.compliance >= 85 ? '#f59e0b' : '#ef4444';
+                           const compColor = m.compliance == null ? null
+                             : m.compliance >= 100 ? '#6ee7b7'
+                             : m.compliance >= 85 ? '#fcd34d'
+                             : '#fca5a5';
                            return (
                              <Cell
                                key={i}
-                               fill={compColor || (isCurrentMonth ? 'url(#barGradPink)' : `rgba(233,30,140,${0.15 + (m.participation / 100) * 0.6})`)}
+                               fill={compColor || (isCurrentMonth ? 'url(#barGradPink)' : `rgba(99,102,241,${0.18 + (m.participation / 100) * 0.5})`)}
                              />
                            );
                          })}
@@ -438,43 +441,44 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                            dataKey="compliance"
                            position="top"
                            formatter={(v) => v != null ? `${v}%` : ''}
-                           style={{ fontSize: 8, fontWeight: 700, fill: '#475569', fontFamily: 'Inter, sans-serif' }}
+                           style={{ fontSize: 8, fontWeight: 600, fill: '#64748b', fontFamily: 'Inter, sans-serif' }}
                          />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
 
                     {/* Ranking mensual por cumplimiento */}
-                    <div className="mx-3 mt-2 rounded-xl overflow-hidden border border-pink-50">
-                     <div className="grid grid-cols-[20px_1fr_auto_44px] gap-x-2 px-3 py-1.5 bg-pink-50/60">
-                       <span className="text-[9px] font-bold text-pink-300 uppercase">#</span>
-                       <span className="text-[9px] font-bold text-pink-300 uppercase">Mes</span>
-                       <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Venta</span>
-                       <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Cumpl.</span>
-                     </div>
-                     {[...monthsWithPart].sort((a, b) => a.month - b.month).map((m, i) => {
-                       const compColor = m.compliance == null ? '#94a3b8' : m.compliance >= 100 ? '#10b981' : m.compliance >= 85 ? '#f59e0b' : '#ef4444';
-                       return (
-                       <div
-                         key={m.key}
-                         className="grid grid-cols-[20px_1fr_auto_44px] gap-x-2 px-3 py-1.5 items-center"
-                         style={{ background: i % 2 === 0 ? 'rgba(253,242,248,0.5)' : 'white' }}
-                       >
-                         <span className="text-[10px] font-bold leading-none text-slate-400">{m.month}</span>
-                         <div className="min-w-0">
-                           <p className="text-[10px] font-medium text-slate-700 leading-tight">{m.label}</p>
-                           <div className="mt-0.5 h-[3px] rounded-full bg-pink-100 overflow-hidden">
-                             <div className="h-full rounded-full"
-                               style={{ width: `${Math.min(100, m.compliance || (m.totalSales / maxMonthSales) * 100)}%`, background: compColor }} />
-                           </div>
-                         </div>
-                         <span className="text-[10px] font-bold text-right" style={{ color: '#E91E8C' }}>{fmt(m.totalSales)}</span>
-                         <span className="text-[10px] font-black text-right" style={{ color: compColor }}>
-                           {m.compliance != null ? `${m.compliance}%` : '—'}
-                         </span>
-                       </div>
-                       );
-                     })}
+                    <div className="mx-3 mt-2 rounded-xl overflow-hidden border border-slate-100">
+                      <div className="grid grid-cols-[20px_1fr_auto_44px] gap-x-2 px-3 py-1.5 bg-slate-50">
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase">#</span>
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase">Mes</span>
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase text-right">Venta</span>
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase text-right">Cumpl.</span>
+                      </div>
+                      {[...monthsWithPart].sort((a, b) => a.month - b.month).map((m, i) => {
+                        const compColor = m.compliance == null ? '#94a3b8' : m.compliance >= 100 ? '#059669' : m.compliance >= 85 ? '#b45309' : '#b91c1c';
+                        const barColor = m.compliance == null ? '#e2e8f0' : m.compliance >= 100 ? '#a7f3d0' : m.compliance >= 85 ? '#fde68a' : '#fecaca';
+                        return (
+                        <div
+                          key={m.key}
+                          className="grid grid-cols-[20px_1fr_auto_44px] gap-x-2 px-3 py-1.5 items-center"
+                          style={{ background: i % 2 === 0 ? '#fafafa' : 'white' }}
+                        >
+                          <span className="text-[10px] font-medium leading-none text-slate-400">{m.month}</span>
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-medium text-slate-600 leading-tight">{m.label}</p>
+                            <div className="mt-0.5 h-[3px] rounded-full bg-slate-100 overflow-hidden">
+                              <div className="h-full rounded-full"
+                                style={{ width: `${Math.min(100, m.compliance || (m.totalSales / maxMonthSales) * 100)}%`, background: barColor }} />
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-semibold text-right text-slate-600">{fmt(m.totalSales)}</span>
+                          <span className="text-[10px] font-bold text-right" style={{ color: compColor }}>
+                            {m.compliance != null ? `${m.compliance}%` : '—'}
+                          </span>
+                        </div>
+                        );
+                      })}
                     </div>
                   </>
                 )}
