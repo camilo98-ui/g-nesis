@@ -213,7 +213,7 @@ export default function ProductTicketAnalysis({ storeId }) {
   return (
     <div className="space-y-5">
       {/* KPI Summary Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 hidden">
         <div className="bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
           <p className="text-xs text-slate-400 mb-1">Productos Analizados</p>
           <p className="text-2xl font-bold text-slate-800">{products.length}</p>
