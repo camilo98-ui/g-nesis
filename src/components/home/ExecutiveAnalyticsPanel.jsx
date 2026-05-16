@@ -1,8 +1,8 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, LineChart, Line, BarChart, Bar
-} from
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, LineChart, Line, BarChart, Bar } from
+
 'recharts';
 import { PieChart, Pie, Cell } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Trophy } from 'lucide-react';
@@ -11,7 +11,7 @@ import { AnimatedChartWrapper, AnimatedProgressBar } from '@/components/dashboar
 // ── ANIMATED COUNTER ──────────────────────────────────────────────────────────
 function AnimatedCounter({ value, format = (v) => v, delay = 0, duration = 2 }) {
   const [displayValue, setDisplayValue] = useState(0);
-  
+
   useEffect(() => {
     const timer = setTimeout(() => {
       const increment = value / (duration * 60);
@@ -29,7 +29,7 @@ function AnimatedCounter({ value, format = (v) => v, delay = 0, duration = 2 }) 
     }, delay * 1000);
     return () => clearTimeout(timer);
   }, [value, delay, duration]);
-  
+
   return format(displayValue);
 }
 
@@ -80,23 +80,23 @@ const EbitdaTooltip = makePremiumTooltip((val) => `${val}%`);
 
 // ── PREMIUM ANALYTICS CARD ────────────────────────────────────────────────────
 function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
-   const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
-   return (
-     <motion.div
-       initial={{ opacity: 0, y: 24, scale: 0.98 }}
-       animate={{ opacity: 1, y: 0, scale: 1 }}
-       transition={{ delay, duration: 0.7, ease: [0.165, 0.84, 0.44, 1] }}
-       onHoverStart={() => setIsHovered(true)}
-       onHoverEnd={() => setIsHovered(false)}
-       whileHover={{ y: -4, transition: { duration: 0.4 } }}
-       className={`rounded-3xl p-6 ${colSpan} group relative overflow-hidden`}
-       style={{
-         background: 'linear-gradient(135deg, rgba(255,248,250,0.98) 0%, rgba(255,255,255,0.93) 100%)',
-         backdropFilter: 'blur(40px)',
-         border: '1px solid rgba(255, 77, 141, 0.15)',
-       }}
-       whileTap={{ scale: 0.98 }}>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay, duration: 0.7, ease: [0.165, 0.84, 0.44, 1] }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      whileHover={{ y: -4, transition: { duration: 0.4 } }}
+      className={`rounded-3xl p-6 ${colSpan} group relative overflow-hidden`}
+      style={{
+        background: 'linear-gradient(135deg, rgba(255,248,250,0.98) 0%, rgba(255,255,255,0.93) 100%)',
+        backdropFilter: 'blur(40px)',
+        border: '1px solid rgba(255, 77, 141, 0.15)'
+      }}
+      whileTap={{ scale: 0.98 }}>
       
       {/* Animated glow effect on hover */}
       <motion.div
@@ -106,8 +106,8 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
         style={{
           background: 'radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 77, 141, 0.1), transparent 80%)',
           pointerEvents: 'none'
-        }}
-      />
+        }} />
+      
       
       {/* Animated border glow */}
       <motion.div
@@ -118,8 +118,8 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
           background: 'linear-gradient(135deg, rgba(255, 77, 141, 0.2), rgba(255, 182, 201, 0.1))',
           boxShadow: '0 0 20px rgba(255, 77, 141, 0.2), inset 0 0 20px rgba(255, 77, 141, 0.08)',
           filter: 'blur(1px)'
-        }}
-      />
+        }} />
+      
       
       {/* Dynamic shadow */}
       <motion.div
@@ -127,28 +127,28 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
         animate={isHovered ? { opacity: 1 } : { opacity: 0.5 }}
         transition={{ duration: 0.4 }}
         style={{
-          boxShadow: isHovered 
-            ? '0 20px 40px rgba(255, 77, 141, 0.12), 0 8px 16px rgba(0,0,0,0.06)'
-            : '0 2px 8px rgba(255, 77, 141, 0.08), 0 16px 48px rgba(0,0,0,0.04)'
-        }}
-      />
+          boxShadow: isHovered ?
+          '0 20px 40px rgba(255, 77, 141, 0.12), 0 8px 16px rgba(0,0,0,0.06)' :
+          '0 2px 8px rgba(255, 77, 141, 0.08), 0 16px 48px rgba(0,0,0,0.04)'
+        }} />
+      
       
       <div className="relative z-10 flex items-start justify-between mb-5">
         <div>
-          <motion.p 
+          <motion.p
             className="text-[9px] font-semibold text-[#8F96A3] uppercase tracking-[0.15em]"
             animate={isHovered ? { letterSpacing: '0.2em' } : { letterSpacing: '0.15em' }}
             transition={{ duration: 0.3 }}>
             {title}
           </motion.p>
-          {subtitle && (
-            <motion.p 
-              className="text-[12px] text-[#8F96A3] mt-1.5 font-medium"
-              animate={isHovered ? { color: '#FF4D8D' } : { color: '#8F96A3' }}
-              transition={{ duration: 0.3 }}>
+          {subtitle &&
+          <motion.p
+            className="text-[12px] text-[#8F96A3] mt-1.5 font-medium"
+            animate={isHovered ? { color: '#FF4D8D' } : { color: '#8F96A3' }}
+            transition={{ duration: 0.3 }}>
               {subtitle}
             </motion.p>
-          )}
+          }
         </div>
       </div>
       <div className="relative z-10">
@@ -165,14 +165,14 @@ const DAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 function HeatmapCell({ value, max }) {
   const intensity = max > 0 ? value / max : 0;
   const alpha = 0.06 + intensity * 0.85;
-  
+
   return (
     <motion.div
       whileHover={{ scale: 1.15, transition: { duration: 0.3 } }}
       whileTap={{ scale: 0.95 }}
       className="rounded-lg w-full aspect-square cursor-pointer"
       animate={{
-        opacity: [0.8, 1, 0.8],
+        opacity: [0.8, 1, 0.8]
       }}
       transition={{
         duration: 3 + Math.random() * 2,
@@ -181,9 +181,9 @@ function HeatmapCell({ value, max }) {
       }}
       style={{
         background: `rgba(255, 77, 141, ${alpha})`,
-        boxShadow: intensity > 0.6 
-          ? `0 0 12px rgba(255, 77, 141, ${intensity * 0.4})` 
-          : `0 0 4px rgba(255, 77, 141, ${intensity * 0.15})`
+        boxShadow: intensity > 0.6 ?
+        `0 0 12px rgba(255, 77, 141, ${intensity * 0.4})` :
+        `0 0 4px rgba(255, 77, 141, ${intensity * 0.15})`
       }}
       title={`${value} txn`} />);
 
@@ -226,10 +226,10 @@ const PARTICIPATION_SEGMENTS = [
 
 function DonutChart({ data }) {
   const [isHovered, setIsHovered] = useState(null);
-  
+
   return (
     <div className="flex items-center gap-5">
-      <motion.div 
+      <motion.div
         className="flex-shrink-0 relative"
         initial={{ opacity: 0, scale: 0.8, rotateZ: -10 }}
         animate={{ opacity: 1, scale: 1, rotateZ: 0 }}
@@ -238,15 +238,15 @@ function DonutChart({ data }) {
         {/* Pulsing halo */}
         <motion.div
           className="absolute inset-0 rounded-full"
-          animate={{ 
+          animate={{
             boxShadow: [
-              '0 0 20px rgba(255, 77, 141, 0)',
-              '0 0 30px rgba(255, 77, 141, 0.15)',
-              '0 0 20px rgba(255, 77, 141, 0)'
-            ]
+            '0 0 20px rgba(255, 77, 141, 0)',
+            '0 0 30px rgba(255, 77, 141, 0.15)',
+            '0 0 20px rgba(255, 77, 141, 0)']
+
           }}
-          transition={{ duration: 3, repeat: Infinity }}
-        />
+          transition={{ duration: 3, repeat: Infinity }} />
+        
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -280,21 +280,21 @@ function DonutChart({ data }) {
           transition={{ delay: 0.4 + i * 0.08, ease: [0.165, 0.84, 0.44, 1] }}
           whileHover={{ x: 4 }}>
           
-            <motion.div 
-              className="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-all"
-              animate={{
-                scale: isHovered === i ? 1.4 : 1,
-                boxShadow: isHovered === i 
-                  ? `0 0 16px ${PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length]}80`
-                  : `0 0 8px ${PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length]}40`
-              }}
-              transition={{ duration: 0.3 }}
-              style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }} />
+            <motion.div
+            className="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-all"
+            animate={{
+              scale: isHovered === i ? 1.4 : 1,
+              boxShadow: isHovered === i ?
+              `0 0 16px ${PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length]}80` :
+              `0 0 8px ${PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length]}40`
+            }}
+            transition={{ duration: 0.3 }}
+            style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }} />
             <span className="text-[10px] text-[#8F96A3] flex-1 font-medium group-hover:text-[#FF4D8D] transition-colors duration-300">{item.name}</span>
-            <motion.span 
-              className="text-[10px] font-bold text-[#2A2A2A] tabular-nums"
-              animate={{ scale: isHovered === i ? 1.1 : 1 }}
-              transition={{ duration: 0.2 }}>
+            <motion.span
+            className="text-[10px] font-bold text-[#2A2A2A] tabular-nums"
+            animate={{ scale: isHovered === i ? 1.1 : 1 }}
+            transition={{ duration: 0.2 }}>
               {item.value}%
             </motion.span>
           </motion.div>
@@ -309,9 +309,9 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
 
   // Build 30-day trend from todaySales
   const sorted30 = useMemo(() => {
-    const daily = [...todaySales]
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .slice(-30);
+    const daily = [...todaySales].
+    sort((a, b) => new Date(a.date) - new Date(b.date)).
+    slice(-30);
 
     return daily.map((d) => {
       const ventas = d.total_sales || 0;
@@ -321,7 +321,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       const saleDate = new Date(d.date);
       const salesMonth = saleDate.getMonth() + 1;
       const salesYear = saleDate.getFullYear();
-      const matchBudget = budget.find(b => Number(b.month) === salesMonth && Number(b.year) === salesYear) || budget[0];
+      const matchBudget = budget.find((b) => Number(b.month) === salesMonth && Number(b.year) === salesYear) || budget[0];
       const daysInSaleMonth = new Date(salesYear, salesMonth, 0).getDate();
       const dailyPPT = matchBudget?.sales_budget ? matchBudget.sales_budget / daysInSaleMonth : 0;
       const ticketPPT = 25000; // Meta fija de ticket promedio
@@ -341,14 +341,14 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
   const ebitdaDataEnhancedFromPYG = useMemo(() => {
     if (!pygReports.length) return [];
     const monthNames = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return [...pygReports]
-      .sort((a, b) => a.year !== b.year ? a.year - b.year : a.month - b.month)
-      .map(r => ({
-        date: `${monthNames[r.month]} ${String(r.year).slice(2)}`,
-        margen: r.margen_ebitda != null ? Math.round(r.margen_ebitda * 100) : null,
-        sales: r.total_sales || 0
-      }))
-      .filter(d => d.margen !== null);
+    return [...pygReports].
+    sort((a, b) => a.year !== b.year ? a.year - b.year : a.month - b.month).
+    map((r) => ({
+      date: `${monthNames[r.month]} ${String(r.year).slice(2)}`,
+      margen: r.margen_ebitda != null ? Math.round(r.margen_ebitda * 100) : null,
+      sales: r.total_sales || 0
+    })).
+    filter((d) => d.margen !== null);
   }, [pygReports]);
 
   // Hourly heatmap data — desde todaySales agrupado por día de semana
@@ -360,20 +360,20 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
     // Acumular transacciones reales por día de semana desde todaySales
     const dayTxnMap = {}; // { dayOfWeek: total_transactions }
     const dayCountMap = {}; // { dayOfWeek: count } para promediar
-    todaySales.forEach(d => {
+    todaySales.forEach((d) => {
       const date = new Date(d.date);
       const dow = (date.getDay() + 6) % 7; // 0=Lun...6=Dom
-      if (!dayTxnMap[dow]) { dayTxnMap[dow] = 0; dayCountMap[dow] = 0; }
+      if (!dayTxnMap[dow]) {dayTxnMap[dow] = 0;dayCountMap[dow] = 0;}
       dayTxnMap[dow] += d.total_transactions || 0;
       dayCountMap[dow]++;
     });
 
     // Construir heatmap distribuyendo el promedio diario por franja horaria
     return DAYS.flatMap((_, di) =>
-      HOURS.map((_, hi) => {
-        const avgTxn = dayCountMap[di] > 0 ? dayTxnMap[di] / dayCountMap[di] : 0;
-        return { day: di, hour: hi, value: Math.round(avgTxn * hourWeights[hi]) };
-      })
+    HOURS.map((_, hi) => {
+      const avgTxn = dayCountMap[di] > 0 ? dayTxnMap[di] / dayCountMap[di] : 0;
+      return { day: di, hour: hi, value: Math.round(avgTxn * hourWeights[hi]) };
+    })
     );
   }, [todaySales]);
 
@@ -392,7 +392,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
   const txnDelta = pct(today?.total_transactions, yesterday?.total_transactions);
 
   const hasSalesData = sorted30.length > 0;
-  
+
   // ── PROYECCIÓN: solo mes actual ──────────────────────────────────────────────
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
@@ -401,28 +401,28 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
   const dayOfMonth = currentDate.getDate(); // días transcurridos (incluye hoy)
 
   // Ventas solo del mes actual
-   const currentMonthSales = todaySales.filter(d => {
-     const dd = new Date(d.date);
-     return dd.getMonth() === currentMonth && dd.getFullYear() === currentYear;
-   });
-   const currentMonthTotal = currentMonthSales.reduce((s, d) => s + (d.total_sales || 0), 0);
-   const currentMonthTickets = currentMonthSales.reduce((s, d) => s + (d.total_tickets || 0), 0);
-   const daysWithData = currentMonthSales.length || 1;
-   const avgDailySales = Math.round(currentMonthTotal / daysWithData);
+  const currentMonthSales = todaySales.filter((d) => {
+    const dd = new Date(d.date);
+    return dd.getMonth() === currentMonth && dd.getFullYear() === currentYear;
+  });
+  const currentMonthTotal = currentMonthSales.reduce((s, d) => s + (d.total_sales || 0), 0);
+  const currentMonthTickets = currentMonthSales.reduce((s, d) => s + (d.total_tickets || 0), 0);
+  const daysWithData = currentMonthSales.length || 1;
+  const avgDailySales = Math.round(currentMonthTotal / daysWithData);
 
   // Proyección: lo ya acumulado + promedio diario × días restantes
   const daysRemaining = Math.max(daysInMonth - dayOfMonth, 0);
-  const monthSalesProjection = currentMonthTotal + (avgDailySales * daysRemaining);
-  const monthProjectionPercent = activeBudget?.sales_budget
-    ? Math.round((monthSalesProjection / activeBudget.sales_budget) * 100)
-    : 0;
-  
-  // Average margin from real PYG data
-  const avgMargin = ebitdaDataEnhancedFromPYG.length > 0
-    ? Math.round(ebitdaDataEnhancedFromPYG.reduce((sum, d) => sum + d.margen, 0) / ebitdaDataEnhancedFromPYG.length)
-    : 0;
+  const monthSalesProjection = currentMonthTotal + avgDailySales * daysRemaining;
+  const monthProjectionPercent = activeBudget?.sales_budget ?
+  Math.round(monthSalesProjection / activeBudget.sales_budget * 100) :
+  0;
 
-  const ebitdaDataWithAvg = ebitdaDataEnhancedFromPYG.map(d => ({
+  // Average margin from real PYG data
+  const avgMargin = ebitdaDataEnhancedFromPYG.length > 0 ?
+  Math.round(ebitdaDataEnhancedFromPYG.reduce((sum, d) => sum + d.margen, 0) / ebitdaDataEnhancedFromPYG.length) :
+  0;
+
+  const ebitdaDataWithAvg = ebitdaDataEnhancedFromPYG.map((d) => ({
     ...d,
     promedio: avgMargin
   }));
@@ -441,7 +441,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
       
 
       {/* ── ROW 1: Tendencia de Ventas + Matriz de Desempeño ── */}
-      <motion.div 
+      <motion.div
         className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -454,39 +454,39 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           delay={0.18}
           colSpan="lg:col-span-3">
           
-          {hasSalesData ? (
-            <>
+          {hasSalesData ?
+          <>
               {/* KPI summary */}
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {(() => {
-                  const withTicket = sorted30.filter(d => d.ticket > 0);
-                  const avgTicket = withTicket.length > 0 ? Math.round(withTicket.reduce((s, d) => s + d.ticket, 0) / withTicket.length) : 0;
-                  const latestTicket = withTicket[withTicket.length - 1]?.ticket || 0;
-                  const ticketPPT = 25000;
-                  const pctVsPPT = Math.round((latestTicket / ticketPPT) * 100);
-                  return (
-                    <>
+                const withTicket = sorted30.filter((d) => d.ticket > 0);
+                const avgTicket = withTicket.length > 0 ? Math.round(withTicket.reduce((s, d) => s + d.ticket, 0) / withTicket.length) : 0;
+                const latestTicket = withTicket[withTicket.length - 1]?.ticket || 0;
+                const ticketPPT = 25000;
+                const pctVsPPT = Math.round(latestTicket / ticketPPT * 100);
+                return (
+                  <>
                       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
-                        className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(255,77,141,0.08), rgba(255,182,201,0.04))' }}>
+                    className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(255,77,141,0.08), rgba(255,182,201,0.04))' }}>
                         <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Último día</p>
                         <p className="text-[16px] font-black text-[#FF4D8D] mb-0.5" style={{ lineHeight: '1' }}>{fmt(latestTicket)}</p>
                         {pctVsPPT !== null && <p className="text-[9px] font-bold" style={{ color: pctVsPPT >= 100 ? '#10b981' : '#f59e0b' }}>{pctVsPPT}% del PPT</p>}
                       </motion.div>
                       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                        className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(255,127,165,0.08), rgba(255,182,201,0.04))' }}>
+                    className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(255,127,165,0.08), rgba(255,182,201,0.04))' }}>
                         <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Promedio 30d</p>
                         <p className="text-[16px] font-black text-[#FF7FA5] mb-0.5" style={{ lineHeight: '1' }}>{fmt(avgTicket)}</p>
                         <p className="text-[9px] font-bold text-[#8F96A3]">período actual</p>
                       </motion.div>
                       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
-                        className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(165,180,252,0.04))' }}>
+                    className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(165,180,252,0.04))' }}>
                         <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-1">Meta Ticket</p>
                         <p className="text-[16px] font-black text-indigo-400 mb-0.5" style={{ lineHeight: '1' }}>$25K</p>
                         <p className="text-[9px] font-bold text-[#8F96A3]">presupuesto</p>
                       </motion.div>
-                    </>
-                  );
-                })()}
+                    </>);
+
+              })()}
               </div>
 
               <AnimatedChartWrapper label="Ticket Promedio">
@@ -509,8 +509,8 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                      <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
                      <YAxis hide />
                      <Tooltip
-                       contentStyle={{ background: '#fff', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 12, fontSize: 11 }}
-                       formatter={(v, name) => [fmt(v), name]} />
+                    contentStyle={{ background: '#fff', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 12, fontSize: 11 }}
+                    formatter={(v, name) => [fmt(v), name]} />
                      <Area type="monotone" dataKey="ticket" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ticketGrad)" dot={false} name="Ticket Real" isAnimationActive={true} animationDuration={1200} />
                      <Line type="monotone" dataKey="ticketPPT" stroke="#6366f1" strokeWidth={2} strokeDasharray="5,5" dot={false} name="Meta Ticket $25K" isAnimationActive={true} animationDuration={1200} />
                   </ComposedChart>
@@ -527,12 +527,12 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                   <span className="text-[#8F96A3]">Meta Ticket (PPT)</span>
                 </div>
               </div>
-            </>
-          ) : (
-            <div className="h-[200px] flex items-center justify-center">
+            </> :
+
+          <div className="h-[200px] flex items-center justify-center">
               <p className="text-[11px] text-[#8F96A3]">Sin datos disponibles</p>
             </div>
-          )}
+          }
         </AnalyticsCard>
 
         {/* EBITDA % Mensual */}
@@ -542,8 +542,8 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           delay={0.22}
           colSpan="lg:col-span-2">
           
-          {ebitdaDataWithAvg && ebitdaDataWithAvg.length > 0 ? (
-            <>
+          {ebitdaDataWithAvg && ebitdaDataWithAvg.length > 0 ?
+          <>
                <AnimatedChartWrapper label="EBITDA">
                  <ResponsiveContainer width="100%" height={140}>
                    <LineChart data={ebitdaDataWithAvg} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
@@ -582,17 +582,17 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                   </div>
                 </div>
               </div>
-            </>
-          ) : (
-            <div className="h-[180px] flex items-center justify-center">
+            </> :
+
+          <div className="h-[180px] flex items-center justify-center">
               <p className="text-[11px] text-[#8F96A3]">Sin datos de EBITDA</p>
             </div>
-          )}
+          }
         </AnalyticsCard>
       </motion.div>
 
       {/* ── ROW 2: TXN Heatmap + Participación + Cajeros ── */}
-      <motion.div 
+      <motion.div
         className="grid grid-cols-1 lg:grid-cols-3 gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -638,8 +638,8 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 <Tooltip
                   contentStyle={{ background: 'rgba(15,15,20,0.9)', border: 'none', borderRadius: 8, fontSize: 10, padding: '4px 8px' }}
                   formatter={(v) => [v, 'Txn']}
-                  labelFormatter={(l) => l}
-                />
+                  labelFormatter={(l) => l} />
+                
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -650,24 +650,24 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           {(() => {
             // Build real dept data from products prop
             const deptMap = {};
-            (products || []).forEach(p => {
+            (products || []).forEach((p) => {
               const dept = p.department || 'Otros';
               if (!deptMap[dept]) deptMap[dept] = 0;
               deptMap[dept] += p.total_sales || 0;
             });
             const totalDeptSales = Object.values(deptMap).reduce((s, v) => s + v, 0);
-            const realDepts = Object.entries(deptMap)
-              .map(([name, sales]) => ({ name, value: totalDeptSales > 0 ? Math.round(sales / totalDeptSales * 100) : 0, sales }))
-              .filter(d => d.value > 0)
-              .sort((a, b) => b.value - a.value)
-              .slice(0, 5);
+            const realDepts = Object.entries(deptMap).
+            map(([name, sales]) => ({ name, value: totalDeptSales > 0 ? Math.round(sales / totalDeptSales * 100) : 0, sales })).
+            filter((d) => d.value > 0).
+            sort((a, b) => b.value - a.value).
+            slice(0, 5);
             const donutData = realDepts.length > 0 ? realDepts : PARTICIPATION_SEGMENTS;
 
             // Monthly sales from todaySales
-            const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+            const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
             const monthMap = {};
             const currentYear = new Date().getFullYear();
-            (todaySales || []).forEach(d => {
+            (todaySales || []).forEach((d) => {
               if (!d.date) return;
               try {
                 const dt = new Date(d.date);
@@ -675,10 +675,10 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 const key = dt.getMonth();
                 if (!monthMap[key]) monthMap[key] = { label: MONTH_NAMES[key], month: key, totalSales: 0 };
                 monthMap[key].totalSales += d.total_sales || 0;
-              } catch(e) {}
+              } catch (e) {}
             });
             const monthData = Object.values(monthMap).sort((a, b) => a.month - b.month);
-            const maxMonthSales = Math.max(...monthData.map(m => m.totalSales), 1);
+            const maxMonthSales = Math.max(...monthData.map((m) => m.totalSales), 1);
             const totalYearSales = monthData.reduce((s, m) => s + m.totalSales, 0);
 
             return (
@@ -698,38 +698,38 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                       <Tooltip
                         contentStyle={{ background: 'rgba(15,15,20,0.9)', border: 'none', borderRadius: 8, fontSize: 10, padding: '4px 8px' }}
                         formatter={(v) => [fmt(v), 'Ticket']}
-                        labelFormatter={(l) => l}
-                      />
+                        labelFormatter={(l) => l} />
+                      
                     </AreaChart>
                   </ResponsiveContainer>
 
                   {/* Ventas por mes */}
-                  {monthData.length > 0 && (
-                    <div className="mt-3 pt-2" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
+                  {monthData.length > 0 &&
+                  <div className="mt-3 pt-2 hidden" style={{ borderTop: '1px solid rgba(255, 77, 141, 0.1)' }}>
                       <p className="text-[8px] text-[#8F96A3] font-semibold uppercase mb-2">Venta por mes · {currentYear}</p>
                       <div className="space-y-1.5">
-                        {[...monthData].sort((a, b) => b.totalSales - a.totalSales).slice(0, 4).map((m, i) => (
-                          <div key={m.label} className="flex items-center gap-2">
+                        {[...monthData].sort((a, b) => b.totalSales - a.totalSales).slice(0, 4).map((m, i) =>
+                      <div key={m.label} className="flex items-center gap-2">
                             <span className="text-[9px] font-bold w-6 flex-shrink-0" style={{ color: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}>{m.label}</span>
                             <div className="flex-1 h-2 rounded-full bg-pink-50 overflow-hidden">
                               <motion.div
-                                className="h-full rounded-full"
-                                style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}
-                                initial={{ width: 0 }}
-                                animate={{ width: `${(m.totalSales / maxMonthSales) * 100}%` }}
-                                transition={{ delay: 0.6 + i * 0.06, duration: 0.7 }}
-                              />
+                            className="h-full rounded-full"
+                            style={{ background: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${m.totalSales / maxMonthSales * 100}%` }}
+                            transition={{ delay: 0.6 + i * 0.06, duration: 0.7 }} />
+                          
                             </div>
                             <span className="text-[9px] font-bold tabular-nums flex-shrink-0" style={{ color: PARTICIPATION_COLORS[i % PARTICIPATION_COLORS.length] }}>{fmt(m.totalSales)}</span>
                             <span className="text-[8px] text-slate-300 flex-shrink-0">{totalYearSales > 0 ? Math.round(m.totalSales / totalYearSales * 100) : 0}%</span>
                           </div>
-                        ))}
+                      )}
                       </div>
                     </div>
-                  )}
+                  }
                 </div>
-              </>
-            );
+              </>);
+
           })()}
         </AnalyticsCard>
 
@@ -738,37 +738,37 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           {todaySales && todaySales.length > 0 ? (() => {
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
-            const thisMonthSales = todaySales.filter(d => {
+            const thisMonthSales = todaySales.filter((d) => {
               const date = new Date(d.date);
               return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
             }).sort((a, b) => (b.total_sales || 0) - (a.total_sales || 0)).slice(0, 5);
-            
-            const maxSales = Math.max(...thisMonthSales.map(d => d.total_sales || 0), 1);
+
+            const maxSales = Math.max(...thisMonthSales.map((d) => d.total_sales || 0), 1);
             const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            
-            return thisMonthSales.length > 0 ? (
-              <div className="space-y-3">
+
+            return thisMonthSales.length > 0 ?
+            <div className="space-y-3">
                 {thisMonthSales.map((d, i) => {
-                  const salesPercent = (d.total_sales / maxSales) * 100;
-                  const dateObj = new Date(d.date);
-                  const dateStr = dateObj.toLocaleDateString('es', { day: '2-digit', month: 'short' });
-                  const dayName = dayNames[dateObj.getDay()];
-                  const pptCompliance = activeBudget?.sales_budget ? Math.round((d.total_sales / activeBudget.sales_budget) * 100) : null;
-                  
-                  return (
-                    <motion.div
-                      key={d.id}
-                      initial={{ opacity: 0, x: -15 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5 + i * 0.06 }}
-                      className="group">
+                const salesPercent = d.total_sales / maxSales * 100;
+                const dateObj = new Date(d.date);
+                const dateStr = dateObj.toLocaleDateString('es', { day: '2-digit', month: 'short' });
+                const dayName = dayNames[dateObj.getDay()];
+                const pptCompliance = activeBudget?.sales_budget ? Math.round(d.total_sales / activeBudget.sales_budget * 100) : null;
+
+                return (
+                  <motion.div
+                    key={d.id}
+                    initial={{ opacity: 0, x: -15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + i * 0.06 }}
+                    className="group">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0"
-                          style={{
-                            background: i === 0 ? 'linear-gradient(135deg, #FF4D8D, #FF7FA5)' : `rgba(255, 77, 141, ${0.08 + i * 0.02})`,
-                            color: i === 0 ? '#fff' : '#FF4D8D',
-                            boxShadow: i === 0 ? '0 0 12px rgba(255, 77, 141, 0.4)' : 'none'
-                          }}>
+                      style={{
+                        background: i === 0 ? 'linear-gradient(135deg, #FF4D8D, #FF7FA5)' : `rgba(255, 77, 141, ${0.08 + i * 0.02})`,
+                        color: i === 0 ? '#fff' : '#FF4D8D',
+                        boxShadow: i === 0 ? '0 0 12px rgba(255, 77, 141, 0.4)' : 'none'
+                      }}>
                           {i + 1}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -779,32 +779,32 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                           <p className="text-[11px] font-black tabular-nums" style={{ color: '#FF4D8D' }}>
                             {fmt(d.total_sales)}
                           </p>
-                          {pptCompliance !== null && (
-                            <p className={`text-[9px] font-bold tabular-nums mt-1 ${pptCompliance >= 80 ? 'text-emerald-600' : pptCompliance >= 60 ? 'text-amber-600' : 'text-rose-500'}`}>
+                          {pptCompliance !== null &&
+                        <p className={`text-[9px] font-bold tabular-nums mt-1 ${pptCompliance >= 80 ? 'text-emerald-600' : pptCompliance >= 60 ? 'text-amber-600' : 'text-rose-500'}`}>
                               {pptCompliance}% PPT
                             </p>
-                          )}
+                        }
                         </div>
                       </div>
-                      <AnimatedProgressBar 
-                        value={salesPercent} 
-                        color={i === 0 ? '#FF4D8D' : `rgba(255, 77, 141, ${0.7 - i * 0.1})`}
-                        height={8}
-                      />
-                    </motion.div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-20 gap-2">
-                <p className="text-[11px] text-[#8F96A3] font-medium">Sin registros en el mes actual</p>
-              </div>
-            );
-          })() : (
+                      <AnimatedProgressBar
+                      value={salesPercent}
+                      color={i === 0 ? '#FF4D8D' : `rgba(255, 77, 141, ${0.7 - i * 0.1})`}
+                      height={8} />
+                    
+                    </motion.div>);
+
+              })}
+              </div> :
+
             <div className="flex flex-col items-center justify-center h-20 gap-2">
+                <p className="text-[11px] text-[#8F96A3] font-medium">Sin registros en el mes actual</p>
+              </div>;
+
+          })() :
+          <div className="flex flex-col items-center justify-center h-20 gap-2">
               <p className="text-[11px] text-[#8F96A3] font-medium">Sin datos de ventas</p>
             </div>
-          )}
+          }
         </AnalyticsCard>
       </motion.div>
     </motion.div>);
