@@ -277,13 +277,13 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
         >
           {/* Header */}
           <div style={{
-                padding: '18px 20px 13px',
+                padding: '10px 14px 8px',
                 borderBottom: `1px solid rgba(255,143,184,0.12)`,
                 background: 'transparent'
               }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                
+
 
 
 
@@ -292,8 +292,8 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
 
                     
                 <div>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: P.textSub, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0, lineHeight: 1.3 }}>Top 10 Productos</p>
-                  <p style={{ fontSize: 14, fontWeight: 500, color: P.text, margin: 0, marginTop: 3, letterSpacing: '-0.01em', lineHeight: 1.3 }}>Por participación en ventas</p>
+                <p style={{ fontSize: 9, fontWeight: 700, color: P.textSub, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0, lineHeight: 1.2 }}>Top 10 Productos</p>
+                <p style={{ fontSize: 11, fontWeight: 500, color: P.text, margin: 0, marginTop: 1, letterSpacing: '-0.01em', lineHeight: 1.2 }}>Por participación</p>
                 </div>
               </div>
               <span style={{
@@ -305,7 +305,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
           </div>
 
           {/* List */}
-          <div style={{ padding: '12px 16px 16px' }}>
+          <div style={{ padding: '8px 12px 10px' }}>
             {(() => {
                   const top10 = [...products].sort((a, b) => b.totalSales - a.totalSales).slice(0, 10);
                   const maxSales = top10[0]?.totalSales || 1;
@@ -317,27 +317,27 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                     return { bar: `rgba(255,143,184,${0.55 - i * 0.04})`, num: P.textSub, hoverBg: `rgba(255,77,141,0.04)`, badge: P.textSub };
                   };
                   return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                   {top10.map((p, i) => {
                         const pct = p.totalSales / maxSales * 100;
                         const rs = getRankStyle(i);
                         return (
                           <div key={p.product}
-                          style={{ padding: '7px 10px', borderRadius: 11, background: 'transparent', transition: 'background 0.2s, box-shadow 0.2s', cursor: 'default' }}
+                          style={{ padding: '4px 8px', borderRadius: 8, background: 'transparent', transition: 'background 0.2s, box-shadow 0.2s', cursor: 'default' }}
                           onMouseEnter={(e) => {e.currentTarget.style.background = rs.hoverBg;e.currentTarget.style.boxShadow = `0 2px 12px rgba(255,77,141,0.08)`;}}
                           onMouseLeave={(e) => {e.currentTarget.style.background = 'transparent';e.currentTarget.style.boxShadow = 'none';}}>
                             
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 7, flex: 1, minWidth: 0, paddingRight: 8 }}>
-                            <span style={{ fontSize: 10, fontWeight: 800, color: rs.num, minWidth: 16, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
-                            <span style={{ fontSize: 11, color: P.text, fontWeight: i < 3 ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.product}</span>
+                            <span style={{ fontSize: 9, fontWeight: 800, color: rs.num, minWidth: 14, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
+                             <span style={{ fontSize: 10, color: P.text, fontWeight: i < 3 ? 600 : 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.product}</span>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
-                            <span style={{ fontSize: 10, color: P.textSub, fontVariantNumeric: 'tabular-nums' }}>{fmt(p.totalSales)}</span>
+                            <span style={{ fontSize: 9, color: P.textSub, fontVariantNumeric: 'tabular-nums' }}>{fmt(p.totalSales)}</span>
                             <span style={{
-                                  fontSize: 10, fontWeight: 700, color: i < 2 ? P.magenta : P.textSub,
+                                  fontSize: 9, fontWeight: 700, color: i < 2 ? P.magenta : P.textSub,
                                   background: i < 2 ? 'rgba(216,27,96,0.08)' : 'rgba(143,122,134,0.07)',
-                                  padding: '1px 7px', borderRadius: 7, fontVariantNumeric: 'tabular-nums',
+                                  padding: '0px 5px', borderRadius: 5, fontVariantNumeric: 'tabular-nums',
                                   border: `1px solid ${i < 2 ? 'rgba(216,27,96,0.14)' : 'rgba(143,122,134,0.1)'}`
                                 }}>{p.participation.toFixed(1)}%</span>
                           </div>
@@ -504,7 +504,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                 >
               {/* Header */}
               <div style={{
-                    padding: '18px 20px 13px',
+                    padding: '10px 14px 8px',
                     borderBottom: `1px solid rgba(255,143,184,0.12)`,
                     background: 'transparent'
                   }}>
@@ -519,14 +519,14 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
 
                         
                     <div>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: P.textSub, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0, lineHeight: 1.3 }}>Venta por Mes</p>
-                      <p style={{ fontSize: 14, fontWeight: 500, color: P.primary, margin: 0, marginTop: 3, letterSpacing: '-0.01em', lineHeight: 1.3 }}>Ene – {MONTH_NAMES[new Date().getMonth()]} · {currentYear}</p>
+                      <p style={{ fontSize: 9, fontWeight: 700, color: P.textSub, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0, lineHeight: 1.2 }}>Venta por Mes</p>
+                      <p style={{ fontSize: 11, fontWeight: 500, color: P.primary, margin: 0, marginTop: 1, letterSpacing: '-0.01em', lineHeight: 1.2 }}>Ene – {MONTH_NAMES[new Date().getMonth()]} · {currentYear}</p>
                     </div>
                   </div>
                   {totalYearSales > 0 &&
                     <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: P.primary, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 3px' }}>Total acumulado</p>
-                      <p style={{ fontSize: 19, fontWeight: 700, color: P.primary, margin: 0, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{fmt(totalYearSales)}</p>
+                      <p style={{ fontSize: 9, fontWeight: 700, color: P.primary, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 2px' }}>Total</p>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: P.primary, margin: 0, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{fmt(totalYearSales)}</p>
                     </div>
                   }
                 </div>
@@ -553,7 +553,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                         pointerEvents: 'none',
                       }} />
                       
-                      <ResponsiveContainer width="100%" height={300}>
+                      <ResponsiveContainer width="100%" height={200}>
                         <ComposedChart data={monthsWithPart} margin={{ top: 20, right: 24, left: 0, bottom: 12 }}>
                           <defs>
                             {/* Gradientes Premium */}
@@ -670,7 +670,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                       </ResponsiveContainer>
                       
                       {/* Mini Stats Footer */}
-                      <div style={{ display: 'flex', justifyContent: 'space-around', padding: '14px 20px 16px', borderTop: '1px solid rgba(255,143,184,0.1)', background: 'rgba(255,255,255,0.5)', gap: 16 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-around', padding: '8px 14px 10px', borderTop: '1px solid rgba(255,143,184,0.1)', background: 'rgba(255,255,255,0.5)', gap: 10 }}>
                         {(() => {
                           const maxMonth = monthsWithPart.reduce((a, b) => (a.totalSales > b.totalSales ? a : b), monthsWithPart[0]);
                           const avgSales = monthsWithPart.reduce((s, m) => s + m.totalSales, 0) / monthsWithPart.length;
@@ -684,9 +684,9 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             { label: 'vs Período', value: `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`, detail: 'anterior', color: growth > 0 ? '#10b981' : '#ef4444' },
                           ].map((stat, i) => (
                             <div key={i} style={{ textAlign: 'center', flex: 1 }}>
-                              <p style={{ fontSize: 8.5, fontWeight: 700, color: P.textSub, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{stat.label}</p>
-                              <p style={{ fontSize: 12, fontWeight: 700, color: stat.color || P.primary, margin: '0 0 1px', fontVariantNumeric: 'tabular-nums' }}>{stat.value}</p>
-                              <p style={{ fontSize: 7.5, color: P.textSub, margin: 0 }}>{stat.detail}</p>
+                              <p style={{ fontSize: 7.5, fontWeight: 700, color: P.textSub, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{stat.label}</p>
+                              <p style={{ fontSize: 10, fontWeight: 700, color: stat.color || P.primary, margin: '0 0 0px', fontVariantNumeric: 'tabular-nums' }}>{stat.value}</p>
+                              <p style={{ fontSize: 7, color: P.textSub, margin: 0 }}>{stat.detail}</p>
                             </div>
                           ));
                         })()}
