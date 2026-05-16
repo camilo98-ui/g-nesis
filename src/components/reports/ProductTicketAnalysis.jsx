@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  ResponsiveContainer, BarChart, Bar, Cell, Legend } from
+  ResponsiveContainer, BarChart, Bar, Cell, Legend, LabelList } from
 'recharts';
 import { STORES } from '@/components/StoreSelector';
 
@@ -315,48 +315,79 @@ export default function ProductTicketAnalysis({ storeId }) {
 
 
 
-
-
-
-        {/* Chart 2: Top productos — estilo premium */}
-        <Card className="border-0 shadow-sm bg-white flex flex-col">
-          <CardHeader className="pb-1 pt-4 px-5 flex-shrink-0">
+        {/* Chart 2: Top productos — gráfica de barras verticales premium */}
+        <Card className="border-0 shadow-sm bg-white flex flex-col overflow-hidden">
+          <CardHeader className="pb-0 pt-4 px-5 flex-shrink-0">
             <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-0.5">Top Productos</p>
-            <CardTitle className="text-sm font-semibold text-slate-700">
-              Venta bruta · período actual
-            </CardTitle>
+            <div className="flex items-end justify-between">
+              <CardTitle className="text-sm font-semibold text-slate-700">Venta bruta · período actual</CardTitle>
+              {topProducts[0] && (
+                <span className="text-lg font-extrabold pb-0.5" style={{ color: '#E91E8C' }}>
+                  {fmt(topProducts.reduce((s, p) => s + p.totalSales, 0))}
+                </span>
+              )}
+            </div>
           </CardHeader>
-          <CardContent className="px-5 pb-5 flex-1 flex flex-col justify-between gap-3">
-            {topProducts.slice(0, 7).map((p, i) => {
-              const maxSales = topProducts[0]?.totalSales || 1;
-              const barPct = (p.totalSales / maxSales) * 100;
-              const opacity = 1 - i * 0.1;
-              return (
-                <div key={p.product} className="group">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[10px] font-bold text-slate-300 w-4 flex-shrink-0">{i + 1}</span>
-                      <span className="text-xs font-medium text-slate-700 truncate">{p.product}</span>
-                    </div>
-                    <div className="flex items-center gap-3 flex-shrink-0 ml-2">
-                      <span className="text-[11px] font-bold" style={{ color: '#E91E8C' }}>{fmt(p.totalSales)}</span>
-                      <span className="text-[10px] text-slate-400 w-8 text-right">{p.participation.toFixed(1)}%</span>
-                    </div>
-                  </div>
-                  <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: '#fce7f3' }}>
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${barPct}%`,
-                        background: i === 0
-                          ? 'linear-gradient(90deg, #E91E8C, #F48FB1)'
-                          : `rgba(233,30,140,${opacity * 0.7})`,
-                      }}
+          <CardContent className="px-1 pb-3 pt-2 flex-1">
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart
+                data={topProducts.slice(0, 8)}
+                margin={{ top: 8, right: 8, left: 0, bottom: 32 }}
+                barCategoryGap="28%"
+              >
+                <defs>
+                  <linearGradient id="barGradPink" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#E91E8C" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#F48FB1" stopOpacity={0.7} />
+                  </linearGradient>
+                  <linearGradient id="barGradPinkLight" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#F06292" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="#FCE4EC" stopOpacity={0.3} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} stroke="#fce7f3" strokeDasharray="4 4" />
+                <XAxis
+                  dataKey="product"
+                  tick={({ x, y, payload }) => (
+                    <text x={x} y={y + 6} textAnchor="middle" fontSize={9} fill="#c084a8"
+                      style={{ fontFamily: 'Inter, sans-serif' }}>
+                      {payload.value.length > 10 ? payload.value.slice(0, 10) + '…' : payload.value}
+                    </text>
+                  )}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis hide />
+                <RechartsTooltip
+                  cursor={{ fill: 'rgba(249,168,212,0.12)' }}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div style={{ background: '#fff', border: '1px solid #fce7f3', borderRadius: 10, padding: '8px 12px', boxShadow: '0 4px 20px rgba(233,30,140,0.12)' }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>{d.product}</p>
+                        <p style={{ fontSize: 13, fontWeight: 800, color: '#E91E8C' }}>{fmt(d.totalSales)}</p>
+                        <p style={{ fontSize: 10, color: '#94a3b8' }}>{d.participation.toFixed(1)}% participación</p>
+                      </div>
+                    );
+                  }}
+                />
+                <Bar dataKey="totalSales" radius={[6, 6, 0, 0]}>
+                  {topProducts.slice(0, 8).map((p, i) => (
+                    <Cell
+                      key={i}
+                      fill={i === 0 ? 'url(#barGradPink)' : i === 1 ? 'url(#barGradPinkLight)' : `rgba(233,30,140,${0.18 + (8 - i) * 0.06})`}
                     />
-                  </div>
-                </div>
-              );
-            })}
+                  ))}
+                  <LabelList
+                    dataKey="participation"
+                    position="top"
+                    formatter={(v) => `${v.toFixed(0)}%`}
+                    style={{ fontSize: 9, fontWeight: 700, fill: '#E91E8C', fontFamily: 'Inter, sans-serif' }}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
