@@ -242,40 +242,52 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
 
       return (<>
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Chart 1: Barras de progreso — Participación por Departamento */}
+        {/* Chart 1: Top 10 productos más vendidos */}
         <Card className="border-0 shadow-sm bg-white flex flex-col">
           <CardHeader className="pb-2 pt-4 px-4 flex-shrink-0">
-            <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-pink-400" />
-              Participación por Departamento
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-pink-400" />
+                Top 10 Productos
+              </CardTitle>
+              <span className="text-[10px] text-slate-400 font-medium">{products.length} productos totales</span>
+            </div>
           </CardHeader>
           <CardContent className="px-4 pb-4 flex-1 flex flex-col justify-between">
-            <div className="space-y-3">
-              {deptData.slice(0, 8).map((d, i) => (
-                <div key={d.dept}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-slate-600 truncate flex-1 pr-2">{d.dept}</span>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-[10px] text-slate-400">{fmt(d.totalSales)}</span>
-                      <span className="text-xs font-bold text-pink-500 w-10 text-right">{d.participation.toFixed(1)}%</span>
+            {(() => {
+              const top10 = [...products].sort((a, b) => b.totalSales - a.totalSales).slice(0, 10);
+              const maxSales = top10[0]?.totalSales || 1;
+              return (
+                <div className="space-y-2.5">
+                  {top10.map((p, i) => (
+                    <div key={p.product}>
+                      <div className="flex justify-between items-center mb-1">
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0 pr-2">
+                          <span className="text-[10px] font-black flex-shrink-0 w-4"
+                            style={{ color: i === 0 ? '#E91E8C' : i === 1 ? '#f06292' : i === 2 ? '#f48fb1' : '#d1b3c4' }}>
+                            {i + 1}
+                          </span>
+                          <span className="text-[11px] text-slate-700 font-medium truncate">{p.product}</span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-[10px] text-slate-400">{fmt(p.totalSales)}</span>
+                          <span className="text-[10px] font-bold text-pink-500 w-9 text-right">{p.participation.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-pink-50 rounded-full h-2">
+                        <div
+                          className="h-2 rounded-full transition-all duration-700"
+                          style={{
+                            width: `${(p.totalSales / maxSales) * 100}%`,
+                            background: i === 0 ? 'linear-gradient(90deg,#E91E8C,#F48FB1)' : `rgba(233,30,140,${0.85 - i * 0.07})`
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="w-full bg-pink-50 rounded-full h-2.5">
-                    <div
-                      className="h-2.5 rounded-full transition-all duration-700"
-                      style={{
-                        width: `${Math.min(100, d.participation)}%`,
-                        background: i === 0 ? 'linear-gradient(90deg,#E91E8C,#F48FB1)' : `rgba(233,30,140,${1 - i * 0.09})`
-                      }}
-                    />
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            {deptData.length > 8 && (
-              <p className="text-[10px] text-slate-400 mt-3 text-center">+{deptData.length - 8} departamentos más</p>
-            )}
+              );
+            })()}
           </CardContent>
         </Card>
 
