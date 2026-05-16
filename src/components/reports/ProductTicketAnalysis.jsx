@@ -213,24 +213,24 @@ export default function ProductTicketAnalysis({ storeId }) {
   return (
     <div className="space-y-5">
       {/* KPI Summary Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 hidden">
-        <div className="bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
-          <p className="text-xs text-slate-400 mb-1">Productos Analizados</p>
-          <p className="text-2xl font-bold text-slate-800">{products.length}</p>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
-          <p className="text-xs text-slate-400 mb-1">Ticket Promedio Tienda</p>
-          <p className="text-2xl font-bold text-slate-800">{fmt(effectiveTicketAvg)}</p>
-        </div>
-        <div className="bg-emerald-50 rounded-xl border border-emerald-100 p-3 shadow-sm">
-          <p className="text-xs text-emerald-600 mb-1">Motores de Ticket</p>
-          <p className="text-2xl font-bold text-emerald-700">{(impactSummary['Motor'] || 0) + (impactSummary['Impulsor'] || 0)}</p>
-        </div>
-        <div className="bg-amber-50 rounded-xl border border-amber-100 p-3 shadow-sm">
-          <p className="text-xs text-amber-600 mb-1">Requieren Atención</p>
-          <p className="text-2xl font-bold text-amber-700">{(impactSummary['Sin Tracción'] || 0) + (impactSummary['Volumen Bajo Valor'] || 0)}</p>
-        </div>
-      </div>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
 
       {/* Charts Row */}
       <div className="grid md:grid-cols-2 gap-4">
@@ -369,104 +369,104 @@ export default function ProductTicketAnalysis({ storeId }) {
       </div>
 
       {/* Filters + Table */}
-      <Card className="border-0 shadow-sm bg-white overflow-hidden hidden">
-        <CardHeader className="pb-3 pt-4 px-4 flex flex-row items-center justify-between gap-3">
-          <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-amber-500" />
-            Análisis Cruzado: Producto × Ticket Promedio
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <Select value={selectedDept} onValueChange={setSelectedDept}>
-              <SelectTrigger className="h-7 text-xs w-40">
-                <SelectValue placeholder="Departamento" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-7 text-xs w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="participation">Por Participación</SelectItem>
-                <SelectItem value="sales">Por Ventas</SelectItem>
-                <SelectItem value="impact">Por Impacto</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-800 text-white text-xs">
-                  <th className="py-2.5 px-3 text-left font-medium w-6">#</th>
-                  <th className="py-2.5 px-3 text-left font-medium min-w-[180px]">Producto</th>
-                  <th className="py-2.5 px-3 text-left font-medium">Departamento</th>
-                  <th className="py-2.5 px-3 text-right font-medium">% Participación</th>
-                  <th className="py-2.5 px-3 text-right font-medium">Venta Bruta</th>
-                  <th className="py-2.5 px-3 text-right font-medium">Barra Part.</th>
-                  <th className="py-2.5 px-3 text-center font-medium">Impacto Ticket</th>
-                  <th className="py-2.5 px-3 text-center font-medium">Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((p, idx) => {
-                  const barWidth = totals.topSales > 0 ? p.totalSales / totals.topSales * 100 : 0;
-                  const isTop10 = idx < 10;
-                  return (
-                    <React.Fragment key={p.product}>
-                      <tr
-                        className={`border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer ${expandedRow === p.product ? 'bg-indigo-50/40' : ''}`}
-                        onClick={() => setExpandedRow(expandedRow === p.product ? null : p.product)}>
-                        
-                        <td className="py-2 px-3 text-xs text-slate-400">{idx + 1}</td>
-                        <td className="py-2 px-3">
-                          <div className="flex items-center gap-2">
-                            {expandedRow === p.product ? <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />}
-                            <span className="font-medium text-slate-800 text-xs truncate max-w-[160px]">{p.product}</span>
-                            {isTop10 && <Star className="w-3 h-3 text-amber-400 flex-shrink-0" />}
-                          </div>
-                        </td>
-                        <td className="py-2 px-3 text-xs text-slate-500 truncate max-w-[120px]">{p.department}</td>
-                        <td className="py-2 px-3 text-right">
-                          <span className="text-xs font-bold text-rose-500">{fmtPct(p.participation)}</span>
-                        </td>
-                        <td className="py-2 px-3 text-right text-xs text-slate-700 font-medium">{fmt(p.totalSales)}</td>
-                        <td className="py-2 px-3 w-32">
-                          <div className="w-full bg-slate-100 rounded-full h-1.5">
-                            <div
-                              className="h-1.5 rounded-full bg-gradient-to-r from-rose-400 to-pink-500"
-                              style={{ width: `${Math.min(100, barWidth)}%` }} />
-                            
-                          </div>
-                        </td>
-                        <td className="py-2 px-3 text-center">
-                          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${p.impact.bg} ${p.impact.color}`}>
-                            {p.impact.icon} {p.impact.label}
-                          </span>
-                        </td>
-                        <td className="py-2 px-3 text-center">
-                          <ActionRecommendation impact={p.impact.label} />
-                        </td>
-                      </tr>
-                      {expandedRow === p.product &&
-                      <tr className="bg-indigo-50/30 border-b border-indigo-100">
-                          <td colSpan={8} className="px-10 py-3">
-                            <ProductInsight product={p} ticketAvg={effectiveTicketAvg} />
-                          </td>
-                        </tr>
-                      }
-                    </React.Fragment>);
+      
 
-                })}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
     </div>);
 
 }
