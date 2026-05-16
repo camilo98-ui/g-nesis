@@ -230,13 +230,13 @@ export default function VisualEditAgent() {
 		const elementData = {
 			type: 'element-selected',
 			tagName: element.tagName,
-			classes: element.className?.baseVal || element.className || '',
+			classes: typeof element.className === 'string' ? element.className : (element.className?.baseVal || ''),
 			visualSelectorId: visualSelectorId,
-			content: element.innerText,
-			dataSourceLocation: element.dataset.sourceLocation,
+			content: element.innerText || '',
+			dataSourceLocation: element.dataset.sourceLocation || '',
 			isDynamicContent: element.dataset.dynamicContent === 'true',
-			linenumber: element.dataset.linenumber, // Keep for backward compatibility
-			filename: element.dataset.filename, // Keep for backward compatibility
+			linenumber: element.dataset.linenumber || '',
+			filename: element.dataset.filename || '',
 			position: elementPosition // Add position data for popover
 		};
 		window.parent.postMessage(elementData, '*');
