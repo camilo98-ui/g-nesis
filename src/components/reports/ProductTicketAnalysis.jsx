@@ -4,16 +4,16 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
   TrendingUp, TrendingDown, Minus, AlertTriangle, Star,
-  ChevronDown, ChevronRight, BarChart3, Target, Zap, Info
-} from 'lucide-react';
+  ChevronDown, ChevronRight, BarChart3, Target, Zap, Info } from
+'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine, Label
-} from 'recharts';
+  ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine, Label } from
+'recharts';
 import { STORES } from '@/components/StoreSelector';
 
 const fmt = (v) => '$' + Math.round(v || 0).toLocaleString('es-CO');
@@ -50,24 +50,24 @@ export default function ProductTicketAnalysis({ storeId }) {
       const all = await base44.entities.SalesReport.filter({ store_code: storeCode });
       if (!all.length) return [];
       const latestUploadedAt = all.reduce((max, r) => r.uploaded_at > max ? r.uploaded_at : max, '');
-      const latestReportId = all.find(r => r.uploaded_at === latestUploadedAt)?.report_id;
-      return latestReportId ? all.filter(r => r.report_id === latestReportId) : all;
+      const latestReportId = all.find((r) => r.uploaded_at === latestUploadedAt)?.report_id;
+      return latestReportId ? all.filter((r) => r.report_id === latestReportId) : all;
     },
-    enabled: !!storeCode,
+    enabled: !!storeCode
   });
 
   // Daily sales for ticket avg
   const { data: dailySales = [], isLoading: loadingDaily } = useQuery({
     queryKey: ['dailySalesForStore', storeId],
     queryFn: () => base44.entities.DailySales.filter({ store_id: storeId }),
-    enabled: !!storeId,
+    enabled: !!storeId
   });
 
   // Shift records for per-cashier ticket data
   const { data: shiftRecords = [] } = useQuery({
     queryKey: ['shiftRecordsForStore', storeId],
     queryFn: () => base44.entities.ShiftRecord.filter({ store_id: storeId }),
-    enabled: !!storeId,
+    enabled: !!storeId
   });
 
   const isLoading = loadingReports || loadingDaily;
@@ -95,7 +95,7 @@ export default function ProductTicketAnalysis({ storeId }) {
     const totalStoreVenta = salesReports.reduce((s, r) => s + (r.total_sales || 0), 0);
 
     const productMap = {};
-    salesReports.forEach(r => {
+    salesReports.forEach((r) => {
       const key = r.product || r.section || '';
       if (!key) return;
       if (!productMap[key]) {
@@ -105,28 +105,28 @@ export default function ProductTicketAnalysis({ storeId }) {
           section: r.section || '',
           totalSales: 0,
           participation: 0,
-          rawParticipation: r.participation || 0,
+          rawParticipation: r.participation || 0
         };
       }
       productMap[key].totalSales += r.total_sales || 0;
     });
 
-    const productsArr = Object.values(productMap).map(p => {
-      const participation = totalStoreVenta > 0 ? (p.totalSales / totalStoreVenta) * 100 : (p.rawParticipation * 100);
+    const productsArr = Object.values(productMap).map((p) => {
+      const participation = totalStoreVenta > 0 ? p.totalSales / totalStoreVenta * 100 : p.rawParticipation * 100;
       // Estimate ticket impact: products with higher sales per record vs avg
-      const estimatedTicketRatio = effectiveTicketAvg > 0
-        ? (p.totalSales / Math.max(1, participation)) / (effectiveTicketAvg / 10)
-        : 1;
+      const estimatedTicketRatio = effectiveTicketAvg > 0 ?
+      p.totalSales / Math.max(1, participation) / (effectiveTicketAvg / 10) :
+      1;
       const impact = classifyImpact(participation, p.totalSales, Math.min(2, estimatedTicketRatio));
       return {
         ...p,
         participation,
         ticketRatio: estimatedTicketRatio,
-        impact,
+        impact
       };
-    }).filter(p => p.participation > 0);
+    }).filter((p) => p.participation > 0);
 
-    const depts = [...new Set(productsArr.map(p => p.department))];
+    const depts = [...new Set(productsArr.map((p) => p.department))];
     const topSales = productsArr.reduce((max, p) => Math.max(max, p.totalSales), 0);
 
     return {
@@ -138,7 +138,7 @@ export default function ProductTicketAnalysis({ storeId }) {
 
   // Filter + sort
   const filtered = useMemo(() => {
-    let arr = selectedDept === 'all' ? products : products.filter(p => p.department === selectedDept);
+    let arr = selectedDept === 'all' ? products : products.filter((p) => p.department === selectedDept);
     return [...arr].sort((a, b) => {
       if (sortBy === 'participation') return b.participation - a.participation;
       if (sortBy === 'sales') return b.totalSales - a.totalSales;
@@ -148,29 +148,29 @@ export default function ProductTicketAnalysis({ storeId }) {
   }, [products, selectedDept, sortBy]);
 
   // Chart data: scatter participation vs ticket impact
-  const scatterData = useMemo(() => filtered.slice(0, 30).map(p => ({
+  const scatterData = useMemo(() => filtered.slice(0, 30).map((p) => ({
     x: parseFloat(p.participation.toFixed(2)),
     y: parseFloat(Math.min(2, p.ticketRatio).toFixed(2)),
     name: p.product,
     sales: p.totalSales,
     label: p.impact.label,
     fill: p.impact.label === 'Motor' ? '#10b981' :
-          p.impact.label === 'Impulsor' ? '#3b82f6' :
-          p.impact.label === 'Premium Dormido' ? '#8b5cf6' :
-          p.impact.label === 'Volumen Bajo Valor' ? '#f59e0b' :
-          p.impact.label === 'Sin Tracción' ? '#ef4444' : '#94a3b8',
+    p.impact.label === 'Impulsor' ? '#3b82f6' :
+    p.impact.label === 'Premium Dormido' ? '#8b5cf6' :
+    p.impact.label === 'Volumen Bajo Valor' ? '#f59e0b' :
+    p.impact.label === 'Sin Tracción' ? '#ef4444' : '#94a3b8'
   })), [filtered]);
 
   // Top 8 for bar chart
   const topProducts = useMemo(() =>
-    [...products].sort((a, b) => b.participation - a.participation).slice(0, 8),
-    [products]
+  [...products].sort((a, b) => b.participation - a.participation).slice(0, 8),
+  [products]
   );
 
   // Summary counts
   const impactSummary = useMemo(() => {
     const counts = {};
-    products.forEach(p => {
+    products.forEach((p) => {
       counts[p.impact.label] = (counts[p.impact.label] || 0) + 1;
     });
     return counts;
@@ -180,8 +180,8 @@ export default function ProductTicketAnalysis({ storeId }) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="w-8 h-8 border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   if (!salesReports.length) {
@@ -190,8 +190,8 @@ export default function ProductTicketAnalysis({ storeId }) {
         <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-30" />
         <p className="font-medium">No hay reporte de participación cargado</p>
         <p className="text-sm mt-1">Sube el reporte desde la sección de Reportes</p>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -230,18 +230,18 @@ export default function ProductTicketAnalysis({ storeId }) {
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={topProducts} layout="vertical" margin={{ left: 8, right: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                <XAxis type="number" tickFormatter={v => `${v.toFixed(1)}%`} tick={{ fontSize: 9 }} />
+                <XAxis type="number" tickFormatter={(v) => `${v.toFixed(1)}%`} tick={{ fontSize: 9 }} />
                 <YAxis dataKey="product" type="category" width={100} tick={{ fontSize: 9 }} />
                 <RechartsTooltip formatter={(v, n) => [`${v.toFixed(2)}%`, 'Participación']} />
                 <Bar dataKey="participation" radius={[0, 4, 4, 0]}>
-                  {topProducts.map((p, i) => (
-                    <Cell key={i} fill={
-                      p.impact.label === 'Motor' ? '#10b981' :
-                      p.impact.label === 'Impulsor' ? '#3b82f6' :
-                      p.impact.label === 'Volumen Bajo Valor' ? '#f59e0b' :
-                      p.impact.label === 'Sin Tracción' ? '#ef4444' : '#94a3b8'
-                    } />
-                  ))}
+                  {topProducts.map((p, i) =>
+                  <Cell key={i} fill={
+                  p.impact.label === 'Motor' ? '#10b981' :
+                  p.impact.label === 'Impulsor' ? '#3b82f6' :
+                  p.impact.label === 'Volumen Bajo Valor' ? '#f59e0b' :
+                  p.impact.label === 'Sin Tracción' ? '#ef4444' : '#94a3b8'
+                  } />
+                  )}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -249,7 +249,7 @@ export default function ProductTicketAnalysis({ storeId }) {
         </Card>
 
         {/* Scatter: Participation vs Ticket Impact */}
-        <Card className="border-0 shadow-sm bg-white">
+        <Card className="border-0 shadow-sm bg-white hidden">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <Target className="w-4 h-4 text-indigo-500" />
@@ -268,7 +268,7 @@ export default function ProductTicketAnalysis({ storeId }) {
             <ResponsiveContainer width="100%" height={220}>
               <ScatterChart margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="x" name="Participación" tickFormatter={v => `${v}%`} tick={{ fontSize: 9 }}>
+                <XAxis dataKey="x" name="Participación" tickFormatter={(v) => `${v}%`} tick={{ fontSize: 9 }}>
                   <Label value="% Participación" offset={-3} position="insideBottom" style={{ fontSize: 9, fill: '#94a3b8' }} />
                 </XAxis>
                 <YAxis dataKey="y" name="Ratio Ticket" tick={{ fontSize: 9 }}>
@@ -287,10 +287,10 @@ export default function ProductTicketAnalysis({ storeId }) {
                         <p className="text-slate-500">Part: {d.x}% | Valor: {d.y}x</p>
                         <p className="text-slate-400">Venta: {fmt(d.sales)}</p>
                         <p className="font-medium" style={{ color: d.fill }}>{d.label}</p>
-                      </div>
-                    );
-                  }}
-                />
+                      </div>);
+
+                  }} />
+                
                 <Scatter data={scatterData} fill="#8884d8">
                   {scatterData.map((d, i) => <Cell key={i} fill={d.fill} fillOpacity={0.8} />)}
                 </Scatter>
@@ -314,7 +314,7 @@ export default function ProductTicketAnalysis({ storeId }) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                {departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
@@ -346,14 +346,14 @@ export default function ProductTicketAnalysis({ storeId }) {
               </thead>
               <tbody>
                 {filtered.map((p, idx) => {
-                  const barWidth = totals.topSales > 0 ? (p.totalSales / totals.topSales) * 100 : 0;
+                  const barWidth = totals.topSales > 0 ? p.totalSales / totals.topSales * 100 : 0;
                   const isTop10 = idx < 10;
                   return (
                     <React.Fragment key={p.product}>
                       <tr
                         className={`border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer ${expandedRow === p.product ? 'bg-indigo-50/40' : ''}`}
-                        onClick={() => setExpandedRow(expandedRow === p.product ? null : p.product)}
-                      >
+                        onClick={() => setExpandedRow(expandedRow === p.product ? null : p.product)}>
+                        
                         <td className="py-2 px-3 text-xs text-slate-400">{idx + 1}</td>
                         <td className="py-2 px-3">
                           <div className="flex items-center gap-2">
@@ -371,8 +371,8 @@ export default function ProductTicketAnalysis({ storeId }) {
                           <div className="w-full bg-slate-100 rounded-full h-1.5">
                             <div
                               className="h-1.5 rounded-full bg-gradient-to-r from-rose-400 to-pink-500"
-                              style={{ width: `${Math.min(100, barWidth)}%` }}
-                            />
+                              style={{ width: `${Math.min(100, barWidth)}%` }} />
+                            
                           </div>
                         </td>
                         <td className="py-2 px-3 text-center">
@@ -384,23 +384,23 @@ export default function ProductTicketAnalysis({ storeId }) {
                           <ActionRecommendation impact={p.impact.label} />
                         </td>
                       </tr>
-                      {expandedRow === p.product && (
-                        <tr className="bg-indigo-50/30 border-b border-indigo-100">
+                      {expandedRow === p.product &&
+                      <tr className="bg-indigo-50/30 border-b border-indigo-100">
                           <td colSpan={8} className="px-10 py-3">
                             <ProductInsight product={p} ticketAvg={effectiveTicketAvg} />
                           </td>
                         </tr>
-                      )}
-                    </React.Fragment>
-                  );
+                      }
+                    </React.Fragment>);
+
                 })}
               </tbody>
             </table>
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>);
+
 }
 
 function ActionRecommendation({ impact }) {
@@ -410,57 +410,57 @@ function ActionRecommendation({ impact }) {
     'Volumen Bajo Valor': { label: 'Revisar Precio', color: 'bg-amber-100 text-amber-700' },
     'Premium Dormido': { label: 'Visibilizar', color: 'bg-purple-100 text-purple-700' },
     'Sin Tracción': { label: 'Evaluar', color: 'bg-red-100 text-red-700' },
-    'Estable': { label: 'Mantener', color: 'bg-slate-100 text-slate-600' },
+    'Estable': { label: 'Mantener', color: 'bg-slate-100 text-slate-600' }
   };
   const a = actions[impact] || actions['Estable'];
   return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${a.color}`}>{a.label}</span>
-  );
+    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${a.color}`}>{a.label}</span>);
+
 }
 
 function ProductInsight({ product, ticketAvg }) {
   const insights = {
     'Motor': [
-      `Este producto representa el ${product.participation.toFixed(2)}% de la venta total — es un ancla crítica del ticket promedio.`,
-      `Priorizar disponibilidad, visibilidad en menú y capacitación activa al equipo para mantener su dominancia.`,
-      `Evaluar bundle con productos complementarios para amplificar el valor del ticket aún más.`,
-    ],
+    `Este producto representa el ${product.participation.toFixed(2)}% de la venta total — es un ancla crítica del ticket promedio.`,
+    `Priorizar disponibilidad, visibilidad en menú y capacitación activa al equipo para mantener su dominancia.`,
+    `Evaluar bundle con productos complementarios para amplificar el valor del ticket aún más.`],
+
     'Impulsor': [
-      `Sólida participación del ${product.participation.toFixed(2)}% con buen ratio de valor.`,
-      `Oportunidad de llevarlo al siguiente nivel con sugeridos activos y posicionamiento estratégico en el menú.`,
-      `Analizar qué cajeros lo venden más y replicar esas prácticas en todo el equipo.`,
-    ],
+    `Sólida participación del ${product.participation.toFixed(2)}% con buen ratio de valor.`,
+    `Oportunidad de llevarlo al siguiente nivel con sugeridos activos y posicionamiento estratégico en el menú.`,
+    `Analizar qué cajeros lo venden más y replicar esas prácticas en todo el equipo.`],
+
     'Volumen Bajo Valor': [
-      `Alta participación pero bajo impacto en ticket promedio — mueve volumen sin mover valor.`,
-      `Investigar si el precio es competitivo o si se está vendiendo como "opción económica" por defecto.`,
-      `Considerar rediseño de combos que incluyan este producto junto a opciones premium.`,
-    ],
+    `Alta participación pero bajo impacto en ticket promedio — mueve volumen sin mover valor.`,
+    `Investigar si el precio es competitivo o si se está vendiendo como "opción económica" por defecto.`,
+    `Considerar rediseño de combos que incluyan este producto junto a opciones premium.`],
+
     'Premium Dormido': [
-      `Producto de alto valor potencial pero baja visibilidad (${product.participation.toFixed(2)}% participación).`,
-      `Cuando se vende, contribuye positivamente al ticket — el problema es la frecuencia de sugerencia.`,
-      `Acción inmediata: incluir en guion de sugeridos y destacar en menú visual.`,
-    ],
+    `Producto de alto valor potencial pero baja visibilidad (${product.participation.toFixed(2)}% participación).`,
+    `Cuando se vende, contribuye positivamente al ticket — el problema es la frecuencia de sugerencia.`,
+    `Acción inmediata: incluir en guion de sugeridos y destacar en menú visual.`],
+
     'Sin Tracción': [
-      `Participación menor al 1% — prácticamente invisible en la operación.`,
-      `Evaluar si el producto justifica espacio en menú o si debe ser reemplazado.`,
-      `Antes de eliminar, prueba de spotlight (destacarlo activamente por 2 semanas) para medir potencial real.`,
-    ],
+    `Participación menor al 1% — prácticamente invisible en la operación.`,
+    `Evaluar si el producto justifica espacio en menú o si debe ser reemplazado.`,
+    `Antes de eliminar, prueba de spotlight (destacarlo activamente por 2 semanas) para medir potencial real.`],
+
     'Estable': [
-      `Participación consistente del ${product.participation.toFixed(2)}% — sin oscilaciones significativas.`,
-      `No es motor de ticket pero tampoco riesgo. Foco en mantener calidad y consistencia.`,
-    ],
+    `Participación consistente del ${product.participation.toFixed(2)}% — sin oscilaciones significativas.`,
+    `No es motor de ticket pero tampoco riesgo. Foco en mantener calidad y consistencia.`]
+
   };
 
   const msgs = insights[product.impact.label] || insights['Estable'];
   return (
     <div className="space-y-1.5">
       <p className="text-xs font-semibold text-indigo-700 mb-2">Diagnóstico Estratégico — {product.product}</p>
-      {msgs.map((m, i) => (
-        <div key={i} className="flex items-start gap-2 text-xs text-slate-600">
+      {msgs.map((m, i) =>
+      <div key={i} className="flex items-start gap-2 text-xs text-slate-600">
           <span className="text-indigo-400 mt-0.5 flex-shrink-0">→</span>
           <span>{m}</span>
         </div>
-      ))}
-    </div>
-  );
+      )}
+    </div>);
+
 }
