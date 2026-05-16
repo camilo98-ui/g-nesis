@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
-  ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
-  ResponsiveContainer, BarChart, Bar, Cell, ReferenceLine, Label } from
+  PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  ResponsiveContainer, BarChart, Bar, Cell, Legend } from
 'recharts';
 import { STORES } from '@/components/StoreSelector';
 
@@ -213,72 +213,85 @@ export default function ProductTicketAnalysis({ storeId }) {
   return (
     <div className="space-y-5">
       {/* KPI Summary Row */}
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 hidden">
+        <div className="bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
+          <p className="text-xs text-slate-400 mb-1">Productos Analizados</p>
+          <p className="text-2xl font-bold text-slate-800">{products.length}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
+          <p className="text-xs text-slate-400 mb-1">Ticket Promedio Tienda</p>
+          <p className="text-2xl font-bold text-slate-800">{fmt(effectiveTicketAvg)}</p>
+        </div>
+        <div className="bg-emerald-50 rounded-xl border border-emerald-100 p-3 shadow-sm">
+          <p className="text-xs text-emerald-600 mb-1">Motores de Ticket</p>
+          <p className="text-2xl font-bold text-emerald-700">{(impactSummary['Motor'] || 0) + (impactSummary['Impulsor'] || 0)}</p>
+        </div>
+        <div className="bg-amber-50 rounded-xl border border-amber-100 p-3 shadow-sm">
+          <p className="text-xs text-amber-600 mb-1">Requieren Atención</p>
+          <p className="text-2xl font-bold text-amber-700">{(impactSummary['Sin Tracción'] || 0) + (impactSummary['Volumen Bajo Valor'] || 0)}</p>
+        </div>
+      </div>
 
       {/* Charts Row */}
+      {/* Pastel pink palette */}
+      {(() => {
+        const PASTEL = ['#f9a8d4','#fbcfe8','#fda4af','#fecdd3','#f0abfc','#e9d5ff','#fbb6ce','#fcd5ce'];
+        const PASTEL_DARK = ['#db2777','#be185d','#e11d48','#c026d3','#7c3aed','#d946ef','#f43f5e','#ec4899'];
+
+      return (<>
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Chart 1: Participación y Venta Bruta por Departamento */}
+        {/* Chart 1: Dona — Participación por Departamento */}
         <Card className="border-0 shadow-sm bg-white">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-rose-500" />
+              <BarChart3 className="w-4 h-4 text-pink-400" />
               Participación por Departamento
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-2 pb-3">
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={deptData} layout="vertical" margin={{ left: 4, right: 40, top: 4, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                <XAxis type="number" tickFormatter={(v) => `${v.toFixed(0)}%`} tick={{ fontSize: 9 }} />
-                <YAxis dataKey="dept" type="category" width={90} tick={{ fontSize: 9 }} />
-                <RechartsTooltip
-                  formatter={(v, name) => name === 'participation' ? [`${v.toFixed(2)}%`, 'Participación'] : [fmt(v), 'Venta Bruta']}
-                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
-                
-                <Bar dataKey="participation" name="participation" radius={[0, 4, 4, 0]} fill="#C21875">
-                  {deptData.map((d, i) =>
-                  <Cell key={i} fill={i === 0 ? '#C21875' : i === 1 ? '#e11d48' : i === 2 ? '#f43f5e' : `rgba(194,24,117,${0.6 - i * 0.08})`} />
-                  )}
-                  
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-            {/* Dept summary rows */}
-            <div className="mt-2 space-y-1 px-2">
-              {deptData.slice(0, 5).map((d, i) =>
-              <div key={d.dept} className="flex items-center gap-2 text-xs">
-                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: i === 0 ? '#C21875' : i === 1 ? '#e11d48' : i === 2 ? '#f43f5e' : `rgba(194,24,117,${0.6 - i * 0.08})` }} />
-                  <span className="truncate text-slate-600 flex-1">{d.dept}</span>
-                  <span className="font-semibold text-rose-500">{d.participation.toFixed(1)}%</span>
-                  <span className="text-slate-400">{fmt(d.totalSales)}</span>
+          <CardContent className="px-3 pb-4">
+            <div className="flex items-center gap-4">
+              <ResponsiveContainer width="55%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={deptData}
+                    dataKey="participation"
+                    nameKey="dept"
+                    cx="50%" cy="50%"
+                    innerRadius={52}
+                    outerRadius={82}
+                    paddingAngle={2}
+                  >
+                    {deptData.map((d, i) => (
+                      <Cell key={i} fill={PASTEL[i % PASTEL.length]} stroke={PASTEL_DARK[i % PASTEL_DARK.length]} strokeWidth={0.5} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip
+                    formatter={(v, name) => [`${v.toFixed(1)}%`, name]}
+                    contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #fce7f3' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex-1 space-y-1.5">
+                {deptData.slice(0, 6).map((d, i) => (
+                  <div key={d.dept} className="flex items-center gap-2 text-xs">
+                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: PASTEL[i % PASTEL.length], border: `1px solid ${PASTEL_DARK[i % PASTEL_DARK.length]}` }} />
+                    <span className="truncate text-slate-600 flex-1">{d.dept}</span>
+                    <span className="font-bold text-pink-500">{d.participation.toFixed(1)}%</span>
+                  </div>
+                ))}
+                <div className="pt-1 border-t border-pink-50 mt-1 space-y-1">
+                  {deptData.slice(0, 4).map((d, i) => (
+                    <div key={d.dept + '_s'} className="flex justify-between text-[10px] text-slate-400">
+                      <span className="truncate flex-1">{d.dept}</span>
+                      <span className="font-medium text-slate-500">{fmt(d.totalSales)}</span>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Chart 2: Top productos por venta bruta */}
-        
-
-
-
 
 
 
@@ -327,146 +340,142 @@ export default function ProductTicketAnalysis({ storeId }) {
         <Card className="border-0 shadow-sm bg-white">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-500" />
+              <TrendingUp className="w-4 h-4 text-pink-400" />
               Top Productos · Venta Bruta
             </CardTitle>
           </CardHeader>
           <CardContent className="px-2 pb-3">
-            <ResponsiveContainer width="100%" height={240}>
+            <ResponsiveContainer width="100%" height={220}>
               <BarChart data={topProducts} layout="vertical" margin={{ left: 4, right: 50, top: 4, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                <XAxis type="number" tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : `${(v / 1e3).toFixed(0)}K`} tick={{ fontSize: 9 }} />
-                <YAxis dataKey="product" type="category" width={90} tick={{ fontSize: 9 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#fdf2f8" horizontal={false} />
+                <XAxis type="number" tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : `${(v / 1e3).toFixed(0)}K`} tick={{ fontSize: 9, fill: '#d1a8c0' }} />
+                <YAxis dataKey="product" type="category" width={90} tick={{ fontSize: 9, fill: '#9d7492' }} />
                 <RechartsTooltip
                   formatter={(v) => [fmt(v), 'Venta Bruta']}
-                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
-                
+                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #fce7f3', background: '#fff' }}
+                />
                 <Bar dataKey="totalSales" radius={[0, 4, 4, 0]}>
-                  {topProducts.map((p, i) =>
-                  <Cell key={i} fill={
-                  p.impact.label === 'Motor' ? '#10b981' :
-                  p.impact.label === 'Impulsor' ? '#3b82f6' :
-                  p.impact.label === 'Volumen Bajo Valor' ? '#f59e0b' :
-                  p.impact.label === 'Sin Tracción' ? '#ef4444' : '#94a3b8'
-                  } />
-                  )}
+                  {topProducts.map((p, i) => (
+                    <Cell key={i} fill={PASTEL[i % PASTEL.length]} stroke={PASTEL_DARK[i % PASTEL_DARK.length]} strokeWidth={0.5} />
+                  ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
             <div className="mt-2 space-y-1 px-2">
-              {topProducts.slice(0, 5).map((p, i) =>
-              <div key={p.product} className="flex items-center gap-2 text-xs">
-                  <span className="text-slate-300 tabular-nums w-4">{i + 1}</span>
+              {topProducts.slice(0, 5).map((p, i) => (
+                <div key={p.product} className="flex items-center gap-2 text-xs">
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PASTEL[i % PASTEL.length] }} />
                   <span className="truncate text-slate-600 flex-1">{p.product}</span>
-                  <span className={`font-semibold ${p.impact.color}`}>{p.impact.icon}</span>
                   <span className="font-medium text-slate-700">{fmt(p.totalSales)}</span>
-                  <span className="text-slate-400">{p.participation.toFixed(1)}%</span>
+                  <span className="text-pink-400 font-semibold">{p.participation.toFixed(1)}%</span>
                 </div>
-              )}
+              ))}
             </div>
           </CardContent>
         </Card>
       </div>
+      </>);
+      })()}
 
       {/* Filters + Table */}
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
+      <Card className="border-0 shadow-sm bg-white overflow-hidden hidden">
+        <CardHeader className="pb-3 pt-4 px-4 flex flex-row items-center justify-between gap-3">
+          <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-amber-500" />
+            Análisis Cruzado: Producto × Ticket Promedio
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Select value={selectedDept} onValueChange={setSelectedDept}>
+              <SelectTrigger className="h-7 text-xs w-40">
+                <SelectValue placeholder="Departamento" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-7 text-xs w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="participation">Por Participación</SelectItem>
+                <SelectItem value="sales">Por Ventas</SelectItem>
+                <SelectItem value="impact">Por Impacto</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-800 text-white text-xs">
+                  <th className="py-2.5 px-3 text-left font-medium w-6">#</th>
+                  <th className="py-2.5 px-3 text-left font-medium min-w-[180px]">Producto</th>
+                  <th className="py-2.5 px-3 text-left font-medium">Departamento</th>
+                  <th className="py-2.5 px-3 text-right font-medium">% Participación</th>
+                  <th className="py-2.5 px-3 text-right font-medium">Venta Bruta</th>
+                  <th className="py-2.5 px-3 text-right font-medium">Barra Part.</th>
+                  <th className="py-2.5 px-3 text-center font-medium">Impacto Ticket</th>
+                  <th className="py-2.5 px-3 text-center font-medium">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((p, idx) => {
+                  const barWidth = totals.topSales > 0 ? p.totalSales / totals.topSales * 100 : 0;
+                  const isTop10 = idx < 10;
+                  return (
+                    <React.Fragment key={p.product}>
+                      <tr
+                        className={`border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer ${expandedRow === p.product ? 'bg-indigo-50/40' : ''}`}
+                        onClick={() => setExpandedRow(expandedRow === p.product ? null : p.product)}>
+                        
+                        <td className="py-2 px-3 text-xs text-slate-400">{idx + 1}</td>
+                        <td className="py-2 px-3">
+                          <div className="flex items-center gap-2">
+                            {expandedRow === p.product ? <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />}
+                            <span className="font-medium text-slate-800 text-xs truncate max-w-[160px]">{p.product}</span>
+                            {isTop10 && <Star className="w-3 h-3 text-amber-400 flex-shrink-0" />}
+                          </div>
+                        </td>
+                        <td className="py-2 px-3 text-xs text-slate-500 truncate max-w-[120px]">{p.department}</td>
+                        <td className="py-2 px-3 text-right">
+                          <span className="text-xs font-bold text-rose-500">{fmtPct(p.participation)}</span>
+                        </td>
+                        <td className="py-2 px-3 text-right text-xs text-slate-700 font-medium">{fmt(p.totalSales)}</td>
+                        <td className="py-2 px-3 w-32">
+                          <div className="w-full bg-slate-100 rounded-full h-1.5">
+                            <div
+                              className="h-1.5 rounded-full bg-gradient-to-r from-rose-400 to-pink-500"
+                              style={{ width: `${Math.min(100, barWidth)}%` }} />
+                            
+                          </div>
+                        </td>
+                        <td className="py-2 px-3 text-center">
+                          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${p.impact.bg} ${p.impact.color}`}>
+                            {p.impact.icon} {p.impact.label}
+                          </span>
+                        </td>
+                        <td className="py-2 px-3 text-center">
+                          <ActionRecommendation impact={p.impact.label} />
+                        </td>
+                      </tr>
+                      {expandedRow === p.product &&
+                      <tr className="bg-indigo-50/30 border-b border-indigo-100">
+                          <td colSpan={8} className="px-10 py-3">
+                            <ProductInsight product={p} ticketAvg={effectiveTicketAvg} />
+                          </td>
+                        </tr>
+                      }
+                    </React.Fragment>);
+
+                })}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>);
 
 }
