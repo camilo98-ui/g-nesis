@@ -9,7 +9,7 @@ import FloatingIceCreamsBg from '@/components/FloatingIceCreamsBg';
 import { 
   ArrowLeft, FileText, Download, FileSpreadsheet, Calendar,
   TrendingUp, Users, Store, Target, BarChart3, Filter,
-  ChevronDown, CheckCircle, AlertCircle, Printer
+  ChevronDown, CheckCircle, AlertCircle, Printer, Sparkles
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -326,6 +326,12 @@ export default function Reports() {
 
           {/* Export Buttons */}
           <div className="flex items-center gap-2">
+            <Link to="/ProductTicketAnalysis">
+              <Button variant="outline" size="sm" className="gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                <Sparkles className="w-4 h-4" />
+                Análisis IA
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="sm"
