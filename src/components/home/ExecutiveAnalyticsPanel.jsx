@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PremiumTicketChart from '@/components/home/PremiumTicketChart';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, LineChart, Line, BarChart, Bar
 } from
@@ -489,33 +490,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                 })()}
               </div>
 
-              <AnimatedChartWrapper label="Ticket Promedio">
-                <ResponsiveContainer width="100%" height={140}>
-                  <ComposedChart data={sorted30} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                     <defs>
-                       <linearGradient id="ticketGrad" x1="0" y1="0" x2="0" y2="1">
-                         <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.35" />
-                         <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
-                       </linearGradient>
-                       <filter id="ticketGlow">
-                         <feGaussianBlur stdDeviation="2" result="coloredBlur" />
-                         <feMerge>
-                           <feMergeNode in="coloredBlur" />
-                           <feMergeNode in="SourceGraphic" />
-                         </feMerge>
-                       </filter>
-                     </defs>
-                     <CartesianGrid strokeDasharray="0" stroke="rgba(255,77,141,0.08)" vertical={false} />
-                     <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
-                     <YAxis hide />
-                     <Tooltip
-                       contentStyle={{ background: '#fff', border: '1px solid rgba(255,77,141,0.2)', borderRadius: 12, fontSize: 11 }}
-                       formatter={(v, name) => [fmt(v), name]} />
-                     <Area type="monotone" dataKey="ticket" stroke="#FF4D8D" strokeWidth={2.5} fill="url(#ticketGrad)" dot={false} name="Ticket Real" isAnimationActive={true} animationDuration={1200} />
-                     <Line type="monotone" dataKey="ticketPPT" stroke="#6366f1" strokeWidth={2} strokeDasharray="5,5" dot={false} name="Meta Ticket $25K" isAnimationActive={true} animationDuration={1200} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </AnimatedChartWrapper>
+              <PremiumTicketChart data={sorted30} />
 
               <div className="flex gap-6 mt-3 text-[10px]">
                 <div className="flex items-center gap-2">
@@ -544,31 +519,69 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           
           {ebitdaDataWithAvg && ebitdaDataWithAvg.length > 0 ? (
             <>
-               <AnimatedChartWrapper label="EBITDA">
+               <motion.div
+                 key={ebitdaDataWithAvg.map(d=>d.margen).join(',')}
+                 initial={{ opacity: 0, clipPath: 'inset(0 100% 0 0)' }}
+                 animate={{ opacity: 1, clipPath: 'inset(0 0% 0 0)' }}
+                 transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+                 style={{ position: 'relative' }}>
+                 <motion.div
+                   animate={{ y: [0, -1.2, 0, 0.8, 0] }}
+                   transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}>
                  <ResponsiveContainer width="100%" height={140}>
                    <LineChart data={ebitdaDataWithAvg} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
                      <defs>
-                       <linearGradient id="ebitdaGrad" x1="0" y1="0" x2="0" y2="1">
-                         <stop offset="0%" stopColor="#FF4D8D" stopOpacity="0.3" />
-                         <stop offset="100%" stopColor="#FF4D8D" stopOpacity="0" />
-                       </linearGradient>
-                       <filter id="ebitdaGlow">
-                         <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                       <filter id="ebitdaLineGlow" x="-20%" y="-20%" width="140%" height="140%">
+                         <feGaussianBlur stdDeviation="3" result="blur1" />
+                         <feGaussianBlur stdDeviation="1.2" result="blur2" />
                          <feMerge>
-                           <feMergeNode in="coloredBlur" />
+                           <feMergeNode in="blur1" />
+                           <feMergeNode in="blur2" />
                            <feMergeNode in="SourceGraphic" />
                          </feMerge>
                        </filter>
+                       <linearGradient id="ebitdaLineGrad" x1="0" y1="0" x2="1" y2="0">
+                         <stop offset="0%" stopColor="#FF2D78" />
+                         <stop offset="50%" stopColor="#FF4D8D" />
+                         <stop offset="100%" stopColor="#FF7FA5" />
+                       </linearGradient>
                      </defs>
-                     <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.08)" vertical={false} />
-                     <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#8F96A3' }} axisLine={false} tickLine={false} />
+                     <CartesianGrid strokeDasharray="0" stroke="rgba(255, 77, 141, 0.05)" vertical={false} />
+                     <XAxis dataKey="date" tick={{ fontSize: 7, fill: '#9CA3AF', fontWeight: 500 }} axisLine={false} tickLine={false} />
                      <YAxis hide domain={[0, 50]} />
-                     <Tooltip content={<EbitdaTooltip />} />
-                     <Line type="monotone" dataKey="margen" stroke="#FF4D8D" strokeWidth={2.5} dot={{ fill: '#FF4D8D', r: 4 }} name="EBITDA %" isAnimationActive={true} animationDuration={1500} />
-                     <Line type="linear" dataKey="promedio" stroke="#FFB4C9" strokeWidth={2} strokeDasharray="4,4" dot={false} name="Promedio" isAnimationActive={true} animationDuration={1500} />
+                     <Tooltip content={<EbitdaTooltip />} cursor={{ stroke: 'rgba(255,77,141,0.12)', strokeWidth: 1, strokeDasharray: '4 3' }} />
+                     <Line
+                       type="monotoneCubicBezier"
+                       dataKey="promedio"
+                       stroke="rgba(255,180,201,0.45)"
+                       strokeWidth={1.5}
+                       strokeDasharray="4 3"
+                       dot={false}
+                       activeDot={false}
+                       isAnimationActive={false}
+                       name="Promedio"
+                     />
+                     <Line
+                       type="monotoneCubicBezier"
+                       dataKey="margen"
+                       stroke="url(#ebitdaLineGrad)"
+                       strokeWidth={2.5}
+                       isAnimationActive={false}
+                       filter="url(#ebitdaLineGlow)"
+                       name="EBITDA %"
+                       dot={false}
+                       activeDot={{
+                         r: 5,
+                         fill: '#FF4D8D',
+                         stroke: 'rgba(255,77,141,0.3)',
+                         strokeWidth: 6,
+                         filter: 'url(#ebitdaLineGlow)',
+                       }}
+                     />
                    </LineChart>
                  </ResponsiveContainer>
-               </AnimatedChartWrapper>
+                 </motion.div>
+               </motion.div>
               
               <div className="mt-3 pt-2 border-t border-slate-100">
                 <div className="grid grid-cols-2 gap-2 text-[9px]">
