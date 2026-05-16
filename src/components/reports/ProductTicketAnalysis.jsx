@@ -249,55 +249,55 @@ export default function ProductTicketAnalysis({ storeId }) {
         </Card>
 
         {/* Scatter: Participation vs Ticket Impact */}
-        <Card className="border-0 shadow-sm bg-white hidden">
-          <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <Target className="w-4 h-4 text-indigo-500" />
-              Participación vs Impacto Ticket
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger><Info className="w-3.5 h-3.5 text-slate-400" /></TooltipTrigger>
-                  <TooltipContent className="max-w-xs text-xs">
-                    Cuadrante superior derecho = motores ideales (alta participación + alto valor de ticket)
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-2 pb-3">
-            <ResponsiveContainer width="100%" height={220}>
-              <ScatterChart margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="x" name="Participación" tickFormatter={(v) => `${v}%`} tick={{ fontSize: 9 }}>
-                  <Label value="% Participación" offset={-3} position="insideBottom" style={{ fontSize: 9, fill: '#94a3b8' }} />
-                </XAxis>
-                <YAxis dataKey="y" name="Ratio Ticket" tick={{ fontSize: 9 }}>
-                  <Label value="Valor Ticket" angle={-90} position="insideLeft" style={{ fontSize: 9, fill: '#94a3b8' }} />
-                </YAxis>
-                <ReferenceLine x={5} stroke="#e2e8f0" strokeDasharray="4 4" />
-                <ReferenceLine y={1} stroke="#e2e8f0" strokeDasharray="4 4" />
-                <RechartsTooltip
-                  cursor={{ strokeDasharray: '3 3' }}
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const d = payload[0].payload;
-                    return (
-                      <div className="bg-white border border-slate-200 rounded-lg p-2 shadow text-xs">
-                        <p className="font-semibold text-slate-800 truncate max-w-[160px]">{d.name}</p>
-                        <p className="text-slate-500">Part: {d.x}% | Valor: {d.y}x</p>
-                        <p className="text-slate-400">Venta: {fmt(d.sales)}</p>
-                        <p className="font-medium" style={{ color: d.fill }}>{d.label}</p>
-                      </div>);
+        
 
-                  }} />
-                
-                <Scatter data={scatterData} fill="#8884d8">
-                  {scatterData.map((d, i) => <Cell key={i} fill={d.fill} fillOpacity={0.8} />)}
-                </Scatter>
-              </ScatterChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
       </div>
 
       {/* Filters + Table */}
