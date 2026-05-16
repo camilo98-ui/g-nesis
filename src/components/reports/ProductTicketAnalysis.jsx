@@ -636,7 +636,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                     </ResponsiveContainer>
 
                     {/* KPI Cards */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, padding: '20px 0 12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, padding: '12px 0 6px' }}>
                       {(() => {
                         const maxMonth = monthsWithPart.reduce((a, b) => (a.totalSales > b.totalSales ? a : b), monthsWithPart[0]);
                         const minMonth = monthsWithPart.reduce((a, b) => (a.totalSales < b.totalSales ? a : b), monthsWithPart[0]);
@@ -657,9 +657,9 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                               background: '#ffffff',
                               backdropFilter: 'blur(20px)',
                               border: `1px solid rgba(255,143,184,0.15)`,
-                              borderRadius: 14,
-                              padding: '12px 14px',
-                              boxShadow: `0 4px 16px rgba(255,77,141,0.08)`,
+                              borderRadius: 12,
+                              padding: '8px 11px',
+                              boxShadow: `0 2px 8px rgba(255,77,141,0.06)`,
                               transition: 'all 0.3s ease',
                               cursor: 'default',
                             }}
@@ -674,9 +674,9 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                               e.currentTarget.style.boxShadow = `0 4px 16px rgba(255,77,141,0.08)`;
                             }}
                           >
-                            <p style={{ fontSize: 9, fontWeight: 700, color: P.textSub, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.09em' }}>{kpi.icon} {kpi.label}</p>
-                            <p style={{ fontSize: 13, fontWeight: 700, color: kpi.color || P.primary, margin: '0 0 2px', fontVariantNumeric: 'tabular-nums' }}>{kpi.value}</p>
-                            <p style={{ fontSize: 8.5, color: P.textSub, margin: 0 }}>{kpi.detail}</p>
+                            <p style={{ fontSize: 8, fontWeight: 700, color: P.textSub, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{kpi.icon} {kpi.label}</p>
+                            <p style={{ fontSize: 12, fontWeight: 700, color: kpi.color || P.primary, margin: '0 0 1px', fontVariantNumeric: 'tabular-nums' }}>{kpi.value}</p>
+                            <p style={{ fontSize: 7.5, color: P.textSub, margin: 0 }}>{kpi.detail}</p>
                           </div>
                         ));
                       })()}
