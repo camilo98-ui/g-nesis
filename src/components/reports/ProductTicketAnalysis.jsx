@@ -690,7 +690,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             filter="url(#barGlow)"
                             shape={<CustomBar />}
                             label={({ x, y, width, height, payload }) => {
-                              if (payload.compliance == null) return null;
+                              if (!payload || payload.compliance == null) return null;
                               return (
                                 <text
                                   x={x + width / 2}
