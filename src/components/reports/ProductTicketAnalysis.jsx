@@ -240,60 +240,42 @@ export default function ProductTicketAnalysis({ storeId }) {
 
       return (<>
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Chart 1: Dona — Participación por Departamento */}
-        <Card className="border-0 shadow-sm bg-white">
-          <CardHeader className="pb-2 pt-4 px-4">
+        {/* Chart 1: Barras de progreso — Participación por Departamento */}
+        <Card className="border-0 shadow-sm bg-white flex flex-col">
+          <CardHeader className="pb-2 pt-4 px-4 flex-shrink-0">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-pink-400" />
               Participación por Departamento
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-3 pb-4">
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width="55%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={deptData}
-                    dataKey="participation"
-                    nameKey="dept"
-                    cx="50%" cy="50%"
-                    innerRadius={52}
-                    outerRadius={82}
-                    paddingAngle={2}
-                  >
-                    {deptData.map((d, i) => (
-                      <Cell key={i} fill={PASTEL[i % PASTEL.length]} stroke={PASTEL_DARK[i % PASTEL_DARK.length]} strokeWidth={0.5} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip
-                    formatter={(v, name) => [`${v.toFixed(1)}%`, name]}
-                    contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #fce7f3' }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex-1 space-y-1.5">
-                {deptData.slice(0, 6).map((d, i) => (
-                  <div key={d.dept} className="flex items-center gap-2 text-xs">
-                    <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: PASTEL[i % PASTEL.length], border: `1px solid ${PASTEL_DARK[i % PASTEL_DARK.length]}` }} />
-                    <span className="truncate text-slate-600 flex-1">{d.dept}</span>
-                    <span className="font-bold text-pink-500">{d.participation.toFixed(1)}%</span>
-                  </div>
-                ))}
-                <div className="pt-1 border-t border-pink-50 mt-1 space-y-1">
-                  {deptData.slice(0, 4).map((d, i) => (
-                    <div key={d.dept + '_s'} className="flex justify-between text-[10px] text-slate-400">
-                      <span className="truncate flex-1">{d.dept}</span>
-                      <span className="font-medium text-slate-500">{fmt(d.totalSales)}</span>
+          <CardContent className="px-4 pb-4 flex-1 flex flex-col justify-between">
+            <div className="space-y-3">
+              {deptData.slice(0, 8).map((d, i) => (
+                <div key={d.dept}>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-slate-600 truncate flex-1 pr-2">{d.dept}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-[10px] text-slate-400">{fmt(d.totalSales)}</span>
+                      <span className="text-xs font-bold text-pink-500 w-10 text-right">{d.participation.toFixed(1)}%</span>
                     </div>
-                  ))}
+                  </div>
+                  <div className="w-full bg-pink-50 rounded-full h-2.5">
+                    <div
+                      className="h-2.5 rounded-full transition-all duration-700"
+                      style={{
+                        width: `${Math.min(100, d.participation)}%`,
+                        background: `linear-gradient(90deg, ${PASTEL_DARK[i % PASTEL_DARK.length]}, ${PASTEL[i % PASTEL.length]})`
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
+            {deptData.length > 8 && (
+              <p className="text-[10px] text-slate-400 mt-3 text-center">+{deptData.length - 8} departamentos más</p>
+            )}
           </CardContent>
         </Card>
-
-
-
 
 
 
