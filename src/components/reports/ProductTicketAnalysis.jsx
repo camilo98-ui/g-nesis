@@ -278,14 +278,14 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
               }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{
-                      width: 30, height: 30, borderRadius: 9,
-                      background: `linear-gradient(135deg, ${P.primary} 0%, ${P.soft} 100%)`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: `0 3px 12px ${P.glow}`
-                    }} className="hidden">
-                  <BarChart3 style={{ width: 14, height: 14, color: '#fff' }} />
-                </div>
+                
+
+
+
+
+
+
+                    
                 <div>
                   <p style={{ fontSize: 13, fontWeight: 700, color: P.text, letterSpacing: '-0.02em', margin: 0, lineHeight: 1.2 }}>Top 10 Productos</p>
                   <p style={{ fontSize: 10, color: P.textSub, margin: 0, marginTop: 2 }}>Por participación en ventas</p>
@@ -489,14 +489,14 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                   }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                          width: 30, height: 30, borderRadius: 9,
-                          background: `linear-gradient(135deg, ${P.magenta} 0%, ${P.primary} 100%)`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: `0 3px 12px rgba(216,27,96,0.3)`
-                        }} className="hidden">
-                      <Target style={{ width: 14, height: 14, color: '#fff' }} />
-                    </div>
+                    
+
+
+
+
+
+
+                        
                     <div>
                       <p style={{ fontSize: 13, fontWeight: 700, color: P.text, letterSpacing: '-0.02em', margin: 0, lineHeight: 1.2 }}>Venta por Mes</p>
                       <p style={{ fontSize: 10, color: P.textSub, margin: 0, marginTop: 2 }}>Ene – {MONTH_NAMES[new Date().getMonth()]} {currentYear}</p>
