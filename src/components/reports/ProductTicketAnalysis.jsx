@@ -264,7 +264,7 @@ export default function ProductTicketAnalysis({ storeId }) {
                       className="h-2.5 rounded-full transition-all duration-700"
                       style={{
                         width: `${Math.min(100, d.participation)}%`,
-                        background: `linear-gradient(90deg, ${PASTEL_DARK[i % PASTEL_DARK.length]}, ${PASTEL[i % PASTEL.length]})`
+                        background: i === 0 ? 'linear-gradient(90deg,#E91E8C,#F48FB1)' : `rgba(233,30,140,${1 - i * 0.09})`
                       }}
                     />
                   </div>
@@ -318,41 +318,45 @@ export default function ProductTicketAnalysis({ storeId }) {
 
 
 
-        {/* Chart 2: Top productos por venta bruta */}
-        <Card className="border-0 shadow-sm bg-white">
-          <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-pink-400" />
-              Top Productos · Venta Bruta
+        {/* Chart 2: Top productos — estilo premium */}
+        <Card className="border-0 shadow-sm bg-white flex flex-col">
+          <CardHeader className="pb-1 pt-4 px-5 flex-shrink-0">
+            <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-0.5">Top Productos</p>
+            <CardTitle className="text-sm font-semibold text-slate-700">
+              Venta bruta · período actual
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-2 pb-3">
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={topProducts} layout="vertical" margin={{ left: 4, right: 50, top: 4, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#fdf2f8" horizontal={false} />
-                <XAxis type="number" tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : `${(v / 1e3).toFixed(0)}K`} tick={{ fontSize: 9, fill: '#d1a8c0' }} />
-                <YAxis dataKey="product" type="category" width={90} tick={{ fontSize: 9, fill: '#9d7492' }} />
-                <RechartsTooltip
-                  formatter={(v) => [fmt(v), 'Venta Bruta']}
-                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #fce7f3', background: '#fff' }}
-                />
-                <Bar dataKey="totalSales" radius={[0, 4, 4, 0]}>
-                  {topProducts.map((p, i) => (
-                    <Cell key={i} fill={PASTEL[i % PASTEL.length]} stroke={PASTEL_DARK[i % PASTEL_DARK.length]} strokeWidth={0.5} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-            <div className="mt-2 space-y-1 px-2">
-              {topProducts.slice(0, 5).map((p, i) => (
-                <div key={p.product} className="flex items-center gap-2 text-xs">
-                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PASTEL[i % PASTEL.length] }} />
-                  <span className="truncate text-slate-600 flex-1">{p.product}</span>
-                  <span className="font-medium text-slate-700">{fmt(p.totalSales)}</span>
-                  <span className="text-pink-400 font-semibold">{p.participation.toFixed(1)}%</span>
+          <CardContent className="px-5 pb-5 flex-1 flex flex-col justify-between gap-3">
+            {topProducts.slice(0, 7).map((p, i) => {
+              const maxSales = topProducts[0]?.totalSales || 1;
+              const barPct = (p.totalSales / maxSales) * 100;
+              const opacity = 1 - i * 0.1;
+              return (
+                <div key={p.product} className="group">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-[10px] font-bold text-slate-300 w-4 flex-shrink-0">{i + 1}</span>
+                      <span className="text-xs font-medium text-slate-700 truncate">{p.product}</span>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0 ml-2">
+                      <span className="text-[11px] font-bold" style={{ color: '#E91E8C' }}>{fmt(p.totalSales)}</span>
+                      <span className="text-[10px] text-slate-400 w-8 text-right">{p.participation.toFixed(1)}%</span>
+                    </div>
+                  </div>
+                  <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: '#fce7f3' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${barPct}%`,
+                        background: i === 0
+                          ? 'linear-gradient(90deg, #E91E8C, #F48FB1)'
+                          : `rgba(233,30,140,${opacity * 0.7})`,
+                      }}
+                    />
+                  </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </CardContent>
         </Card>
       </div>
