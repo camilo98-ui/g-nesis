@@ -242,54 +242,102 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
 
       return (<>
       <div className="grid md:grid-cols-2 gap-4">
-        {/* Chart 1: Top 10 productos más vendidos */}
-        <Card className="border-0 shadow-sm bg-white flex flex-col">
-          <CardHeader className="pb-2 pt-4 px-4 flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-pink-400" />
-                Top 10 Productos
-              </CardTitle>
-              <span className="text-[10px] text-slate-400 font-medium">{products.length} productos totales</span>
+        {/* Chart 1: Top 10 productos más vendidos — PREMIUM */}
+        <div style={{
+          background: 'linear-gradient(145deg, #ffffff 0%, #F8FAFC 100%)',
+          borderRadius: 20,
+          border: '1px solid rgba(226,232,240,0.8)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          {/* Header */}
+          <div style={{ padding: '18px 20px 12px', borderBottom: '1px solid rgba(241,245,249,1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: 8,
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(99,102,241,0.3)'
+                }}>
+                  <BarChart3 style={{ width: 14, height: 14, color: '#fff' }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em', margin: 0 }}>Top 10 Productos</p>
+                  <p style={{ fontSize: 10, color: '#94a3b8', margin: 0, marginTop: 1 }}>Por participación en ventas</p>
+                </div>
+              </div>
+              <span style={{
+                fontSize: 10, fontWeight: 600, color: '#6366f1',
+                background: 'rgba(99,102,241,0.08)', padding: '3px 8px',
+                borderRadius: 20, border: '1px solid rgba(99,102,241,0.15)'
+              }}>{products.length} productos</span>
             </div>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 flex-1 flex flex-col justify-between">
+          </div>
+          {/* List */}
+          <div style={{ padding: '12px 16px 16px' }}>
             {(() => {
               const top10 = [...products].sort((a, b) => b.totalSales - a.totalSales).slice(0, 10);
               const maxSales = top10[0]?.totalSales || 1;
+              const rankColors = [
+                { bar: 'linear-gradient(90deg, #6366f1, #8b5cf6)', num: '#6366f1', bg: 'rgba(99,102,241,0.06)' },
+                { bar: 'linear-gradient(90deg, #8b5cf6, #a78bfa)', num: '#8b5cf6', bg: 'rgba(139,92,246,0.05)' },
+                { bar: 'linear-gradient(90deg, #06b6d4, #22d3ee)', num: '#06b6d4', bg: 'rgba(6,182,212,0.05)' },
+              ];
               return (
-                <div className="space-y-2.5">
-                  {top10.map((p, i) => (
-                    <div key={p.product}>
-                      <div className="flex justify-between items-center mb-1">
-                        <div className="flex items-center gap-1.5 flex-1 min-w-0 pr-2">
-                          <span className="text-[10px] font-black flex-shrink-0 w-4"
-                            style={{ color: i === 0 ? '#E91E8C' : i === 1 ? '#f06292' : i === 2 ? '#f48fb1' : '#d1b3c4' }}>
-                            {i + 1}
-                          </span>
-                          <span className="text-[11px] text-slate-700 font-medium truncate">{p.product}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {top10.map((p, i) => {
+                    const pct = (p.totalSales / maxSales) * 100;
+                    const rc = rankColors[i] || { bar: `rgba(99,102,241,${0.7 - i * 0.06})`, num: '#94a3b8', bg: 'transparent' };
+                    return (
+                      <div key={p.product} style={{
+                        padding: '7px 10px', borderRadius: 10,
+                        background: rc.bg,
+                        transition: 'background 0.2s',
+                        cursor: 'default',
+                      }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.08)'}
+                        onMouseLeave={e => e.currentTarget.style.background = rc.bg}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, paddingRight: 8 }}>
+                            <span style={{
+                              fontSize: 10, fontWeight: 800, color: rc.num,
+                              minWidth: 16, textAlign: 'right', fontVariantNumeric: 'tabular-nums'
+                            }}>{i + 1}</span>
+                            <span style={{
+                              fontSize: 11, color: '#1e293b', fontWeight: i < 3 ? 600 : 500,
+                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                            }}>{p.product}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                            <span style={{ fontSize: 10, color: '#64748b', fontVariantNumeric: 'tabular-nums' }}>{fmt(p.totalSales)}</span>
+                            <span style={{
+                              fontSize: 10, fontWeight: 700, color: '#6366f1',
+                              background: 'rgba(99,102,241,0.1)', padding: '1px 6px',
+                              borderRadius: 6, fontVariantNumeric: 'tabular-nums'
+                            }}>{p.participation.toFixed(1)}%</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-[10px] text-slate-400">{fmt(p.totalSales)}</span>
-                          <span className="text-[10px] font-bold text-pink-500 w-9 text-right">{p.participation.toFixed(1)}%</span>
+                        <div style={{ height: 4, borderRadius: 9999, background: 'rgba(226,232,240,0.8)', overflow: 'hidden' }}>
+                          <div style={{
+                            height: '100%', borderRadius: 9999,
+                            width: `${pct}%`,
+                            background: rc.bar,
+                            boxShadow: i < 3 ? `0 0 8px rgba(99,102,241,0.3)` : 'none',
+                            transition: 'width 0.8s cubic-bezier(0.34,1.56,0.64,1)',
+                          }} />
                         </div>
                       </div>
-                      <div className="w-full bg-pink-50 rounded-full h-2">
-                        <div
-                          className="h-2 rounded-full transition-all duration-700"
-                          style={{
-                            width: `${(p.totalSales / maxSales) * 100}%`,
-                            background: i === 0 ? 'linear-gradient(90deg,#E91E8C,#F48FB1)' : `rgba(233,30,140,${0.85 - i * 0.07})`
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })()}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
 
 
@@ -365,41 +413,95 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
             };
           });
 
+          // Helper semaforo premium
+          const getComplianceStyle = (c) => {
+            if (c == null) return { grad: 'url(#gradNeutral)', glow: 'transparent', badge: { bg: '#f1f5f9', color: '#94a3b8', border: '#e2e8f0' } };
+            if (c >= 100) return { grad: 'url(#gradGreen)', glow: 'rgba(52,211,153,0.35)', badge: { bg: 'rgba(52,211,153,0.12)', color: '#059669', border: 'rgba(52,211,153,0.3)' } };
+            if (c >= 80) return { grad: 'url(#gradAmber)', glow: 'rgba(251,191,36,0.35)', badge: { bg: 'rgba(251,191,36,0.12)', color: '#b45309', border: 'rgba(251,191,36,0.3)' } };
+            return { grad: 'url(#gradRed)', glow: 'rgba(251,113,133,0.35)', badge: { bg: 'rgba(251,113,133,0.12)', color: '#be123c', border: 'rgba(251,113,133,0.3)' } };
+          };
+
           return (
-            <Card className="border-0 shadow-sm bg-white flex flex-col overflow-hidden">
-              <CardHeader className="pb-0 pt-4 px-5 flex-shrink-0">
-                <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-0.5">Venta por Mes</p>
-                <div className="flex items-end justify-between">
-                  <CardTitle className="text-sm font-semibold text-slate-700">Enero – {MONTH_NAMES[new Date().getMonth()]} {currentYear}</CardTitle>
+            <div style={{
+              background: 'linear-gradient(145deg, #ffffff 0%, #F8FAFC 100%)',
+              borderRadius: 20,
+              border: '1px solid rgba(226,232,240,0.8)',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}>
+              {/* Header premium */}
+              <div style={{ padding: '18px 20px 12px', borderBottom: '1px solid rgba(241,245,249,1)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 8,
+                      background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(14,165,233,0.3)'
+                    }}>
+                      <Target style={{ width: 14, height: 14, color: '#fff' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.01em', margin: 0 }}>
+                        Venta por Mes
+                      </p>
+                      <p style={{ fontSize: 10, color: '#94a3b8', margin: 0, marginTop: 1 }}>
+                        Ene – {MONTH_NAMES[new Date().getMonth()]} {currentYear}
+                      </p>
+                    </div>
+                  </div>
                   {totalYearSales > 0 && (
-                    <span className="text-lg font-bold pb-0.5 text-slate-700">
-                      {fmt(totalYearSales)}
-                    </span>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+                        {fmt(totalYearSales)}
+                      </p>
+                      <p style={{ fontSize: 9, color: '#94a3b8', margin: 0, marginTop: 1, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Total acumulado</p>
+                    </div>
                   )}
                 </div>
-              </CardHeader>
-              <CardContent className="px-1 pb-2 pt-2 flex-1 flex flex-col">
+              </div>
+
+              <div style={{ padding: '8px 4px 0' }}>
                 {monthsWithPart.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center text-[11px] text-slate-300">Sin datos de ventas mensuales</div>
+                  <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 11, color: '#cbd5e1' }}>Sin datos de ventas mensuales</div>
                 ) : (
                   <>
-                    <ResponsiveContainer width="100%" height={185}>
+                    <ResponsiveContainer width="100%" height={190}>
                       <BarChart
                         data={monthsWithPart}
-                        margin={{ top: 18, right: 8, left: 0, bottom: 4 }}
-                        barCategoryGap="22%"
+                        margin={{ top: 24, right: 12, left: 8, bottom: 4 }}
+                        barCategoryGap="18%"
                       >
                         <defs>
-                          <linearGradient id="barGradPink" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#6366f1" stopOpacity={0.85} />
-                              <stop offset="100%" stopColor="#a5b4fc" stopOpacity={0.4} />
-                            </linearGradient>
+                          {/* Gradientes semaforo premium */}
+                          <linearGradient id="gradGreen" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#34D399" stopOpacity={1} />
+                            <stop offset="100%" stopColor="#6ee7b7" stopOpacity={0.6} />
+                          </linearGradient>
+                          <linearGradient id="gradAmber" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#FBBF24" stopOpacity={1} />
+                            <stop offset="100%" stopColor="#fde68a" stopOpacity={0.6} />
+                          </linearGradient>
+                          <linearGradient id="gradRed" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#FB7185" stopOpacity={1} />
+                            <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.6} />
+                          </linearGradient>
+                          <linearGradient id="gradNeutral" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.7} />
+                            <stop offset="100%" stopColor="#a5b4fc" stopOpacity={0.3} />
+                          </linearGradient>
+                          <filter id="barGlow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="2" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                          </filter>
                         </defs>
-                        <CartesianGrid vertical={false} stroke="#f1f5f9" strokeDasharray="3 3" />
+                        <CartesianGrid vertical={false} stroke="rgba(241,245,249,1)" strokeDasharray="0" />
                         <XAxis
                           dataKey="label"
                           tick={({ x, y, payload }) => (
-                            <text x={x} y={y + 8} textAnchor="middle" fontSize={9} fill="#94a3b8" fontFamily="Inter, sans-serif">
+                            <text x={x} y={y + 10} textAnchor="middle" fontSize={9.5} fill="#94a3b8" fontFamily="Inter, -apple-system, sans-serif" fontWeight={500}>
                               {payload.value}
                             </text>
                           )}
@@ -408,82 +510,153 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                         />
                         <YAxis hide />
                         <RechartsTooltip
-                         cursor={{ fill: 'rgba(99,102,241,0.06)' }}
-                         content={({ active, payload }) => {
-                           if (!active || !payload?.length) return null;
-                           const d = payload[0].payload;
-                           const compColor = d.compliance == null ? '#94a3b8' : d.compliance >= 100 ? '#059669' : d.compliance >= 85 ? '#b45309' : '#b91c1c';
-                           return (
-                             <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 10, padding: '8px 12px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
-                               <p style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>{d.label} {d.year}</p>
-                               <p style={{ fontSize: 13, fontWeight: 800, color: '#6366f1' }}>{fmt(d.totalSales)}</p>
-                               {d.pptMes > 0 && <p style={{ fontSize: 10, color: '#94a3b8' }}>PPT: {fmt(d.pptMes)}</p>}
-                               {d.compliance != null && <p style={{ fontSize: 11, fontWeight: 700, color: compColor }}>Cumplimiento: {d.compliance}%</p>}
-                             </div>
-                           );
-                         }}
+                          cursor={{ fill: 'rgba(99,102,241,0.04)', radius: 8 }}
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const d = payload[0].payload;
+                            const cs = getComplianceStyle(d.compliance);
+                            return (
+                              <div style={{
+                                background: '#fff',
+                                border: '1px solid rgba(226,232,240,0.9)',
+                                borderRadius: 14,
+                                padding: '10px 14px',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)',
+                                minWidth: 140,
+                              }}>
+                                <p style={{ fontSize: 11, fontWeight: 700, color: '#0f172a', margin: '0 0 6px', letterSpacing: '-0.01em' }}>
+                                  {d.label} {d.year}
+                                </p>
+                                <p style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: '0 0 4px', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+                                  {fmt(d.totalSales)}
+                                </p>
+                                {d.pptMes > 0 && (
+                                  <p style={{ fontSize: 10, color: '#94a3b8', margin: '0 0 4px', fontVariantNumeric: 'tabular-nums' }}>
+                                    PPT: {fmt(d.pptMes)}
+                                  </p>
+                                )}
+                                {d.compliance != null && (
+                                  <span style={{
+                                    display: 'inline-block',
+                                    fontSize: 11, fontWeight: 700,
+                                    color: cs.badge.color,
+                                    background: cs.badge.bg,
+                                    border: `1px solid ${cs.badge.border}`,
+                                    padding: '2px 8px', borderRadius: 20,
+                                    marginTop: 2
+                                  }}>
+                                    {d.compliance}% cumplimiento
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          }}
                         />
-                        <Bar dataKey="totalSales" radius={[4, 4, 0, 0]}>
-                         {monthsWithPart.map((m, i) => {
-                           const isCurrentMonth = m.month === new Date().getMonth() + 1;
-                           const compColor = m.compliance == null ? null
-                             : m.compliance >= 100 ? '#6ee7b7'
-                             : m.compliance >= 85 ? '#fcd34d'
-                             : '#fca5a5';
-                           return (
-                             <Cell
-                               key={i}
-                               fill={compColor || (isCurrentMonth ? 'url(#barGradPink)' : `rgba(99,102,241,${0.18 + (m.participation / 100) * 0.5})`)}
-                             />
-                           );
-                         })}
-                         <LabelList
-                           dataKey="compliance"
-                           position="top"
-                           formatter={(v) => v != null ? `${v}%` : ''}
-                           style={{ fontSize: 8, fontWeight: 600, fill: '#64748b', fontFamily: 'Inter, sans-serif' }}
-                         />
+                        <Bar dataKey="totalSales" radius={[6, 6, 0, 0]} maxBarSize={36}>
+                          {monthsWithPart.map((m, i) => {
+                            const cs = getComplianceStyle(m.compliance);
+                            return <Cell key={i} fill={cs.grad} />;
+                          })}
+                          <LabelList
+                            dataKey="compliance"
+                            position="top"
+                            formatter={(v) => v != null ? `${v}%` : ''}
+                            style={{ fontSize: 9, fontWeight: 700, fill: '#475569', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}
+                          />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
 
-                    {/* Ranking mensual por cumplimiento */}
-                    <div className="mx-3 mt-2 rounded-xl overflow-hidden border border-slate-100">
-                      <div className="grid grid-cols-[20px_1fr_auto_44px] gap-x-2 px-3 py-1.5 bg-slate-50">
-                        <span className="text-[9px] font-semibold text-slate-400 uppercase">#</span>
-                        <span className="text-[9px] font-semibold text-slate-400 uppercase">Mes</span>
-                        <span className="text-[9px] font-semibold text-slate-400 uppercase text-right">Venta</span>
-                        <span className="text-[9px] font-semibold text-slate-400 uppercase text-right">Cumpl.</span>
-                      </div>
-                      {[...monthsWithPart].sort((a, b) => a.month - b.month).map((m, i) => {
-                        const compColor = m.compliance == null ? '#94a3b8' : m.compliance >= 100 ? '#059669' : m.compliance >= 85 ? '#b45309' : '#b91c1c';
-                        const barColor = m.compliance == null ? '#e2e8f0' : m.compliance >= 100 ? '#a7f3d0' : m.compliance >= 85 ? '#fde68a' : '#fecaca';
-                        return (
-                        <div
-                          key={m.key}
-                          className="grid grid-cols-[20px_1fr_auto_44px] gap-x-2 px-3 py-1.5 items-center"
-                          style={{ background: i % 2 === 0 ? '#fafafa' : 'white' }}
-                        >
-                          <span className="text-[10px] font-medium leading-none text-slate-400">{m.month}</span>
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-medium text-slate-600 leading-tight">{m.label}</p>
-                            <div className="mt-0.5 h-[3px] rounded-full bg-slate-100 overflow-hidden">
-                              <div className="h-full rounded-full"
-                                style={{ width: `${Math.min(100, m.compliance || (m.totalSales / maxMonthSales) * 100)}%`, background: barColor }} />
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-semibold text-right text-slate-600">{fmt(m.totalSales)}</span>
-                          <span className="text-[10px] font-bold text-right" style={{ color: compColor }}>
-                            {m.compliance != null ? `${m.compliance}%` : '—'}
-                          </span>
+                    {/* Leyenda semaforo */}
+                    <div style={{ display: 'flex', gap: 12, padding: '0 16px 10px', justifyContent: 'center' }}>
+                      {[
+                        { color: '#34D399', label: '≥100%' },
+                        { color: '#FBBF24', label: '80–99%' },
+                        { color: '#FB7185', label: '<80%' },
+                      ].map(({ color, label }) => (
+                        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+                          <span style={{ fontSize: 9.5, color: '#94a3b8', fontWeight: 500 }}>{label}</span>
                         </div>
+                      ))}
+                    </div>
+
+                    {/* Tabla mensual premium */}
+                    <div style={{ margin: '0 12px 14px', borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(226,232,240,0.7)' }}>
+                      {/* Header tabla */}
+                      <div style={{
+                        display: 'grid', gridTemplateColumns: '24px 1fr auto 52px',
+                        gap: '0 8px', padding: '7px 12px',
+                        background: 'linear-gradient(90deg, #F8FAFC, #f1f5f9)',
+                        borderBottom: '1px solid rgba(226,232,240,0.7)'
+                      }}>
+                        {['#', 'Mes', 'Venta', 'Cumpl.'].map((h, hi) => (
+                          <span key={h} style={{
+                            fontSize: 9, fontWeight: 700, color: '#94a3b8',
+                            textTransform: 'uppercase', letterSpacing: '0.08em',
+                            textAlign: hi >= 2 ? 'right' : 'left'
+                          }}>{h}</span>
+                        ))}
+                      </div>
+                      {/* Rows */}
+                      {[...monthsWithPart].sort((a, b) => a.month - b.month).map((m, i) => {
+                        const cs = getComplianceStyle(m.compliance);
+                        const barPct = Math.min(100, m.compliance != null ? Math.min(m.compliance, 100) : (m.totalSales / maxMonthSales) * 100);
+                        return (
+                          <div
+                            key={m.key}
+                            style={{
+                              display: 'grid', gridTemplateColumns: '24px 1fr auto 52px',
+                              gap: '0 8px', padding: '6px 12px', alignItems: 'center',
+                              background: i % 2 === 0 ? '#ffffff' : '#FAFBFC',
+                              transition: 'background 0.15s',
+                              cursor: 'default',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.04)'}
+                            onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? '#ffffff' : '#FAFBFC'}
+                          >
+                            <span style={{ fontSize: 10, fontWeight: 600, color: '#cbd5e1', fontVariantNumeric: 'tabular-nums' }}>{m.month}</span>
+                            <div style={{ minWidth: 0 }}>
+                              <p style={{ fontSize: 10.5, fontWeight: 600, color: '#334155', margin: '0 0 3px', letterSpacing: '-0.005em' }}>{m.label}</p>
+                              <div style={{ height: 3, borderRadius: 9999, background: 'rgba(226,232,240,0.8)', overflow: 'hidden' }}>
+                                <div style={{
+                                  height: '100%', borderRadius: 9999,
+                                  width: `${barPct}%`,
+                                  background: m.compliance == null ? '#a5b4fc'
+                                    : m.compliance >= 100 ? 'linear-gradient(90deg, #34D399, #6ee7b7)'
+                                    : m.compliance >= 80 ? 'linear-gradient(90deg, #FBBF24, #fde68a)'
+                                    : 'linear-gradient(90deg, #FB7185, #fecdd3)',
+                                  transition: 'width 0.6s cubic-bezier(0.34,1.56,0.64,1)',
+                                }} />
+                              </div>
+                            </div>
+                            <span style={{ fontSize: 10.5, fontWeight: 600, color: '#334155', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                              {fmt(m.totalSales)}
+                            </span>
+                            {m.compliance != null ? (
+                              <span style={{
+                                fontSize: 10, fontWeight: 800,
+                                color: cs.badge.color,
+                                background: cs.badge.bg,
+                                border: `1px solid ${cs.badge.border}`,
+                                padding: '2px 5px', borderRadius: 8,
+                                textAlign: 'center', display: 'block',
+                                fontVariantNumeric: 'tabular-nums',
+                                letterSpacing: '-0.01em',
+                              }}>
+                                {m.compliance}%
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: 10, color: '#cbd5e1', textAlign: 'right', display: 'block' }}>—</span>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
                   </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           );
         })()}
       </div>
