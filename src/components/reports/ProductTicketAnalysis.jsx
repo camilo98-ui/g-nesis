@@ -328,8 +328,8 @@ export default function ProductTicketAnalysis({ storeId }) {
               )}
             </div>
           </CardHeader>
-          <CardContent className="px-1 pb-3 pt-2 flex-1">
-            <ResponsiveContainer width="100%" height={240}>
+          <CardContent className="px-1 pb-2 pt-2 flex-1 flex flex-col">
+            <ResponsiveContainer width="100%" height={185}>
               <BarChart
                 data={topProducts.slice(0, 8)}
                 margin={{ top: 8, right: 8, left: 0, bottom: 32 }}
@@ -388,6 +388,24 @@ export default function ProductTicketAnalysis({ storeId }) {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+
+            {/* Mini tabla resumen */}
+            <div className="mt-1 px-3 flex-1">
+              <div className="border-t border-pink-50 pt-2">
+                {topProducts.slice(0, 5).map((p, i) => (
+                  <div key={p.product} className="flex items-center justify-between py-0.5 gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-[9px] font-bold text-pink-200 w-3 flex-shrink-0">{i + 1}</span>
+                      <span className="text-[10px] text-slate-600 truncate">{p.product}</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-[10px] font-bold" style={{ color: '#E91E8C' }}>{fmt(p.totalSales)}</span>
+                      <span className="text-[9px] text-slate-400 w-7 text-right">{p.participation.toFixed(1)}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
