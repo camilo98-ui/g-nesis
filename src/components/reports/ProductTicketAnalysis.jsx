@@ -524,168 +524,133 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                   <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 11, color: P.textSub }}>Sin datos de ventas mensuales</div>
                 ) : (
                   <>
-                    {/* Premium Area Chart */}
-                    <ResponsiveContainer width="100%" height={280}>
-                      <AreaChart data={monthsWithPart} margin={{ top: 16, right: 20, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#FF4D8D" stopOpacity={0.35} />
-                            <stop offset="100%" stopColor="#FF4D8D" stopOpacity={0.02} />
-                          </linearGradient>
-                          <filter id="glowFilter">
-                            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                            <feMerge>
-                              <feMergeNode in="coloredBlur" />
-                              <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                          </filter>
-                        </defs>
-                        <CartesianGrid stroke="rgba(255,143,184,0.08)" strokeDasharray="0" vertical={false} />
-                        <XAxis
-                          dataKey="label"
-                          tick={({ x, y, payload }) => (
-                            <text x={x} y={y + 12} textAnchor="middle" fontSize={10} fill={P.textSub} fontFamily="Inter, -apple-system, sans-serif" fontWeight={500}>
-                              {payload.value}
-                            </text>
-                          )}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis hide />
-                        <RechartsTooltip
-                          cursor={{ stroke: 'rgba(255,77,141,0.2)', strokeWidth: 2 }}
-                          content={({ active, payload }) => {
-                            if (!active || !payload?.length) return null;
-                            const d = payload[0].payload;
-                            return (
-                              <div
-                                style={{
-                                  background: 'rgba(255,255,255,0.95)',
-                                  backdropFilter: 'blur(20px)',
-                                  border: `1px solid rgba(255,77,141,0.2)`,
-                                  borderRadius: 16,
-                                  padding: '12px 16px',
-                                  boxShadow: `0 12px 48px rgba(255,77,141,0.15), 0 2px 12px rgba(0,0,0,0.06)`,
-                                  minWidth: 180,
-                                }}
-                              >
-                                <p style={{ fontSize: 11, fontWeight: 600, color: P.textSub, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{d.label} {d.year}</p>
-                                <p
-                                  style={{
-                                    fontSize: 18,
-                                    fontWeight: 700,
-                                    color: P.primary,
-                                    margin: '3px 0 8px',
-                                    letterSpacing: '-0.02em',
-                                    fontVariantNumeric: 'tabular-nums',
-                                  }}
-                                >
-                                  {fmt(d.totalSales)}
-                                </p>
-                                {d.pptMes > 0 && (
-                                  <p style={{ fontSize: 9, color: P.textSub, margin: '0 0 3px', fontVariantNumeric: 'tabular-nums' }}>Meta: {fmt(d.pptMes)}</p>
-                                )}
-                                {d.compliance != null && (
-                                  <span
-                                    style={{
-                                      display: 'inline-block',
-                                      fontSize: 10,
-                                      fontWeight: 700,
-                                      color: d.compliance >= 100 ? P.primary : d.compliance >= 80 ? P.magenta : P.textSub,
-                                      background: d.compliance >= 100 ? 'rgba(255,77,141,0.1)' : 'rgba(255,143,184,0.08)',
-                                      border: `1px solid ${d.compliance >= 100 ? 'rgba(255,77,141,0.2)' : 'rgba(255,143,184,0.15)'}`,
-                                      padding: '2px 8px',
-                                      borderRadius: 20,
-                                      marginTop: 4,
-                                    }}
-                                  >
-                                    {d.compliance}% cumplimiento
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          }}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="totalSales"
-                          stroke="#FF4D8D"
-                          strokeWidth={2.5}
-                          fill="url(#areaGrad)"
-                          isAnimationActive={true}
-                          animationDuration={1200}
-                          dot={(props) => {
-                            const { cx, cy, payload } = props;
-                            return (
-                              <g key={`dot-${payload.key}`}>
-                                <circle cx={cx} cy={cy} r={4.5} fill="#FF4D8D" opacity={0.95} />
-                                <circle cx={cx} cy={cy} r={4.5} fill="none" stroke="rgba(255,77,141,0.4)" strokeWidth={1.5} />
-                                <circle cx={cx} cy={cy} r={6.5} fill="none" stroke="rgba(255,77,141,0.15)" strokeWidth={1} opacity={0} style={{ animation: 'pulse 2s ease-in-out infinite' }} />
-                              </g>
-                            );
-                          }}
-                          activeDot={{
-                            r: 6,
-                            fill: '#FF4D8D',
-                            stroke: '#FFF7FA',
-                            strokeWidth: 2,
-                            filter: 'url(#glowFilter)',
-                          }}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-
-                    {/* KPI Cards */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, padding: '12px 0 6px' }}>
-                      {(() => {
-                        const maxMonth = monthsWithPart.reduce((a, b) => (a.totalSales > b.totalSales ? a : b), monthsWithPart[0]);
-                        const minMonth = monthsWithPart.reduce((a, b) => (a.totalSales < b.totalSales ? a : b), monthsWithPart[0]);
-                        const avgSales = monthsWithPart.reduce((s, m) => s + m.totalSales, 0) / monthsWithPart.length;
-                        const lastMonth = monthsWithPart[monthsWithPart.length - 1];
-                        const prevMonth = monthsWithPart[monthsWithPart.length - 2];
-                        const varPct = prevMonth ? ((lastMonth.totalSales - prevMonth.totalSales) / prevMonth.totalSales * 100) : 0;
-
-                        return [
-                          { label: 'Mejor mes', value: fmt(maxMonth.totalSales), detail: maxMonth.label, icon: '📈' },
-                          { label: 'Promedio', value: fmt(avgSales), detail: 'mensual', icon: '📊' },
-                          { label: 'Peor mes', value: fmt(minMonth.totalSales), detail: minMonth.label, icon: '📉' },
-                          { label: 'Variación', value: `${varPct > 0 ? '+' : ''}${varPct.toFixed(1)}%`, detail: 'vs anterior', icon: '🔄', color: varPct > 0 ? P.primary : P.textSub },
-                        ].map((kpi, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              background: '#ffffff',
-                              backdropFilter: 'blur(20px)',
-                              border: `1px solid rgba(255,143,184,0.15)`,
-                              borderRadius: 12,
-                              padding: '8px 11px',
-                              boxShadow: `0 2px 8px rgba(255,77,141,0.06)`,
-                              transition: 'all 0.3s ease',
-                              cursor: 'default',
+                    {/* Premium Cinematic Area Chart HERO */}
+                    <div style={{
+                      position: 'relative',
+                      background: 'linear-gradient(135deg, rgba(255,247,250,0.8) 0%, rgba(255,255,255,0.95) 100%)',
+                      borderRadius: '20px 20px 0 0',
+                      overflow: 'hidden',
+                      backdropFilter: 'blur(16px)',
+                    }}>
+                      {/* Ambient Glow Background */}
+                      <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255,77,141,0.15) 0%, transparent 70%)',
+                        pointerEvents: 'none',
+                      }} />
+                      
+                      <ResponsiveContainer width="100%" height={440}>
+                        <AreaChart data={monthsWithPart} margin={{ top: 30, right: 32, left: 0, bottom: 20 }}>
+                          <defs>
+                            {/* Premium Gradient con glow intenso */}
+                            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#FF4D8D" stopOpacity={0.48} />
+                              <stop offset="40%" stopColor="#FF8FB8" stopOpacity={0.22} />
+                              <stop offset="100%" stopColor="#FCE7F3" stopOpacity={0.06} />
+                            </linearGradient>
+                            
+                            {/* Neón Glow Filter para línea */}
+                            <filter id="neonGlow">
+                              <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                              <feMerge>
+                                <feMergeNode in="coloredBlur" />
+                                <feMergeNode in="SourceGraphic" />
+                              </feMerge>
+                            </filter>
+                            
+                            {/* Glow para puntos */}
+                            <filter id="dotGlow">
+                              <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
+                              <feMerge>
+                                <feMergeNode in="coloredBlur" />
+                                <feMergeNode in="SourceGraphic" />
+                              </feMerge>
+                            </filter>
+                          </defs>
+                          
+                          <CartesianGrid stroke="rgba(255,143,184,0.12)" strokeDasharray="0" vertical={false} />
+                          
+                          <XAxis
+                            dataKey="label"
+                            tick={({ x, y, payload }) => (
+                              <text x={x} y={y + 14} textAnchor="middle" fontSize={11} fill={P.textSub} fontFamily="Inter, -apple-system, sans-serif" fontWeight={600} letterSpacing="0.5px">
+                                {payload.value}
+                              </text>
+                            )}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis hide />
+                          
+                          {/* Tooltip Minimalista tipo Linear/Raycast */}
+                          <RechartsTooltip
+                            cursor={{ stroke: 'rgba(255,77,141,0.25)', strokeWidth: 2, strokeDasharray: '4 4' }}
+                            content={({ active, payload }) => {
+                              if (!active || !payload?.length) return null;
+                              const d = payload[0].payload;
+                              return (
+                                <div style={{
+                                  background: 'rgba(255,255,255,0.92)',
+                                  backdropFilter: 'blur(24px)',
+                                  border: `1px solid rgba(255,77,141,0.18)`,
+                                  borderRadius: 12,
+                                  padding: '10px 13px',
+                                  boxShadow: `0 8px 32px rgba(255,77,141,0.12), 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)`,
+                                  minWidth: 'auto',
+                                  fontSize: '11px',
+                                }}>
+                                  <p style={{ fontSize: 10, fontWeight: 700, color: P.textSub, margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.09em' }}>{d.label}</p>
+                                  <p style={{ fontSize: 15, fontWeight: 700, color: '#FF4D8D', margin: '0 0 2px', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{fmt(d.totalSales)}</p>
+                                  {d.compliance != null && (
+                                    <p style={{ fontSize: 9, color: P.textSub, margin: 0, fontVariantNumeric: 'tabular-nums' }}>Cumplimiento: {d.compliance}%</p>
+                                  )}
+                                </div>
+                              );
                             }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = 'rgba(255,247,250,0.95)';
-                              e.currentTarget.style.borderColor = 'rgba(255,77,141,0.2)';
-                              e.currentTarget.style.boxShadow = `0 8px 24px rgba(255,77,141,0.12)`;
+                          />
+                          
+                          {/* Línea Principal con Neón Glow + Premium Glassmorphism Dots */}
+                          <Area
+                            type="monotone"
+                            dataKey="totalSales"
+                            stroke="#FF4D8D"
+                            strokeWidth={3.2}
+                            fill="url(#areaGrad)"
+                            filter="url(#neonGlow)"
+                            isAnimationActive={true}
+                            animationDuration={1400}
+                            animationEasing="ease-in-out"
+                            dot={(props) => {
+                              const { cx, cy, payload } = props;
+                              return (
+                                <g key={`dot-${payload.key}`}>
+                                  <circle cx={cx} cy={cy} r={8} fill="rgba(255,77,141,0.15)" opacity={0.6} />
+                                  <circle cx={cx} cy={cy} r={5.5} fill="#FFF7FA" opacity={0.95} />
+                                  <circle cx={cx} cy={cy} r={5.5} fill="none" stroke="rgba(255,77,141,0.4)" strokeWidth={1.8} />
+                                  <circle cx={cx} cy={cy} r={3} fill="rgba(255,255,255,0.8)" opacity={0.7} />
+                                  <circle cx={cx} cy={cy} r={7} fill="none" stroke="rgba(255,77,141,0.2)" strokeWidth={1} style={{ animation: 'premiumPulse 2.4s ease-in-out infinite' }} />
+                                </g>
+                              );
                             }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = '#ffffff';
-                              e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)';
-                              e.currentTarget.style.boxShadow = `0 4px 16px rgba(255,77,141,0.08)`;
+                            activeDot={{
+                              r: 7,
+                              fill: '#FF4D8D',
+                              stroke: '#FFF7FA',
+                              strokeWidth: 2.5,
+                              filter: 'url(#dotGlow)',
                             }}
-                          >
-                            <p style={{ fontSize: 8, fontWeight: 700, color: P.textSub, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{kpi.icon} {kpi.label}</p>
-                            <p style={{ fontSize: 12, fontWeight: 700, color: kpi.color || P.primary, margin: '0 0 1px', fontVariantNumeric: 'tabular-nums' }}>{kpi.value}</p>
-                            <p style={{ fontSize: 7.5, color: P.textSub, margin: 0 }}>{kpi.detail}</p>
-                          </div>
-                        ));
-                      })()}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
                     </div>
 
+
+
                     <style>{`
-                      @keyframes pulse {
-                        0%, 100% { r: 6.5; opacity: 0; }
-                        50% { r: 10; opacity: 0.2; }
+                      @keyframes premiumPulse {
+                        0%, 100% { r: 7; opacity: 0; }
+                        50% { r: 11; opacity: 0.25; }
                       }
                     `}</style>
                   </>
