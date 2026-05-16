@@ -689,31 +689,82 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             animationDuration={1200}
                             filter="url(#barGlow)"
                             shape={<CustomBar />}
+                            label={({ x, y, width, height, payload }) => {
+                              if (payload.compliance == null) return null;
+                              return (
+                                <text
+                                  x={x + width / 2}
+                                  y={y - 8}
+                                  textAnchor="middle"
+                                  fontSize={9}
+                                  fontWeight={700}
+                                  fill={payload.compliance >= 100 ? '#D81B60' : payload.compliance >= 80 ? '#FF4D8D' : '#FF8FB8'}
+                                  fontVariantNumeric="tabular-nums"
+                                >
+                                  {payload.compliance}%
+                                </text>
+                              );
+                            }}
                           />
                         </BarChart>
                       </ResponsiveContainer>
                       
-                      {/* Mini Stats Footer */}
-                      <div style={{ display: 'flex', justifyContent: 'space-around', padding: '8px 14px 10px', borderTop: '1px solid rgba(255,143,184,0.1)', background: 'rgba(255,255,255,0.5)', gap: 10 }}>
+                      {/* KPI Cards Separados */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 12px', gap: 10, borderTop: '1px solid rgba(255,143,184,0.1)' }}>
                         {(() => {
                           const maxMonth = monthsWithPart.reduce((a, b) => (a.totalSales > b.totalSales ? a : b), monthsWithPart[0]);
                           const avgSales = monthsWithPart.reduce((s, m) => s + m.totalSales, 0) / monthsWithPart.length;
                           const lastMonth = monthsWithPart[monthsWithPart.length - 1];
                           const prevMonth = monthsWithPart[monthsWithPart.length - 2];
                           const growth = prevMonth ? ((lastMonth.totalSales - prevMonth.totalSales) / prevMonth.totalSales * 100) : 0;
-                          
+
                           return [
-                            { label: 'Mejor mes', value: fmt(maxMonth.totalSales), detail: maxMonth.label },
-                            { label: 'Promedio', value: fmt(avgSales), detail: 'mensual' },
-                            { label: 'vs Período', value: `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`, detail: 'anterior', color: growth > 0 ? '#10b981' : '#ef4444' },
+                            { label: 'Mejor mes', value: fmt(maxMonth.totalSales), detail: maxMonth.label, bg: 'rgba(255,77,141,0.06)' },
+                            { label: 'Promedio', value: fmt(avgSales), detail: 'mensual', bg: 'rgba(255,143,184,0.06)' },
+                            { label: 'vs Período', value: `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`, detail: 'anterior', color: growth > 0 ? '#10b981' : '#ef4444', bg: growth > 0 ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)' },
                           ].map((stat, i) => (
-                            <div key={i} style={{ textAlign: 'center', flex: 1 }}>
-                              <p style={{ fontSize: 7.5, fontWeight: 700, color: P.textSub, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{stat.label}</p>
-                              <p style={{ fontSize: 10, fontWeight: 700, color: stat.color || P.primary, margin: '0 0 0px', fontVariantNumeric: 'tabular-nums' }}>{stat.value}</p>
+                            <div key={i} style={{ 
+                              textAlign: 'center', 
+                              flex: 1, 
+                              background: stat.bg,
+                              padding: '9px 10px',
+                              borderRadius: 10,
+                              border: `1px solid ${stat.color ? 'transparent' : 'rgba(255,77,141,0.1)'}`
+                            }}>
+                              <p style={{ fontSize: 7, fontWeight: 700, color: P.textSub, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{stat.label}</p>
+                              <p style={{ fontSize: 11, fontWeight: 700, color: stat.color || P.primary, margin: '0 0 2px', fontVariantNumeric: 'tabular-nums' }}>{stat.value}</p>
                               <p style={{ fontSize: 7, color: P.textSub, margin: 0 }}>{stat.detail}</p>
                             </div>
                           ));
                         })()}
+                      </div>
+
+                      {/* Mini Gráfica Tendencia Cumplimiento */}
+                      <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(255,143,184,0.08)' }}>
+                        <p style={{ fontSize: 7.5, fontWeight: 700, color: P.textSub, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Tendencia Cumplimiento</p>
+                        <ResponsiveContainer width="100%" height={65}>
+                          <AreaChart data={monthsWithPart.map((m) => ({ ...m, compliance: m.compliance || 0 }))}>
+                            <defs>
+                              <linearGradient id="complianceGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#FF4D8D" stopOpacity={0.3} />
+                                <stop offset="100%" stopColor="#FF4D8D" stopOpacity={0.02} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid stroke="none" vertical={false} />
+                            <XAxis dataKey="label" tick={false} axisLine={false} height={0} margin={0} />
+                            <YAxis hide domain={[0, 120]} />
+                            <Area
+                              type="monotone"
+                              dataKey="compliance"
+                              fill="url(#complianceGrad)"
+                              stroke="#FF4D8D"
+                              strokeWidth={1.8}
+                              isAnimationActive={true}
+                              animationDuration={1200}
+                              dot={false}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
                       </div>
                     </div>
 
