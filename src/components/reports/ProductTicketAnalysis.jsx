@@ -507,13 +507,13 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                         
                     <div>
                       <p style={{ fontSize: 10, fontWeight: 700, color: P.textSub, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0, lineHeight: 1.3 }}>Venta por Mes</p>
-                      <p style={{ fontSize: 14, fontWeight: 500, color: P.text, margin: 0, marginTop: 3, letterSpacing: '-0.01em', lineHeight: 1.3 }}>Ene – {MONTH_NAMES[new Date().getMonth()]} · {currentYear}</p>
+                      <p style={{ fontSize: 14, fontWeight: 500, color: P.primary, margin: 0, marginTop: 3, letterSpacing: '-0.01em', lineHeight: 1.3 }}>Ene – {MONTH_NAMES[new Date().getMonth()]} · {currentYear}</p>
                     </div>
                   </div>
                   {totalYearSales > 0 &&
                     <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: P.textSub, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 3px' }}>Total acumulado</p>
-                      <p style={{ fontSize: 19, fontWeight: 700, color: P.text, margin: 0, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{fmt(totalYearSales)}</p>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: P.primary, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 3px' }}>Total acumulado</p>
+                      <p style={{ fontSize: 19, fontWeight: 700, color: P.primary, margin: 0, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{fmt(totalYearSales)}</p>
                     </div>
                   }
                 </div>
