@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -315,127 +317,146 @@ export default function ProductTicketAnalysis({ storeId }) {
 
 
 
-        {/* Chart 2: Top productos — gráfica de barras verticales premium */}
-        <Card className="border-0 shadow-sm bg-white flex flex-col overflow-hidden">
-          <CardHeader className="pb-0 pt-4 px-5 flex-shrink-0">
-            <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-0.5">Top Productos</p>
-            <div className="flex items-end justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">Venta bruta · período actual</CardTitle>
-              {topProducts[0] && (
-                <span className="text-lg font-extrabold pb-0.5" style={{ color: '#E91E8C' }}>
-                  {fmt(topProducts.reduce((s, p) => s + p.totalSales, 0))}
-                </span>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="px-1 pb-2 pt-2 flex-1 flex flex-col">
-            <ResponsiveContainer width="100%" height={185}>
-              <BarChart
-                data={topProducts.slice(0, 8)}
-                margin={{ top: 8, right: 8, left: 0, bottom: 32 }}
-                barCategoryGap="28%"
-              >
-                <defs>
-                  <linearGradient id="barGradPink" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#E91E8C" stopOpacity={1} />
-                    <stop offset="100%" stopColor="#F48FB1" stopOpacity={0.7} />
-                  </linearGradient>
-                  <linearGradient id="barGradPinkLight" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#F06292" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="#FCE4EC" stopOpacity={0.3} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} stroke="#fce7f3" strokeDasharray="4 4" />
-                <XAxis
-                  dataKey="product"
-                  tick={({ x, y, payload }) => (
-                    <text x={x} y={y + 6} textAnchor="middle" fontSize={9} fill="#c084a8"
-                      style={{ fontFamily: 'Inter, sans-serif' }}>
-                      {payload.value.length > 10 ? payload.value.slice(0, 10) + '…' : payload.value}
-                    </text>
-                  )}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis hide />
-                <RechartsTooltip
-                  cursor={{ fill: 'rgba(249,168,212,0.12)' }}
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const d = payload[0].payload;
-                    return (
-                      <div style={{ background: '#fff', border: '1px solid #fce7f3', borderRadius: 10, padding: '8px 12px', boxShadow: '0 4px 20px rgba(233,30,140,0.12)' }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>{d.product}</p>
-                        <p style={{ fontSize: 13, fontWeight: 800, color: '#E91E8C' }}>{fmt(d.totalSales)}</p>
-                        <p style={{ fontSize: 10, color: '#94a3b8' }}>{d.participation.toFixed(1)}% participación</p>
-                      </div>
-                    );
-                  }}
-                />
-                <Bar dataKey="totalSales" radius={[6, 6, 0, 0]}>
-                  {topProducts.slice(0, 8).map((p, i) => (
-                    <Cell
-                      key={i}
-                      fill={i === 0 ? 'url(#barGradPink)' : i === 1 ? 'url(#barGradPinkLight)' : `rgba(233,30,140,${0.18 + (8 - i) * 0.06})`}
-                    />
-                  ))}
-                  <LabelList
-                    dataKey="participation"
-                    position="top"
-                    formatter={(v) => `${v.toFixed(0)}%`}
-                    style={{ fontSize: 9, fontWeight: 700, fill: '#E91E8C', fontFamily: 'Inter, sans-serif' }}
-                  />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+        {/* Chart 2: Ventas por mes — desde Enero */}
+        {(() => {
+          // Agrupar dailySales por mes
+          const monthMap = {};
+          const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+          dailySales.forEach((d) => {
+            if (!d.date) return;
+            try {
+              const dt = parseISO(d.date);
+              const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2,'0')}`;
+              const monthIdx = dt.getMonth();
+              if (!monthMap[key]) monthMap[key] = { key, label: MONTH_NAMES[monthIdx], month: monthIdx + 1, year: dt.getFullYear(), totalSales: 0, totalTickets: 0 };
+              monthMap[key].totalSales += d.total_sales || 0;
+              monthMap[key].totalTickets += d.total_tickets || 0;
+            } catch(e) {}
+          });
+          // Solo meses del año actual, desde enero
+          const currentYear = new Date().getFullYear();
+          const monthData = Object.values(monthMap)
+            .filter(m => m.year === currentYear)
+            .sort((a, b) => a.month - b.month);
+          const totalYearSales = monthData.reduce((s, m) => s + m.totalSales, 0);
+          const maxMonthSales = Math.max(...monthData.map(m => m.totalSales), 1);
+          const monthsWithPart = monthData.map(m => ({
+            ...m,
+            participation: totalYearSales > 0 ? m.totalSales / totalYearSales * 100 : 0
+          }));
 
-            {/* Ranking table */}
-            <div className="mx-3 mt-2 rounded-xl overflow-hidden border border-pink-50">
-              {/* Header */}
-              <div className="grid grid-cols-[16px_1fr_auto_36px] gap-x-2 px-3 py-1.5 bg-pink-50/60">
-                <span className="text-[9px] font-bold text-pink-300 uppercase">#</span>
-                <span className="text-[9px] font-bold text-pink-300 uppercase">Producto</span>
-                <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Venta bruta</span>
-                <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Part.</span>
-              </div>
-              {topProducts.slice(0, 5).map((p, i) => {
-                const maxS = topProducts[0]?.totalSales || 1;
-                return (
-                  <div
-                    key={p.product}
-                    className="grid grid-cols-[16px_1fr_auto_36px] gap-x-2 px-3 py-1.5 items-center relative"
-                    style={{ background: i % 2 === 0 ? 'rgba(253,242,248,0.5)' : 'white' }}
-                  >
-                    {/* rank badge */}
-                    <span className="text-[10px] font-black leading-none"
-                      style={{ color: i === 0 ? '#E91E8C' : i === 1 ? '#f06292' : '#d1b3c4' }}>
-                      {i + 1}
+          return (
+            <Card className="border-0 shadow-sm bg-white flex flex-col overflow-hidden">
+              <CardHeader className="pb-0 pt-4 px-5 flex-shrink-0">
+                <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mb-0.5">Venta por Mes</p>
+                <div className="flex items-end justify-between">
+                  <CardTitle className="text-sm font-semibold text-slate-700">Enero – {MONTH_NAMES[new Date().getMonth()]} {currentYear}</CardTitle>
+                  {totalYearSales > 0 && (
+                    <span className="text-lg font-extrabold pb-0.5" style={{ color: '#E91E8C' }}>
+                      {fmt(totalYearSales)}
                     </span>
-                    {/* name + mini bar */}
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-medium text-slate-700 truncate leading-tight">{p.product}</p>
-                      <div className="mt-0.5 h-[3px] rounded-full bg-pink-100 overflow-hidden">
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${(p.totalSales / maxS) * 100}%`,
-                            background: i === 0 ? '#E91E8C' : `rgba(233,30,140,${0.55 - i * 0.08})`
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="px-1 pb-2 pt-2 flex-1 flex flex-col">
+                {monthsWithPart.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center text-[11px] text-slate-300">Sin datos de ventas mensuales</div>
+                ) : (
+                  <>
+                    <ResponsiveContainer width="100%" height={185}>
+                      <BarChart
+                        data={monthsWithPart}
+                        margin={{ top: 18, right: 8, left: 0, bottom: 4 }}
+                        barCategoryGap="22%"
+                      >
+                        <defs>
+                          <linearGradient id="barGradPink" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#E91E8C" stopOpacity={1} />
+                            <stop offset="100%" stopColor="#F48FB1" stopOpacity={0.6} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid vertical={false} stroke="#fce7f3" strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="label"
+                          tick={({ x, y, payload }) => (
+                            <text x={x} y={y + 8} textAnchor="middle" fontSize={9} fill="#c084a8" fontFamily="Inter, sans-serif">
+                              {payload.value}
+                            </text>
+                          )}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis hide />
+                        <RechartsTooltip
+                          cursor={{ fill: 'rgba(249,168,212,0.10)' }}
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const d = payload[0].payload;
+                            return (
+                              <div style={{ background: '#fff', border: '1px solid #fce7f3', borderRadius: 10, padding: '8px 12px', boxShadow: '0 4px 20px rgba(233,30,140,0.12)' }}>
+                                <p style={{ fontSize: 11, fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>{d.label} {d.year}</p>
+                                <p style={{ fontSize: 13, fontWeight: 800, color: '#E91E8C' }}>{fmt(d.totalSales)}</p>
+                                <p style={{ fontSize: 10, color: '#94a3b8' }}>{d.participation.toFixed(1)}% del año</p>
+                              </div>
+                            );
                           }}
                         />
+                        <Bar dataKey="totalSales" radius={[5, 5, 0, 0]}>
+                          {monthsWithPart.map((m, i) => {
+                            const isCurrentMonth = m.month === new Date().getMonth() + 1;
+                            return (
+                              <Cell
+                                key={i}
+                                fill={isCurrentMonth ? 'url(#barGradPink)' : `rgba(233,30,140,${0.15 + (m.participation / 100) * 0.6})`}
+                              />
+                            );
+                          })}
+                          <LabelList
+                            dataKey="participation"
+                            position="top"
+                            formatter={(v) => v >= 5 ? `${v.toFixed(0)}%` : ''}
+                            style={{ fontSize: 8, fontWeight: 700, fill: '#E91E8C', fontFamily: 'Inter, sans-serif' }}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+
+                    {/* Ranking mensual */}
+                    <div className="mx-3 mt-2 rounded-xl overflow-hidden border border-pink-50">
+                      <div className="grid grid-cols-[20px_1fr_auto_36px] gap-x-2 px-3 py-1.5 bg-pink-50/60">
+                        <span className="text-[9px] font-bold text-pink-300 uppercase">#</span>
+                        <span className="text-[9px] font-bold text-pink-300 uppercase">Mes</span>
+                        <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Venta bruta</span>
+                        <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Part.</span>
                       </div>
+                      {[...monthsWithPart].sort((a, b) => b.totalSales - a.totalSales).slice(0, 5).map((m, i) => (
+                        <div
+                          key={m.key}
+                          className="grid grid-cols-[20px_1fr_auto_36px] gap-x-2 px-3 py-1.5 items-center"
+                          style={{ background: i % 2 === 0 ? 'rgba(253,242,248,0.5)' : 'white' }}
+                        >
+                          <span className="text-[10px] font-black leading-none"
+                            style={{ color: i === 0 ? '#E91E8C' : i === 1 ? '#f06292' : '#d1b3c4' }}>
+                            {i + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-medium text-slate-700 leading-tight">{m.label} {m.year}</p>
+                            <div className="mt-0.5 h-[3px] rounded-full bg-pink-100 overflow-hidden">
+                              <div className="h-full rounded-full"
+                                style={{ width: `${(m.totalSales / maxMonthSales) * 100}%`, background: i === 0 ? '#E91E8C' : `rgba(233,30,140,${0.55 - i * 0.08})` }} />
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-right" style={{ color: '#E91E8C' }}>{fmt(m.totalSales)}</span>
+                          <span className="text-[9px] text-slate-400 text-right">{m.participation.toFixed(1)}%</span>
+                        </div>
+                      ))}
                     </div>
-                    {/* sales */}
-                    <span className="text-[10px] font-bold text-right" style={{ color: '#E91E8C' }}>
-                      {fmt(p.totalSales)}
-                    </span>
-                    {/* participation */}
-                    <span className="text-[9px] text-slate-400 text-right">{p.participation.toFixed(1)}%</span>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })()}
       </div>
       </>);
       })()}
