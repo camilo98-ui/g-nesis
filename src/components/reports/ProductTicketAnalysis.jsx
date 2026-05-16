@@ -174,12 +174,12 @@ export default function ProductTicketAnalysis({ storeId }) {
       const d = p.department || 'Sin Dpto';
       if (!map[d]) map[d] = { dept: d, totalSales: 0, participation: 0, units: 0 };
       map[d].totalSales += p.totalSales;
-      map[d].units += salesReports.filter(r => r.department === d).reduce((s, r) => s + (r.quantity || r.units || 0), 0);
+      map[d].units += salesReports.filter((r) => r.department === d).reduce((s, r) => s + (r.quantity || r.units || 0), 0);
     });
     const total = Object.values(map).reduce((s, d) => s + d.totalSales, 0);
-    return Object.values(map).map(d => ({
+    return Object.values(map).map((d) => ({
       ...d,
-      participation: total > 0 ? (d.totalSales / total * 100) : 0
+      participation: total > 0 ? d.totalSales / total * 100 : 0
     })).sort((a, b) => b.totalSales - a.totalSales);
   }, [products, salesReports]);
 
@@ -250,26 +250,26 @@ export default function ProductTicketAnalysis({ storeId }) {
                 <YAxis dataKey="dept" type="category" width={90} tick={{ fontSize: 9 }} />
                 <RechartsTooltip
                   formatter={(v, name) => name === 'participation' ? [`${v.toFixed(2)}%`, 'Participación'] : [fmt(v), 'Venta Bruta']}
-                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }}
-                />
+                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
+                
                 <Bar dataKey="participation" name="participation" radius={[0, 4, 4, 0]} fill="#C21875">
-                  {deptData.map((d, i) => (
-                    <Cell key={i} fill={i === 0 ? '#C21875' : i === 1 ? '#e11d48' : i === 2 ? '#f43f5e' : `rgba(194,24,117,${0.6 - i * 0.08})`} />
-                  ))}
+                  {deptData.map((d, i) =>
+                  <Cell key={i} fill={i === 0 ? '#C21875' : i === 1 ? '#e11d48' : i === 2 ? '#f43f5e' : `rgba(194,24,117,${0.6 - i * 0.08})`} />
+                  )}
                   
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
             {/* Dept summary rows */}
             <div className="mt-2 space-y-1 px-2">
-              {deptData.slice(0, 5).map((d, i) => (
-                <div key={d.dept} className="flex items-center gap-2 text-xs">
+              {deptData.slice(0, 5).map((d, i) =>
+              <div key={d.dept} className="flex items-center gap-2 text-xs">
                   <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: i === 0 ? '#C21875' : i === 1 ? '#e11d48' : i === 2 ? '#f43f5e' : `rgba(194,24,117,${0.6 - i * 0.08})` }} />
                   <span className="truncate text-slate-600 flex-1">{d.dept}</span>
                   <span className="font-semibold text-rose-500">{d.participation.toFixed(1)}%</span>
                   <span className="text-slate-400">{fmt(d.totalSales)}</span>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -335,41 +335,41 @@ export default function ProductTicketAnalysis({ storeId }) {
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={topProducts} layout="vertical" margin={{ left: 4, right: 50, top: 4, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                <XAxis type="number" tickFormatter={(v) => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : `${(v/1e3).toFixed(0)}K`} tick={{ fontSize: 9 }} />
+                <XAxis type="number" tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : `${(v / 1e3).toFixed(0)}K`} tick={{ fontSize: 9 }} />
                 <YAxis dataKey="product" type="category" width={90} tick={{ fontSize: 9 }} />
                 <RechartsTooltip
                   formatter={(v) => [fmt(v), 'Venta Bruta']}
-                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }}
-                />
+                  contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
+                
                 <Bar dataKey="totalSales" radius={[0, 4, 4, 0]}>
-                  {topProducts.map((p, i) => (
-                    <Cell key={i} fill={
-                      p.impact.label === 'Motor' ? '#10b981' :
-                      p.impact.label === 'Impulsor' ? '#3b82f6' :
-                      p.impact.label === 'Volumen Bajo Valor' ? '#f59e0b' :
-                      p.impact.label === 'Sin Tracción' ? '#ef4444' : '#94a3b8'
-                    } />
-                  ))}
+                  {topProducts.map((p, i) =>
+                  <Cell key={i} fill={
+                  p.impact.label === 'Motor' ? '#10b981' :
+                  p.impact.label === 'Impulsor' ? '#3b82f6' :
+                  p.impact.label === 'Volumen Bajo Valor' ? '#f59e0b' :
+                  p.impact.label === 'Sin Tracción' ? '#ef4444' : '#94a3b8'
+                  } />
+                  )}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
             <div className="mt-2 space-y-1 px-2">
-              {topProducts.slice(0, 5).map((p, i) => (
-                <div key={p.product} className="flex items-center gap-2 text-xs">
-                  <span className="text-slate-300 tabular-nums w-4">{i+1}</span>
+              {topProducts.slice(0, 5).map((p, i) =>
+              <div key={p.product} className="flex items-center gap-2 text-xs">
+                  <span className="text-slate-300 tabular-nums w-4">{i + 1}</span>
                   <span className="truncate text-slate-600 flex-1">{p.product}</span>
                   <span className={`font-semibold ${p.impact.color}`}>{p.impact.icon}</span>
                   <span className="font-medium text-slate-700">{fmt(p.totalSales)}</span>
                   <span className="text-slate-400">{p.participation.toFixed(1)}%</span>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters + Table */}
-      <Card className="border-0 shadow-sm bg-white overflow-hidden">
+      <Card className="border-0 shadow-sm bg-white overflow-hidden hidden">
         <CardHeader className="pb-3 pt-4 px-4 flex flex-row items-center justify-between gap-3">
           <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
             <Zap className="w-4 h-4 text-amber-500" />
