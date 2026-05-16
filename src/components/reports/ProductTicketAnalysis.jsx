@@ -524,30 +524,30 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                   <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 11, color: P.textSub }}>Sin datos de ventas mensuales</div>
                 ) : (
                   <>
-                    {/* Premium Cinematic Area Chart HERO */}
+                    {/* Premium Clean Area Chart */}
                     <div style={{
                       position: 'relative',
-                      background: 'linear-gradient(135deg, rgba(255,247,250,0.8) 0%, rgba(255,255,255,0.95) 100%)',
+                      background: 'linear-gradient(135deg, rgba(255,250,252,0.9) 0%, rgba(255,255,255,0.98) 100%)',
                       borderRadius: '20px 20px 0 0',
                       overflow: 'hidden',
-                      backdropFilter: 'blur(16px)',
+                      backdropFilter: 'blur(12px)',
                     }}>
-                      {/* Ambient Glow Background */}
+                      {/* Subtle Ambient Glow */}
                       <div style={{
                         position: 'absolute',
                         inset: 0,
-                        background: 'radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255,77,141,0.15) 0%, transparent 70%)',
+                        background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255,77,141,0.08) 0%, transparent 65%)',
                         pointerEvents: 'none',
                       }} />
                       
-                      <ResponsiveContainer width="100%" height={440}>
-                        <AreaChart data={monthsWithPart} margin={{ top: 30, right: 32, left: 0, bottom: 20 }}>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart data={monthsWithPart} margin={{ top: 20, right: 24, left: 0, bottom: 12 }}>
                           <defs>
-                            {/* Premium Gradient con glow intenso */}
+                            {/* Clean Premium Gradient */}
                             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#FF4D8D" stopOpacity={0.48} />
-                              <stop offset="40%" stopColor="#FF8FB8" stopOpacity={0.22} />
-                              <stop offset="100%" stopColor="#FCE7F3" stopOpacity={0.06} />
+                              <stop offset="0%" stopColor="#FF4D8D" stopOpacity={0.35} />
+                              <stop offset="50%" stopColor="#FF8FB8" stopOpacity={0.12} />
+                              <stop offset="100%" stopColor="#FCE7F3" stopOpacity={0.02} />
                             </linearGradient>
                             
                             {/* Neón Glow Filter para línea */}
@@ -569,7 +569,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             </filter>
                           </defs>
                           
-                          <CartesianGrid stroke="rgba(255,143,184,0.12)" strokeDasharray="0" vertical={false} />
+                          <CartesianGrid stroke="rgba(255,143,184,0.08)" strokeDasharray="0" vertical={false} />
                           
                           <XAxis
                             dataKey="label"
@@ -610,26 +610,25 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             }}
                           />
                           
-                          {/* Línea Principal con Neón Glow + Premium Glassmorphism Dots */}
+                          {/* Línea Principal + Glassmorphism Dots */}
                           <Area
                             type="monotone"
                             dataKey="totalSales"
                             stroke="#FF4D8D"
-                            strokeWidth={3.2}
+                            strokeWidth={2.8}
                             fill="url(#areaGrad)"
                             filter="url(#neonGlow)"
                             isAnimationActive={true}
-                            animationDuration={1400}
+                            animationDuration={1200}
                             animationEasing="ease-in-out"
                             dot={(props) => {
                               const { cx, cy, payload } = props;
                               return (
                                 <g key={`dot-${payload.key}`}>
-                                  <circle cx={cx} cy={cy} r={8} fill="rgba(255,77,141,0.15)" opacity={0.6} />
-                                  <circle cx={cx} cy={cy} r={5.5} fill="#FFF7FA" opacity={0.95} />
-                                  <circle cx={cx} cy={cy} r={5.5} fill="none" stroke="rgba(255,77,141,0.4)" strokeWidth={1.8} />
-                                  <circle cx={cx} cy={cy} r={3} fill="rgba(255,255,255,0.8)" opacity={0.7} />
-                                  <circle cx={cx} cy={cy} r={7} fill="none" stroke="rgba(255,77,141,0.2)" strokeWidth={1} style={{ animation: 'premiumPulse 2.4s ease-in-out infinite' }} />
+                                  <circle cx={cx} cy={cy} r={7} fill="rgba(255,77,141,0.12)" opacity={0.5} />
+                                  <circle cx={cx} cy={cy} r={4.5} fill="#FFF7FA" opacity={0.95} />
+                                  <circle cx={cx} cy={cy} r={4.5} fill="none" stroke="rgba(255,77,141,0.35)" strokeWidth={1.5} />
+                                  <circle cx={cx} cy={cy} r={2} fill="rgba(255,255,255,0.85)" opacity={0.7} />
                                 </g>
                               );
                             }}
@@ -643,9 +642,30 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                           />
                         </AreaChart>
                       </ResponsiveContainer>
+                      
+                      {/* Mini Stats Footer */}
+                      <div style={{ display: 'flex', justifyContent: 'space-around', padding: '14px 20px 16px', borderTop: '1px solid rgba(255,143,184,0.1)', background: 'rgba(255,255,255,0.5)', gap: 16 }}>
+                        {(() => {
+                          const maxMonth = monthsWithPart.reduce((a, b) => (a.totalSales > b.totalSales ? a : b), monthsWithPart[0]);
+                          const avgSales = monthsWithPart.reduce((s, m) => s + m.totalSales, 0) / monthsWithPart.length;
+                          const lastMonth = monthsWithPart[monthsWithPart.length - 1];
+                          const prevMonth = monthsWithPart[monthsWithPart.length - 2];
+                          const growth = prevMonth ? ((lastMonth.totalSales - prevMonth.totalSales) / prevMonth.totalSales * 100) : 0;
+                          
+                          return [
+                            { label: 'Mejor mes', value: fmt(maxMonth.totalSales), detail: maxMonth.label },
+                            { label: 'Promedio', value: fmt(avgSales), detail: 'mensual' },
+                            { label: 'vs Período', value: `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`, detail: 'anterior', color: growth > 0 ? '#10b981' : '#ef4444' },
+                          ].map((stat, i) => (
+                            <div key={i} style={{ textAlign: 'center', flex: 1 }}>
+                              <p style={{ fontSize: 8.5, fontWeight: 700, color: P.textSub, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{stat.label}</p>
+                              <p style={{ fontSize: 12, fontWeight: 700, color: stat.color || P.primary, margin: '0 0 1px', fontVariantNumeric: 'tabular-nums' }}>{stat.value}</p>
+                              <p style={{ fontSize: 7.5, color: P.textSub, margin: 0 }}>{stat.detail}</p>
+                            </div>
+                          ));
+                        })()}
+                      </div>
                     </div>
-
-
 
                     <style>{`
                       @keyframes premiumPulse {
