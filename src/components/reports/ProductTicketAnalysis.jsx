@@ -556,10 +556,19 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                       <ResponsiveContainer width="100%" height={200}>
                         <ComposedChart data={monthsWithPart} margin={{ top: 20, right: 24, left: 0, bottom: 12 }}>
                           <defs>
-                            {/* Gradientes Premium */}
-                            <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#FFB3D9" stopOpacity={0.6} />
-                              <stop offset="100%" stopColor="#FF8FB8" stopOpacity={0.35} />
+                            {/* Gradientes Profesionales Multicapa */}
+                            <linearGradient id="areaPrimary" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#FF4D8D" stopOpacity={0.4} />
+                              <stop offset="50%" stopColor="#FF8FB8" stopOpacity={0.2} />
+                              <stop offset="100%" stopColor="#FFD1E3" stopOpacity={0.05} />
+                            </linearGradient>
+                            <linearGradient id="areaSecondary" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.25} />
+                              <stop offset="100%" stopColor="#E9D5FF" stopOpacity={0.02} />
+                            </linearGradient>
+                            <linearGradient id="areaTertiary" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#06B6D4" stopOpacity={0.2} />
+                              <stop offset="100%" stopColor="#CFFAFE" stopOpacity={0.01} />
                             </linearGradient>
                             <linearGradient id="trendGrad" x1="0" y1="0" x2="1" y2="0">
                               <stop offset="0%" stopColor="#8B5CF6" />
@@ -586,7 +595,12 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             </filter>
                           </defs>
                           
-                          <CartesianGrid stroke="rgba(200,200,200,0.1)" strokeDasharray="4 4" vertical={false} />
+                          <CartesianGrid 
+                            stroke="rgba(200,200,200,0.08)" 
+                            strokeDasharray="3 3" 
+                            vertical={false}
+                            opacity={0.6}
+                          />
                           
                           <XAxis
                             dataKey="label"
@@ -628,8 +642,29 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             }}
                           />
                           
-                          {/* Barras de Volumen de Fondo */}
-                          <Bar yAxisId="left" dataKey="participation" fill="url(#barGrad)" radius={[8, 8, 0, 0]} opacity={0.4} />
+                          {/* Área Base Terciaria (Cyan suave) */}
+                          <Area
+                            yAxisId="left"
+                            type="monotone"
+                            dataKey="trendline"
+                            fill="url(#areaTertiary)"
+                            stroke="none"
+                            isAnimationActive={true}
+                            animationDuration={1600}
+                            opacity={0.7}
+                          />
+
+                          {/* Área Secundaria (Violeta profesional) */}
+                          <Area
+                            yAxisId="left"
+                            type="monotone"
+                            dataKey="participation"
+                            fill="url(#areaSecondary)"
+                            stroke="none"
+                            isAnimationActive={true}
+                            animationDuration={1500}
+                            opacity={0.6}
+                          />
 
                           {/* Línea de Tendencia Suave */}
                           <Line
@@ -637,31 +672,32 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             type="monotone"
                             dataKey="trendline"
                             stroke="url(#trendGrad)"
-                            strokeWidth={3}
+                            strokeWidth={2.5}
                             dot={false}
                             isAnimationActive={true}
                             animationDuration={1400}
-                            opacity={0.85}
+                            opacity={0.8}
                             strokeLinecap="round"
                           />
 
-                          {/* Línea Principal con Puntos */}
-                          <Line
+                          {/* Área Principal (Rosa premium) */}
+                          <Area
                             yAxisId="left"
                             type="monotone"
                             dataKey="totalSales"
+                            fill="url(#areaPrimary)"
                             stroke="#FF4D8D"
-                            strokeWidth={3.2}
+                            strokeWidth={3}
                             isAnimationActive={true}
-                            animationDuration={1200}
+                            animationDuration={1300}
                             dot={(props) => {
                               const { cx, cy, payload } = props;
                               return (
                                 <g key={`dot-${payload.key}`}>
-                                  <circle cx={cx} cy={cy} r={8} fill="rgba(255,77,141,0.15)" opacity={0.5} />
-                                  <circle cx={cx} cy={cy} r={5} fill="#FFF7FA" opacity={0.98} />
-                                  <circle cx={cx} cy={cy} r={5} fill="none" stroke="#FF4D8D" strokeWidth={2} />
-                                  <circle cx={cx} cy={cy} r={2.5} fill="#FF4D8D" />
+                                  <circle cx={cx} cy={cy} r={7} fill="rgba(255,77,141,0.12)" opacity={0.4} />
+                                  <circle cx={cx} cy={cy} r={5} fill="#FFF7FA" opacity={0.99} />
+                                  <circle cx={cx} cy={cy} r={5} fill="none" stroke="#FF4D8D" strokeWidth={1.8} />
+                                  <circle cx={cx} cy={cy} r={2.2} fill="#FF4D8D" />
                                 </g>
                               );
                             }}
