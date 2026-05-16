@@ -389,22 +389,50 @@ export default function ProductTicketAnalysis({ storeId }) {
               </BarChart>
             </ResponsiveContainer>
 
-            {/* Mini tabla resumen */}
-            <div className="mt-1 px-3 flex-1">
-              <div className="border-t border-pink-50 pt-2">
-                {topProducts.slice(0, 5).map((p, i) => (
-                  <div key={p.product} className="flex items-center justify-between py-0.5 gap-2">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-[9px] font-bold text-pink-200 w-3 flex-shrink-0">{i + 1}</span>
-                      <span className="text-[10px] text-slate-600 truncate">{p.product}</span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-[10px] font-bold" style={{ color: '#E91E8C' }}>{fmt(p.totalSales)}</span>
-                      <span className="text-[9px] text-slate-400 w-7 text-right">{p.participation.toFixed(1)}%</span>
-                    </div>
-                  </div>
-                ))}
+            {/* Ranking table */}
+            <div className="mx-3 mt-2 rounded-xl overflow-hidden border border-pink-50">
+              {/* Header */}
+              <div className="grid grid-cols-[16px_1fr_auto_36px] gap-x-2 px-3 py-1.5 bg-pink-50/60">
+                <span className="text-[9px] font-bold text-pink-300 uppercase">#</span>
+                <span className="text-[9px] font-bold text-pink-300 uppercase">Producto</span>
+                <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Venta bruta</span>
+                <span className="text-[9px] font-bold text-pink-300 uppercase text-right">Part.</span>
               </div>
+              {topProducts.slice(0, 5).map((p, i) => {
+                const maxS = topProducts[0]?.totalSales || 1;
+                return (
+                  <div
+                    key={p.product}
+                    className="grid grid-cols-[16px_1fr_auto_36px] gap-x-2 px-3 py-1.5 items-center relative"
+                    style={{ background: i % 2 === 0 ? 'rgba(253,242,248,0.5)' : 'white' }}
+                  >
+                    {/* rank badge */}
+                    <span className="text-[10px] font-black leading-none"
+                      style={{ color: i === 0 ? '#E91E8C' : i === 1 ? '#f06292' : '#d1b3c4' }}>
+                      {i + 1}
+                    </span>
+                    {/* name + mini bar */}
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-medium text-slate-700 truncate leading-tight">{p.product}</p>
+                      <div className="mt-0.5 h-[3px] rounded-full bg-pink-100 overflow-hidden">
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${(p.totalSales / maxS) * 100}%`,
+                            background: i === 0 ? '#E91E8C' : `rgba(233,30,140,${0.55 - i * 0.08})`
+                          }}
+                        />
+                      </div>
+                    </div>
+                    {/* sales */}
+                    <span className="text-[10px] font-bold text-right" style={{ color: '#E91E8C' }}>
+                      {fmt(p.totalSales)}
+                    </span>
+                    {/* participation */}
+                    <span className="text-[9px] text-slate-400 text-right">{p.participation.toFixed(1)}%</span>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
