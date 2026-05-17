@@ -79,7 +79,7 @@ const SalesTooltip = makePremiumTooltip(fmt);
 const EbitdaTooltip = makePremiumTooltip((val) => `${val}%`);
 
 // ── PREMIUM ANALYTICS CARD ────────────────────────────────────────────────────
-function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
+function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '', insightTooltip = [] }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -108,7 +108,6 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
           pointerEvents: 'none'
         }} />
       
-      
       {/* Animated border glow */}
       <motion.div
         className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 pointer-events-none"
@@ -120,7 +119,6 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
           filter: 'blur(1px)'
         }} />
       
-      
       {/* Dynamic shadow */}
       <motion.div
         className="absolute inset-0 rounded-3xl opacity-0 pointer-events-none"
@@ -131,7 +129,6 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
           '0 20px 40px rgba(255, 77, 141, 0.12), 0 8px 16px rgba(0,0,0,0.06)' :
           '0 2px 8px rgba(255, 77, 141, 0.08), 0 16px 48px rgba(0,0,0,0.04)'
         }} />
-      
       
       <div className="relative z-10 flex items-start justify-between mb-5">
         <div>
@@ -150,6 +147,29 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
             </motion.p>
           }
         </div>
+
+        {/* ? Insight Button */}
+        {insightTooltip.length > 0 && (
+          <div className="relative group/itip flex-shrink-0 ml-2 mt-0.5">
+            <div className="w-5 h-5 rounded-full flex items-center justify-center cursor-default"
+              style={{ background: 'rgba(255,77,141,0.1)', border: '1px solid rgba(255,77,141,0.25)' }}>
+              <span className="text-[9px] font-black leading-none" style={{ color: '#FF4D8D' }}>?</span>
+            </div>
+            <div className="absolute right-0 top-6 z-50 w-60 rounded-2xl p-3.5 opacity-0 pointer-events-none group-hover/itip:opacity-100 group-hover/itip:pointer-events-auto transition-all duration-200 translate-y-1 group-hover/itip:translate-y-0"
+              style={{ background: 'rgba(10,10,20,0.94)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255,77,141,0.2)', boxShadow: '0 20px 48px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04)' }}>
+              <div className="absolute -top-1.5 right-2 w-2.5 h-2.5 rotate-45" style={{ background: 'rgba(10,10,20,0.94)', borderTop: '1px solid rgba(255,77,141,0.2)', borderLeft: '1px solid rgba(255,77,141,0.2)' }} />
+              <p className="text-[7.5px] font-bold uppercase tracking-[0.18em] mb-2.5" style={{ color: '#FF4D8D' }}>Insights · {title}</p>
+              <div className="space-y-2">
+                {insightTooltip.map(({ label, value, highlight }) => (
+                  <div key={label} className="flex items-center justify-between gap-3">
+                    <span className="text-[9px] text-slate-400 font-medium leading-tight">{label}</span>
+                    <span className="text-[9.5px] font-black tabular-nums flex-shrink-0" style={{ color: highlight || '#fff' }}>{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <div className="relative z-10">
         {children}
@@ -452,7 +472,24 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           title="Ticket Promedio"
           subtitle="Tendencia diaria · últimos 30 días"
           delay={0.18}
-          colSpan="lg:col-span-3">
+          colSpan="lg:col-span-3"
+          insightTooltip={(() => {
+            const withTicket = sorted30.filter(d => d.ticket > 0);
+            const avgTk = withTicket.length > 0 ? Math.round(withTicket.reduce((s,d) => s+d.ticket,0)/withTicket.length) : 0;
+            const latestTk = withTicket[withTicket.length-1]?.ticket || 0;
+            const maxTk = Math.max(...withTicket.map(d=>d.ticket), 1);
+            const minTk = withTicket.length > 0 ? Math.min(...withTicket.map(d=>d.ticket)) : 0;
+            const daysAboveMeta = withTicket.filter(d => d.ticket >= 25000).length;
+            const pctVsMeta = Math.round(latestTk / 25000 * 100);
+            return [
+              { label: 'Ticket último día', value: fmt(latestTk), highlight: latestTk >= 25000 ? '#10b981' : '#f59e0b' },
+              { label: 'Ticket promedio 30d', value: fmt(avgTk) },
+              { label: 'Meta ticket', value: '$25.000', highlight: '#6366f1' },
+              { label: '% vs meta (hoy)', value: `${pctVsMeta}%`, highlight: pctVsMeta >= 100 ? '#10b981' : '#ef4444' },
+              { label: 'Días ≥ meta', value: `${daysAboveMeta} / ${withTicket.length}` },
+              { label: 'Rango (min-max)', value: `${fmt(minTk)} – ${fmt(maxTk)}` },
+            ];
+          })()}>
           
           {hasSalesData ?
           <>
@@ -540,7 +577,24 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
           title="EBITDA Mensual"
           subtitle="Tendencia % de margen bruto por mes"
           delay={0.22}
-          colSpan="lg:col-span-2">
+          colSpan="lg:col-span-2"
+          insightTooltip={(() => {
+            if (!ebitdaDataWithAvg.length) return [];
+            const last = ebitdaDataWithAvg[ebitdaDataWithAvg.length-1]?.margen || 0;
+            const prev = ebitdaDataWithAvg[ebitdaDataWithAvg.length-2]?.margen || 0;
+            const maxM = Math.max(...ebitdaDataWithAvg.map(d=>d.margen||0));
+            const minM = Math.min(...ebitdaDataWithAvg.map(d=>d.margen||0));
+            const vsAvg = last - avgMargin;
+            const health = last >= avgMargin ? '#10b981' : last >= avgMargin*0.85 ? '#f59e0b' : '#ef4444';
+            return [
+              { label: 'EBITDA actual', value: `${last}%`, highlight: health },
+              { label: 'EBITDA anterior', value: `${prev}%` },
+              { label: 'Promedio histórico', value: `${avgMargin}%`, highlight: '#FF4D8D' },
+              { label: 'vs promedio', value: `${vsAvg >= 0 ? '+' : ''}${vsAvg.toFixed(1)}pp`, highlight: vsAvg >= 0 ? '#10b981' : '#ef4444' },
+              { label: 'Rango (min-max)', value: `${minM}% – ${maxM}%` },
+              { label: 'Meses con datos', value: `${ebitdaDataWithAvg.length}` },
+            ];
+          })()}>
           
           {ebitdaDataWithAvg && ebitdaDataWithAvg.length > 0 ?
           <>
@@ -626,7 +680,21 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         transition={{ duration: 0.3, staggerChildren: 0.1, delayChildren: 0.2 }}>
 
         {/* Hourly heatmap */}
-         <AnalyticsCard title="Tráfico por Hora" subtitle="Transacciones · patrón semanal" delay={0.26}>
+         <AnalyticsCard title="Tráfico por Hora" subtitle="Transacciones · patrón semanal" delay={0.26}
+          insightTooltip={(() => {
+            const avgTxn = Math.round(sorted30.reduce((s,d) => s+(d.txn||0),0) / (sorted30.length||1));
+            const maxTxnDay = sorted30.reduce((max,d) => (d.txn||0) > (max.txn||0) ? d : max, sorted30[0] || {});
+            const totalTxn30 = sorted30.reduce((s,d) => s+(d.txn||0),0);
+            const avgDaily = Math.round(totalTxn30 / (sorted30.length||1));
+            return [
+              { label: 'Promedio diario txn', value: `${avgDaily}`, highlight: '#FF4D8D' },
+              { label: 'Mejor día (txn)', value: maxTxnDay?.date ? `${maxTxnDay.date} · ${maxTxnDay.txn}` : '—' },
+              { label: 'Total txn 30 días', value: totalTxn30.toLocaleString('es-CO') },
+              { label: 'Peak horario', value: '1pm – 3pm' },
+              { label: 'Hora de apertura', value: '8:00 am' },
+              { label: 'Hora de cierre', value: '9:00 pm' },
+            ];
+          })()}>
           <HourlyHeatmap data={heatmapData} />
           <div className="flex items-center justify-between mt-2.5">
             <span className="text-[8px] text-[#8F96A3] font-semibold uppercase">Bajo</span>
@@ -673,7 +741,21 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         </AnalyticsCard>
 
         {/* Participación */}
-         <AnalyticsCard title="Participación" subtitle="Mix del negocio por categoría" delay={0.3}>
+         <AnalyticsCard title="Participación" subtitle="Mix del negocio por categoría" delay={0.3}
+          insightTooltip={(() => {
+            const withTicket = sorted30.filter(d => d.ticket > 0);
+            const avgTk = withTicket.length > 0 ? Math.round(withTicket.reduce((s,d)=>s+d.ticket,0)/withTicket.length) : 0;
+            const daysAbove = withTicket.filter(d => d.ticket >= 25000).length;
+            const totalVentas = sorted30.reduce((s,d) => s+(d.ventas||0),0);
+            return [
+              { label: 'Ticket prom. 30d', value: fmt(avgTk), highlight: '#FF4D8D' },
+              { label: 'Días ≥ meta ticket', value: `${daysAbove} / ${withTicket.length}` },
+              { label: 'Ventas acum. 30d', value: fmt(totalVentas) },
+              { label: 'Participación top', value: 'Ver donut arriba' },
+              { label: 'Meta ticket', value: '$25.000', highlight: '#6366f1' },
+              { label: 'Período analizado', value: `${sorted30.length} días` },
+            ];
+          })()}>
           {(() => {
             // Build real dept data from products prop
             const deptMap = {};
@@ -759,7 +841,26 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
         </AnalyticsCard>
 
         {/* Mejores Días de Venta */}
-        <AnalyticsCard title="Mejores Días" subtitle="Top días de venta del mes actual" delay={0.34}>
+        <AnalyticsCard title="Mejores Días" subtitle="Top días de venta del mes actual" delay={0.34}
+          insightTooltip={(() => {
+            const thisMonthAll = todaySales.filter(d => {
+              const dt = new Date(d.date);
+              return dt.getMonth() === currentMonth && dt.getFullYear() === currentYear;
+            });
+            const totalMes = thisMonthAll.reduce((s,d) => s+(d.total_sales||0),0);
+            const avgDia = thisMonthAll.length > 0 ? Math.round(totalMes/thisMonthAll.length) : 0;
+            const maxDia = thisMonthAll.reduce((max,d) => (d.total_sales||0)>(max.total_sales||0)?d:max, thisMonthAll[0]||{});
+            const totalTxnMes = thisMonthAll.reduce((s,d) => s+(d.total_transactions||0),0);
+            const compliance30 = activeBudget?.sales_budget ? Math.round(totalMes/activeBudget.sales_budget*100) : null;
+            return [
+              { label: 'Ventas acum. mes', value: fmt(totalMes), highlight: '#FF4D8D' },
+              { label: 'Promedio diario mes', value: fmt(avgDia) },
+              { label: 'Mejor día del mes', value: maxDia?.date ? `${fmt(maxDia.total_sales)}` : '—', highlight: '#10b981' },
+              { label: 'Txn acumuladas mes', value: totalTxnMes.toLocaleString('es-CO') },
+              { label: 'Días con datos', value: `${thisMonthAll.length}` },
+              { label: 'Cumplimiento mes', value: compliance30 !== null ? `${compliance30}%` : '—', highlight: compliance30 >= 80 ? '#10b981' : '#f59e0b' },
+            ];
+          })()}>
           {todaySales && todaySales.length > 0 ? (() => {
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();

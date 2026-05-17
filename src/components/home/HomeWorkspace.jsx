@@ -1304,30 +1304,8 @@ export default function HomeWorkspace({
                      {/* Top accent bar */}
                      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}60, ${c.accent}20)` }} />
 
-                     {/* Label + ? tooltip */}
-                     <div className="flex items-center justify-between mb-1.5">
-                       <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">{c.label}</p>
-                       <div className="relative group/tip" onClick={e => e.stopPropagation()}>
-                         <div className="w-4 h-4 rounded-full flex items-center justify-center cursor-default"
-                           style={{ background: `${c.accent}15`, border: `1px solid ${c.accent}30` }}>
-                           <span className="text-[8px] font-black leading-none" style={{ color: c.accent }}>?</span>
-                         </div>
-                         {/* Tooltip */}
-                         <div className="absolute right-0 top-5 z-50 w-52 rounded-xl p-3 opacity-0 pointer-events-none group-hover/tip:opacity-100 group-hover/tip:pointer-events-auto transition-all duration-200 translate-y-1 group-hover/tip:translate-y-0"
-                           style={{ background: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 16px 40px rgba(0,0,0,0.3)' }}>
-                           <div className="absolute -top-1 right-1.5 w-2 h-2 rotate-45" style={{ background: 'rgba(15,23,42,0.92)', border: '1px solid rgba(255,255,255,0.1)', borderBottom: 'none', borderRight: 'none' }} />
-                           <p className="text-[8px] font-bold uppercase tracking-widest mb-2" style={{ color: c.accent }}>Insights · {c.label}</p>
-                           <div className="space-y-1.5">
-                             {c.detail.map(({ label, value }) => (
-                               <div key={label} className="flex items-center justify-between gap-2">
-                                 <span className="text-[9px] text-slate-400 font-medium leading-tight">{label}</span>
-                                 <span className="text-[9px] font-black text-white tabular-nums flex-shrink-0">{value}</span>
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-                       </div>
-                     </div>
+                     {/* Label */}
+                     <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-1.5">{c.label}</p>
 
                      {/* Sparkline ocupa todo el ancho, alineada con el número */}
                      <div className="flex items-end gap-0 w-full" style={{ minHeight: 44 }}>
