@@ -25,27 +25,27 @@ const fmtPct = (v) => (v || 0).toFixed(2) + '%';
 const CustomBar = (props) => {
   const { fill, x, y, width, height } = props;
   const [isHovered, setIsHovered] = React.useState(false);
-  
+
   if (!width || !height || width <= 0 || height <= 0) return null;
-  
+
   return (
     <g
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={{ transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)', cursor: 'pointer' }}
-    >
+      style={{ transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)', cursor: 'pointer' }}>
+      
       {/* Glow Background */}
-      {isHovered && (
-        <rect
-          x={x - 3}
-          y={y - 5}
-          width={width + 6}
-          height={height + 8}
-          fill="rgba(255,77,141,0.15)"
-          rx="12"
-          opacity={0.5}
-        />
-      )}
+      {isHovered &&
+      <rect
+        x={x - 3}
+        y={y - 5}
+        width={width + 6}
+        height={height + 8}
+        fill="rgba(255,77,141,0.15)"
+        rx="12"
+        opacity={0.5} />
+
+      }
       
       {/* Barra Principal */}
       <rect
@@ -59,9 +59,9 @@ const CustomBar = (props) => {
         opacity={isHovered ? 1 : 0.92}
         style={{
           filter: isHovered ? 'drop-shadow(0 12px 28px rgba(255,77,141,0.22))' : 'drop-shadow(0 6px 16px rgba(255,77,141,0.12))',
-          transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
-        }}
-      />
+          transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)'
+        }} />
+      
       
       {/* Highlight Superior */}
       <rect
@@ -71,10 +71,10 @@ const CustomBar = (props) => {
         height={3}
         fill="rgba(255,255,255,0.4)"
         rx="11"
-        opacity={isHovered ? 0.6 : 0.3}
-      />
-    </g>
-  );
+        opacity={isHovered ? 0.6 : 0.3} />
+      
+    </g>);
+
 };
 
 function extractStoreCode(sid) {
@@ -316,21 +316,21 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
       <div className="grid md:grid-cols-2 gap-4">
         {/* ── Top 10 Productos — Luxury Pink AI SaaS ── */}
         <div
-          style={{
-            background: '#ffffff',
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-            borderRadius: 22,
-            border: `1px solid rgba(255,143,184,0.15)`,
-            boxShadow: `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)`,
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            transition: 'box-shadow 0.3s, border-color 0.3s, background 0.3s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,247,250,0.97)'; e.currentTarget.style.borderColor = 'rgba(255,77,141,0.2)'; e.currentTarget.style.boxShadow = `0 4px 20px rgba(255,77,141,0.10), 0 16px 48px rgba(255,77,141,0.07), inset 0 1px 0 rgba(255,255,255,1)`; }}
-          onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)'; e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)`; }}
-        >
+              style={{
+                background: '#ffffff',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                borderRadius: 22,
+                border: `1px solid rgba(255,143,184,0.15)`,
+                boxShadow: `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)`,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'box-shadow 0.3s, border-color 0.3s, background 0.3s'
+              }}
+              onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(255,247,250,0.97)';e.currentTarget.style.borderColor = 'rgba(255,77,141,0.2)';e.currentTarget.style.boxShadow = `0 4px 20px rgba(255,77,141,0.10), 0 16px 48px rgba(255,77,141,0.07), inset 0 1px 0 rgba(255,255,255,1)`;}}
+              onMouseLeave={(e) => {e.currentTarget.style.background = '#ffffff';e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)';e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)`;}}>
+              
           {/* Header */}
           <div style={{
                 padding: '10px 14px 8px',
@@ -349,7 +349,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                     
                 <div>
                 <p style={{ fontSize: 9, fontWeight: 700, color: P.textSub, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0, lineHeight: 1.2 }}>Top 10 Productos</p>
-                <p style={{ fontSize: 11, fontWeight: 500, color: P.text, margin: 0, marginTop: 1, letterSpacing: '-0.01em', lineHeight: 1.2 }}>Por participación</p>
+                <p style={{ fontSize: 11, fontWeight: 500, color: P.text, margin: 0, marginTop: 1, letterSpacing: '-0.01em', lineHeight: 1.2 }} className="hidden">Por participación</p>
                 </div>
               </div>
               <span style={{
@@ -553,11 +553,11 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
-                    transition: 'box-shadow 0.3s, border-color 0.3s, background 0.3s',
+                    transition: 'box-shadow 0.3s, border-color 0.3s, background 0.3s'
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,247,250,0.97)'; e.currentTarget.style.borderColor = 'rgba(255,77,141,0.2)'; e.currentTarget.style.boxShadow = `0 4px 20px rgba(255,77,141,0.10), 0 16px 48px rgba(255,77,141,0.07)`; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)'; e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05)`; }}
-                >
+                  onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(255,247,250,0.97)';e.currentTarget.style.borderColor = 'rgba(255,77,141,0.2)';e.currentTarget.style.boxShadow = `0 4px 20px rgba(255,77,141,0.10), 0 16px 48px rgba(255,77,141,0.07)`;}}
+                  onMouseLeave={(e) => {e.currentTarget.style.background = '#ffffff';e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)';e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05)`;}}>
+                  
               {/* Header */}
               <div style={{
                     padding: '10px 14px 8px',
@@ -580,34 +580,34 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                     </div>
                   </div>
                   {totalYearSales > 0 &&
-                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ textAlign: 'right' }}>
                       <p style={{ fontSize: 9, fontWeight: 700, color: P.primary, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 2px' }}>Total</p>
                       <p style={{ fontSize: 14, fontWeight: 700, color: P.primary, margin: 0, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{fmt(totalYearSales)}</p>
                     </div>
-                  }
+                      }
                 </div>
               </div>
 
               <div style={{ padding: '12px 0 0' }}>
-                {monthsWithPart.length === 0 ? (
-                  <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 11, color: P.textSub }}>Sin datos de ventas mensuales</div>
-                ) : (
-                  <>
+                {monthsWithPart.length === 0 ?
+                    <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 11, color: P.textSub }}>Sin datos de ventas mensuales</div> :
+
+                    <>
                     {/* Premium Clean Area Chart */}
                     <div style={{
-                      position: 'relative',
-                      background: 'linear-gradient(135deg, rgba(255,250,252,0.9) 0%, rgba(255,255,255,0.98) 100%)',
-                      borderRadius: '20px 20px 0 0',
-                      overflow: 'hidden',
-                      backdropFilter: 'blur(12px)',
-                    }}>
+                        position: 'relative',
+                        background: 'linear-gradient(135deg, rgba(255,250,252,0.9) 0%, rgba(255,255,255,0.98) 100%)',
+                        borderRadius: '20px 20px 0 0',
+                        overflow: 'hidden',
+                        backdropFilter: 'blur(12px)'
+                      }}>
                       {/* Subtle Ambient Glow */}
                       <div style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255,77,141,0.08) 0%, transparent 65%)',
-                        pointerEvents: 'none',
-                      }} />
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255,77,141,0.08) 0%, transparent 65%)',
+                          pointerEvents: 'none'
+                        }} />
                       
                       <ResponsiveContainer width="100%" height={160}>
                         <BarChart data={monthsWithPart} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
@@ -628,104 +628,104 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             </filter>
                           </defs>
                           
-                          <CartesianGrid 
-                            stroke="rgba(200,200,200,0.06)" 
-                            horizontal={true}
-                            vertical={false}
-                            strokeDasharray="0"
-                            opacity={0.5}
-                          />
+                          <CartesianGrid
+                              stroke="rgba(200,200,200,0.06)"
+                              horizontal={true}
+                              vertical={false}
+                              strokeDasharray="0"
+                              opacity={0.5} />
+                            
                           
                           <XAxis
-                            dataKey="label"
-                            tick={({ x, y, payload }) => (
-                              <text 
-                                x={x} 
-                                y={y + 12} 
-                                textAnchor="middle" 
-                                fontSize={9} 
-                                fill={P.textSub} 
-                                fontFamily="Inter, -apple-system, sans-serif" 
+                              dataKey="label"
+                              tick={({ x, y, payload }) =>
+                              <text
+                                x={x}
+                                y={y + 12}
+                                textAnchor="middle"
+                                fontSize={9}
+                                fill={P.textSub}
+                                fontFamily="Inter, -apple-system, sans-serif"
                                 fontWeight={500}
-                                letterSpacing="0px"
-                              >
+                                letterSpacing="0px">
+                                
                                 {payload.value}
                               </text>
-                            )}
-                            axisLine={false}
-                            tickLine={false}
-                          />
+                              }
+                              axisLine={false}
+                              tickLine={false} />
+                            
                           <YAxis hide />
                           
                           {/* Tooltip Premium */}
                           <RechartsTooltip
-                            cursor={{ fill: 'rgba(255,77,141,0.08)', radius: 8 }}
-                            content={({ active, payload }) => {
-                              if (!active || !payload?.length) return null;
-                              const d = payload[0].payload;
-                              return (
-                                <div style={{
-                                  background: 'rgba(255,255,255,0.95)',
-                                  backdropFilter: 'blur(20px)',
-                                  border: `1px solid rgba(255,77,141,0.2)`,
-                                  borderRadius: 10,
-                                  padding: '8px 11px',
-                                  boxShadow: `0 10px 35px rgba(255,77,141,0.15), inset 0 1px 0 rgba(255,255,255,0.85)`,
-                                  fontSize: '11px',
-                                }}>
+                              cursor={{ fill: 'rgba(255,77,141,0.08)', radius: 8 }}
+                              content={({ active, payload }) => {
+                                if (!active || !payload?.length) return null;
+                                const d = payload[0].payload;
+                                return (
+                                  <div style={{
+                                    background: 'rgba(255,255,255,0.95)',
+                                    backdropFilter: 'blur(20px)',
+                                    border: `1px solid rgba(255,77,141,0.2)`,
+                                    borderRadius: 10,
+                                    padding: '8px 11px',
+                                    boxShadow: `0 10px 35px rgba(255,77,141,0.15), inset 0 1px 0 rgba(255,255,255,0.85)`,
+                                    fontSize: '11px'
+                                  }}>
                                   <p style={{ fontSize: 9, fontWeight: 700, color: P.textSub, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{d.label}</p>
                                   <p style={{ fontSize: 13, fontWeight: 700, color: '#FF4D8D', margin: '0', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{fmt(d.totalSales)}</p>
-                                </div>
-                              );
-                            }}
-                          />
+                                </div>);
+
+                              }} />
+                            
                           
                           {/* Barras Premium con Glow */}
                           <Bar
-                            dataKey="totalSales"
-                            fill="url(#barGradientPremium)"
-                            radius={[12, 12, 4, 4]}
-                            isAnimationActive={true}
-                            animationDuration={1200}
-                            filter="url(#barGlow)"
-                            shape={<CustomBar />}
-                            label={({ x, y, width, height, payload }) => {
-                              if (!payload || payload.compliance == null) return null;
-                              return (
-                                <text
-                                  x={x + width / 2}
-                                  y={y - 8}
-                                  textAnchor="middle"
-                                  fontSize={9}
-                                  fontWeight={700}
-                                  fill={payload.compliance >= 100 ? '#D81B60' : payload.compliance >= 80 ? '#FF4D8D' : '#FF8FB8'}
-                                  fontVariantNumeric="tabular-nums"
-                                >
+                              dataKey="totalSales"
+                              fill="url(#barGradientPremium)"
+                              radius={[12, 12, 4, 4]}
+                              isAnimationActive={true}
+                              animationDuration={1200}
+                              filter="url(#barGlow)"
+                              shape={<CustomBar />}
+                              label={({ x, y, width, height, payload }) => {
+                                if (!payload || payload.compliance == null) return null;
+                                return (
+                                  <text
+                                    x={x + width / 2}
+                                    y={y - 8}
+                                    textAnchor="middle"
+                                    fontSize={9}
+                                    fontWeight={700}
+                                    fill={payload.compliance >= 100 ? '#D81B60' : payload.compliance >= 80 ? '#FF4D8D' : '#FF8FB8'}
+                                    fontVariantNumeric="tabular-nums">
+                                    
                                   {payload.compliance}%
-                                </text>
-                              );
-                            }}
-                          />
+                                </text>);
+
+                              }} />
+                            
                         </BarChart>
                       </ResponsiveContainer>
                       
                       {/* KPI Cards Separados */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 12px', gap: 10, borderTop: '1px solid rgba(255,143,184,0.1)' }}>
                         {(() => {
-                          const maxMonth = monthsWithPart.reduce((a, b) => (a.totalSales > b.totalSales ? a : b), monthsWithPart[0]);
-                          const avgSales = monthsWithPart.reduce((s, m) => s + m.totalSales, 0) / monthsWithPart.length;
-                          const lastMonth = monthsWithPart[monthsWithPart.length - 1];
-                          const prevMonth = monthsWithPart[monthsWithPart.length - 2];
-                          const growth = prevMonth ? ((lastMonth.totalSales - prevMonth.totalSales) / prevMonth.totalSales * 100) : 0;
+                            const maxMonth = monthsWithPart.reduce((a, b) => a.totalSales > b.totalSales ? a : b, monthsWithPart[0]);
+                            const avgSales = monthsWithPart.reduce((s, m) => s + m.totalSales, 0) / monthsWithPart.length;
+                            const lastMonth = monthsWithPart[monthsWithPart.length - 1];
+                            const prevMonth = monthsWithPart[monthsWithPart.length - 2];
+                            const growth = prevMonth ? (lastMonth.totalSales - prevMonth.totalSales) / prevMonth.totalSales * 100 : 0;
 
-                          return [
+                            return [
                             { label: 'Mejor mes', value: fmt(maxMonth.totalSales), detail: maxMonth.label, bg: 'rgba(255,77,141,0.06)' },
                             { label: 'Promedio', value: fmt(avgSales), detail: 'mensual', bg: 'rgba(255,143,184,0.06)' },
-                            { label: 'vs Período', value: `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`, detail: 'anterior', color: growth > 0 ? '#10b981' : '#ef4444', bg: growth > 0 ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)' },
-                          ].map((stat, i) => (
-                            <div key={i} style={{ 
-                              textAlign: 'center', 
-                              flex: 1, 
+                            { label: 'vs Período', value: `${growth > 0 ? '+' : ''}${growth.toFixed(1)}%`, detail: 'anterior', color: growth > 0 ? '#10b981' : '#ef4444', bg: growth > 0 ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)' }].
+                            map((stat, i) =>
+                            <div key={i} style={{
+                              textAlign: 'center',
+                              flex: 1,
                               background: stat.bg,
                               padding: '9px 10px',
                               borderRadius: 10,
@@ -735,8 +735,8 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                               <p style={{ fontSize: 11, fontWeight: 700, color: stat.color || P.primary, margin: '0 0 2px', fontVariantNumeric: 'tabular-nums' }}>{stat.value}</p>
                               <p style={{ fontSize: 7, color: P.textSub, margin: 0 }}>{stat.detail}</p>
                             </div>
-                          ));
-                        })()}
+                            );
+                          })()}
                       </div>
 
                       {/* Mini Gráfica Tendencia Cumplimiento */}
@@ -754,26 +754,26 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                             <XAxis dataKey="label" tick={false} axisLine={false} height={0} margin={0} />
                             <YAxis hide domain={[0, 120]} />
                             <Area
-                              type="monotone"
-                              dataKey="compliance"
-                              fill="url(#complianceGrad)"
-                              stroke="#FF4D8D"
-                              strokeWidth={1.8}
-                              isAnimationActive={true}
-                              animationDuration={1200}
-                              dot={(props) => {
-                                const { cx, cy, payload } = props;
-                                if (!payload) return null;
-                                return (
-                                  <g key={`dot-${payload.label}`}>
+                                type="monotone"
+                                dataKey="compliance"
+                                fill="url(#complianceGrad)"
+                                stroke="#FF4D8D"
+                                strokeWidth={1.8}
+                                isAnimationActive={true}
+                                animationDuration={1200}
+                                dot={(props) => {
+                                  const { cx, cy, payload } = props;
+                                  if (!payload) return null;
+                                  return (
+                                    <g key={`dot-${payload.label}`}>
                                     <circle cx={cx} cy={cy} r={2.5} fill="#FF4D8D" opacity={0.8} />
                                     <text x={cx} y={cy - 10} textAnchor="middle" fontSize={7} fontWeight={700} fill="#D81B60">
                                       {payload.compliance}%
                                     </text>
-                                  </g>
-                                );
-                              }}
-                            />
+                                  </g>);
+
+                                }} />
+                              
                           </AreaChart>
                         </ResponsiveContainer>
                       </div>
@@ -786,7 +786,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                       }
                     `}</style>
                   </>
-                )}
+                    }
               </div>
             </div>);
 
