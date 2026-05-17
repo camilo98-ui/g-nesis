@@ -856,18 +856,32 @@ export default function HomeWorkspace({
                   <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
                 </div>
                 {!isGerente &&
-                <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={onShowStoreSales}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-rose-500 hover:text-rose-600 flex-shrink-0 transition-all"
-                  style={{
-                    background: 'rgba(244,63,94,0.07)',
-                    border: '1px solid rgba(244,63,94,0.15)'
-                  }}>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => window.location.href = '/FreezerMap'}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-cyan-500 hover:text-cyan-600 transition-all"
+                    style={{
+                      background: 'rgba(6,182,212,0.07)',
+                      border: '1px solid rgba(6,182,212,0.15)'
+                    }}>
+                    <Snowflake style={{ width: 12, height: 12 }} />
+                    <span className="hidden sm:inline">Nevera</span>
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={onShowStoreSales}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-rose-500 hover:text-rose-600 transition-all"
+                    style={{
+                      background: 'rgba(244,63,94,0.07)',
+                      border: '1px solid rgba(244,63,94,0.15)'
+                    }}>
                     <Plus style={{ width: 12, height: 12 }} />
                     <span className="hidden sm:inline">Venta</span>
                   </motion.button>
+                </div>
                 }
               </div>
               {isGerente &&
