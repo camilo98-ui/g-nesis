@@ -42,12 +42,12 @@ function MascotCanvas({ width = 48, height = 48, style = {} }) {
       const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const d = data.data;
       for (let i = 0; i < d.length; i += 4) {
-        const r = d[i], g = d[i+1], b = d[i+2];
+        const r = d[i],g = d[i + 1],b = d[i + 2];
         if (r > 220 && g > 220 && b > 220) {
-          d[i+3] = 0;
+          d[i + 3] = 0;
         } else if (r > 180 && g > 180 && b > 180) {
           const brightness = (r + g + b) / 3;
-          d[i+3] = Math.round(255 * (1 - (brightness - 180) / 75));
+          d[i + 3] = Math.round(255 * (1 - (brightness - 180) / 75));
         }
       }
       ctx.putImageData(data, 0, 0);
@@ -87,8 +87,8 @@ function KPICard({ label, value, change, icon: Icon, color, chartData, delay = 0
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
       whileHover={{ y: -2, transition: { duration: 0.18 } }}
-      className="relative rounded-2xl p-4 cursor-default group glass-card hover-lift card-accent-top"
-    >
+      className="relative rounded-2xl p-4 cursor-default group glass-card hover-lift card-accent-top">
+      
       
       {/* Top row: icon + delta */}
       <div className="flex items-center justify-between mb-3">
@@ -134,11 +134,11 @@ function NavItem({ item, isActive, onClick }) {
         background: 'linear-gradient(135deg, rgba(194,24,117,0.10), rgba(194,24,117,0.05))',
         border: '1px solid rgba(194,24,117,0.22)',
         boxShadow: '0 3px 12px rgba(194,24,117,0.12), inset 0 1px 0 rgba(255,255,255,0.8)',
-        backdropFilter: 'blur(8px)',
+        backdropFilter: 'blur(8px)'
       } : {
         background: 'transparent',
         border: '1px solid transparent',
-        transition: 'all 0.2s cubic-bezier(0.23,1,0.32,1)',
+        transition: 'all 0.2s cubic-bezier(0.23,1,0.32,1)'
       }}>
       
       <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -468,43 +468,43 @@ export default function HomeWorkspace({
   useEffect(() => {
     if (!setPageData || !selectedStore) return;
     const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
-    
+
     // Datos de hoy
     const todaySalesValue = latest?.total_sales || 0;
     const todayTransactions = latest?.total_transactions || 0;
     const todayTicket = todayTransactions > 0 ? todaySalesValue / todayTransactions : 0;
     const pptHoy = budgetData?.excelBudgetForToday || (budgetData?.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
-    
+
     // Análisis histórico de últimos 7 días
     const last7Sales = todaySales.slice(-7).sort((a, b) => new Date(b.date) - new Date(a.date));
     const totalSales7d = last7Sales.reduce((sum, d) => sum + (d.total_sales || 0), 0);
     const avgDaily7d = last7Sales.length > 0 ? totalSales7d / last7Sales.length : 0;
     const totalTxn7d = last7Sales.reduce((sum, d) => sum + (d.total_transactions || 0), 0);
-    const maxDay7d = Math.max(...last7Sales.map(d => d.total_sales || 0), 0);
-    const minDay7d = Math.min(...last7Sales.filter(d => d.total_sales).map(d => d.total_sales), todaySalesValue || 1);
-    
+    const maxDay7d = Math.max(...last7Sales.map((d) => d.total_sales || 0), 0);
+    const minDay7d = Math.min(...last7Sales.filter((d) => d.total_sales).map((d) => d.total_sales), todaySalesValue || 1);
+
     // Análisis de últimos 30 días si existen
     const last30Sales = todaySales.slice(-30).sort((a, b) => new Date(b.date) - new Date(a.date));
     const totalSales30d = last30Sales.reduce((sum, d) => sum + (d.total_sales || 0), 0);
     const avgDaily30d = last30Sales.length > 0 ? totalSales30d / last30Sales.length : 0;
-    
+
     // Presupuesto y brecha
     const gap = (budgetData?.salesUntilYesterday || 0) - (budgetData?.budgetUntilYesterday || 0);
     const isPos = gap >= 0;
     const projPct = budgetData?.monthProjectionCompliance ?? 0;
     const dailyBudget = budgetData?.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
-    const budgetCompliance = dailyBudget > 0 ? (todaySalesValue / dailyBudget * 100) : 0;
-    
+    const budgetCompliance = dailyBudget > 0 ? todaySalesValue / dailyBudget * 100 : 0;
+
     // Tendencias
-    const trend7d = last7Sales.length >= 2 
-      ? ((last7Sales[0].total_sales || 0) - (last7Sales[last7Sales.length - 1].total_sales || 0)) / (last7Sales[last7Sales.length - 1].total_sales || 1) * 100
-      : 0;
-    
+    const trend7d = last7Sales.length >= 2 ?
+    ((last7Sales[0].total_sales || 0) - (last7Sales[last7Sales.length - 1].total_sales || 0)) / (last7Sales[last7Sales.length - 1].total_sales || 1) * 100 :
+    0;
+
     // Análisis de productos más vendidos con descripción
-    const topProducts = salesReports.length > 0
-      ? salesReports.sort((a, b) => (b.sales_amount || b.quantity || 0) - (a.sales_amount || a.quantity || 0)).slice(0, 15)
-      : [];
-    
+    const topProducts = salesReports.length > 0 ?
+    salesReports.sort((a, b) => (b.sales_amount || b.quantity || 0) - (a.sales_amount || a.quantity || 0)).slice(0, 15) :
+    [];
+
     // Mapeo de descripciones de productos (galletería, bebidas, etc.)
     const productDescriptions = {
       'cookie': 'galleta/cookie',
@@ -520,7 +520,7 @@ export default function HomeWorkspace({
       'té': 'bebida té',
       'jugo': 'bebida jugo'
     };
-    
+
     const getProductType = (name) => {
       if (!name) return '';
       const lower = name.toLowerCase();
@@ -529,20 +529,20 @@ export default function HomeWorkspace({
       }
       return 'producto';
     };
-    
-    const topProductsList = topProducts.length > 0
-      ? topProducts.map((p, i) => {
-        const type = getProductType(p.product_name);
-        return `${i + 1}. ${p.product_name || 'Producto'} (${type}) - ${fmt(p.sales_amount || 0)}${p.quantity ? ` (${p.quantity} unidades)` : ''}`;
-      }).join(' | ')
-      : 'Sin datos de productos';
-    
+
+    const topProductsList = topProducts.length > 0 ?
+    topProducts.map((p, i) => {
+      const type = getProductType(p.product_name);
+      return `${i + 1}. ${p.product_name || 'Producto'} (${type}) - ${fmt(p.sales_amount || 0)}${p.quantity ? ` (${p.quantity} unidades)` : ''}`;
+    }).join(' | ') :
+    'Sin datos de productos';
+
     // Análisis por categoría/departamento (galletería, bebidas, etc.)
-    const departments = [...new Set(salesReports.map(p => p.department).filter(Boolean))];
-    const departmentSummary = departments.map(dept => {
-      const deptProducts = salesReports.filter(p => p.department === dept);
+    const departments = [...new Set(salesReports.map((p) => p.department).filter(Boolean))];
+    const departmentSummary = departments.map((dept) => {
+      const deptProducts = salesReports.filter((p) => p.department === dept);
       const deptSales = deptProducts.reduce((sum, p) => sum + (p.sales_amount || 0), 0);
-      const deptPercentage = todaySalesValue > 0 ? (deptSales / todaySalesValue * 100) : 0;
+      const deptPercentage = todaySalesValue > 0 ? deptSales / todaySalesValue * 100 : 0;
       return {
         name: dept,
         sales: fmt(deptSales),
@@ -551,19 +551,19 @@ export default function HomeWorkspace({
         topProduct: deptProducts.sort((a, b) => (b.sales_amount || 0) - (a.sales_amount || 0))[0]
       };
     }).sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
-    
+
     // Participación de top 5 productos en ventas totales
     const top5ProductsSales = topProducts.slice(0, 5).reduce((sum, p) => sum + (p.sales_amount || 0), 0);
-    const top5Participation = todaySalesValue > 0 ? (top5ProductsSales / todaySalesValue * 100) : 0;
-    
+    const top5Participation = todaySalesValue > 0 ? top5ProductsSales / todaySalesValue * 100 : 0;
+
     // Productos con datos adicionales
-    const productsDetail = topProducts.slice(0, 5).map(p => ({
+    const productsDetail = topProducts.slice(0, 5).map((p) => ({
       name: p.product_name || 'Producto sin nombre',
       sales: fmt(p.sales_amount || 0),
       quantity: p.quantity || 0,
       percentage: todaySalesValue > 0 ? ((p.sales_amount || 0) / todaySalesValue * 100).toFixed(1) : 0
     }));
-    
+
     // Datos P&G (EBITDA, costos, personal) si están disponibles
     const latestPyg = pygReports.length > 0 ? pygReports[pygReports.length - 1] : null;
     const ebitdaMargin = latestPyg?.margen_ebitda ? (latestPyg.margen_ebitda * 100).toFixed(1) : null;
@@ -580,7 +580,7 @@ export default function HomeWorkspace({
       page: 'Home',
       store: storeName,
       storeCode: selectedStore,
-      
+
       // Venta de hoy
       venta_hoy: todaySalesValue,
       venta_hoy_fmt: fmt(todaySalesValue),
@@ -588,7 +588,7 @@ export default function HomeWorkspace({
       ticket_promedio_hoy: todayTicket,
       variacion_vs_ayer: salesChange,
       cumplimiento_diario: budgetCompliance.toFixed(1),
-      
+
       // Presupuesto
       ppt_dia: pptHoy,
       presupuesto_mes: budgetData?.monthlyBudget || activeBudget?.sales_budget || 0,
@@ -598,7 +598,7 @@ export default function HomeWorkspace({
       cumplimiento_proyeccion: budgetData?.monthProjectionCompliance || 0,
       venta_diaria_requerida: budgetData?.dailyRequiredSales || 0,
       dias_restantes: budgetData?.remainingDays || 0,
-      
+
       // Análisis últimos 7 días
       sales_7d_total: totalSales7d,
       sales_7d_avg: avgDaily7d,
@@ -606,31 +606,31 @@ export default function HomeWorkspace({
       sales_7d_min: minDay7d,
       txn_7d_total: totalTxn7d,
       trend_7d: trend7d.toFixed(1),
-      
+
       // Análisis últimos 30 días
       sales_30d_total: totalSales30d,
       sales_30d_avg: avgDaily30d,
       days_with_data: last30Sales.length,
-      
+
       // Equipo
       cajeros_activos: cashiers.length,
-      
+
       // Productos más vendidos (con detalles y descripción de qué son)
       top_products: topProductsList,
       top_products_count: topProducts.length,
-      top_5_products_list: productsDetail.map(p => {
+      top_5_products_list: productsDetail.map((p) => {
         const type = getProductType(p.name);
         return `${p.name} (${type}): ${p.sales} (${p.quantity} unidades, ${p.percentage}% de ventas)`;
       }).join(' | '),
       top_5_products_participation: top5Participation.toFixed(1),
-      
+
       // Categorías/Departamentos (Galletería, Bebidas, etc.) con productos top identificados
-      categories_summary: departmentSummary.map(d => {
+      categories_summary: departmentSummary.map((d) => {
         const topType = getProductType(d.topProduct?.product_name || '');
         return `${d.name}: ${d.sales} (${d.percentage}% de ventas, ${d.productCount} productos) - top: ${d.topProduct?.product_name || 'N/A'} (${topType})`;
       }).join(' | '),
-      top_categories: departmentSummary.slice(0, 5).map(d => `${d.name} - ${d.percentage}% (top: ${d.topProduct?.product_name} que es ${getProductType(d.topProduct?.product_name)})`).join(' | '),
-      
+      top_categories: departmentSummary.slice(0, 5).map((d) => `${d.name} - ${d.percentage}% (top: ${d.topProduct?.product_name} que es ${getProductType(d.topProduct?.product_name)})`).join(' | '),
+
       // Datos P&G - EBITDA y Márgenes
       pyg_ebitda_margin: ebitdaMargin,
       pyg_cost_real: costReal,
@@ -641,17 +641,17 @@ export default function HomeWorkspace({
       pyg_servicios: servicios,
       pyg_administracion: administracion,
       pyg_impuestos: impuestos,
-      
+
       // KPI Card data
       kpi_ppt: fmt(pptHoy),
       kpi_ppt_meta: `Meta: ${fmt(pptHoy)}`,
       kpi_ppt_sub: budgetData?.gapRecoveryIncrement > 0 && budgetData?.excelBudgetForToday > 0 ? `+${budgetData.incrementPct}% recuperación` : 'meta diaria',
       kpi_brecha: fmt(gap),
       kpi_brecha_meta: budgetData?.monthlyBudget > 0 ? `${isPos ? 'Sobre' : 'Bajo'} meta` : '',
-      kpi_brecha_sub: `${Math.abs((gap / (budgetData?.monthlyBudget || 1) * 100)).toFixed(0)}%`,
+      kpi_brecha_sub: `${Math.abs(gap / (budgetData?.monthlyBudget || 1) * 100).toFixed(0)}%`,
       kpi_proyeccion: `${projPct.toFixed(0)}%`,
       kpi_proyeccion_meta: `${fmt(budgetData?.monthProjection || 0)} / ${fmt(budgetData?.monthlyBudget || 0)}`,
-      kpi_proyeccion_sub: `Cumplimiento: ${projPct.toFixed(1)}%`,
+      kpi_proyeccion_sub: `Cumplimiento: ${projPct.toFixed(1)}%`
     });
   }, [latest, budgetData, selectedStore, cashiers, salesChange, setPageData, storeName, activeBudget, todaySales, salesReports]);
 
@@ -737,8 +737,8 @@ export default function HomeWorkspace({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      style={{ background: 'transparent', position: 'relative', zIndex: 1 }}
-    >
+      style={{ background: 'transparent', position: 'relative', zIndex: 1 }}>
+      
 
       {/* ── LEFT SIDEBAR ── */}
       <motion.aside
@@ -750,9 +750,9 @@ export default function HomeWorkspace({
           background: 'rgba(255,255,255,0.82)',
           backdropFilter: 'blur(48px) saturate(160%)',
           borderRight: '1px solid rgba(0,0,0,0.045)',
-          boxShadow: '2px 0 24px rgba(0,0,0,0.03)',
-        }}
-      >
+          boxShadow: '2px 0 24px rgba(0,0,0,0.03)'
+        }}>
+        
         
         {/* Logo */}
         <div className="px-4 pt-5 pb-4">
@@ -832,8 +832,8 @@ export default function HomeWorkspace({
                     className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.12), rgba(194,24,117,0.06))', border: '1px solid rgba(194,24,117,0.12)' }}
                     animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  >
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+                    
                     <GreetIcon className="w-4 h-4" style={{ color: '#C21875' }} />
                   </motion.div>
                   <div>
@@ -841,12 +841,12 @@ export default function HomeWorkspace({
                       {new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
                     <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-none"
-                      style={{ letterSpacing: '-0.04em', color: '#1a1a2e' }}>
+                    style={{ letterSpacing: '-0.04em', color: '#1a1a2e' }}>
                       {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{LEADERS[selectedStore] || 'Tienda'}</span>
                     </h1>
                   </div>
                 </div>
-                <p className="text-[11.5px] text-slate-500 font-medium leading-snug max-w-sm pl-11">
+                <p className="text-[11.5px] text-slate-500 font-medium leading-snug max-w-sm pl-11 hidden">
                   {getDynamicPhrase()}
                 </p>
               </div>
@@ -905,16 +905,16 @@ export default function HomeWorkspace({
                 background: 'linear-gradient(130deg, rgba(255,255,255,0.97) 0%, rgba(253,236,248,0.8) 60%, rgba(255,255,255,0.95) 100%)',
                 backdropFilter: 'blur(40px)',
                 border: '1px solid rgba(194,24,117,0.12)',
-                boxShadow: '0 6px 32px rgba(194,24,117,0.10), 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)',
-              }}
-            >
+                boxShadow: '0 6px 32px rgba(194,24,117,0.10), 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)'
+              }}>
+              
               {/* Ambient glow blob */}
               <motion.div
                 animate={{ opacity: [0.3, 0.55, 0.3], scale: [1, 1.06, 1] }}
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
                 className="absolute -top-8 -right-8 w-48 h-48 rounded-full pointer-events-none"
-                style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.08) 0%, transparent 70%)', filter: 'blur(24px)' }}
-              />
+                style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.08) 0%, transparent 70%)', filter: 'blur(24px)' }} />
+              
               {/* Top accent line */}
               <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(194,24,117,0.35) 40%, rgba(194,24,117,0.2) 70%, transparent 95%)' }} />
               <div className="flex items-center h-16 px-6 gap-4">
@@ -954,34 +954,34 @@ export default function HomeWorkspace({
                 {/* Insight Premium — Real Sales Data */}
                  <div className="flex-1 min-w-0 flex items-center">
                     <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3, duration: 0.6 }}
-                      className="text-[12.5px] leading-relaxed font-medium text-slate-700"
-                      style={{ letterSpacing: '0.3px' }}>
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.6 }}
+                    className="text-[12.5px] leading-relaxed font-medium text-slate-700"
+                    style={{ letterSpacing: '0.3px' }}>
                       {todaySales && todaySales.length > 0 ?
-                      (() => {
-                        const lastSale = todaySales[todaySales.length - 1];
-                        const totalToday = todaySales.reduce((s, d) => s + (d.total_sales || 0), 0);
-                        const txnCount = todaySales.reduce((s, d) => s + (d.total_transactions || 0), 0);
-                        const avgTicket = txnCount > 0 ? totalToday / txnCount : 0;
-                        const avgSuggest = todaySales.reduce((s, d) => s + (d.total_suggested || 0), 0);
+                    (() => {
+                      const lastSale = todaySales[todaySales.length - 1];
+                      const totalToday = todaySales.reduce((s, d) => s + (d.total_sales || 0), 0);
+                      const txnCount = todaySales.reduce((s, d) => s + (d.total_transactions || 0), 0);
+                      const avgTicket = txnCount > 0 ? totalToday / txnCount : 0;
+                      const avgSuggest = todaySales.reduce((s, d) => s + (d.total_suggested || 0), 0);
 
-                        // Determine status color based on metrics
-                        const isStrong = avgTicket > 80000 && avgSuggest > 30;
-                        const color = isStrong ? '#10b981' : avgTicket > 60000 ? '#f59e0b' : '#e11d48';
-                        const status = isStrong ? '🚀 Excelente' : avgTicket > 60000 ? '📈 Bueno' : '⚠️ Revisar';
+                      // Determine status color based on metrics
+                      const isStrong = avgTicket > 80000 && avgSuggest > 30;
+                      const color = isStrong ? '#10b981' : avgTicket > 60000 ? '#f59e0b' : '#e11d48';
+                      const status = isStrong ? '🚀 Excelente' : avgTicket > 60000 ? '📈 Bueno' : '⚠️ Revisar';
 
-                        return (
-                          <>
+                      return (
+                        <>
                             <span className="text-slate-600">{status} · </span>
                             <span className="text-slate-700">Ticket promedio </span>
-                            <span style={{ color, fontWeight: 800, fontSize: '13px' }}>${(avgTicket/1000).toFixed(0)}K</span>
+                            <span style={{ color, fontWeight: 800, fontSize: '13px' }}>${(avgTicket / 1000).toFixed(0)}K</span>
                             <span className="text-slate-600"> · {txnCount} transacciones hoy · Sugeridos: {avgSuggest.toFixed(0)}</span>
-                          </>
-                        );
-                      })() :
-                      <span className="text-slate-500">Cargando datos de hoy...</span>}
+                          </>);
+
+                    })() :
+                    <span className="text-slate-500">Cargando datos de hoy...</span>}
                     </motion.p>
                   </div>
 
@@ -1014,7 +1014,7 @@ export default function HomeWorkspace({
             {/* Budget Mini Cards — PPT del Día, Brecha del Mes, Proyección */}
             {budgetData && (() => {
               const fmt = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
-              const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : (budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
+              const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
               const gap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
               const isPos = gap >= 0;
               const projPct = budgetData.monthProjectionCompliance ?? 0;
@@ -1022,15 +1022,15 @@ export default function HomeWorkspace({
               // Sparkline ultra delgada y elegante — sin relleno exagerado
               const Spark = ({ points, color }) => {
                 if (!points || points.length < 2) return null;
-                const W = 200, H = 40;
-                const padX = 2, padY = 6;
-                const vals = points.filter(v => v != null && !isNaN(v));
+                const W = 200,H = 40;
+                const padX = 2,padY = 6;
+                const vals = points.filter((v) => v != null && !isNaN(v));
                 if (vals.length < 2) return null;
                 const max = Math.max(...vals);
                 const min = Math.min(...vals);
                 const range = max - min || 1;
-                const toX = (i) => padX + (i / (vals.length - 1)) * (W - padX * 2);
-                const toY = (v) => H - padY - ((v - min) / range) * (H - padY * 2);
+                const toX = (i) => padX + i / (vals.length - 1) * (W - padX * 2);
+                const toY = (v) => H - padY - (v - min) / range * (H - padY * 2);
                 const coords = vals.map((v, i) => [toX(i), toY(v)]);
                 // Catmull-Rom → cubic bezier
                 let d = `M${coords[0][0].toFixed(1)},${coords[0][1].toFixed(1)}`;
@@ -1060,8 +1060,8 @@ export default function HomeWorkspace({
                     <path d={d} stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                     <circle cx={lx} cy={ly} r="2.2" fill={color} />
                     <circle cx={lx} cy={ly} r="4.5" fill={color} opacity="0.12" />
-                  </svg>
-                );
+                  </svg>);
+
               };
 
               // Tendencias ÚNICAS por card
@@ -1069,7 +1069,7 @@ export default function HomeWorkspace({
 
               // PPT: cumplimiento diario (% de ventas vs meta diaria)
               const dailyBudgetForSpark = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 1;
-              const sparkPPT = sorted14.map(d => dailyBudgetForSpark > 0 ? (d.total_sales || 0) / dailyBudgetForSpark * 100 : 0);
+              const sparkPPT = sorted14.map((d) => dailyBudgetForSpark > 0 ? (d.total_sales || 0) / dailyBudgetForSpark * 100 : 0);
 
               // Brecha: diferencia diaria acumulada ventas - presupuesto (acumulado día a día)
               const sparkGap = sorted14.map((d, i, arr) => {
@@ -1084,61 +1084,61 @@ export default function HomeWorkspace({
                 const accSales = arr.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0);
                 const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 1;
                 const accBudget = dailyBudgetBase * (i + 1);
-                return accBudget > 0 ? (accSales / accBudget) * 100 : 0;
+                return accBudget > 0 ? accSales / accBudget * 100 : 0;
               });
 
               const cards = [
-                {
-                  label: 'PPT del Día',
-                  value: fmt(pptVal),
-                  sub: budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0
-                    ? `+${budgetData.incrementPct}% recuperación`
-                    : 'meta diaria',
-                  accent: '#C21875',
-                  spark: sparkPPT,
-                  delay: 0.05,
-                  key: 'ppt',
-                  detail: [
-                    { label: 'PPT hoy', value: fmt(pptVal) },
-                    { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0) },
-                    { label: 'Incremento recuperación', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : '—' },
-                    { label: 'Días restantes', value: budgetData.remainingDays ?? '—' },
-                  ],
-                },
-                {
-                  label: 'Brecha del Mes',
-                  value: fmt(gap),
-                  sub: budgetData.monthlyBudget > 0
-                    ? `${isPos ? 'Sobre' : 'Bajo'} meta · ${Math.abs((gap / budgetData.monthlyBudget * 100)).toFixed(0)}%`
-                    : '',
-                  accent: isPos ? '#059669' : '#e11d48',
-                  spark: sparkGap,
-                  delay: 0.1,
-                  prefix: isPos ? '▲' : '▼',
-                  key: 'gap',
-                  detail: [
-                    { label: 'Ventas acumuladas', value: fmt(budgetData.salesUntilYesterday || 0) },
-                    { label: 'PPT acumulado', value: fmt(budgetData.budgetUntilYesterday || 0) },
-                    { label: 'Brecha', value: fmt(gap) },
-                    { label: 'Brecha %', value: `${Math.abs((gap / (budgetData.monthlyBudget || 1) * 100)).toFixed(1)}%` },
-                  ],
-                },
-                {
-                  label: 'Proyección Cierre',
-                  value: `${projPct.toFixed(0)}%`,
-                  sub: `${fmt(budgetData.monthProjection)} / ${fmt(budgetData.monthlyBudget)}`,
-                  accent: '#7c3aed',
-                  spark: sparkProj,
-                  delay: 0.15,
-                  key: 'proj',
-                  detail: [
-                    { label: 'Proyección cierre', value: fmt(budgetData.monthProjection || 0) },
-                    { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0) },
-                    { label: 'Cumplimiento', value: `${projPct.toFixed(1)}%` },
-                    { label: 'Ritmo diario req.', value: fmt(budgetData.dailyRequiredSales || 0) },
-                  ],
-                },
-              ];
+              {
+                label: 'PPT del Día',
+                value: fmt(pptVal),
+                sub: budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 ?
+                `+${budgetData.incrementPct}% recuperación` :
+                'meta diaria',
+                accent: '#C21875',
+                spark: sparkPPT,
+                delay: 0.05,
+                key: 'ppt',
+                detail: [
+                { label: 'PPT hoy', value: fmt(pptVal) },
+                { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0) },
+                { label: 'Incremento recuperación', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : '—' },
+                { label: 'Días restantes', value: budgetData.remainingDays ?? '—' }]
+
+              },
+              {
+                label: 'Brecha del Mes',
+                value: fmt(gap),
+                sub: budgetData.monthlyBudget > 0 ?
+                `${isPos ? 'Sobre' : 'Bajo'} meta · ${Math.abs(gap / budgetData.monthlyBudget * 100).toFixed(0)}%` :
+                '',
+                accent: isPos ? '#059669' : '#e11d48',
+                spark: sparkGap,
+                delay: 0.1,
+                prefix: isPos ? '▲' : '▼',
+                key: 'gap',
+                detail: [
+                { label: 'Ventas acumuladas', value: fmt(budgetData.salesUntilYesterday || 0) },
+                { label: 'PPT acumulado', value: fmt(budgetData.budgetUntilYesterday || 0) },
+                { label: 'Brecha', value: fmt(gap) },
+                { label: 'Brecha %', value: `${Math.abs(gap / (budgetData.monthlyBudget || 1) * 100).toFixed(1)}%` }]
+
+              },
+              {
+                label: 'Proyección Cierre',
+                value: `${projPct.toFixed(0)}%`,
+                sub: `${fmt(budgetData.monthProjection)} / ${fmt(budgetData.monthlyBudget)}`,
+                accent: '#7c3aed',
+                spark: sparkProj,
+                delay: 0.15,
+                key: 'proj',
+                detail: [
+                { label: 'Proyección cierre', value: fmt(budgetData.monthProjection || 0) },
+                { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0) },
+                { label: 'Cumplimiento', value: `${projPct.toFixed(1)}%` },
+                { label: 'Ritmo diario req.', value: fmt(budgetData.dailyRequiredSales || 0) }]
+
+              }];
+
 
               // Build rich chart data for each modal
               const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0;
@@ -1149,7 +1149,7 @@ export default function HomeWorkspace({
                 brecha: Math.round((d.total_sales || 0) - dailyBudgetBase),
                 cumplimiento: dailyBudgetBase > 0 ? Math.round((d.total_sales || 0) / dailyBudgetBase * 100) : 0,
                 acumVentas: Math.round(sorted14.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0)),
-                acumPPT: Math.round(dailyBudgetBase * (i + 1)),
+                acumPPT: Math.round(dailyBudgetBase * (i + 1))
               }));
 
               const modalCharts = {
@@ -1158,13 +1158,13 @@ export default function HomeWorkspace({
                   subtitle: 'Últimos 14 días · COP',
                   color: '#C21875',
                   stats: [
-                    { label: 'Meta hoy', value: fmt(pptVal), color: '#C21875' },
-                    { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#94a3b8' },
-                    { label: 'Días restantes', value: `${budgetData.remainingDays ?? '—'} días`, color: '#f59e0b' },
-                    { label: 'Incremento recup.', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : 'Sin brecha', color: '#10b981' },
-                  ],
-                  chart: (
-                   <ResponsiveContainer width="100%" height={160}>
+                  { label: 'Meta hoy', value: fmt(pptVal), color: '#C21875' },
+                  { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#94a3b8' },
+                  { label: 'Días restantes', value: `${budgetData.remainingDays ?? '—'} días`, color: '#f59e0b' },
+                  { label: 'Incremento recup.', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : 'Sin brecha', color: '#10b981' }],
+
+                  chart:
+                  <ResponsiveContainer width="100%" height={160}>
                      <LineChart data={chartSales14}>
                        <defs>
                          <linearGradient id="gradPPT" x1="0" y1="0" x2="0" y2="1">
@@ -1174,26 +1174,26 @@ export default function HomeWorkspace({
                        </defs>
                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                        <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                       <YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} width={32} />
+                       <YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={32} />
                        <Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
                        <ReferenceLine y={100} stroke="#C21875" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: '100%', position: 'right', fontSize: 9, fill: '#C21875' }} />
                        <Line type="monotone" dataKey="cumplimiento" stroke="#C21875" strokeWidth={2.5} dot={{ r: 3, fill: '#C21875' }} activeDot={{ r: 5 }} />
                      </LineChart>
                    </ResponsiveContainer>
-                  ),
+
                 },
                 gap: {
                   title: 'Brecha Acumulada del Mes',
                   subtitle: 'Diferencia ventas - presupuesto acumulado',
                   color: isPos ? '#059669' : '#e11d48',
                   stats: [
-                    { label: 'Ventas acumuladas', value: fmt(budgetData.salesUntilYesterday || 0), color: '#059669' },
-                    { label: 'PPT acumulado', value: fmt(budgetData.budgetUntilYesterday || 0), color: '#94a3b8' },
-                    { label: 'Brecha total', value: fmt(gap), color: isPos ? '#059669' : '#e11d48' },
-                    { label: 'Brecha %', value: `${Math.abs((gap / (budgetData.monthlyBudget || 1) * 100)).toFixed(1)}%`, color: '#7c3aed' },
-                  ],
-                  chart: (
-                    <ResponsiveContainer width="100%" height={160}>
+                  { label: 'Ventas acumuladas', value: fmt(budgetData.salesUntilYesterday || 0), color: '#059669' },
+                  { label: 'PPT acumulado', value: fmt(budgetData.budgetUntilYesterday || 0), color: '#94a3b8' },
+                  { label: 'Brecha total', value: fmt(gap), color: isPos ? '#059669' : '#e11d48' },
+                  { label: 'Brecha %', value: `${Math.abs(gap / (budgetData.monthlyBudget || 1) * 100).toFixed(1)}%`, color: '#7c3aed' }],
+
+                  chart:
+                  <ResponsiveContainer width="100%" height={160}>
                       <AreaChart data={chartSales14}>
                         <defs>
                           <linearGradient id="gradGap" x1="0" y1="0" x2="0" y2="1">
@@ -1203,27 +1203,27 @@ export default function HomeWorkspace({
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                         <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => v >= 1e6 ? `${(v/1e6).toFixed(1)}M` : `${(v/1e3).toFixed(0)}K`} width={38} />
+                        <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : `${(v / 1e3).toFixed(0)}K`} width={38} />
                         <Tooltip formatter={(v, n) => [fmt(v), n === 'acumVentas' ? 'Ventas acum.' : 'PPT acum.']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
                         <ReferenceLine y={0} stroke="#e2e8f0" />
                         <Area type="monotone" dataKey="acumVentas" stroke={isPos ? '#059669' : '#e11d48'} strokeWidth={2} fill="url(#gradGap)" />
                         <Line type="monotone" dataKey="acumPPT" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
                       </AreaChart>
                     </ResponsiveContainer>
-                  ),
+
                 },
                 proj: {
                   title: 'Proyección de Cierre del Mes',
                   subtitle: 'Cumplimiento diario acumulado · %',
                   color: '#7c3aed',
                   stats: [
-                    { label: 'Proyección cierre', value: fmt(budgetData.monthProjection || 0), color: '#7c3aed' },
-                    { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#94a3b8' },
-                    { label: 'Cumplimiento', value: `${projPct.toFixed(1)}%`, color: projPct >= 100 ? '#059669' : projPct >= 80 ? '#f59e0b' : '#e11d48' },
-                    { label: 'Ritmo diario req.', value: fmt(budgetData.dailyRequiredSales || 0), color: '#f59e0b' },
-                  ],
-                  chart: (
-                    <ResponsiveContainer width="100%" height={160}>
+                  { label: 'Proyección cierre', value: fmt(budgetData.monthProjection || 0), color: '#7c3aed' },
+                  { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#94a3b8' },
+                  { label: 'Cumplimiento', value: `${projPct.toFixed(1)}%`, color: projPct >= 100 ? '#059669' : projPct >= 80 ? '#f59e0b' : '#e11d48' },
+                  { label: 'Ritmo diario req.', value: fmt(budgetData.dailyRequiredSales || 0), color: '#f59e0b' }],
+
+                  chart:
+                  <ResponsiveContainer width="100%" height={160}>
                       <LineChart data={chartSales14}>
                         <defs>
                           <linearGradient id="gradProj" x1="0" y1="0" x2="0" y2="1">
@@ -1233,24 +1233,24 @@ export default function HomeWorkspace({
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                         <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                        <YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} width={32} />
+                        <YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={32} />
                         <Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
                         <ReferenceLine y={100} stroke="#7c3aed" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: '100%', position: 'right', fontSize: 9, fill: '#7c3aed' }} />
                         <Line type="monotone" dataKey="cumplimiento" stroke="#7c3aed" strokeWidth={2.5} dot={{ r: 3, fill: '#7c3aed' }} activeDot={{ r: 5 }} />
                       </LineChart>
                     </ResponsiveContainer>
-                  ),
-                },
+
+                }
               };
 
               const activeModal = kpiModal ? modalCharts[kpiModal] : null;
-              const activeCard = cards.find(c => c.key === kpiModal);
+              const activeCard = cards.find((c) => c.key === kpiModal);
 
               return (
                 <>
                 {/* KPI Detail Modal */}
                 <AnimatePresence>
-                  {activeModal && activeCard && (
+                  {activeModal && activeCard &&
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -1263,12 +1263,12 @@ export default function HomeWorkspace({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.96, y: 24 }}
                         transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-                        onClick={e => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                         className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
                         style={{
                           background: 'rgba(255,255,255,0.96)',
                           backdropFilter: 'blur(48px)',
-                          boxShadow: '0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.5)',
+                          boxShadow: '0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.5)'
                         }}>
                         
                         {/* Colored header band */}
@@ -1284,33 +1284,33 @@ export default function HomeWorkspace({
                               <p className="text-[10px] text-slate-400 mt-1 font-medium">{activeModal.subtitle}</p>
                             </div>
                             <button onClick={() => setKpiModal(null)}
-                              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/[0.06] transition-colors mt-0.5">
+                            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/[0.06] transition-colors mt-0.5">
                               <X className="w-4 h-4 text-slate-400" />
                             </button>
                           </div>
                           {/* Stat pills */}
                           <div className="grid grid-cols-2 gap-2 mt-4">
-                            {activeModal.stats.map(({ label, value, color }) => (
-                              <div key={label} className="rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.05)' }}>
+                            {activeModal.stats.map(({ label, value, color }) =>
+                            <div key={label} className="rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.05)' }}>
                                 <p className="text-[9px] text-slate-400 font-medium mb-0.5">{label}</p>
                                 <p className="text-[13px] font-bold tabular-nums leading-none" style={{ color }}>{value}</p>
                               </div>
-                            ))}
+                            )}
                           </div>
                         </div>
 
                         {/* Chart area */}
                         <div className="p-5 pt-4">
                           <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-300 mb-3">Tendencia · últimos 14 días</p>
-                          {chartSales14.length >= 2 ? activeModal.chart : (
-                            <div className="h-40 flex items-center justify-center text-[11px] text-slate-300">Sin suficientes datos históricos</div>
-                          )}
+                          {chartSales14.length >= 2 ? activeModal.chart :
+                          <div className="h-40 flex items-center justify-center text-[11px] text-slate-300">Sin suficientes datos históricos</div>
+                          }
                         </div>
 
                         {/* CTA */}
                         <div className="px-5 pb-5">
                           <button
-                            onClick={() => { setKpiModal(null); onShowBudgetDashboard?.(); }}
+                            onClick={() => {setKpiModal(null);onShowBudgetDashboard?.();}}
                             className="w-full py-2.5 rounded-xl text-[11.5px] font-semibold transition-all active:scale-98"
                             style={{ background: `linear-gradient(135deg, ${activeModal.color}18, ${activeModal.color}08)`, color: activeModal.color, border: `1px solid ${activeModal.color}25` }}>
                             Ver presupuesto completo →
@@ -1318,11 +1318,11 @@ export default function HomeWorkspace({
                         </div>
                       </motion.div>
                     </motion.div>
-                  )}
+                    }
                 </AnimatePresence>
 
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  {cards.map((c) => (
+                  {cards.map((c) =>
                     <motion.div
                       key={c.label}
                       initial={{ opacity: 0, y: 10 }}
@@ -1336,15 +1336,15 @@ export default function HomeWorkspace({
                         backdropFilter: 'blur(40px)',
                         border: `1px solid ${c.accent}18`,
                         boxShadow: `0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04), 0 0 0 0.5px ${c.accent}10, inset 0 1px 0 rgba(255,255,255,1)`,
-                        transition: 'box-shadow 0.25s, transform 0.22s',
+                        transition: 'box-shadow 0.25s, transform 0.22s'
                       }}
-                      onMouseEnter={e => {
+                      onMouseEnter={(e) => {
                         e.currentTarget.style.boxShadow = `0 12px 40px rgba(0,0,0,0.10), 0 0 24px ${c.accent}18, 0 0 0 1px ${c.accent}20, inset 0 1px 0 rgba(255,255,255,1)`;
                       }}
-                      onMouseLeave={e => {
+                      onMouseLeave={(e) => {
                         e.currentTarget.style.boxShadow = `0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04), 0 0 0 0.5px ${c.accent}10, inset 0 1px 0 rgba(255,255,255,1)`;
-                      }}
-                    >
+                      }}>
+                      
                       {/* Top accent bar — fully opaque */}
                       <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}, ${c.accent}40, transparent)` }} />
                       {/* Bottom ambient bleed */}
@@ -1367,22 +1367,22 @@ export default function HomeWorkspace({
                         </div>
                       </div>
                     </motion.div>
-                  ))}
+                    )}
                 </div>
-                </>
-              );
+                </>);
+
             })()}
 
             {/* ── PRODUCT × TICKET ANALYSIS ── */}
-            {salesReports && salesReports.length > 0 && selectedStore && (
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-              >
+            {salesReports && salesReports.length > 0 && selectedStore &&
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}>
+              
                 <ProductTicketAnalysis storeId={selectedStore} budget={budget} />
               </motion.div>
-            )}
+            }
 
 
 
@@ -1559,11 +1559,11 @@ export default function HomeWorkspace({
               const impactLabel = isHot ? '🔥 +15–25% ventas est.' : isCold ? '❄️ −10–15% ventas est.' : '✅ Condición ideal';
               const impactColor = isHot ? '#f97316' : isCold ? '#6366f1' : '#10b981';
               // Tendencia de temperatura
-              const avgTemp7 = tempData.length > 0 ? tempData.reduce((a,b) => a+b,0)/tempData.length : 0;
+              const avgTemp7 = tempData.length > 0 ? tempData.reduce((a, b) => a + b, 0) / tempData.length : 0;
               const tempTrend = temp != null && avgTemp7 > 0 ? temp - avgTemp7 : 0;
               return (
                 <div className="rounded-2xl p-4 hover-lift flex flex-col gap-0"
-                  style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
+                style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Temperatura · 7 días</p>
                     <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : isCold ? '❄️ Frío' : '🌤 Fresco'}</span>
@@ -1600,15 +1600,15 @@ export default function HomeWorkspace({
               const rainLevel = totalRain > 20 ? 'Alta' : totalRain > 5 ? 'Moderada' : 'Baja';
               const rainColor = totalRain > 20 ? '#6366f1' : totalRain > 5 ? '#38bdf8' : '#94a3b8';
               // Días con lluvia significativa
-              const rainyDays = rainData.filter(v => v >= 3).length;
+              const rainyDays = rainData.filter((v) => v >= 3).length;
               const dryDays = rainData.length - rainyDays;
               // Correlación lluvia → tráfico (lluvia = menos tráfico peatonal)
-              const trafficAlert = todayRain >= 5 ? { msg: '⚠️ Flujo peatonal reducido', color: '#ef4444' }
-                : todayRain >= 2 ? { msg: '🌂 Tráfico moderado', color: '#f59e0b' }
-                : { msg: '🚶 Buen tráfico esperado', color: '#10b981' };
+              const trafficAlert = todayRain >= 5 ? { msg: '⚠️ Flujo peatonal reducido', color: '#ef4444' } :
+              todayRain >= 2 ? { msg: '🌂 Tráfico moderado', color: '#f59e0b' } :
+              { msg: '🚶 Buen tráfico esperado', color: '#10b981' };
               return (
                 <div className="rounded-2xl p-4 hover-lift flex flex-col gap-0"
-                  style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
+                style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Lluvia · 7 días</p>
                     <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
@@ -1647,23 +1647,23 @@ export default function HomeWorkspace({
               const cloudy = weatherLast7.length - sunny - rainy;
               const total = Math.max(weatherLast7.length, 1);
               const segments = [
-                { label: 'Soleado', color: '#f97316', val: sunny },
-                { label: 'Nublado', color: '#94a3b8', val: cloudy },
-                { label: 'Lluvioso', color: '#6366f1', val: rainy }
-              ];
+              { label: 'Soleado', color: '#f97316', val: sunny },
+              { label: 'Nublado', color: '#94a3b8', val: cloudy },
+              { label: 'Lluvioso', color: '#6366f1', val: rainy }];
+
               const circ = 2 * Math.PI * 16;
               let cumulative = 0;
               // Score de condición ideal para ventas de helados (calor + sin lluvia = ideal)
               const salesScore = Math.max(0, Math.min(100, Math.round(
-                (temp > 0 ? Math.min((temp - 10) / 20 * 60, 60) : 0) +
-                (precip < 1 ? 30 : precip < 3 ? 15 : 0) +
-                (humidity > 0 && humidity < 70 ? 10 : 0)
+                (temp > 0 ? Math.min((temp - 10) / 20 * 60, 60) : 0) + (
+                precip < 1 ? 30 : precip < 3 ? 15 : 0) + (
+                humidity > 0 && humidity < 70 ? 10 : 0)
               )));
               const scoreColor = salesScore >= 70 ? '#10b981' : salesScore >= 45 ? '#f59e0b' : '#ef4444';
               const scoreLabel = salesScore >= 70 ? 'Ideal para vender' : salesScore >= 45 ? 'Condición regular' : 'Día difícil';
               return (
                 <div className="rounded-2xl p-4 flex flex-col hover-lift"
-                  style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
+                style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Condición · semana</p>
                    <span className="text-[8px] font-semibold" style={{ color: scoreColor }}>💧 {humidity > 0 ? `${Math.round(humidity)}%` : '—'} hum.</span>
@@ -1687,7 +1687,7 @@ export default function HomeWorkspace({
                     </svg>
                     <div className="flex flex-col gap-0.5">
                       {segments.map(({ label, color, val }) =>
-                        <div key={label} className="flex items-center gap-1.5">
+                      <div key={label} className="flex items-center gap-1.5">
                           <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
                           <span className="text-[8.5px] text-slate-400 font-medium">{label}</span>
                           <span className="text-[8.5px] font-bold text-slate-600 ml-auto pl-1">{val}d</span>
@@ -1838,9 +1838,9 @@ export default function HomeWorkspace({
         todaySales={todaySales}
         budget={budget}
         cashiers={cashiers}
-        shiftRecords={shiftRecords}
-      />
-      </motion.div>
-  );
+        shiftRecords={shiftRecords} />
+      
+      </motion.div>);
+
 
 }
