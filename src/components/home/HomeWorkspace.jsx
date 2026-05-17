@@ -902,21 +902,14 @@ export default function HomeWorkspace({
               transition={{ delay: 0.2, duration: 0.5 }}
               className="relative overflow-hidden rounded-2xl cursor-default"
               style={{
-                background: 'linear-gradient(130deg, rgba(255,255,255,0.97) 0%, rgba(253,236,248,0.8) 60%, rgba(255,255,255,0.95) 100%)',
+                background: 'rgba(255,255,255,0.92)',
                 backdropFilter: 'blur(40px)',
-                border: '1px solid rgba(194,24,117,0.12)',
-                boxShadow: '0 6px 32px rgba(194,24,117,0.10), 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)'
+                border: '1px solid rgba(0,0,0,0.07)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1)'
               }}>
               
-              {/* Ambient glow blob */}
-              <motion.div
-                animate={{ opacity: [0.3, 0.55, 0.3], scale: [1, 1.06, 1] }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -top-8 -right-8 w-48 h-48 rounded-full pointer-events-none"
-                style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.08) 0%, transparent 70%)', filter: 'blur(24px)' }} />
-              
               {/* Top accent line */}
-              <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(194,24,117,0.35) 40%, rgba(194,24,117,0.2) 70%, transparent 95%)' }} />
+              <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(0,0,0,0.06) 40%, rgba(0,0,0,0.04) 70%, transparent 95%)' }} />
               <div className="flex items-center h-16 px-6 gap-4">
                 
                 {/* Avatar Nova Mascota */}
