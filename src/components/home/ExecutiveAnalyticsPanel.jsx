@@ -570,18 +570,45 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
                  </ResponsiveContainer>
                </AnimatedChartWrapper>
               
-              <div className="mt-3 pt-2 border-t border-slate-100">
-                <div className="grid grid-cols-2 gap-2 text-[9px]">
-                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
-                    <p className="text-[#8F96A3] font-medium mb-1">Actual</p>
-                    <p className="text-[14px] font-black text-[#FF4D8D]">{ebitdaDataWithAvg[ebitdaDataWithAvg.length - 1]?.margen || 0}%</p>
+              {(() => {
+                const last = ebitdaDataWithAvg[ebitdaDataWithAvg.length - 1]?.margen || 0;
+                const prev = ebitdaDataWithAvg[ebitdaDataWithAvg.length - 2]?.margen || 0;
+                const delta = last - prev;
+                const trending = delta >= 0;
+                const vsAvg = last - avgMargin;
+                const maxM = Math.max(...ebitdaDataWithAvg.map(d => d.margen || 0), 1);
+                const minM = Math.min(...ebitdaDataWithAvg.map(d => d.margen || 0), 0);
+                const health = last >= avgMargin ? '🟢 Saludable' : last >= avgMargin * 0.85 ? '🟡 Alerta' : '🔴 Crítico';
+                return (
+                  <div className="mt-3 pt-2 border-t border-slate-100">
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <div className="p-2 rounded-lg col-span-1" style={{ background: 'rgba(255,77,141,0.05)', border: '1px solid rgba(255,77,141,0.08)' }}>
+                        <p className="text-[7.5px] text-[#8F96A3] font-semibold uppercase tracking-wide mb-0.5">Actual</p>
+                        <p className="text-[15px] font-black text-[#FF4D8D] leading-none">{last}%</p>
+                        <p className={`text-[8px] font-bold mt-0.5 ${trending ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {trending ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}pp
+                        </p>
+                      </div>
+                      <div className="col-span-2 grid grid-rows-2 gap-1.5">
+                        <div className="px-2 py-1 rounded-lg flex items-center justify-between" style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.1)' }}>
+                          <span className="text-[7.5px] text-[#8F96A3] font-semibold uppercase">vs Prom.</span>
+                          <span className={`text-[9px] font-black ${vsAvg >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                            {vsAvg >= 0 ? '+' : ''}{vsAvg.toFixed(1)}pp
+                          </span>
+                        </div>
+                        <div className="px-2 py-1 rounded-lg flex items-center justify-between" style={{ background: 'rgba(255,77,141,0.04)', border: '1px solid rgba(255,77,141,0.08)' }}>
+                          <span className="text-[7.5px] text-[#8F96A3] font-semibold uppercase">Rango</span>
+                          <span className="text-[8.5px] font-bold text-[#2A2A2A]">{minM}% – {maxM}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-1.5 px-2 py-1 rounded-lg flex items-center gap-1.5" style={{ background: 'rgba(255,77,141,0.03)', border: '1px solid rgba(255,77,141,0.07)' }}>
+                      <span className="text-[8px] font-semibold text-[#8F96A3] uppercase tracking-wide">Estado</span>
+                      <span className="text-[8px] font-bold text-[#2A2A2A] ml-auto">{health}</span>
+                    </div>
                   </div>
-                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
-                    <p className="text-[#8F96A3] font-medium mb-1">Promedio</p>
-                    <p className="text-[14px] font-black text-[#FFB4C9]">{avgMargin}%</p>
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
             </> :
 
           <div className="h-[180px] flex items-center justify-center">
