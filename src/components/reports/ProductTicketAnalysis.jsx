@@ -555,8 +555,18 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                     flexDirection: 'column',
                     transition: 'box-shadow 0.3s, border-color 0.3s, background 0.3s'
                   }}
-                  onMouseEnter={(e) => {e.currentTarget.style.background = 'rgba(255,247,250,0.97)';e.currentTarget.style.borderColor = 'rgba(255,77,141,0.2)';e.currentTarget.style.boxShadow = `0 4px 20px rgba(255,77,141,0.10), 0 16px 48px rgba(255,77,141,0.07)`;}}
-                  onMouseLeave={(e) => {e.currentTarget.style.background = '#ffffff';e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)';e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05)`;}}>
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,240,247,0.98)';
+                    e.currentTarget.style.borderColor = 'rgba(255,77,141,0.25)';
+                    e.currentTarget.style.boxShadow = `0 4px 20px rgba(255,77,141,0.12), 0 16px 48px rgba(255,77,141,0.08)`;
+                    e.currentTarget.querySelectorAll('[data-hover-bg]').forEach(el => { el.style.background = 'rgba(255,240,247,0.98)'; });
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#ffffff';
+                    e.currentTarget.style.borderColor = 'rgba(255,143,184,0.15)';
+                    e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.05)`;
+                    e.currentTarget.querySelectorAll('[data-hover-bg]').forEach(el => { el.style.background = '#ffffff'; });
+                  }}>
                   
               {/* Header */}
               <div style={{
@@ -594,11 +604,12 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
 
                     <>
                     {/* Premium Clean Area Chart */}
-                    <div style={{
+                    <div data-hover-bg="1" style={{
                         position: 'relative',
                         background: '#ffffff',
                         borderRadius: '20px 20px 0 0',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        transition: 'background 0.3s'
                       }}>
                       
                       <ResponsiveContainer width="100%" height={160}>
