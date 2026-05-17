@@ -54,28 +54,28 @@ export default function AIBackground() {
         className="absolute inset-0"
         animate={{
           background: [
-            'linear-gradient(165deg, #FEFCFD 0%, #FFFBFE 30%, #FAFAFA 60%, #FDFCFF 100%)',
-            'linear-gradient(175deg, #FFF5FA 0%, #FFFBFE 35%, #FAF9FE 65%, #FDFCFF 100%)',
-            'linear-gradient(155deg, #FEFCFD 0%, #FFF8FC 28%, #FAFAFA 58%, #FDFCFF 100%)',
+            'linear-gradient(160deg, #FDF0F8 0%, #FFF8FD 28%, #F6F4FB 58%, #FFF9FE 100%)',
+            'linear-gradient(170deg, #FEF3FA 0%, #FFFBFE 32%, #F5F4FA 62%, #FDFAFF 100%)',
+            'linear-gradient(150deg, #FCF0F7 0%, #FFF6FC 26%, #F7F5FC 60%, #FFFAFF 100%)',
           ],
         }}
-        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
       />
 
-      {/* Ambient pink orb — top left */}
+      {/* Ambient pink orb — top left — más intenso */}
       <motion.div
         className="absolute"
         style={{
-          width: 600, height: 500,
-          top: -160, left: -120,
-          background: 'radial-gradient(ellipse, rgba(194,24,117,0.055) 0%, transparent 65%)',
-          filter: 'blur(40px)',
+          width: 700, height: 580,
+          top: -180, left: -140,
+          background: 'radial-gradient(ellipse, rgba(194,24,117,0.10) 0%, rgba(194,24,117,0.04) 45%, transparent 70%)',
+          filter: 'blur(50px)',
         }}
         animate={{
-          x: [0, 30, -10, 0],
-          y: [0, -20, 15, 0],
-          scale: [1, 1.08, 0.95, 1],
-          opacity: [0.7, 1, 0.6, 0.7],
+          x: [0, 35, -12, 0],
+          y: [0, -22, 18, 0],
+          scale: [1, 1.1, 0.93, 1],
+          opacity: [0.85, 1, 0.7, 0.85],
         }}
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
       />
@@ -84,35 +84,35 @@ export default function AIBackground() {
       <motion.div
         className="absolute"
         style={{
-          width: 500, height: 400,
-          bottom: -80, right: -100,
-          background: 'radial-gradient(ellipse, rgba(194,24,117,0.04) 0%, transparent 65%)',
-          filter: 'blur(50px)',
+          width: 550, height: 450,
+          bottom: -100, right: -110,
+          background: 'radial-gradient(ellipse, rgba(194,24,117,0.08) 0%, rgba(194,24,117,0.03) 50%, transparent 70%)',
+          filter: 'blur(55px)',
         }}
         animate={{
-          x: [0, -25, 10, 0],
-          y: [0, 18, -12, 0],
-          scale: [1, 0.92, 1.06, 1],
-          opacity: [0.5, 0.8, 0.4, 0.5],
+          x: [0, -28, 12, 0],
+          y: [0, 20, -14, 0],
+          scale: [1, 0.90, 1.08, 1],
+          opacity: [0.7, 1, 0.55, 0.7],
         }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut', delay: -8 }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: -8 }}
       />
 
       {/* Mid ambient — center right */}
       <motion.div
         className="absolute"
         style={{
-          width: 350, height: 350,
-          top: '35%', right: '5%',
-          background: 'radial-gradient(circle, rgba(194,24,117,0.03) 0%, transparent 70%)',
-          filter: 'blur(60px)',
+          width: 400, height: 400,
+          top: '30%', right: '8%',
+          background: 'radial-gradient(circle, rgba(194,24,117,0.065) 0%, transparent 65%)',
+          filter: 'blur(55px)',
         }}
         animate={{
-          x: [0, 15, -8, 0],
-          y: [0, -30, 20, 0],
-          opacity: [0.4, 0.7, 0.3, 0.4],
+          x: [0, 18, -10, 0],
+          y: [0, -35, 22, 0],
+          opacity: [0.55, 0.9, 0.4, 0.55],
         }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut', delay: -14 }}
+        transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut', delay: -14 }}
       />
 
       {/* Holographic horizontal light band */}

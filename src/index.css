@@ -190,25 +190,25 @@
 ═══════════════════════════════════════════════ */
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(36px) saturate(150%);
-  -webkit-backdrop-filter: blur(36px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(40px) saturate(160%);
+  -webkit-backdrop-filter: blur(40px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   box-shadow: 
-    0 2px 16px rgba(0, 0, 0, 0.04),
-    0 1px 3px rgba(0, 0, 0, 0.025),
-    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    0 4px 24px rgba(0, 0, 0, 0.07),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
   transition: all 0.32s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.9);
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.07),
-    0 3px 10px rgba(194, 24, 117, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  transform: translateY(-2px);
+    0 16px 48px rgba(0, 0, 0, 0.10),
+    0 4px 14px rgba(194, 24, 117, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  transform: translateY(-3px);
 }
 
 /* Elevated premium card — hero level */
@@ -258,10 +258,10 @@
   position: absolute;
   inset: 0;
   background: 
-    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(194, 24, 117, 0.055) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(194, 24, 117, 0.04) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 60% at 50% 50%, rgba(245, 230, 240, 0.3) 0%, transparent 70%),
-    linear-gradient(165deg, #FEFCFD 0%, #FFFBFE 30%, #FAFAFA 60%, #FDFCFF 100%);
+    radial-gradient(ellipse 70% 50% at 15% 5%, rgba(194, 24, 117, 0.09) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 85% 75%, rgba(194, 24, 117, 0.07) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 60% at 50% 50%, rgba(252, 231, 243, 0.55) 0%, transparent 70%),
+    linear-gradient(160deg, #FEF6FB 0%, #FFF8FD 25%, #F8F8FA 55%, #FDFAFF 100%);
   animation: ambient-breathe 12s ease-in-out infinite;
 }
 

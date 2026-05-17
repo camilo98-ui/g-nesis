@@ -816,7 +816,7 @@ export default function HomeWorkspace({
       <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh' }}>
 
         {/* CENTER — scrollable */}
-        <div className="flex-1 min-w-0 overflow-y-auto p-2 sm:p-4 lg:p-7">
+        <div className="flex-1 min-w-0 overflow-y-auto p-3 sm:p-5 lg:p-8">
 
           {/* TOP BAR */}
           <motion.div
@@ -826,20 +826,27 @@ export default function HomeWorkspace({
             className="mb-4 lg:mb-7">
             
             <div className="flex items-center justify-between gap-2 sm:gap-4 mb-3 lg:mb-5 flex-wrap">
-              <div className="flex flex-col gap-1 min-w-0">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <div className="flex items-center gap-2.5">
                   <motion.div
-                    animate={{ rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.12), rgba(194,24,117,0.06))', border: '1px solid rgba(194,24,117,0.12)' }}
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                   >
-                    <GreetIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: greeting.color }} />
+                    <GreetIcon className="w-4 h-4" style={{ color: '#C21875' }} />
                   </motion.div>
-                  <h1 className="text-base sm:text-xl lg:text-2xl font-black text-slate-800 tracking-tight truncate leading-none"
-                    style={{ letterSpacing: '-0.03em' }}>
-                    {greeting.text}, <span style={{ color: '#C21875' }}>{LEADERS[selectedStore] || 'Tienda'}</span>
-                  </h1>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-0.5">
+                      {new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
+                    <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-none"
+                      style={{ letterSpacing: '-0.04em', color: '#1a1a2e' }}>
+                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{LEADERS[selectedStore] || 'Tienda'}</span>
+                    </h1>
+                  </div>
                 </div>
-                <p className="text-[11px] sm:text-[12.5px] text-slate-400 font-medium leading-snug max-w-sm pl-7">
+                <p className="text-[11.5px] text-slate-500 font-medium leading-snug max-w-sm pl-11">
                   {getDynamicPhrase()}
                 </p>
               </div>
@@ -893,7 +900,13 @@ export default function HomeWorkspace({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative overflow-hidden rounded-2xl cursor-default card-elevated"
+              className="relative overflow-hidden rounded-2xl cursor-default"
+              style={{
+                background: 'linear-gradient(130deg, rgba(255,255,255,0.97) 0%, rgba(253,236,248,0.8) 60%, rgba(255,255,255,0.95) 100%)',
+                backdropFilter: 'blur(40px)',
+                border: '1px solid rgba(194,24,117,0.12)',
+                boxShadow: '0 6px 32px rgba(194,24,117,0.10), 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)',
+              }}
             >
               {/* Ambient glow blob */}
               <motion.div
@@ -1319,37 +1332,37 @@ export default function HomeWorkspace({
                       onClick={() => setKpiModal(c.key)}
                       className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden cursor-pointer"
                       style={{
-                        background: 'rgba(255,255,255,0.82)',
-                        backdropFilter: 'blur(32px)',
-                        border: '1px solid rgba(255,255,255,0.6)',
-                        boxShadow: `0 2px 16px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.9)`,
-                        transition: 'box-shadow 0.25s, transform 0.2s',
+                        background: 'rgba(255,255,255,0.92)',
+                        backdropFilter: 'blur(40px)',
+                        border: `1px solid ${c.accent}18`,
+                        boxShadow: `0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04), 0 0 0 0.5px ${c.accent}10, inset 0 1px 0 rgba(255,255,255,1)`,
+                        transition: 'box-shadow 0.25s, transform 0.22s',
                       }}
                       onMouseEnter={e => {
-                        e.currentTarget.style.boxShadow = `0 8px 32px rgba(0,0,0,0.08), 0 0 20px ${c.accent}14, inset 0 1px 0 rgba(255,255,255,0.95)`;
+                        e.currentTarget.style.boxShadow = `0 12px 40px rgba(0,0,0,0.10), 0 0 24px ${c.accent}18, 0 0 0 1px ${c.accent}20, inset 0 1px 0 rgba(255,255,255,1)`;
                       }}
                       onMouseLeave={e => {
-                        e.currentTarget.style.boxShadow = `0 2px 16px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.9)`;
+                        e.currentTarget.style.boxShadow = `0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04), 0 0 0 0.5px ${c.accent}10, inset 0 1px 0 rgba(255,255,255,1)`;
                       }}
                     >
-                      {/* Top accent gradient bar */}
-                      <div className="absolute top-0 left-0 right-0 h-[2.5px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}80, ${c.accent}18, transparent)` }} />
-                      {/* Ambient corner glow */}
-                      <div className="absolute top-0 right-0 w-16 h-16 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle at top right, ${c.accent}08, transparent 70%)` }} />
+                      {/* Top accent bar — fully opaque */}
+                      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}, ${c.accent}40, transparent)` }} />
+                      {/* Bottom ambient bleed */}
+                      <div className="absolute bottom-0 left-0 right-0 h-12 rounded-b-2xl pointer-events-none" style={{ background: `linear-gradient(0deg, ${c.accent}06, transparent)` }} />
 
                       {/* Label */}
-                      <p className="text-[8.5px] sm:text-[9.5px] font-semibold uppercase tracking-[0.15em] mb-1.5" style={{ color: `${c.accent}80` }}>{c.label}</p>
+                      <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.18em] mb-2" style={{ color: `${c.accent}99` }}>{c.label}</p>
 
                       {/* Value + Sparkline */}
-                      <div className="flex items-end gap-0 w-full" style={{ minHeight: 44 }}>
+                      <div className="flex items-end gap-0 w-full" style={{ minHeight: 48 }}>
                         <div className="flex-shrink-0 flex flex-col justify-end">
-                          <p className="text-sm sm:text-[15px] font-black leading-none tabular-nums tracking-tight" style={{ color: c.accent, letterSpacing: '-0.02em' }}>
-                            {c.prefix && <span className="mr-0.5 text-[10px] sm:text-[12px] font-bold">{c.prefix}</span>}
+                          <p className="text-[15px] sm:text-[18px] font-black leading-none tabular-nums" style={{ color: c.accent, letterSpacing: '-0.03em' }}>
+                            {c.prefix && <span className="mr-0.5 text-[12px] sm:text-[14px] font-bold">{c.prefix}</span>}
                             {c.value}
                           </p>
-                          <p className="text-[7.5px] sm:text-[8.5px] font-medium mt-1.5 tracking-wide" style={{ color: `${c.accent}60` }}>{c.sub}</p>
+                          <p className="text-[8px] sm:text-[9px] font-semibold mt-1.5 tracking-wide" style={{ color: `${c.accent}70` }}>{c.sub}</p>
                         </div>
-                        <div className="flex-1 min-w-0" style={{ height: 44 }}>
+                        <div className="flex-1 min-w-0" style={{ height: 48 }}>
                           <Spark points={c.spark} color={c.accent} />
                         </div>
                       </div>
