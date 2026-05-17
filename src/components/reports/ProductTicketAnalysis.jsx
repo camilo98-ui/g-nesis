@@ -596,18 +596,10 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                     {/* Premium Clean Area Chart */}
                     <div style={{
                         position: 'relative',
-                        background: 'linear-gradient(135deg, rgba(255,250,252,0.9) 0%, rgba(255,255,255,0.98) 100%)',
+                        background: '#ffffff',
                         borderRadius: '20px 20px 0 0',
-                        overflow: 'hidden',
-                        backdropFilter: 'blur(12px)'
+                        overflow: 'hidden'
                       }}>
-                      {/* Subtle Ambient Glow */}
-                      <div style={{
-                          position: 'absolute',
-                          inset: 0,
-                          background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255,77,141,0.08) 0%, transparent 65%)',
-                          pointerEvents: 'none'
-                        }} />
                       
                       <ResponsiveContainer width="100%" height={160}>
                         <BarChart data={monthsWithPart} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
