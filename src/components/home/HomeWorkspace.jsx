@@ -846,9 +846,9 @@ export default function HomeWorkspace({
                     </h1>
                   </div>
                 </div>
-                <p className="text-[11.5px] text-slate-500 font-medium leading-snug max-w-sm pl-11 hidden">
-                  {getDynamicPhrase()}
-                </p>
+                
+
+                
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <div className="flex-1 sm:flex-none sm:max-w-xs">
