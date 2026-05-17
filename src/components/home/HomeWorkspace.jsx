@@ -106,7 +106,7 @@ function KPICard({ label, value, change, icon: Icon, color, chartData, delay = 0
       </div>
 
       {/* Value */}
-      <p className="text-[22px] font-black text-slate-800 leading-none tracking-tight mb-0.5 tabular-nums">{value}</p>
+      <p className="text-[28px] font-black text-slate-800 leading-none tracking-tight mb-0.5 tabular-nums">{value}</p>
       <p className="text-[11px] font-medium text-slate-400 mb-3 tracking-wide">{label}</p>
 
       {/* Sparkline */}
@@ -129,11 +129,11 @@ function NavItem({ item, isActive, onClick }) {
       whileHover={{ x: 2 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left"
+      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left"
       style={isActive ? {
-        background: 'rgba(194,24,117,0.07)',
-        border: '1px solid rgba(194,24,117,0.14)',
-        boxShadow: '0 2px 8px rgba(194,24,117,0.06)',
+        background: 'linear-gradient(135deg, rgba(194,24,117,0.10), rgba(194,24,117,0.05))',
+        border: '1px solid rgba(194,24,117,0.22)',
+        boxShadow: '0 3px 12px rgba(194,24,117,0.12), inset 0 1px 0 rgba(255,255,255,0.8)',
         backdropFilter: 'blur(8px)',
       } : {
         background: 'transparent',
@@ -141,18 +141,18 @@ function NavItem({ item, isActive, onClick }) {
         transition: 'all 0.2s cubic-bezier(0.23,1,0.32,1)',
       }}>
       
-      <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
       style={isActive ?
-      { background: 'rgba(194,24,117,0.1)' } :
+      { background: 'rgba(194,24,117,0.14)', boxShadow: '0 2px 6px rgba(194,24,117,0.15)' } :
       { background: 'rgba(0,0,0,0.03)' }}>
-        <Icon style={{ color: isActive ? '#C21875' : '#9ca3af', width: 13, height: 13 }} />
+        <Icon style={{ color: isActive ? '#C21875' : '#9ca3af', width: 14, height: 14 }} />
       </div>
-      <span className="text-xs font-medium flex-1 truncate"
+      <span className="text-[12px] font-semibold flex-1 truncate"
       style={{ color: isActive ? '#C21875' : '#6b7280' }}>
         {item.label}
       </span>
       {isActive &&
-      <div className="w-1 h-3 rounded-full flex-shrink-0" style={{ background: '#C21875' }} />
+      <div className="w-1.5 h-4 rounded-full flex-shrink-0" style={{ background: 'linear-gradient(180deg, #C21875, #e11d7a)' }} />
       }
     </motion.button>);
 
@@ -823,9 +823,9 @@ export default function HomeWorkspace({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="mb-4 lg:mb-7">
+            className="mb-5 lg:mb-8">
             
-            <div className="flex items-center justify-between gap-2 sm:gap-4 mb-3 lg:mb-5 flex-wrap">
+            <div className="flex items-center justify-between gap-2 sm:gap-4 mb-4 lg:mb-6 flex-wrap">
               <div className="flex flex-col gap-1.5 min-w-0">
                 <div className="flex items-center gap-2.5">
                   <motion.div
@@ -893,7 +893,7 @@ export default function HomeWorkspace({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-6 space-y-3">
+            className="mb-7 space-y-4">
 
             {/* Nova AI Strip — HERO PREMIUM */}
             <motion.div
@@ -1544,7 +1544,7 @@ export default function HomeWorkspace({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="mb-4 lg:mb-7 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+            className="mb-6 lg:mb-9 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
 
             {/* Card 1 — Temperatura del día + impacto en ventas */}
             {(() => {
