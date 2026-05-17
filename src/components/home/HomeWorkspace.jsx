@@ -893,7 +893,7 @@ export default function HomeWorkspace({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-7 space-y-4">
+            className="mb-6 space-y-3">
 
             {/* Nova AI Strip — HERO PREMIUM */}
             <motion.div
@@ -1544,7 +1544,7 @@ export default function HomeWorkspace({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="mb-6 lg:mb-9 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            className="mb-4 lg:mb-7 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
 
             {/* Card 1 — Temperatura del día + impacto en ventas */}
             {(() => {

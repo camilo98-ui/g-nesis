@@ -54,9 +54,9 @@ export default function AIBackground() {
         className="absolute inset-0"
         animate={{
           background: [
-            'linear-gradient(160deg, #FDF0F8 0%, #FFF8FD 28%, #F6F4FB 58%, #FFF9FE 100%)',
-            'linear-gradient(170deg, #FEF3FA 0%, #FFFBFE 32%, #F5F4FA 62%, #FDFAFF 100%)',
-            'linear-gradient(150deg, #FCF0F7 0%, #FFF6FC 26%, #F7F5FC 60%, #FFFAFF 100%)',
+            'linear-gradient(165deg, #FEFCFD 0%, #FFFBFE 30%, #FAFAFA 60%, #FDFCFF 100%)',
+            'linear-gradient(175deg, #FFF7FB 0%, #FFFCFE 35%, #FAF9FE 65%, #FDFCFF 100%)',
+            'linear-gradient(155deg, #FEFCFD 0%, #FFF9FD 28%, #FAFAFA 58%, #FDFCFF 100%)',
           ],
         }}
         transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
@@ -68,7 +68,7 @@ export default function AIBackground() {
         style={{
           width: 700, height: 580,
           top: -180, left: -140,
-          background: 'radial-gradient(ellipse, rgba(194,24,117,0.10) 0%, rgba(194,24,117,0.04) 45%, transparent 70%)',
+          background: 'radial-gradient(ellipse, rgba(194,24,117,0.055) 0%, rgba(194,24,117,0.02) 45%, transparent 70%)',
           filter: 'blur(50px)',
         }}
         animate={{
@@ -86,7 +86,7 @@ export default function AIBackground() {
         style={{
           width: 550, height: 450,
           bottom: -100, right: -110,
-          background: 'radial-gradient(ellipse, rgba(194,24,117,0.08) 0%, rgba(194,24,117,0.03) 50%, transparent 70%)',
+          background: 'radial-gradient(ellipse, rgba(194,24,117,0.04) 0%, rgba(194,24,117,0.015) 50%, transparent 70%)',
           filter: 'blur(55px)',
         }}
         animate={{
@@ -104,7 +104,7 @@ export default function AIBackground() {
         style={{
           width: 400, height: 400,
           top: '30%', right: '8%',
-          background: 'radial-gradient(circle, rgba(194,24,117,0.065) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, rgba(194,24,117,0.03) 0%, transparent 65%)',
           filter: 'blur(55px)',
         }}
         animate={{
