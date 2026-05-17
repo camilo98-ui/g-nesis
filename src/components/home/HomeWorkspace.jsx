@@ -1502,52 +1502,67 @@ export default function HomeWorkspace({
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="mb-4 lg:mb-7 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
 
-            {/* Card 1 — Temperatura del día + tendencia 7 días (barras) */}
+            {/* Card 1 — Temperatura del día + impacto en ventas */}
             {(() => {
               const tempData = weatherLast7.map((d) => d.temperature_mean || d.temperature_max || 0);
-              const maxTemp = Math.max(...tempData, 1);
               const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
               const tempMax = latestWeather?.temperature_max;
               const tempMin = latestWeather?.temperature_min;
               const isHot = temp > 26;
-              const accentColor = isHot ? '#f97316' : '#38bdf8';
+              const isCold = temp < 18;
+              const accentColor = isHot ? '#f97316' : isCold ? '#6366f1' : '#38bdf8';
+              // Impacto estimado en ventas por temperatura (helados = más ventas con calor)
+              const impactLabel = isHot ? '🔥 +15–25% ventas est.' : isCold ? '❄️ −10–15% ventas est.' : '✅ Condición ideal';
+              const impactColor = isHot ? '#f97316' : isCold ? '#6366f1' : '#10b981';
+              // Tendencia de temperatura
+              const avgTemp7 = tempData.length > 0 ? tempData.reduce((a,b) => a+b,0)/tempData.length : 0;
+              const tempTrend = temp != null && avgTemp7 > 0 ? temp - avgTemp7 : 0;
               return (
-                <div className="rounded-2xl p-4 glass-card hover-lift">
+                <div className="rounded-2xl p-4 glass-card hover-lift flex flex-col gap-0">
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Temperatura · 7 días</p>
-                    <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : '🌤 Fresco'}</span>
+                    <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : isCold ? '❄️ Frío' : '🌤 Fresco'}</span>
                   </div>
                   <div className="flex items-baseline gap-1 mb-1">
                     <p className="text-lg sm:text-[22px] font-black text-slate-800 leading-none">{temp != null ? `${Math.round(temp)}°` : '—'}</p>
                     {tempMax != null && tempMin != null &&
                     <p className="text-[10px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</p>
                     }
+                    {tempTrend !== 0 && <span className="text-[9px] font-bold ml-1" style={{ color: tempTrend > 0 ? '#f97316' : '#38bdf8' }}>{tempTrend > 0 ? '▲' : '▼'}{Math.abs(tempTrend).toFixed(1)}°</span>}
                   </div>
-                  <div className="flex items-end gap-1 h-11 mt-2">
+                  <div className="flex items-end gap-1 h-10 mt-1 mb-2">
                     {(tempData.length > 0 ? tempData : [20, 22, 21, 24, 23, 25, 24]).map((v, i, arr) => {
                       const pct = Math.max(v / Math.max(...arr, 1) * 100, 8);
                       const isLast = i === arr.length - 1;
                       return (
                         <div key={i} className="flex-1 rounded-t-md"
                         style={{ height: `${pct}%`, background: isLast ? accentColor : `${accentColor}28` }} />);
-
                     })}
                   </div>
-                  <p className="text-[9px] text-slate-300 mt-1.5 font-medium">Últimos 7 días · °C</p>
+                  {/* Impacto en ventas */}
+                  <div className="rounded-lg px-2 py-1.5 flex items-center gap-1.5" style={{ background: `${impactColor}10`, border: `1px solid ${impactColor}20` }}>
+                    <span className="text-[8.5px] font-bold flex-1" style={{ color: impactColor }}>{impactLabel}</span>
+                  </div>
+                  <p className="text-[8px] text-slate-300 mt-1.5 font-medium">vs prom. semana: {avgTemp7 > 0 ? `${Math.round(avgTemp7)}°C` : '—'}</p>
                 </div>);
-
             })()}
 
-            {/* Card 2 — Precipitación (barras) últimos 7 días */}
+            {/* Card 2 — Lluvia + días afectados + alerta operativa */}
             {(() => {
               const rainData = weatherLast7.map((d) => d.precipitation || 0);
               const totalRain = rainData.reduce((s, v) => s + v, 0);
-              const maxRain = Math.max(...rainData, 1);
               const todayRain = latestWeather?.precipitation ?? 0;
               const rainLevel = totalRain > 20 ? 'Alta' : totalRain > 5 ? 'Moderada' : 'Baja';
               const rainColor = totalRain > 20 ? '#6366f1' : totalRain > 5 ? '#38bdf8' : '#94a3b8';
+              // Días con lluvia significativa
+              const rainyDays = rainData.filter(v => v >= 3).length;
+              const dryDays = rainData.length - rainyDays;
+              // Correlación lluvia → tráfico (lluvia = menos tráfico peatonal)
+              const trafficAlert = todayRain >= 5 ? { msg: '⚠️ Flujo peatonal reducido', color: '#ef4444' }
+                : todayRain >= 2 ? { msg: '🌂 Tráfico moderado', color: '#f59e0b' }
+                : { msg: '🚶 Buen tráfico esperado', color: '#10b981' };
               return (
-                <div className="rounded-2xl p-4 glass-card hover-lift">
+                <div className="rounded-2xl p-4 glass-card hover-lift flex flex-col gap-0">
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Lluvia · 7 días</p>
                     <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
@@ -1556,46 +1571,58 @@ export default function HomeWorkspace({
                     <p className="text-lg sm:text-[22px] font-black text-slate-800 leading-none">{todayRain > 0 ? `${todayRain.toFixed(1)}` : '0'}<span className="text-[10px] sm:text-[12px] font-semibold text-slate-400">mm</span></p>
                     <p className="text-[10px] text-slate-400 font-medium ml-1">hoy</p>
                   </div>
-                  <div className="flex items-end gap-1 h-11 mt-2">
+                  <div className="flex items-end gap-1 h-10 mt-1 mb-2">
                     {(rainData.length > 0 ? rainData : [0, 2, 1, 5, 3, 8, 4]).map((v, i, arr) => {
                       const pct = Math.max(v / Math.max(...arr, 0.1) * 100, 4);
                       const isLast = i === arr.length - 1;
                       return (
                         <div key={i} className="flex-1 rounded-t-md"
                         style={{ height: `${pct}%`, background: isLast ? rainColor : `${rainColor}30` }} />);
-
                     })}
                   </div>
-                  <p className="text-[9px] text-slate-300 mt-1.5 font-medium">Total semana: {totalRain.toFixed(1)} mm</p>
+                  {/* Alerta de tráfico/operativa */}
+                  <div className="rounded-lg px-2 py-1.5 flex items-center gap-1.5" style={{ background: `${trafficAlert.color}10`, border: `1px solid ${trafficAlert.color}20` }}>
+                    <span className="text-[8.5px] font-bold flex-1" style={{ color: trafficAlert.color }}>{trafficAlert.msg}</span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <p className="text-[8px] text-slate-300 font-medium">Total: {totalRain.toFixed(1)} mm</p>
+                    <p className="text-[8px] text-slate-300 font-medium">{rainyDays}d lluvia · {dryDays}d seco</p>
+                  </div>
                 </div>);
-
             })()}
 
-            {/* Card 3 — Donut condición climática + humedad */}
+            {/* Card 3 — Condición climática + score de venta ideal */}
             {(() => {
               const humidity = latestWeather?.humidity ?? 0;
               const precip = latestWeather?.precipitation ?? 0;
               const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max ?? 0;
-              // Classify days of last 7 as sunny/cloudy/rainy
               const sunny = weatherLast7.filter((d) => (d.precipitation || 0) < 1).length;
               const rainy = weatherLast7.filter((d) => (d.precipitation || 0) >= 5).length;
               const cloudy = weatherLast7.length - sunny - rainy;
               const total = Math.max(weatherLast7.length, 1);
               const segments = [
-              { label: 'Soleado', color: '#f97316', val: sunny },
-              { label: 'Nublado', color: '#94a3b8', val: cloudy },
-              { label: 'Lluvioso', color: '#6366f1', val: rainy }];
-
+                { label: 'Soleado', color: '#f97316', val: sunny },
+                { label: 'Nublado', color: '#94a3b8', val: cloudy },
+                { label: 'Lluvioso', color: '#6366f1', val: rainy }
+              ];
               const circ = 2 * Math.PI * 16;
               let cumulative = 0;
+              // Score de condición ideal para ventas de helados (calor + sin lluvia = ideal)
+              const salesScore = Math.max(0, Math.min(100, Math.round(
+                (temp > 0 ? Math.min((temp - 10) / 20 * 60, 60) : 0) +
+                (precip < 1 ? 30 : precip < 3 ? 15 : 0) +
+                (humidity > 0 && humidity < 70 ? 10 : 0)
+              )));
+              const scoreColor = salesScore >= 70 ? '#10b981' : salesScore >= 45 ? '#f59e0b' : '#ef4444';
+              const scoreLabel = salesScore >= 70 ? 'Ideal para vender' : salesScore >= 45 ? 'Condición regular' : 'Día difícil';
               return (
                 <div className="rounded-2xl p-4 flex flex-col glass-card hover-lift">
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Condición · semana</p>
+                   <span className="text-[8px] font-semibold" style={{ color: scoreColor }}>💧 {humidity > 0 ? `${Math.round(humidity)}%` : '—'} hum.</span>
                   </div>
-                  <p className="text-base sm:text-[18px] font-black text-slate-800 leading-none mb-2">{humidity > 0 ? `${Math.round(humidity)}% 💧` : '—'}</p>
-                  <div className="flex items-center gap-3 flex-1">
-                    <svg width="48" height="48" viewBox="0 0 48 48" className="flex-shrink-0">
+                  <div className="flex items-center gap-3 flex-1 mb-2">
+                    <svg width="44" height="44" viewBox="0 0 48 48" className="flex-shrink-0">
                       <circle cx="24" cy="24" r="16" fill="none" stroke="#f1f5f9" strokeWidth="6" />
                       {segments.map(({ color, val }) => {
                         const pct = val / total;
@@ -1609,24 +1636,29 @@ export default function HomeWorkspace({
                           strokeDashoffset={offset}
                           strokeLinecap="butt"
                           transform="rotate(-90 24 24)" />);
-
                       })}
                     </svg>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-0.5">
                       {segments.map(({ label, color, val }) =>
-                      <div key={label} className="flex items-center gap-1.5">
+                        <div key={label} className="flex items-center gap-1.5">
                           <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
-                          <span className="text-[9px] text-slate-400 font-medium">{label}</span>
-                          <span className="text-[9px] font-bold text-slate-600 ml-auto pl-1">{val}d</span>
+                          <span className="text-[8.5px] text-slate-400 font-medium">{label}</span>
+                          <span className="text-[8.5px] font-bold text-slate-600 ml-auto pl-1">{val}d</span>
                         </div>
                       )}
-                      {temp > 0 &&
-                      <p className="text-[9px] text-slate-300 mt-0.5">Temp prom: {Math.round(temp)}°C</p>
-                      }
+                    </div>
+                  </div>
+                  {/* Score de venta ideal */}
+                  <div className="rounded-lg px-2 py-1.5" style={{ background: `${scoreColor}10`, border: `1px solid ${scoreColor}20` }}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[8.5px] font-bold" style={{ color: scoreColor }}>{scoreLabel}</span>
+                      <span className="text-[9px] font-black" style={{ color: scoreColor }}>{salesScore}/100</span>
+                    </div>
+                    <div className="w-full h-1 rounded-full" style={{ background: `${scoreColor}20` }}>
+                      <div className="h-1 rounded-full transition-all" style={{ width: `${salesScore}%`, background: scoreColor }} />
                     </div>
                   </div>
                 </div>);
-
             })()}
 
           </motion.div>
