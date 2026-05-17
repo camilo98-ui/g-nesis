@@ -944,38 +944,65 @@ export default function HomeWorkspace({
                 {/* Separador elegante */}
                 <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-250 to-transparent opacity-25" />
 
-                {/* Insight Premium — Real Sales Data */}
-                 <div className="flex-1 min-w-0 flex items-center">
-                    <motion.p
+                {/* Insight Premium — Clima + Impacto en Ventas */}
+                 <div className="flex-1 min-w-0 flex items-center gap-3">
+                    <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.6 }}
-                    className="text-[12.5px] leading-relaxed font-medium text-slate-700"
-                    style={{ letterSpacing: '0.3px' }}>
-                      {todaySales && todaySales.length > 0 ?
-                    (() => {
-                      const lastSale = todaySales[todaySales.length - 1];
-                      const totalToday = todaySales.reduce((s, d) => s + (d.total_sales || 0), 0);
-                      const txnCount = todaySales.reduce((s, d) => s + (d.total_transactions || 0), 0);
-                      const avgTicket = txnCount > 0 ? totalToday / txnCount : 0;
-                      const avgSuggest = todaySales.reduce((s, d) => s + (d.total_suggested || 0), 0);
+                    className="flex items-center gap-2 flex-wrap">
+                      {(() => {
+                        const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
+                        const tempMax = latestWeather?.temperature_max;
+                        const tempMin = latestWeather?.temperature_min;
+                        const precip = latestWeather?.precipitation ?? 0;
+                        const humidity = latestWeather?.humidity ?? 0;
 
-                      // Determine status color based on metrics
-                      const isStrong = avgTicket > 80000 && avgSuggest > 30;
-                      const color = isStrong ? '#10b981' : avgTicket > 60000 ? '#f59e0b' : '#e11d48';
-                      const status = isStrong ? '🚀 Excelente' : avgTicket > 60000 ? '📈 Bueno' : '⚠️ Revisar';
+                        if (!latestWeather) return <span className="text-[12px] text-slate-400">Cargando clima...</span>;
 
-                      return (
-                        <>
-                            <span className="text-slate-600">{status} · </span>
-                            <span className="text-slate-700">Ticket promedio </span>
-                            <span style={{ color, fontWeight: 800, fontSize: '13px' }}>${(avgTicket / 1000).toFixed(0)}K</span>
-                            <span className="text-slate-600"> · {txnCount} transacciones hoy · Sugeridos: {avgSuggest.toFixed(0)}</span>
-                          </>);
+                        const isHot = temp > 26;
+                        const isCold = temp < 18;
+                        const isRainy = precip >= 3;
 
-                    })() :
-                    <span className="text-slate-500">Cargando datos de hoy...</span>}
-                    </motion.p>
+                        const weatherIcon = isRainy ? '🌧' : isHot ? '☀️' : isCold ? '❄️' : '🌤';
+                        const weatherLabel = isRainy ? 'Lluvioso' : isHot ? 'Caluroso' : isCold ? 'Frío' : 'Fresco';
+                        const accentColor = isHot && !isRainy ? '#f97316' : isRainy ? '#6366f1' : isCold ? '#38bdf8' : '#10b981';
+
+                        // Impacto estimado en ventas helados
+                        const salesImpact = isHot && !isRainy ? '+18–25%' : isRainy ? '−12–18%' : isCold ? '−8–12%' : '+5–10%';
+                        const impactLabel = isHot && !isRainy ? '🔥 Día ideal — ventas al alza' : isRainy ? '⚠️ Lluvia reduce tráfico' : isCold ? '❄️ Frío puede afectar ventas' : '✅ Buenas condiciones';
+                        const impactColor = isHot && !isRainy ? '#10b981' : isRainy ? '#ef4444' : isCold ? '#6366f1' : '#10b981';
+
+                        return (
+                          <>
+                            {/* Temp badge */}
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg flex-shrink-0"
+                              style={{ background: `${accentColor}10`, border: `1px solid ${accentColor}20` }}>
+                              <span className="text-[13px]">{weatherIcon}</span>
+                              <span className="text-[13px] font-black leading-none" style={{ color: accentColor }}>{temp != null ? `${Math.round(temp)}°C` : '—'}</span>
+                              {tempMax != null && tempMin != null &&
+                                <span className="text-[9px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</span>
+                              }
+                              <span className="text-[9px] font-semibold" style={{ color: accentColor }}>{weatherLabel}</span>
+                            </div>
+
+                            {/* Separador */}
+                            <div className="w-px h-5 bg-slate-200 flex-shrink-0 hidden sm:block" />
+
+                            {/* Impacto ventas */}
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-[11.5px] font-semibold text-slate-600 truncate">{impactLabel}</span>
+                              <span className="text-[11px] font-black flex-shrink-0" style={{ color: impactColor }}>{salesImpact}</span>
+                            </div>
+
+                            {/* Lluvia */}
+                            {precip > 0 &&
+                              <span className="text-[10px] text-slate-400 font-medium flex-shrink-0 hidden sm:block">· {precip.toFixed(1)} mm hoy</span>
+                            }
+                          </>
+                        );
+                      })()}
+                    </motion.div>
                   </div>
 
                 {/* Botón Premium SaaS */}
