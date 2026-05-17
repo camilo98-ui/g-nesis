@@ -349,7 +349,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                     
                 <div>
                 <p style={{ fontSize: 9, fontWeight: 700, color: P.textSub, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0, lineHeight: 1.2 }}>Top 10 Productos</p>
-                <p style={{ fontSize: 11, fontWeight: 500, color: P.text, margin: 0, marginTop: 1, letterSpacing: '-0.01em', lineHeight: 1.2 }} className="hidden">Por participación</p>
+                
                 </div>
               </div>
               <span style={{
