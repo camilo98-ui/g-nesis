@@ -1291,39 +1291,61 @@ export default function HomeWorkspace({
                 </AnimatePresence>
 
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  {cards.map((c) => (
-                    <motion.div
-                      key={c.label}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: c.delay, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                      whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0,0,0,0.08)', transition: { duration: 0.18 } }}
-                      onClick={() => setKpiModal(c.key)}
-                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden cursor-pointer glass-card card-accent-top"
-                    >
-                      {/* Top accent bar */}
-                      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}60, ${c.accent}20)` }} />
+                 {cards.map((c) => (
+                   <motion.div
+                     key={c.label}
+                     initial={{ opacity: 0, y: 8 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={{ delay: c.delay, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                     whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0,0,0,0.08)', transition: { duration: 0.18 } }}
+                     onClick={() => setKpiModal(c.key)}
+                     className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden cursor-pointer glass-card card-accent-top"
+                   >
+                     {/* Top accent bar */}
+                     <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}60, ${c.accent}20)` }} />
 
-                      {/* Label */}
-                      <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-1.5">{c.label}</p>
+                     {/* Label + ? tooltip */}
+                     <div className="flex items-center justify-between mb-1.5">
+                       <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">{c.label}</p>
+                       <div className="relative group/tip" onClick={e => e.stopPropagation()}>
+                         <div className="w-4 h-4 rounded-full flex items-center justify-center cursor-default"
+                           style={{ background: `${c.accent}15`, border: `1px solid ${c.accent}30` }}>
+                           <span className="text-[8px] font-black leading-none" style={{ color: c.accent }}>?</span>
+                         </div>
+                         {/* Tooltip */}
+                         <div className="absolute right-0 top-5 z-50 w-52 rounded-xl p-3 opacity-0 pointer-events-none group-hover/tip:opacity-100 group-hover/tip:pointer-events-auto transition-all duration-200 translate-y-1 group-hover/tip:translate-y-0"
+                           style={{ background: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 16px 40px rgba(0,0,0,0.3)' }}>
+                           <div className="absolute -top-1 right-1.5 w-2 h-2 rotate-45" style={{ background: 'rgba(15,23,42,0.92)', border: '1px solid rgba(255,255,255,0.1)', borderBottom: 'none', borderRight: 'none' }} />
+                           <p className="text-[8px] font-bold uppercase tracking-widest mb-2" style={{ color: c.accent }}>Insights · {c.label}</p>
+                           <div className="space-y-1.5">
+                             {c.detail.map(({ label, value }) => (
+                               <div key={label} className="flex items-center justify-between gap-2">
+                                 <span className="text-[9px] text-slate-400 font-medium leading-tight">{label}</span>
+                                 <span className="text-[9px] font-black text-white tabular-nums flex-shrink-0">{value}</span>
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       </div>
+                     </div>
 
-                      {/* Sparkline ocupa todo el ancho, alineada con el número */}
-                      <div className="flex items-end gap-0 w-full" style={{ minHeight: 44 }}>
-                        {/* KPI texto */}
-                        <div className="flex-shrink-0 flex flex-col justify-end">
-                          <p className="text-sm sm:text-base font-semibold leading-none tabular-nums tracking-tight" style={{ color: c.accent, opacity: 0.9 }}>
-                            {c.prefix && <span className="mr-0.5 text-[11px] sm:text-[13px]">{c.prefix}</span>}
-                            {c.value}
-                          </p>
-                          <p className="text-[8px] sm:text-[9px] text-slate-300 font-medium mt-1.5 tracking-wide">{c.sub}</p>
-                        </div>
-                        {/* Sparkline desde justo después del número hasta el borde */}
-                        <div className="flex-1 min-w-0" style={{ height: 44 }}>
-                          <Spark points={c.spark} color={c.accent} />
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                     {/* Sparkline ocupa todo el ancho, alineada con el número */}
+                     <div className="flex items-end gap-0 w-full" style={{ minHeight: 44 }}>
+                       {/* KPI texto */}
+                       <div className="flex-shrink-0 flex flex-col justify-end">
+                         <p className="text-sm sm:text-base font-semibold leading-none tabular-nums tracking-tight" style={{ color: c.accent, opacity: 0.9 }}>
+                           {c.prefix && <span className="mr-0.5 text-[11px] sm:text-[13px]">{c.prefix}</span>}
+                           {c.value}
+                         </p>
+                         <p className="text-[8px] sm:text-[9px] text-slate-300 font-medium mt-1.5 tracking-wide">{c.sub}</p>
+                       </div>
+                       {/* Sparkline desde justo después del número hasta el borde */}
+                       <div className="flex-1 min-w-0" style={{ height: 44 }}>
+                         <Spark points={c.spark} color={c.accent} />
+                       </div>
+                     </div>
+                   </motion.div>
+                 ))}
                 </div>
                 </>
               );
@@ -1521,7 +1543,34 @@ export default function HomeWorkspace({
                 <div className="rounded-2xl p-4 glass-card hover-lift flex flex-col gap-0">
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Temperatura · 7 días</p>
-                    <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : isCold ? '❄️ Frío' : '🌤 Fresco'}</span>
+                   <div className="flex items-center gap-1.5">
+                     <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : isCold ? '❄️ Frío' : '🌤 Fresco'}</span>
+                     <div className="relative group/ttip">
+                       <div className="w-4 h-4 rounded-full flex items-center justify-center cursor-default" style={{ background: `${accentColor}15`, border: `1px solid ${accentColor}30` }}>
+                         <span className="text-[8px] font-black leading-none" style={{ color: accentColor }}>?</span>
+                       </div>
+                       <div className="absolute right-0 top-5 z-50 w-56 rounded-xl p-3 opacity-0 pointer-events-none group-hover/ttip:opacity-100 group-hover/ttip:pointer-events-auto transition-all duration-200 translate-y-1 group-hover/ttip:translate-y-0"
+                         style={{ background: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 16px 40px rgba(0,0,0,0.3)' }}>
+                         <div className="absolute -top-1 right-1.5 w-2 h-2 rotate-45" style={{ background: 'rgba(15,23,42,0.92)', border: '1px solid rgba(255,255,255,0.1)', borderBottom: 'none', borderRight: 'none' }} />
+                         <p className="text-[8px] font-bold uppercase tracking-widest mb-2" style={{ color: accentColor }}>Insights · Temperatura</p>
+                         <div className="space-y-1.5">
+                           {[
+                             { label: 'Temp. actual', value: temp != null ? `${Math.round(temp)}°C` : '—' },
+                             { label: 'Máxima / Mínima', value: tempMax != null ? `${Math.round(tempMax)}° / ${Math.round(tempMin)}°` : '—' },
+                             { label: 'Prom. 7 días', value: avgTemp7 > 0 ? `${Math.round(avgTemp7)}°C` : '—' },
+                             { label: 'Delta vs prom.', value: tempTrend !== 0 ? `${tempTrend > 0 ? '+' : ''}${tempTrend.toFixed(1)}°C` : '0°C' },
+                             { label: 'Impacto ventas est.', value: isHot ? '+15 a +25%' : isCold ? '−10 a −15%' : 'Neutro' },
+                             { label: 'Umbral calor/frío', value: '>26°C calor · <18°C frío' },
+                           ].map(({ label, value }) => (
+                             <div key={label} className="flex items-center justify-between gap-2">
+                               <span className="text-[9px] text-slate-400 font-medium">{label}</span>
+                               <span className="text-[9px] font-black text-white tabular-nums flex-shrink-0">{value}</span>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
                   </div>
                   <div className="flex items-baseline gap-1 mb-1">
                     <p className="text-lg sm:text-[22px] font-black text-slate-800 leading-none">{temp != null ? `${Math.round(temp)}°` : '—'}</p>
@@ -1565,7 +1614,34 @@ export default function HomeWorkspace({
                 <div className="rounded-2xl p-4 glass-card hover-lift flex flex-col gap-0">
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Lluvia · 7 días</p>
-                    <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
+                   <div className="flex items-center gap-1.5">
+                     <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
+                     <div className="relative group/rtip">
+                       <div className="w-4 h-4 rounded-full flex items-center justify-center cursor-default" style={{ background: `${rainColor}15`, border: `1px solid ${rainColor}30` }}>
+                         <span className="text-[8px] font-black leading-none" style={{ color: rainColor }}>?</span>
+                       </div>
+                       <div className="absolute right-0 top-5 z-50 w-56 rounded-xl p-3 opacity-0 pointer-events-none group-hover/rtip:opacity-100 group-hover/rtip:pointer-events-auto transition-all duration-200 translate-y-1 group-hover/rtip:translate-y-0"
+                         style={{ background: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 16px 40px rgba(0,0,0,0.3)' }}>
+                         <div className="absolute -top-1 right-1.5 w-2 h-2 rotate-45" style={{ background: 'rgba(15,23,42,0.92)', border: '1px solid rgba(255,255,255,0.1)', borderBottom: 'none', borderRight: 'none' }} />
+                         <p className="text-[8px] font-bold uppercase tracking-widest mb-2" style={{ color: rainColor }}>Insights · Precipitación</p>
+                         <div className="space-y-1.5">
+                           {[
+                             { label: 'Lluvia hoy', value: `${todayRain.toFixed(1)} mm` },
+                             { label: 'Total 7 días', value: `${totalRain.toFixed(1)} mm` },
+                             { label: 'Días con lluvia (≥3mm)', value: `${rainyDays} de ${rainData.length} días` },
+                             { label: 'Días secos', value: `${dryDays} días` },
+                             { label: 'Nivel de lluvia', value: rainLevel },
+                             { label: 'Impacto tráfico hoy', value: todayRain >= 5 ? 'Reducido (−30%)' : todayRain >= 2 ? 'Moderado (−15%)' : 'Normal' },
+                           ].map(({ label, value }) => (
+                             <div key={label} className="flex items-center justify-between gap-2">
+                               <span className="text-[9px] text-slate-400 font-medium">{label}</span>
+                               <span className="text-[9px] font-black text-white tabular-nums flex-shrink-0">{value}</span>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
                   </div>
                   <div className="flex items-baseline gap-1 mb-1">
                     <p className="text-lg sm:text-[22px] font-black text-slate-800 leading-none">{todayRain > 0 ? `${todayRain.toFixed(1)}` : '0'}<span className="text-[10px] sm:text-[12px] font-semibold text-slate-400">mm</span></p>
@@ -1619,7 +1695,34 @@ export default function HomeWorkspace({
                 <div className="rounded-2xl p-4 flex flex-col glass-card hover-lift">
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Condición · semana</p>
-                   <span className="text-[8px] font-semibold" style={{ color: scoreColor }}>💧 {humidity > 0 ? `${Math.round(humidity)}%` : '—'} hum.</span>
+                   <div className="flex items-center gap-1.5">
+                     <span className="text-[8px] font-semibold" style={{ color: scoreColor }}>💧 {humidity > 0 ? `${Math.round(humidity)}%` : '—'} hum.</span>
+                     <div className="relative group/ctip">
+                       <div className="w-4 h-4 rounded-full flex items-center justify-center cursor-default" style={{ background: `${scoreColor}15`, border: `1px solid ${scoreColor}30` }}>
+                         <span className="text-[8px] font-black leading-none" style={{ color: scoreColor }}>?</span>
+                       </div>
+                       <div className="absolute right-0 top-5 z-50 w-56 rounded-xl p-3 opacity-0 pointer-events-none group-hover/ctip:opacity-100 group-hover/ctip:pointer-events-auto transition-all duration-200 translate-y-1 group-hover/ctip:translate-y-0"
+                         style={{ background: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 16px 40px rgba(0,0,0,0.3)' }}>
+                         <div className="absolute -top-1 right-1.5 w-2 h-2 rotate-45" style={{ background: 'rgba(15,23,42,0.92)', border: '1px solid rgba(255,255,255,0.1)', borderBottom: 'none', borderRight: 'none' }} />
+                         <p className="text-[8px] font-bold uppercase tracking-widest mb-2" style={{ color: scoreColor }}>Insights · Condición</p>
+                         <div className="space-y-1.5">
+                           {[
+                             { label: 'Score venta ideal', value: `${salesScore}/100` },
+                             { label: 'Humedad actual', value: humidity > 0 ? `${Math.round(humidity)}%` : '—' },
+                             { label: 'Días soleados (7d)', value: `${sunny} días` },
+                             { label: 'Días nublados (7d)', value: `${cloudy} días` },
+                             { label: 'Días lluviosos (7d)', value: `${rainy} días` },
+                             { label: 'Estado operativo', value: scoreLabel },
+                           ].map(({ label, value }) => (
+                             <div key={label} className="flex items-center justify-between gap-2">
+                               <span className="text-[9px] text-slate-400 font-medium">{label}</span>
+                               <span className="text-[9px] font-black text-white tabular-nums flex-shrink-0">{value}</span>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
                   </div>
                   <div className="flex items-center gap-3 flex-1 mb-2">
                     <svg width="44" height="44" viewBox="0 0 48 48" className="flex-shrink-0">
