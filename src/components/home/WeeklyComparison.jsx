@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine
@@ -84,6 +84,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function WeeklyComparison({ dailySales = [] }) {
+  const [isHovered, setIsHovered] = useState(false);
   const { chartData, totals } = useMemo(() => {
     const now = new Date();
     const weekStart = startOfWeek(now, { weekStartsOn: 1 });
@@ -147,10 +148,13 @@ export default function WeeklyComparison({ dailySales = [] }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
       className="mb-4 rounded-2xl overflow-hidden relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
-        background: 'linear-gradient(145deg, #FFF7FA 0%, #FFF0F5 40%, #FFF7FA 100%)',
-        border: '1px solid rgba(255,77,141,0.12)',
-        boxShadow: '0 2px 16px rgba(216,27,96,0.06), 0 1px 4px rgba(0,0,0,0.04)',
+        background: isHovered ? 'linear-gradient(145deg, #FFF7FA 0%, #FFF2F6 100%)' : '#ffffff',
+        border: `1px solid ${isHovered ? 'rgba(255,77,141,0.18)' : 'rgba(255,77,141,0.10)'}`,
+        boxShadow: isHovered ? '0 4px 24px rgba(216,27,96,0.08), 0 1px 4px rgba(0,0,0,0.04)' : '0 2px 16px rgba(216,27,96,0.04), 0 1px 4px rgba(0,0,0,0.03)',
+        transition: 'all 0.3s ease',
       }}>
 
       {/* Subtle ambient glow blobs */}
@@ -208,8 +212,8 @@ export default function WeeklyComparison({ dailySales = [] }) {
                 </p>
                 <div className="flex items-baseline gap-1.5 flex-wrap">
                   <span style={{
-                    fontSize: 17, fontWeight: 900, color: '#0f172a', lineHeight: 1,
-                    fontFamily: 'Inter Tight, Inter, sans-serif', letterSpacing: '-0.03em',
+                    fontSize: 17, fontWeight: 600, color: '#1e293b', lineHeight: 1,
+                    fontFamily: 'Inter Tight, Inter, sans-serif', letterSpacing: '-0.02em',
                     fontVariantNumeric: 'tabular-nums',
                   }}>{k.val}</span>
                   {DIcon && (
@@ -239,7 +243,7 @@ export default function WeeklyComparison({ dailySales = [] }) {
                 ? <ArrowUpRight style={{ width: 11, height: 11, color: '#10b981' }} />
                 : <ArrowDownRight style={{ width: 11, height: 11, color: '#D81B60' }} />}
               <span style={{
-                fontSize: 15, fontWeight: 900, fontFamily: 'Inter Tight, Inter, sans-serif',
+                fontSize: 15, fontWeight: 700, fontFamily: 'Inter Tight, Inter, sans-serif',
                 letterSpacing: '-0.03em', color: overallUp ? '#10b981' : '#D81B60',
                 fontVariantNumeric: 'tabular-nums',
               }}>
