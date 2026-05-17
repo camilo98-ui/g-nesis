@@ -745,7 +745,13 @@ export default function HomeWorkspace({
         initial={{ x: -24, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-        className="hidden lg:flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20 glass-sidebar"
+        className="hidden lg:flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20"
+        style={{
+          background: 'rgba(255,255,255,0.82)',
+          backdropFilter: 'blur(48px) saturate(160%)',
+          borderRight: '1px solid rgba(0,0,0,0.045)',
+          boxShadow: '2px 0 24px rgba(0,0,0,0.03)',
+        }}
       >
         
         {/* Logo */}
@@ -820,14 +826,20 @@ export default function HomeWorkspace({
             className="mb-4 lg:mb-7">
             
             <div className="flex items-center justify-between gap-2 sm:gap-4 mb-3 lg:mb-5 flex-wrap">
-              <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <GreetIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" style={{ color: greeting.color, opacity: 0.7 }} />
-                  <h1 className="text-sm sm:text-base lg:text-lg font-bold text-slate-700 tracking-tight truncate">
-                    {greeting.text}, {LEADERS[selectedStore] || 'Tienda'}
+              <div className="flex flex-col gap-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <motion.div
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <GreetIcon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: greeting.color }} />
+                  </motion.div>
+                  <h1 className="text-base sm:text-xl lg:text-2xl font-black text-slate-800 tracking-tight truncate leading-none"
+                    style={{ letterSpacing: '-0.03em' }}>
+                    {greeting.text}, <span style={{ color: '#C21875' }}>{LEADERS[selectedStore] || 'Tienda'}</span>
                   </h1>
                 </div>
-                <p className="text-[11px] sm:text-[12px] text-slate-400 font-medium leading-snug max-w-sm">
+                <p className="text-[11px] sm:text-[12.5px] text-slate-400 font-medium leading-snug max-w-sm pl-7">
                   {getDynamicPhrase()}
                 </p>
               </div>
@@ -876,16 +888,22 @@ export default function HomeWorkspace({
             transition={{ duration: 0.6 }}
             className="mb-6 space-y-3">
 
-            {/* Nova AI Strip — Premium Enterprise SaaS Copilot */}
+            {/* Nova AI Strip — HERO PREMIUM */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative overflow-hidden rounded-2xl glass-card border-animated"
+              className="relative overflow-hidden rounded-2xl cursor-default card-elevated"
             >
-              
-              {/* Subtle top glow line */}
-              <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(194,24,117,0.25), transparent)' }} />
+              {/* Ambient glow blob */}
+              <motion.div
+                animate={{ opacity: [0.3, 0.55, 0.3], scale: [1, 1.06, 1] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute -top-8 -right-8 w-48 h-48 rounded-full pointer-events-none"
+                style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.08) 0%, transparent 70%)', filter: 'blur(24px)' }}
+              />
+              {/* Top accent line */}
+              <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(194,24,117,0.35) 40%, rgba(194,24,117,0.2) 70%, transparent 95%)' }} />
               <div className="flex items-center h-16 px-6 gap-4">
                 
                 {/* Avatar Nova Mascota */}
@@ -1294,30 +1312,43 @@ export default function HomeWorkspace({
                   {cards.map((c) => (
                     <motion.div
                       key={c.label}
-                      initial={{ opacity: 0, y: 8 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: c.delay, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                      whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(0,0,0,0.08)', transition: { duration: 0.18 } }}
+                      transition={{ delay: c.delay, duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
+                      whileHover={{ y: -3, transition: { duration: 0.2 } }}
                       onClick={() => setKpiModal(c.key)}
-                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden cursor-pointer glass-card card-accent-top"
+                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden cursor-pointer"
+                      style={{
+                        background: 'rgba(255,255,255,0.82)',
+                        backdropFilter: 'blur(32px)',
+                        border: '1px solid rgba(255,255,255,0.6)',
+                        boxShadow: `0 2px 16px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.9)`,
+                        transition: 'box-shadow 0.25s, transform 0.2s',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.boxShadow = `0 8px 32px rgba(0,0,0,0.08), 0 0 20px ${c.accent}14, inset 0 1px 0 rgba(255,255,255,0.95)`;
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.boxShadow = `0 2px 16px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.9)`;
+                      }}
                     >
-                      {/* Top accent bar */}
-                      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}60, ${c.accent}20)` }} />
+                      {/* Top accent gradient bar */}
+                      <div className="absolute top-0 left-0 right-0 h-[2.5px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}80, ${c.accent}18, transparent)` }} />
+                      {/* Ambient corner glow */}
+                      <div className="absolute top-0 right-0 w-16 h-16 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle at top right, ${c.accent}08, transparent 70%)` }} />
 
                       {/* Label */}
-                      <p className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-1.5">{c.label}</p>
+                      <p className="text-[8.5px] sm:text-[9.5px] font-semibold uppercase tracking-[0.15em] mb-1.5" style={{ color: `${c.accent}80` }}>{c.label}</p>
 
-                      {/* Sparkline ocupa todo el ancho, alineada con el número */}
+                      {/* Value + Sparkline */}
                       <div className="flex items-end gap-0 w-full" style={{ minHeight: 44 }}>
-                        {/* KPI texto */}
                         <div className="flex-shrink-0 flex flex-col justify-end">
-                          <p className="text-sm sm:text-base font-semibold leading-none tabular-nums tracking-tight" style={{ color: c.accent, opacity: 0.9 }}>
-                            {c.prefix && <span className="mr-0.5 text-[11px] sm:text-[13px]">{c.prefix}</span>}
+                          <p className="text-sm sm:text-[15px] font-black leading-none tabular-nums tracking-tight" style={{ color: c.accent, letterSpacing: '-0.02em' }}>
+                            {c.prefix && <span className="mr-0.5 text-[10px] sm:text-[12px] font-bold">{c.prefix}</span>}
                             {c.value}
                           </p>
-                          <p className="text-[8px] sm:text-[9px] text-slate-300 font-medium mt-1.5 tracking-wide">{c.sub}</p>
+                          <p className="text-[7.5px] sm:text-[8.5px] font-medium mt-1.5 tracking-wide" style={{ color: `${c.accent}60` }}>{c.sub}</p>
                         </div>
-                        {/* Sparkline desde justo después del número hasta el borde */}
                         <div className="flex-1 min-w-0" style={{ height: 44 }}>
                           <Spark points={c.spark} color={c.accent} />
                         </div>
@@ -1518,7 +1549,8 @@ export default function HomeWorkspace({
               const avgTemp7 = tempData.length > 0 ? tempData.reduce((a,b) => a+b,0)/tempData.length : 0;
               const tempTrend = temp != null && avgTemp7 > 0 ? temp - avgTemp7 : 0;
               return (
-                <div className="rounded-2xl p-4 glass-card hover-lift flex flex-col gap-0">
+                <div className="rounded-2xl p-4 hover-lift flex flex-col gap-0"
+                  style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Temperatura · 7 días</p>
                     <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : isCold ? '❄️ Frío' : '🌤 Fresco'}</span>
@@ -1562,7 +1594,8 @@ export default function HomeWorkspace({
                 : todayRain >= 2 ? { msg: '🌂 Tráfico moderado', color: '#f59e0b' }
                 : { msg: '🚶 Buen tráfico esperado', color: '#10b981' };
               return (
-                <div className="rounded-2xl p-4 glass-card hover-lift flex flex-col gap-0">
+                <div className="rounded-2xl p-4 hover-lift flex flex-col gap-0"
+                  style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Lluvia · 7 días</p>
                     <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: rainColor }}>🌧 {rainLevel}</span>
@@ -1616,7 +1649,8 @@ export default function HomeWorkspace({
               const scoreColor = salesScore >= 70 ? '#10b981' : salesScore >= 45 ? '#f59e0b' : '#ef4444';
               const scoreLabel = salesScore >= 70 ? 'Ideal para vender' : salesScore >= 45 ? 'Condición regular' : 'Día difícil';
               return (
-                <div className="rounded-2xl p-4 flex flex-col glass-card hover-lift">
+                <div className="rounded-2xl p-4 flex flex-col hover-lift"
+                  style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
                  <div className="flex items-center justify-between mb-0.5">
                    <p className="label-premium">Condición · semana</p>
                    <span className="text-[8px] font-semibold" style={{ color: scoreColor }}>💧 {humidity > 0 ? `${Math.round(humidity)}%` : '—'} hum.</span>
@@ -1663,9 +1697,11 @@ export default function HomeWorkspace({
 
           </motion.div>
 
-          <p className="text-center text-[9px] font-medium tracking-widest uppercase mt-6 mb-2 text-slate-200">
-            Popsy AI Workspace
-          </p>
+          <div className="flex items-center justify-center gap-2 mt-8 mb-3">
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, transparent, rgba(194,24,117,0.12))' }} />
+            <p className="text-[8px] font-semibold tracking-[0.22em] uppercase" style={{ color: 'rgba(194,24,117,0.35)' }}>Popsy AI Workspace</p>
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(194,24,117,0.12), transparent)' }} />
+          </div>
         </div>
 
         {/* ── RIGHT AI PANEL ── */}
