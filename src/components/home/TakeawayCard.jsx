@@ -106,24 +106,24 @@ export default function TakeawayCard({ dailySales = [], budget = 0, onBudgetChan
     // Budget reference line
     const budgetY = budget > 0 ? toY(budget / analysis.daysInMonth) : null;
 
-    return (
-      <svg viewBox={`0 0 ${W} ${H}`} fill="none" preserveAspectRatio="none" className="w-full h-full hidden">
-        <defs>
-          <linearGradient id="twGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={PINK} stopOpacity="0.18" />
-            <stop offset="100%" stopColor={PINK} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {/* Budget daily target line */}
-        {budgetY != null &&
-        <line x1={padX} y1={budgetY} x2={W - padX} y2={budgetY}
-        stroke={`${PINK}40`} strokeWidth="1" strokeDasharray="4 3" />
-        }
-        <path d={areaD} fill="url(#twGrad)" />
-        <path d={d} stroke={PINK} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx={lx} cy={ly} r="3" fill={PINK} />
-        <circle cx={lx} cy={ly} r="6" fill={PINK} opacity="0.15" />
-      </svg>);
+    return null;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   };
 
