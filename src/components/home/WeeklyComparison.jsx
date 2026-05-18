@@ -86,15 +86,26 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function WeeklyComparison({ dailySales = [] }) {
   const [isHovered, setIsHovered] = useState(false);
   const { chartData, totals } = useMemo(() => {
-    const now = new Date();
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-    const prevStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
-    const prevEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
+    if (!dailySales.length) return { chartData: DAYS.map(label => ({ label, esta: null, anterior: null, delta: null })), totals: { totalThis: 0, totalLast: 0 } };
 
-    // Use string comparison with YYYY-MM-DD to avoid UTC/local timezone offset issues
-    const thisStartStr = format(weekStart, 'yyyy-MM-dd');
-    const thisEndStr = format(weekEnd, 'yyyy-MM-dd');
+    // Sort all dates to find the most recent data
+    const sortedDates = [...dailySales]
+      .map(d => d.date?.slice(0, 10))
+      .filter(Boolean)
+      .sort((a, b) => b.localeCompare(a));
+
+    const latestDate = sortedDates[0];
+    const [ly, lm, ld] = latestDate.split('-').map(Number);
+    const latestLocalDate = new Date(ly, lm - 1, ld);
+
+    // Find the Monday of the week that contains the latest data
+    const latestWeekStart = startOfWeek(latestLocalDate, { weekStartsOn: 1 });
+    const latestWeekEnd = endOfWeek(latestLocalDate, { weekStartsOn: 1 });
+    const prevStart = startOfWeek(subWeeks(latestWeekStart, 1), { weekStartsOn: 1 });
+    const prevEnd = endOfWeek(subWeeks(latestWeekStart, 1), { weekStartsOn: 1 });
+
+    const thisStartStr = format(latestWeekStart, 'yyyy-MM-dd');
+    const thisEndStr = format(latestWeekEnd, 'yyyy-MM-dd');
     const prevStartStr = format(prevStart, 'yyyy-MM-dd');
     const prevEndStr = format(prevEnd, 'yyyy-MM-dd');
 
@@ -102,9 +113,8 @@ export default function WeeklyComparison({ dailySales = [] }) {
     const lastW = Array(7).fill(null).map(() => ({ sales: 0, transactions: 0 }));
 
     for (const d of dailySales) {
-      const dateStr = d.date?.slice(0, 10); // ensure YYYY-MM-DD
+      const dateStr = d.date?.slice(0, 10);
       if (!dateStr) continue;
-      // Parse day-of-week from the date string directly
       const [y, m, day] = dateStr.split('-').map(Number);
       const localDate = new Date(y, m - 1, day);
       const dow = DAY_NUM[localDate.getDay()];
