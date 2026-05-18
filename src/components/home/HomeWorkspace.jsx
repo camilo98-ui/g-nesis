@@ -324,7 +324,7 @@ export default function HomeWorkspace({
 
   const { data: todaySales = [] } = useQuery({
     queryKey: ['home-today-sales', selectedStore],
-    queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }),
+    queryFn: () => base44.entities.DailySales.filter({ store_id: selectedStore }, '-date', 60),
     enabled: !!selectedStore,
     staleTime: 5 * 60 * 1000
   });
