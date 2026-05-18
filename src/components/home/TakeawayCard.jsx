@@ -10,24 +10,6 @@ function fmt(val) {
   return `$${Math.round(val)}`;
 }
 
-// Catmull-Rom to cubic bezier smooth path
-function smoothPath(pts) {
-  if (pts.length < 2) return '';
-  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[Math.max(i - 1, 0)];
-    const p1 = pts[i];
-    const p2 = pts[i + 1];
-    const p3 = pts[Math.min(i + 2, pts.length - 1)];
-    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
-    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
-    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
-    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
-    d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
-  }
-  return d;
-}
-
 export default function TakeawayCard({ dailySales = [], budget = 0, onBudgetChange }) {
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -46,40 +28,43 @@ export default function TakeawayCard({ dailySales = [], budget = 0, onBudgetChan
     const totalSold = monthData.reduce((s, d) => s + (d.total_takeaway || 0), 0);
     const daysWithData = monthData.length;
 
+    // Days elapsed in month
     const today = new Date();
     const dayOfMonth = today.getDate();
     const daysInMonth = endOfMonth(now).getDate();
     const daysRemaining = daysInMonth - dayOfMonth;
 
-    // ✅ CORRECTED: dailyAvg based on days elapsed in month (not just days with data)
-    // This prevents inflation when not every day has a takeaway record
-    const dailyAvg = dayOfMonth > 0 ? totalSold / dayOfMonth : 0;
+    // Daily average based on days with data
+    const dailyAvg = daysWithData > 0 ? totalSold / daysWithData : 0;
 
-    // ✅ CORRECTED: projection uses elapsed-day average × remaining days
+    // Projection: sold + (avg * remaining days)
     const projection = totalSold + (dailyAvg * daysRemaining);
 
+    // Compliance %
     const compliance = budget > 0 ? (totalSold / budget) * 100 : null;
     const projCompliance = budget > 0 ? (projection / budget) * 100 : null;
 
-    // Trend: last 3 days vs previous 3 days (only days with data)
+    // Trend: last 3 days vs previous 3 days
     const last6 = [...dailySales]
       .filter(d => d.total_takeaway > 0)
       .sort((a, b) => b.date.localeCompare(a.date))
       .slice(0, 6);
-    const r3 = last6.slice(0, 3).reduce((s, d) => s + (d.total_takeaway || 0), 0) / Math.max(last6.slice(0, 3).length, 1);
-    const p3 = last6.slice(3, 6).reduce((s, d) => s + (d.total_takeaway || 0), 0) / Math.max(last6.slice(3, 6).length, 1);
-    const trendPct = p3 > 0 ? ((r3 - p3) / p3) * 100 : null;
+    const recent3 = last6.slice(0, 3).reduce((s, d) => s + (d.total_takeaway || 0), 0) / 3;
+    const prev3 = last6.slice(3, 6).reduce((s, d) => s + (d.total_takeaway || 0), 0) / 3;
+    const trendPct = prev3 > 0 ? ((recent3 - prev3) / prev3) * 100 : null;
 
-    // Sparkline: last 10 days of month (including zeros for days without data)
+    // Last 7 days sparkline
     const spark = [...dailySales]
-      .filter(d => d.date >= monthStart && d.date <= monthEnd)
+      .filter(d => d.date >= monthStart)
       .sort((a, b) => a.date.localeCompare(b.date))
-      .slice(-10)
+      .slice(-7)
       .map(d => d.total_takeaway || 0);
 
+    // Best day
     const bestDay = monthData.reduce((best, d) =>
       (d.total_takeaway || 0) > (best?.total_takeaway || 0) ? d : best, null);
 
+    // Needed daily to hit budget
     const dailyNeeded = budget > 0 && daysRemaining > 0
       ? (budget - totalSold) / daysRemaining : null;
 
@@ -95,49 +80,31 @@ export default function TakeawayCard({ dailySales = [], budget = 0, onBudgetChan
   const accentColor = isOnTrack === null ? '#8b5cf6' : isOnTrack ? '#10b981' : '#ef4444';
   const trendUp = trendPct == null ? null : trendPct >= 0;
 
-  // Premium sparkline with smooth curve, gradient fill, glow dot
+  // Sparkline SVG
   const SparkLine = () => {
     const pts = analysis.spark;
     if (!pts || pts.length < 2) return null;
-    const W = 110, H = 36;
-    const padX = 4, padY = 5;
-    const vals = pts.filter(v => v != null);
-    const max = Math.max(...vals, 1);
-    const min = 0;
-    const range = max - min || 1;
-    const coords = vals.map((v, i) => [
-      padX + (i / (vals.length - 1)) * (W - padX * 2),
-      H - padY - ((v - min) / range) * (H - padY * 2)
+    const W = 120, H = 32;
+    const max = Math.max(...pts, 1);
+    const coords = pts.map((v, i) => [
+      (i / (pts.length - 1)) * W,
+      H - (v / max) * (H - 4) - 2
     ]);
-    const linePath = smoothPath(coords);
-    const [lx, ly] = coords[coords.length - 1];
-    const areaPath = `${linePath} L${lx.toFixed(1)},${H} L${coords[0][0].toFixed(1)},${H} Z`;
-
+    const d = coords.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+    const areaD = `${d} L${W},${H} L0,${H} Z`;
     return (
-      <svg viewBox={`0 0 ${W} ${H}`} fill="none" style={{ width: 80, height: 28, flexShrink: 0 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} fill="none" style={{ width: 80, height: 22, flexShrink: 0 }}>
         <defs>
-          <linearGradient id="tkAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={accentColor} stopOpacity="0.22" />
+          <linearGradient id="tkGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={accentColor} stopOpacity="0.25" />
             <stop offset="100%" stopColor={accentColor} stopOpacity="0" />
           </linearGradient>
-          <filter id="tkGlow">
-            <feGaussianBlur stdDeviation="1.5" result="blur" />
-            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
         </defs>
-        {/* Area fill */}
-        <path d={areaPath} fill="url(#tkAreaGrad)" />
-        {/* Line with glow */}
-        <path d={linePath} stroke={accentColor} strokeOpacity="0.25" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d={linePath} stroke={accentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        {/* Data points */}
-        {coords.map(([cx, cy], i) => i < coords.length - 1 && (
-          <circle key={i} cx={cx} cy={cy} r="1.5" fill={accentColor} opacity="0.45" />
-        ))}
-        {/* Last point glow */}
-        <circle cx={lx} cy={ly} r="5" fill={accentColor} opacity="0.12" />
-        <circle cx={lx} cy={ly} r="2.8" fill={accentColor} />
-        <circle cx={lx} cy={ly} r="1.2" fill="white" />
+        <path d={areaD} fill="url(#tkGrad)" />
+        <path d={d} stroke={accentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        {coords[coords.length - 1] && (
+          <circle cx={coords[coords.length - 1][0]} cy={coords[coords.length - 1][1]} r="2.5" fill={accentColor} />
+        )}
       </svg>
     );
   };
@@ -220,7 +187,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, onBudgetChan
           </p>
         </div>
 
-        {/* Premium Sparkline */}
+        {/* Sparkline */}
         <SparkLine />
 
         {/* Circle compliance */}
