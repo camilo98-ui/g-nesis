@@ -5,7 +5,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, DollarSign, Receipt, Zap, Gift, Loader2, Calendar, Sparkles, History, Edit2, Trash2 } from 'lucide-react';
+import { Save, DollarSign, Receipt, Zap, Gift, Loader2, Calendar, Sparkles, History, Edit2, Trash2, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -46,12 +46,14 @@ export default function DailySalesForm({ storeId, onSuccess }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
+  const [activeTab, setActiveTab] = useState('ventas');
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     total_sales: '',
     total_tickets: '',
     total_transactions: '',
-    total_suggested: ''
+    total_suggested: '',
+    total_takeaway: ''
   });
 
   // Cargar historial de ventas
@@ -85,7 +87,8 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         total_sales: salesValue,
         total_tickets: ticketsValue,
         total_transactions: transactionsValue,
-        total_suggested: suggestedValue
+        total_suggested: suggestedValue,
+        total_takeaway: parseFloat(data.total_takeaway) || 0
       };
       
       let record;
@@ -150,7 +153,8 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           total_sales: '',
           total_tickets: '',
           total_transactions: '',
-          total_suggested: ''
+          total_suggested: '',
+          total_takeaway: ''
         });
         if (onSuccess) onSuccess();
       }, 1500);
@@ -189,10 +193,11 @@ export default function DailySalesForm({ storeId, onSuccess }) {
     setEditingRecord(record);
     setFormData({
       date: record.date,
-      total_sales: record.total_sales.toString(),
-      total_tickets: record.total_tickets.toString(),
-      total_transactions: record.total_transactions.toString(),
-      total_suggested: record.total_suggested.toString()
+      total_sales: record.total_sales?.toString() || '',
+      total_tickets: record.total_tickets?.toString() || '',
+      total_transactions: record.total_transactions?.toString() || '',
+      total_suggested: record.total_suggested?.toString() || '',
+      total_takeaway: record.total_takeaway?.toString() || ''
     });
     setShowHistory(false);
   };
@@ -315,6 +320,28 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         transition={{ duration: 0.4 }}
         className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100"
       >
+        {/* Tabs */}
+        <div className="flex gap-1 p-3 pb-0">
+          {[
+            { id: 'ventas', label: 'Ventas', color: '#10b981' },
+            { id: 'llevar', label: '🛍 Llevar', color: '#8b5cf6' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className="flex-1 py-2 px-3 rounded-xl text-sm font-bold transition-all"
+              style={{
+                background: activeTab === tab.id ? `${tab.color}15` : 'transparent',
+                color: activeTab === tab.id ? tab.color : '#9ca3af',
+                border: `1.5px solid ${activeTab === tab.id ? `${tab.color}30` : 'transparent'}`
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Fecha */}
           <motion.div
@@ -338,8 +365,33 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             />
           </motion.div>
 
-          {/* Grid de métricas */}
-          <div className="grid grid-cols-2 gap-5">
+          {/* Grid de métricas — solo en pestaña ventas */}
+          {activeTab === 'llevar' && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-[20px] p-5 shadow-md border border-violet-100"
+            >
+              <Label className="flex items-center gap-3 mb-3 text-base font-bold text-violet-700">
+                <div className="w-10 h-10 bg-violet-200/60 rounded-xl flex items-center justify-center">
+                  <ShoppingBag className="w-6 h-6 text-violet-600" />
+                </div>
+                Venta Producto para Llevar
+              </Label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={formData.total_takeaway}
+                onChange={(e) => setFormData({...formData, total_takeaway: e.target.value})}
+                className="border-2 border-violet-200 focus:border-violet-400 bg-white rounded-xl text-lg font-bold h-12 focus:ring-2 focus:ring-violet-200 transition-all"
+              />
+              <p className="text-xs text-violet-400 font-medium mt-2">
+                Ingresa el total vendido en producto para llevar del día
+              </p>
+            </motion.div>
+          )}
+
+          {activeTab === 'ventas' && <div className="grid grid-cols-2 gap-5">
             {/* Ventas */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -446,7 +498,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                 className="border-2 border-pink-200 focus:border-pink-400 bg-white rounded-xl text-lg font-bold h-12 focus:ring-2 focus:ring-pink-200 transition-all"
               />
             </motion.div>
-          </div>
+          </div>}
 
           {/* Botones */}
           <div className="flex gap-3">
@@ -506,7 +558,8 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                   total_sales: '',
                   total_tickets: '',
                   total_transactions: '',
-                  total_suggested: ''
+                  total_suggested: '',
+                  total_takeaway: ''
                 });
               }}
               variant="outline"

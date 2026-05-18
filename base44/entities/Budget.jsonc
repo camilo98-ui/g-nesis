@@ -1,0 +1,53 @@
+{
+  "name": "Budget",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "month": {
+      "type": "number",
+      "description": "Mes del presupuesto (1-12)"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o del presupuesto"
+    },
+    "sales_budget": {
+      "type": "number",
+      "description": "Presupuesto de ventas mensual"
+    },
+    "tickets_budget": {
+      "type": "number",
+      "description": "Presupuesto de tickets mensual"
+    },
+    "transactions_budget": {
+      "type": "number",
+      "description": "Presupuesto de transacciones mensual"
+    },
+    "suggested_budget": {
+      "type": "number",
+      "description": "Presupuesto de sugeridos mensual"
+    },
+    "takeaway_budget": {
+      "type": "number",
+      "description": "Presupuesto mensual de producto para llevar"
+    },
+    "sales_gap": {
+      "type": "number",
+      "description": "Brecha Diff Ventas vs PPT (negativo = por debajo, positivo = por encima)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si este presupuesto est\u00e1 activo para mostrar en gr\u00e1ficas"
+    }
+  },
+  "required": [
+    "store_id",
+    "month",
+    "year",
+    "sales_budget"
+  ]
+}

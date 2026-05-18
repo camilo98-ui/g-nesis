@@ -1,0 +1,42 @@
+{
+  "name": "DailySales",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de la venta"
+    },
+    "total_sales": {
+      "type": "number",
+      "description": "Venta total del d\u00eda"
+    },
+    "total_tickets": {
+      "type": "number",
+      "description": "Total de tickets del d\u00eda"
+    },
+    "total_transactions": {
+      "type": "number",
+      "description": "Total de transacciones del d\u00eda"
+    },
+    "total_suggested": {
+      "type": "number",
+      "description": "Total de sugeridos del d\u00eda"
+    },
+    "total_takeaway": {
+      "type": "number",
+      "description": "Venta total de producto para llevar del d\u00eda"
+    }
+  },
+  "required": [
+    "store_id",
+    "date",
+    "total_sales",
+    "total_tickets",
+    "total_transactions"
+  ]
+}
