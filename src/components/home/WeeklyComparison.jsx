@@ -4,7 +4,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
 import { ArrowDownRight, ArrowUpRight, TrendingDown } from 'lucide-react';
-import { parseISO, startOfWeek, endOfWeek, subWeeks, isWithinInterval } from 'date-fns';
+import { format, startOfWeek, endOfWeek, subWeeks } from 'date-fns';
 
 const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const DAY_NUM = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: 6 };
@@ -92,16 +92,26 @@ export default function WeeklyComparison({ dailySales = [] }) {
     const prevStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
     const prevEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
 
+    // Use string comparison with YYYY-MM-DD to avoid UTC/local timezone offset issues
+    const thisStartStr = format(weekStart, 'yyyy-MM-dd');
+    const thisEndStr = format(weekEnd, 'yyyy-MM-dd');
+    const prevStartStr = format(prevStart, 'yyyy-MM-dd');
+    const prevEndStr = format(prevEnd, 'yyyy-MM-dd');
+
     const thisW = Array(7).fill(null).map(() => ({ sales: 0, transactions: 0 }));
     const lastW = Array(7).fill(null).map(() => ({ sales: 0, transactions: 0 }));
 
     for (const d of dailySales) {
-      const date = parseISO(d.date);
-      const dow = DAY_NUM[date.getDay()];
-      if (isWithinInterval(date, { start: weekStart, end: weekEnd })) {
+      const dateStr = d.date?.slice(0, 10); // ensure YYYY-MM-DD
+      if (!dateStr) continue;
+      // Parse day-of-week from the date string directly
+      const [y, m, day] = dateStr.split('-').map(Number);
+      const localDate = new Date(y, m - 1, day);
+      const dow = DAY_NUM[localDate.getDay()];
+      if (dateStr >= thisStartStr && dateStr <= thisEndStr) {
         thisW[dow].sales += d.total_sales || 0;
         thisW[dow].transactions += d.total_transactions || 0;
-      } else if (isWithinInterval(date, { start: prevStart, end: prevEnd })) {
+      } else if (dateStr >= prevStartStr && dateStr <= prevEndStr) {
         lastW[dow].sales += d.total_sales || 0;
         lastW[dow].transactions += d.total_transactions || 0;
       }
