@@ -176,7 +176,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (!formData.total_sales) {
+    if (activeTab === 'ventas' && !formData.total_sales) {
       toast.error('Ingresa las ventas');
       return;
     }
