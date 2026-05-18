@@ -44,14 +44,14 @@ export default function TakeawayCard({ dailySales = [], budget = 0, onBudgetChan
     const compliance = budget > 0 ? (totalSold / budget) * 100 : null;
     const projCompliance = budget > 0 ? (projection / budget) * 100 : null;
 
-    // Trend: last 3 days vs previous 3 days
+    // Trend: last 3 days vs previous 3 days (only meaningful with 4+ days of data)
     const last6 = [...dailySales]
       .filter(d => d.total_takeaway > 0)
       .sort((a, b) => b.date.localeCompare(a.date))
       .slice(0, 6);
     const recent3 = last6.slice(0, 3).reduce((s, d) => s + (d.total_takeaway || 0), 0) / 3;
     const prev3 = last6.slice(3, 6).reduce((s, d) => s + (d.total_takeaway || 0), 0) / 3;
-    const trendPct = prev3 > 0 ? ((recent3 - prev3) / prev3) * 100 : null;
+    const trendPct = last6.length >= 4 && prev3 > 0 ? ((recent3 - prev3) / prev3) * 100 : null;
 
     // Last 7 days sparkline
     const spark = [...dailySales]
