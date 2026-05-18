@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingBag, TrendingUp, TrendingDown, Target, Zap, ChevronDown, ChevronUp } from 'lucide-react';
+import { ShoppingBag, TrendingUp, TrendingDown, Target, Zap, ChevronDown, ChevronUp, Pencil, Check, X } from 'lucide-react';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 
 function fmt(val) {
@@ -10,9 +10,11 @@ function fmt(val) {
   return `$${Math.round(val)}`;
 }
 
-export default function TakeawayCard({ dailySales = [], budget = 0 }) {
+export default function TakeawayCard({ dailySales = [], budget = 0, onBudgetChange }) {
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState('');
 
   const analysis = useMemo(() => {
     const now = new Date();
@@ -198,16 +200,50 @@ export default function TakeawayCard({ dailySales = [], budget = 0 }) {
       </div>
 
       {/* Budget bar */}
-      {budget > 0 && (
-        <div className="px-4 pb-3">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ fontSize: 7.5, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.08em' }}>
-              PPT MES {fmt(budget)}
-            </span>
+      <div className="px-4 pb-3">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          {editingBudget ? (
+            <div className="flex items-center gap-1.5 flex-1 mr-2" onClick={e => e.stopPropagation()}>
+              <input
+                autoFocus
+                type="number"
+                value={budgetInput}
+                onChange={e => setBudgetInput(e.target.value)}
+                placeholder="PPT del mes..."
+                style={{
+                  flex: 1, fontSize: 10, fontWeight: 600, color: '#374151',
+                  border: `1px solid ${accentColor}40`, borderRadius: 6, padding: '2px 6px',
+                  outline: 'none', background: 'white', height: 22,
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') { onBudgetChange?.(Number(budgetInput)); setEditingBudget(false); }
+                  if (e.key === 'Escape') setEditingBudget(false);
+                }}
+              />
+              <button onClick={() => { onBudgetChange?.(Number(budgetInput)); setEditingBudget(false); }}
+                style={{ color: '#10b981', cursor: 'pointer', display: 'flex', padding: 2 }}>
+                <Check style={{ width: 12, height: 12 }} />
+              </button>
+              <button onClick={() => setEditingBudget(false)}
+                style={{ color: '#94a3b8', cursor: 'pointer', display: 'flex', padding: 2 }}>
+                <X style={{ width: 12, height: 12 }} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5" onClick={e => { e.stopPropagation(); setBudgetInput(budget > 0 ? String(budget) : ''); setEditingBudget(true); }}>
+              <span style={{ fontSize: 7.5, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.08em', cursor: 'pointer' }}>
+                {budget > 0 ? `PPT MES ${fmt(budget)}` : 'Agregar PPT del mes'}
+              </span>
+              <Pencil style={{ width: 8, height: 8, color: '#cbd5e1', cursor: 'pointer' }} />
+            </div>
+          )}
+          {!editingBudget && (
             <span style={{ fontSize: 7.5, fontWeight: 700, color: accentColor }}>
-              {compliance != null ? `${compliance.toFixed(1)}%` : '—'}
+              {compliance != null ? `${compliance.toFixed(1)}%` : ''}
             </span>
-          </div>
+          )}
+        </div>
+        {budget > 0 && (
           <div style={{ height: 4, borderRadius: 9999, background: `${accentColor}14`, overflow: 'hidden' }}>
             <motion.div
               initial={{ width: 0 }}
@@ -216,8 +252,8 @@ export default function TakeawayCard({ dailySales = [], budget = 0 }) {
               style={{ height: '100%', borderRadius: 9999, background: `linear-gradient(90deg, ${accentColor}, ${accentColor}80)` }}
             />
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* EXPANDED ANALYSIS */}
       {expanded && (

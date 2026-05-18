@@ -317,6 +317,8 @@ export default function HomeWorkspace({
   const [isTyping, setIsTyping] = useState(false);
   const [kpiModal, setKpiModal] = useState(null); // 'ppt' | 'gap' | 'proj'
   const [showAIReport, setShowAIReport] = useState(false);
+  const [takeawayBudgetOverride, setTakeawayBudgetOverride] = useState(null);
+  useEffect(() => { setTakeawayBudgetOverride(null); }, [activeBudget?.id]);
   const chatEndRef = useRef(null);
   const conversationRef = useRef(null);
 
@@ -1530,7 +1532,13 @@ export default function HomeWorkspace({
           {!isGerente &&
           <TakeawayCard
             dailySales={todaySales}
-            budget={activeBudget?.takeaway_budget || 0}
+            budget={takeawayBudgetOverride ?? activeBudget?.takeaway_budget ?? 0}
+            onBudgetChange={async (val) => {
+              setTakeawayBudgetOverride(val);
+              if (activeBudget?.id) {
+                await base44.entities.Budget.update(activeBudget.id, { takeaway_budget: val });
+              }
+            }}
           />
           }
 
