@@ -141,6 +141,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
       queryClient.invalidateQueries({ queryKey: ['dailyBudgets'] });
       queryClient.invalidateQueries({ queryKey: ['gerenteHomeSales'] });
+      queryClient.invalidateQueries({ queryKey: ['home-today-sales'] });
       
       toast.success(editingRecord ? '¡Venta actualizada!' : '¡Venta registrada!');
       
