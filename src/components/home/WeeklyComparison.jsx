@@ -151,7 +151,7 @@ export default function WeeklyComparison({ dailySales = [] }) {
     };
   }, [dailySales]);
 
-  if (!dailySales.length) return null;
+  if (totals.totalThis === 0 && totals.totalLast === 0) return null;
 
   const overallDelta = totals.salesDelta;
   const overallUp = overallDelta != null && overallDelta >= 0;
