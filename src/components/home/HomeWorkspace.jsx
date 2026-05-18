@@ -318,7 +318,6 @@ export default function HomeWorkspace({
   const [kpiModal, setKpiModal] = useState(null); // 'ppt' | 'gap' | 'proj'
   const [showAIReport, setShowAIReport] = useState(false);
   const [takeawayBudgetOverride, setTakeawayBudgetOverride] = useState(null);
-  useEffect(() => { setTakeawayBudgetOverride(null); }, [activeBudget?.id]);
   const chatEndRef = useRef(null);
   const conversationRef = useRef(null);
 
@@ -399,6 +398,8 @@ export default function HomeWorkspace({
     const now = new Date();
     return Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear();
   }) : null;
+
+  useEffect(() => { setTakeawayBudgetOverride(null); }, [activeBudget?.id]);
 
   const budgetData = useMemo(() => {
     if (!activeBudget?.sales_budget) return null;
