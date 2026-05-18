@@ -23,7 +23,6 @@ import AIExecutiveReport from './AIExecutiveReport';
 import { useNova } from '@/components/NovaContext';
 import ProductTicketAnalysis from '@/components/reports/ProductTicketAnalysis';
 import WeeklyComparison from './WeeklyComparison';
-import DashboardHeader from './DashboardHeader';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -131,26 +130,31 @@ function NavItem({ item, isActive, onClick }) {
       whileHover={{ x: 2 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left"
+      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left"
       style={isActive ? {
-        background: '#fff',
-        border: '1px solid #EFEFF3',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+        background: 'linear-gradient(135deg, rgba(194,24,117,0.10), rgba(194,24,117,0.05))',
+        border: '1px solid rgba(194,24,117,0.22)',
+        boxShadow: '0 3px 12px rgba(194,24,117,0.12), inset 0 1px 0 rgba(255,255,255,0.8)',
+        backdropFilter: 'blur(8px)'
       } : {
         background: 'transparent',
         border: '1px solid transparent',
-        transition: 'all 0.15s ease'
+        transition: 'all 0.2s cubic-bezier(0.23,1,0.32,1)'
       }}>
       
-      <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
       style={isActive ?
-      { background: '#151515' } :
-      { background: 'transparent' }}>
-        <Icon style={{ color: isActive ? '#fff' : '#9CA3AF', width: 12, height: 12 }} />
+      { background: 'rgba(194,24,117,0.14)', boxShadow: '0 2px 6px rgba(194,24,117,0.15)' } :
+      { background: 'rgba(0,0,0,0.03)' }}>
+        <Icon style={{ color: isActive ? '#C21875' : '#9ca3af', width: 14, height: 14 }} />
       </div>
-      <span style={{ fontSize: 12, fontWeight: isActive ? 500 : 400, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: isActive ? '#151515' : '#6B7280' }}>
+      <span className="text-[12px] font-semibold flex-1 truncate"
+      style={{ color: isActive ? '#C21875' : '#6b7280' }}>
         {item.label}
       </span>
+      {isActive &&
+      <div className="w-1.5 h-4 rounded-full flex-shrink-0" style={{ background: 'linear-gradient(180deg, #C21875, #e11d7a)' }} />
+      }
     </motion.button>);
 
 }
@@ -734,7 +738,7 @@ export default function HomeWorkspace({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      style={{ background: '#FAFAFC', position: 'relative', zIndex: 1 }}>
+      style={{ background: 'transparent', position: 'relative', zIndex: 1 }}>
       
 
       {/* ── LEFT SIDEBAR ── */}
@@ -742,10 +746,12 @@ export default function HomeWorkspace({
         initial={{ x: -24, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-        className="hidden lg:flex flex-col w-56 min-h-screen flex-shrink-0 sticky top-0 z-20"
+        className="hidden lg:flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20"
         style={{
-          background: '#FAFAFC',
-          borderRight: '1px solid #EFEFF3',
+          background: 'rgba(255,255,255,0.82)',
+          backdropFilter: 'blur(48px) saturate(160%)',
+          borderRight: '1px solid rgba(0,0,0,0.045)',
+          boxShadow: '2px 0 24px rgba(0,0,0,0.03)'
         }}>
         
         
@@ -785,24 +791,22 @@ export default function HomeWorkspace({
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t" style={{ borderColor: '#EFEFF3' }}>
-          <div className="flex items-center gap-2 px-2 py-2 rounded-xl mb-1.5"
-          style={{ background: '#F3F4F6' }}>
-            <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #FF4FA2, #8B5CF6)' }}>
-              <Sparkles style={{ width: 10, height: 10, color: '#fff' }} />
+        <div className="p-3 border-t border-black/5">
+          <div className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl mb-2"
+          style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.05)' }}>
+            <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center">
+              <MascotCanvas width={24} height={24} />
             </div>
             <div className="flex-1 min-w-0">
-              <p style={{ fontSize: 11, fontWeight: 500, color: '#374151' }}>Popsy AI</p>
+              <p className="text-[10.5px] font-semibold text-slate-600">Nova AI</p>
               <div className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <p style={{ fontSize: 9, color: '#9CA3AF' }}>Activo</p>
+                <div className="live-dot" style={{ width: 6, height: 6 }} />
+                <p className="text-[9px] text-slate-400">En línea</p>
               </div>
             </div>
           </div>
           <button onClick={onLogout}
-          className="w-full flex items-center gap-2 px-2 py-2 rounded-xl transition-all hover:bg-gray-100"
-          style={{ fontSize: 11, fontWeight: 400, color: '#9CA3AF' }}>
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[10.5px] font-medium text-slate-400 hover:text-slate-600 hover:bg-black/[0.03] transition-all">
             <LogOut className="w-3 h-3" />
             Cerrar sesión
           </button>
@@ -813,220 +817,708 @@ export default function HomeWorkspace({
       <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh' }}>
 
         {/* CENTER — scrollable */}
-        <div className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-6 lg:p-8" style={{ background: '#FAFAFC' }}>
+        <div className="flex-1 min-w-0 overflow-y-auto p-3 sm:p-5 lg:p-8">
 
-          {/* ── PREMIUM DASHBOARD HEADER ── */}
-          <DashboardHeader
-            selectedStore={selectedStore}
-            onStoreChange={onStoreChange}
-            selectedRole={selectedRole}
-            isGerente={isGerente}
-            latestWeather={latestWeather}
-            budgetData={budgetData}
-            todaySales={todaySales}
-            kpiModal={kpiModal}
-            setKpiModal={setKpiModal}
-            onShowBudgetImporter={onShowBudgetImporter}
-            onShowKpisUploader={onShowKpisUploader}
-            onShowPYGUploader={onShowPYGUploader}
-            onShowStoreSales={onShowStoreSales}
-            onLogout={onLogout}
-          />
-
-          {/* KPI Detail Modal — kept here for access to budget data */}
-          {!isGerente && budgetData && (() => {
-            const fmt = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
-            const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
-            const gap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
-            const isPos = gap >= 0;
-            const projPct = budgetData.monthProjectionCompliance ?? 0;
-            const sorted14 = [...todaySales].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-14);
-            const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0;
-            const chartSales14 = sorted14.map((d, i) => ({
-              day: format(parseISO(d.date), 'd/M'),
-              ventas: Math.round(d.total_sales || 0),
-              ppt: Math.round(dailyBudgetBase),
-              cumplimiento: dailyBudgetBase > 0 ? Math.round((d.total_sales || 0) / dailyBudgetBase * 100) : 0,
-              acumVentas: Math.round(sorted14.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0)),
-              acumPPT: Math.round(dailyBudgetBase * (i + 1))
-            }));
-
-            const modalConfig = {
-              ppt: { title: 'PPT del Día', subtitle: 'Ventas vs Meta Diaria · 14 días', color: '#FF4FA2',
-                stats: [{ label: 'Meta hoy', value: fmt(pptVal), color: '#FF4FA2' }, { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#9CA3AF' }, { label: 'Días restantes', value: `${budgetData.remainingDays ?? '—'} días`, color: '#F59E0B' }, { label: 'Recup.', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : '—', color: '#10B981' }],
-                chart: <ResponsiveContainer width="100%" height={160}><LineChart data={chartSales14}><CartesianGrid strokeDasharray="2 4" stroke="#F3F4F6" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 9, fill: '#9CA3AF' }} axisLine={false} tickLine={false} /><YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#9CA3AF' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={30} /><Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} contentStyle={{ fontSize: 11, borderRadius: 10, border: '1px solid #EFEFF3', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }} /><ReferenceLine y={100} stroke="#FF4FA2" strokeDasharray="3 3" strokeWidth={1} /><Line type="monotone" dataKey="cumplimiento" stroke="#FF4FA2" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#FF4FA2' }} /></LineChart></ResponsiveContainer>
-              },
-              gap: { title: 'Brecha del Mes', subtitle: 'Ventas acumuladas vs Presupuesto', color: isPos ? '#10B981' : '#EF4444',
-                stats: [{ label: 'Ventas acum.', value: fmt(budgetData.salesUntilYesterday || 0), color: '#10B981' }, { label: 'PPT acum.', value: fmt(budgetData.budgetUntilYesterday || 0), color: '#9CA3AF' }, { label: 'Brecha', value: fmt(gap), color: isPos ? '#10B981' : '#EF4444' }, { label: 'Brecha %', value: `${Math.abs(gap / (budgetData.monthlyBudget || 1) * 100).toFixed(1)}%`, color: '#8B5CF6' }],
-                chart: <ResponsiveContainer width="100%" height={160}><AreaChart data={chartSales14}><defs><linearGradient id="mGap" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={isPos ? '#10B981' : '#EF4444'} stopOpacity={0.1} /><stop offset="100%" stopColor={isPos ? '#10B981' : '#EF4444'} stopOpacity={0} /></linearGradient></defs><CartesianGrid strokeDasharray="2 4" stroke="#F3F4F6" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 9, fill: '#9CA3AF' }} axisLine={false} tickLine={false} /><YAxis tick={{ fontSize: 9, fill: '#9CA3AF' }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : `${(v / 1e3).toFixed(0)}K`} width={36} /><Tooltip formatter={(v, n) => [fmt(v), n === 'acumVentas' ? 'Ventas' : 'PPT']} contentStyle={{ fontSize: 11, borderRadius: 10, border: '1px solid #EFEFF3' }} /><Area type="monotone" dataKey="acumVentas" stroke={isPos ? '#10B981' : '#EF4444'} strokeWidth={2} fill="url(#mGap)" /><Line type="monotone" dataKey="acumPPT" stroke="#D1D5DB" strokeWidth={1.5} strokeDasharray="4 3" dot={false} /></AreaChart></ResponsiveContainer>
-              },
-              proj: { title: 'Proyección de Cierre', subtitle: 'Cumplimiento proyectado del mes', color: '#8B5CF6',
-                stats: [{ label: 'Proyección', value: fmt(budgetData.monthProjection || 0), color: '#8B5CF6' }, { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#9CA3AF' }, { label: 'Cumplimiento', value: `${projPct.toFixed(1)}%`, color: projPct >= 100 ? '#10B981' : projPct >= 80 ? '#F59E0B' : '#EF4444' }, { label: 'Ritmo req.', value: fmt(budgetData.dailyRequiredSales || 0), color: '#F59E0B' }],
-                chart: <ResponsiveContainer width="100%" height={160}><LineChart data={chartSales14}><CartesianGrid strokeDasharray="2 4" stroke="#F3F4F6" vertical={false} /><XAxis dataKey="day" tick={{ fontSize: 9, fill: '#9CA3AF' }} axisLine={false} tickLine={false} /><YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#9CA3AF' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={30} /><Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} contentStyle={{ fontSize: 11, borderRadius: 10, border: '1px solid #EFEFF3' }} /><ReferenceLine y={100} stroke="#8B5CF6" strokeDasharray="3 3" strokeWidth={1} /><Line type="monotone" dataKey="cumplimiento" stroke="#8B5CF6" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#8B5CF6' }} /></LineChart></ResponsiveContainer>
-              }
-            };
-
-            const activeModal = kpiModal ? modalConfig[kpiModal] : null;
-
-            return (
-              <AnimatePresence key="kpi-modal">
-                {activeModal && (
+          {/* TOP BAR */}
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="mb-5 lg:mb-8">
+            
+            <div className="flex items-center justify-between gap-2 sm:gap-4 mb-4 lg:mb-6 flex-wrap">
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <div className="flex items-center gap-2.5">
                   <motion.div
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    onClick={() => setKpiModal(null)}
-                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6"
-                    style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(12px)' }}>
+                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.12), rgba(194,24,117,0.06))', border: '1px solid rgba(194,24,117,0.12)' }}
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+                    
+                    <GreetIcon className="w-4 h-4" style={{ color: '#C21875' }} />
+                  </motion.div>
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-0.5">
+                      {new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
+                    <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-none"
+                    style={{ letterSpacing: '-0.04em', color: '#1a1a2e' }}>
+                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{LEADERS[selectedStore] || 'Tienda'}</span>
+                    </h1>
+                  </div>
+                </div>
+                
+
+                
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="flex-1 sm:flex-none sm:max-w-xs">
+                  <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
+                </div>
+                {!isGerente &&
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => window.location.href = '/FreezerMap'}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-cyan-500 hover:text-cyan-600 transition-all"
+                    style={{
+                      background: 'rgba(6,182,212,0.07)',
+                      border: '1px solid rgba(6,182,212,0.15)'
+                    }}>
+                    <Snowflake style={{ width: 12, height: 12 }} />
+                    <span className="hidden sm:inline">Nevera</span>
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={onShowStoreSales}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-rose-500 hover:text-rose-600 transition-all"
+                    style={{
+                      background: 'rgba(244,63,94,0.07)',
+                      border: '1px solid rgba(244,63,94,0.15)'
+                    }}>
+                    <Plus style={{ width: 12, height: 12 }} />
+                    <span className="hidden sm:inline">Venta</span>
+                  </motion.button>
+                </div>
+                }
+              </div>
+              {isGerente &&
+              <div className="hidden sm:flex items-center gap-1.5 ml-auto">
+                  {[
+                { label: 'PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter },
+                { label: 'KPIs', icon: BarChart3, onClick: onShowKpisUploader },
+                { label: 'P&G', icon: TrendingUp, onClick: onShowPYGUploader }].
+                map(({ label, icon: I, onClick }) =>
+                <button key={label} onClick={onClick}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-700 hover:bg-black/[0.04] transition-all"
+                style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+                      <I style={{ width: 11, height: 11 }} />{label}
+                    </button>
+                )}
+                </div>
+              }
+            </div>
+          </motion.div>
+
+          {/* ── HERO SECTION: Premium KPI Cards + Nova AI Strip ── */}
+          {!isGerente &&
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-6 space-y-3">
+
+            {/* Nova AI Strip — HERO PREMIUM */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="relative overflow-hidden rounded-2xl cursor-default"
+              style={{
+                background: 'rgba(255,255,255,0.92)',
+                backdropFilter: 'blur(40px)',
+                border: '1px solid rgba(0,0,0,0.07)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1)'
+              }}>
+              
+              {/* Top accent line */}
+              <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(0,0,0,0.06) 40%, rgba(0,0,0,0.04) 70%, transparent 95%)' }} />
+              <div className="flex items-center h-16 px-6 gap-4">
+                
+                {/* Avatar Nova Mascota */}
+                <motion.div
+                  animate={{
+                    scale: [1, 1.02, 1]
+                  }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                  className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.14) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(194, 24, 117, 0.08) 100%)',
+                    border: '1.5px solid rgba(194, 24, 117, 0.18)',
+                    boxShadow: '0 0 20px rgba(194, 24, 117, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.6)'
+                  }}>
+                  
+                  {/* Glow pulsante */}
+                  <motion.div
+                    animate={{ opacity: [0.2, 0.4, 0.2] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(194, 24, 117, 0.25), transparent 70%)',
+                      filter: 'blur(10px)',
+                      zIndex: 1
+                    }} />
+                  
+                  {/* Imagen mascota Nova */}
+                  <MascotCanvas width={72} height={72} style={{ scale: 1.4, position: 'relative', zIndex: 10 }} />
+                  
+                </motion.div>
+
+                {/* Separador elegante */}
+                <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-250 to-transparent opacity-25" />
+
+                {/* Insight Premium — Clima + Impacto en Ventas */}
+                 <div className="flex-1 min-w-0 flex items-center gap-3">
                     <motion.div
-                      initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.97 }}
-                      transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
-                      style={{ background: '#fff', border: '1px solid #EFEFF3', boxShadow: '0 24px 80px rgba(0,0,0,0.14)' }}>
-                      <div className="relative p-6 pb-4" style={{ borderBottom: '1px solid #F3F4F6' }}>
-                        <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${activeModal.color}, ${activeModal.color}40, transparent)` }} />
-                        <div className="flex items-start justify-between mb-1">
-                          <div>
-                            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9CA3AF', marginBottom: 4 }}>{activeModal.title}</p>
-                            <p style={{ fontSize: 10, color: '#C4C4CC', fontWeight: 400 }}>{activeModal.subtitle}</p>
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.6 }}
+                    className="flex items-center gap-2 flex-wrap">
+                      {(() => {
+                        const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
+                        const tempMax = latestWeather?.temperature_max;
+                        const tempMin = latestWeather?.temperature_min;
+                        const precip = latestWeather?.precipitation ?? 0;
+                        const humidity = latestWeather?.humidity ?? 0;
+
+                        if (!latestWeather) return <span className="text-[12px] text-slate-400">Cargando clima...</span>;
+
+                        const isHot = temp > 26;
+                        const isCold = temp < 18;
+                        const isRainy = precip >= 3;
+
+                        const weatherIcon = isRainy ? '🌧' : isHot ? '☀️' : isCold ? '❄️' : '🌤';
+                        const weatherLabel = isRainy ? 'Lluvioso' : isHot ? 'Caluroso' : isCold ? 'Frío' : 'Fresco';
+                        const accentColor = isHot && !isRainy ? '#f97316' : isRainy ? '#6366f1' : isCold ? '#38bdf8' : '#10b981';
+
+                        // Impacto estimado en ventas helados
+                        const salesImpact = isHot && !isRainy ? '+18–25%' : isRainy ? '−12–18%' : isCold ? '−8–12%' : '+5–10%';
+                        const impactLabel = isHot && !isRainy ? '🔥 Día ideal — ventas al alza' : isRainy ? '⚠️ Lluvia reduce tráfico' : isCold ? '❄️ Frío puede afectar ventas' : '✅ Buenas condiciones';
+                        const impactColor = isHot && !isRainy ? '#10b981' : isRainy ? '#ef4444' : isCold ? '#6366f1' : '#10b981';
+
+                        return (
+                          <>
+                            {/* Temp badge */}
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg flex-shrink-0"
+                              style={{ background: `${accentColor}10`, border: `1px solid ${accentColor}20` }}>
+                              <span className="text-[13px]">{weatherIcon}</span>
+                              <span className="text-[13px] font-black leading-none" style={{ color: accentColor }}>{temp != null ? `${Math.round(temp)}°C` : '—'}</span>
+                              {tempMax != null && tempMin != null &&
+                                <span className="text-[9px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</span>
+                              }
+                              <span className="text-[9px] font-semibold" style={{ color: accentColor }}>{weatherLabel}</span>
+                            </div>
+
+                            {/* Separador */}
+                            <div className="w-px h-5 bg-slate-200 flex-shrink-0 hidden sm:block" />
+
+                            {/* Impacto ventas */}
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-[11.5px] font-semibold text-slate-600 truncate">{impactLabel}</span>
+                              <span className="text-[11px] font-black flex-shrink-0" style={{ color: impactColor }}>{salesImpact}</span>
+                            </div>
+
+                            {/* Lluvia */}
+                            {precip > 0 &&
+                              <span className="text-[10px] text-slate-400 font-medium flex-shrink-0 hidden sm:block">· {precip.toFixed(1)} mm hoy</span>
+                            }
+                          </>
+                        );
+                      })()}
+                    </motion.div>
+                  </div>
+
+                {/* Botón Premium SaaS */}
+                <motion.button
+                  whileHover={{ scale: 1.04, y: -0.5 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => window.location.href = '/WeatherSalesImpact'}
+                  className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold flex-shrink-0 backdrop-blur-md transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%)',
+                    border: '1.5px solid rgba(194, 24, 117, 0.15)',
+                    color: '#C21875',
+                    boxShadow: '0 4px 12px rgba(194, 24, 117, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                  }}>
+                  <motion.div
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute inset-0 rounded-lg"
+                    style={{
+                      background: 'radial-gradient(circle at center, rgba(194, 24, 117, 0.08), transparent)',
+                      zIndex: -1
+                    }} />
+                  Ver análisis
+                </motion.button>
+
+              </div>
+            </motion.div>
+
+            {/* Budget Mini Cards — PPT del Día, Brecha del Mes, Proyección */}
+            {budgetData && (() => {
+              const fmt = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
+              const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
+              const gap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
+              const isPos = gap >= 0;
+              const projPct = budgetData.monthProjectionCompliance ?? 0;
+
+              // Sparkline ultra delgada y elegante — sin relleno exagerado
+              const Spark = ({ points, color }) => {
+                if (!points || points.length < 2) return null;
+                const W = 200,H = 40;
+                const padX = 2,padY = 6;
+                const vals = points.filter((v) => v != null && !isNaN(v));
+                if (vals.length < 2) return null;
+                const max = Math.max(...vals);
+                const min = Math.min(...vals);
+                const range = max - min || 1;
+                const toX = (i) => padX + i / (vals.length - 1) * (W - padX * 2);
+                const toY = (v) => H - padY - (v - min) / range * (H - padY * 2);
+                const coords = vals.map((v, i) => [toX(i), toY(v)]);
+                // Catmull-Rom → cubic bezier
+                let d = `M${coords[0][0].toFixed(1)},${coords[0][1].toFixed(1)}`;
+                for (let i = 0; i < coords.length - 1; i++) {
+                  const p0 = coords[Math.max(i - 1, 0)];
+                  const p1 = coords[i];
+                  const p2 = coords[i + 1];
+                  const p3 = coords[Math.min(i + 2, coords.length - 1)];
+                  const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+                  const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+                  const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+                  const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+                  d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+                }
+                const [lx, ly] = coords[coords.length - 1];
+                const gradId = `sg${color.replace(/[^a-z0-9]/gi, '')}`;
+                const areaD = `${d} L${lx.toFixed(1)},${H} L${coords[0][0].toFixed(1)},${H} Z`;
+                return (
+                  <svg viewBox={`0 0 ${W} ${H}`} fill="none" preserveAspectRatio="none" className="w-full h-full">
+                    <defs>
+                      <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity="0.08" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path d={areaD} fill={`url(#${gradId})`} />
+                    <path d={d} stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx={lx} cy={ly} r="2.2" fill={color} />
+                    <circle cx={lx} cy={ly} r="4.5" fill={color} opacity="0.12" />
+                  </svg>);
+
+              };
+
+              // Tendencias ÚNICAS por card
+              const sorted14 = [...todaySales].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-14);
+
+              // PPT: cumplimiento diario (% de ventas vs meta diaria)
+              const dailyBudgetForSpark = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 1;
+              const sparkPPT = sorted14.map((d) => dailyBudgetForSpark > 0 ? (d.total_sales || 0) / dailyBudgetForSpark * 100 : 0);
+
+              // Brecha: diferencia diaria acumulada ventas - presupuesto (acumulado día a día)
+              const sparkGap = sorted14.map((d, i, arr) => {
+                const accSales = arr.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0);
+                const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0;
+                const accBudget = dailyBudgetBase * (i + 1);
+                return accSales - accBudget;
+              });
+
+              // Proyección: compliance acumulado día a día (% ventas acumuladas / presupuesto esperado)
+              const sparkProj = sorted14.map((d, i, arr) => {
+                const accSales = arr.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0);
+                const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 1;
+                const accBudget = dailyBudgetBase * (i + 1);
+                return accBudget > 0 ? accSales / accBudget * 100 : 0;
+              });
+
+              const cards = [
+              {
+                label: 'PPT del Día',
+                value: fmt(pptVal),
+                sub: budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 ?
+                `+${budgetData.incrementPct}% recuperación` :
+                'meta diaria',
+                accent: '#C21875',
+                spark: sparkPPT,
+                delay: 0.05,
+                key: 'ppt',
+                detail: [
+                { label: 'PPT hoy', value: fmt(pptVal) },
+                { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0) },
+                { label: 'Incremento recuperación', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : '—' },
+                { label: 'Días restantes', value: budgetData.remainingDays ?? '—' }]
+
+              },
+              {
+                label: 'Brecha del Mes',
+                value: fmt(gap),
+                sub: budgetData.monthlyBudget > 0 ?
+                `${isPos ? 'Sobre' : 'Bajo'} meta · ${Math.abs(gap / budgetData.monthlyBudget * 100).toFixed(0)}%` :
+                '',
+                accent: isPos ? '#059669' : '#e11d48',
+                spark: sparkGap,
+                delay: 0.1,
+                prefix: isPos ? '▲' : '▼',
+                key: 'gap',
+                detail: [
+                { label: 'Ventas acumuladas', value: fmt(budgetData.salesUntilYesterday || 0) },
+                { label: 'PPT acumulado', value: fmt(budgetData.budgetUntilYesterday || 0) },
+                { label: 'Brecha', value: fmt(gap) },
+                { label: 'Brecha %', value: `${Math.abs(gap / (budgetData.monthlyBudget || 1) * 100).toFixed(1)}%` }]
+
+              },
+              {
+                label: 'Proyección Cierre',
+                value: `${projPct.toFixed(0)}%`,
+                sub: `${fmt(budgetData.monthProjection)} / ${fmt(budgetData.monthlyBudget)}`,
+                accent: '#7c3aed',
+                spark: sparkProj,
+                delay: 0.15,
+                key: 'proj',
+                detail: [
+                { label: 'Proyección cierre', value: fmt(budgetData.monthProjection || 0) },
+                { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0) },
+                { label: 'Cumplimiento', value: `${projPct.toFixed(1)}%` },
+                { label: 'Ritmo diario req.', value: fmt(budgetData.dailyRequiredSales || 0) }]
+
+              }];
+
+
+              // Build rich chart data for each modal
+              const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0;
+              const chartSales14 = sorted14.map((d, i) => ({
+                day: format(parseISO(d.date), 'd/M'),
+                ventas: Math.round(d.total_sales || 0),
+                ppt: Math.round(dailyBudgetBase),
+                brecha: Math.round((d.total_sales || 0) - dailyBudgetBase),
+                cumplimiento: dailyBudgetBase > 0 ? Math.round((d.total_sales || 0) / dailyBudgetBase * 100) : 0,
+                acumVentas: Math.round(sorted14.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0)),
+                acumPPT: Math.round(dailyBudgetBase * (i + 1))
+              }));
+
+              const modalCharts = {
+                ppt: {
+                  title: 'PPT del Día — Ventas vs Meta Diaria',
+                  subtitle: 'Últimos 14 días · COP',
+                  color: '#C21875',
+                  stats: [
+                  { label: 'Meta hoy', value: fmt(pptVal), color: '#C21875' },
+                  { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#94a3b8' },
+                  { label: 'Días restantes', value: `${budgetData.remainingDays ?? '—'} días`, color: '#f59e0b' },
+                  { label: 'Incremento recup.', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : 'Sin brecha', color: '#10b981' }],
+
+                  chart:
+                  <ResponsiveContainer width="100%" height={160}>
+                     <LineChart data={chartSales14}>
+                       <defs>
+                         <linearGradient id="gradPPT" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="0%" stopColor="#C21875" stopOpacity={0.15} />
+                           <stop offset="100%" stopColor="#C21875" stopOpacity={0} />
+                         </linearGradient>
+                       </defs>
+                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                       <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                       <YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={32} />
+                       <Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
+                       <ReferenceLine y={100} stroke="#C21875" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: '100%', position: 'right', fontSize: 9, fill: '#C21875' }} />
+                       <Line type="monotone" dataKey="cumplimiento" stroke="#C21875" strokeWidth={2.5} dot={{ r: 3, fill: '#C21875' }} activeDot={{ r: 5 }} />
+                     </LineChart>
+                   </ResponsiveContainer>
+
+                },
+                gap: {
+                  title: 'Brecha Acumulada del Mes',
+                  subtitle: 'Diferencia ventas - presupuesto acumulado',
+                  color: isPos ? '#059669' : '#e11d48',
+                  stats: [
+                  { label: 'Ventas acumuladas', value: fmt(budgetData.salesUntilYesterday || 0), color: '#059669' },
+                  { label: 'PPT acumulado', value: fmt(budgetData.budgetUntilYesterday || 0), color: '#94a3b8' },
+                  { label: 'Brecha total', value: fmt(gap), color: isPos ? '#059669' : '#e11d48' },
+                  { label: 'Brecha %', value: `${Math.abs(gap / (budgetData.monthlyBudget || 1) * 100).toFixed(1)}%`, color: '#7c3aed' }],
+
+                  chart:
+                  <ResponsiveContainer width="100%" height={160}>
+                      <AreaChart data={chartSales14}>
+                        <defs>
+                          <linearGradient id="gradGap" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={isPos ? '#059669' : '#e11d48'} stopOpacity={0.18} />
+                            <stop offset="100%" stopColor={isPos ? '#059669' : '#e11d48'} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : `${(v / 1e3).toFixed(0)}K`} width={38} />
+                        <Tooltip formatter={(v, n) => [fmt(v), n === 'acumVentas' ? 'Ventas acum.' : 'PPT acum.']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
+                        <ReferenceLine y={0} stroke="#e2e8f0" />
+                        <Area type="monotone" dataKey="acumVentas" stroke={isPos ? '#059669' : '#e11d48'} strokeWidth={2} fill="url(#gradGap)" />
+                        <Line type="monotone" dataKey="acumPPT" stroke="#94a3b8" strokeWidth={1.5} strokeDasharray="4 3" dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+
+                },
+                proj: {
+                  title: 'Proyección de Cierre del Mes',
+                  subtitle: 'Cumplimiento diario acumulado · %',
+                  color: '#7c3aed',
+                  stats: [
+                  { label: 'Proyección cierre', value: fmt(budgetData.monthProjection || 0), color: '#7c3aed' },
+                  { label: 'PPT mensual', value: fmt(budgetData.monthlyBudget || 0), color: '#94a3b8' },
+                  { label: 'Cumplimiento', value: `${projPct.toFixed(1)}%`, color: projPct >= 100 ? '#059669' : projPct >= 80 ? '#f59e0b' : '#e11d48' },
+                  { label: 'Ritmo diario req.', value: fmt(budgetData.dailyRequiredSales || 0), color: '#f59e0b' }],
+
+                  chart:
+                  <ResponsiveContainer width="100%" height={160}>
+                      <LineChart data={chartSales14}>
+                        <defs>
+                          <linearGradient id="gradProj" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#7c3aed" stopOpacity={0.15} />
+                            <stop offset="100%" stopColor="#7c3aed" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={32} />
+                        <Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
+                        <ReferenceLine y={100} stroke="#7c3aed" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: '100%', position: 'right', fontSize: 9, fill: '#7c3aed' }} />
+                        <Line type="monotone" dataKey="cumplimiento" stroke="#7c3aed" strokeWidth={2.5} dot={{ r: 3, fill: '#7c3aed' }} activeDot={{ r: 5 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+
+                }
+              };
+
+              const activeModal = kpiModal ? modalCharts[kpiModal] : null;
+              const activeCard = cards.find((c) => c.key === kpiModal);
+
+              return (
+                <>
+                {/* KPI Detail Modal */}
+                <AnimatePresence>
+                  {activeModal && activeCard &&
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setKpiModal(null)}
+                      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+                      style={{ background: 'rgba(15,23,42,0.35)', backdropFilter: 'blur(8px)' }}>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.96, y: 24 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.96, y: 24 }}
+                        transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden"
+                        style={{
+                          background: 'rgba(255,255,255,0.96)',
+                          backdropFilter: 'blur(48px)',
+                          boxShadow: '0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.5)'
+                        }}>
+                        
+                        {/* Colored header band */}
+                        <div className="relative p-5 pb-4" style={{ background: `linear-gradient(135deg, ${activeModal.color}10, ${activeModal.color}04)`, borderBottom: `1px solid ${activeModal.color}15` }}>
+                          <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: `linear-gradient(90deg, ${activeModal.color}, ${activeModal.color}40)` }} />
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-400 mb-1">{activeModal.title}</p>
+                              <p className="text-[28px] font-black tracking-tight leading-none" style={{ color: activeModal.color }}>
+                                {activeCard.prefix && <span className="mr-1 text-xl">{activeCard.prefix}</span>}
+                                {activeCard.value}
+                              </p>
+                              <p className="text-[10px] text-slate-400 mt-1 font-medium">{activeModal.subtitle}</p>
+                            </div>
+                            <button onClick={() => setKpiModal(null)}
+                            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/[0.06] transition-colors mt-0.5">
+                              <X className="w-4 h-4 text-slate-400" />
+                            </button>
                           </div>
-                          <button onClick={() => setKpiModal(null)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
-                            <X className="w-3.5 h-3.5 text-gray-400" />
+                          {/* Stat pills */}
+                          <div className="grid grid-cols-2 gap-2 mt-4">
+                            {activeModal.stats.map(({ label, value, color }) =>
+                            <div key={label} className="rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.05)' }}>
+                                <p className="text-[9px] text-slate-400 font-medium mb-0.5">{label}</p>
+                                <p className="text-[13px] font-bold tabular-nums leading-none" style={{ color }}>{value}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Chart area */}
+                        <div className="p-5 pt-4">
+                          <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-300 mb-3">Tendencia · últimos 14 días</p>
+                          {chartSales14.length >= 2 ? activeModal.chart :
+                          <div className="h-40 flex items-center justify-center text-[11px] text-slate-300">Sin suficientes datos históricos</div>
+                          }
+                        </div>
+
+                        {/* CTA */}
+                        <div className="px-5 pb-5">
+                          <button
+                            onClick={() => {setKpiModal(null);onShowBudgetDashboard?.();}}
+                            className="w-full py-2.5 rounded-xl text-[11.5px] font-semibold transition-all active:scale-98"
+                            style={{ background: `linear-gradient(135deg, ${activeModal.color}18, ${activeModal.color}08)`, color: activeModal.color, border: `1px solid ${activeModal.color}25` }}>
+                            Ver presupuesto completo →
                           </button>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 mt-4">
-                          {activeModal.stats.map(({ label, value, color }) => (
-                            <div key={label} className="rounded-xl p-3" style={{ background: '#FAFAFC', border: '1px solid #EFEFF3' }}>
-                              <p style={{ fontSize: 9, color: '#9CA3AF', fontWeight: 500, marginBottom: 3, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</p>
-                              <p style={{ fontSize: 14, fontWeight: 600, color, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{value}</p>
-                            </div>
-                          ))}
+                      </motion.div>
+                    </motion.div>
+                    }
+                </AnimatePresence>
+
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  {cards.map((c) =>
+                    <motion.div
+                      key={c.label}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: c.delay, duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
+                      whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                      onClick={() => setKpiModal(c.key)}
+                      className="relative rounded-2xl p-3 sm:p-4 flex flex-col gap-1 overflow-hidden cursor-pointer"
+                      style={{
+                        background: 'rgba(255,255,255,0.92)',
+                        backdropFilter: 'blur(40px)',
+                        border: `1px solid ${c.accent}18`,
+                        boxShadow: `0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04), 0 0 0 0.5px ${c.accent}10, inset 0 1px 0 rgba(255,255,255,1)`,
+                        transition: 'box-shadow 0.25s, transform 0.22s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = `0 12px 40px rgba(0,0,0,0.10), 0 0 24px ${c.accent}18, 0 0 0 1px ${c.accent}20, inset 0 1px 0 rgba(255,255,255,1)`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = `0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04), 0 0 0 0.5px ${c.accent}10, inset 0 1px 0 rgba(255,255,255,1)`;
+                      }}>
+                      
+                      {/* Top accent bar — fully opaque */}
+                      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}, ${c.accent}40, transparent)` }} />
+                      {/* Bottom ambient bleed */}
+                      <div className="absolute bottom-0 left-0 right-0 h-12 rounded-b-2xl pointer-events-none" style={{ background: `linear-gradient(0deg, ${c.accent}06, transparent)` }} />
+
+                      {/* Label */}
+                      <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.18em] mb-2" style={{ color: `${c.accent}99` }}>{c.label}</p>
+
+                      {/* Value + Sparkline */}
+                      <div className="flex items-end gap-0 w-full" style={{ minHeight: 48 }}>
+                        <div className="flex-shrink-0 flex flex-col justify-end">
+                          <p className="text-[15px] sm:text-[18px] font-black leading-none tabular-nums" style={{ color: c.accent, letterSpacing: '-0.03em' }}>
+                            {c.prefix && <span className="mr-0.5 text-[12px] sm:text-[14px] font-bold">{c.prefix}</span>}
+                            {c.value}
+                          </p>
+                          <p className="text-[8px] sm:text-[9px] font-semibold mt-1.5 tracking-wide" style={{ color: `${c.accent}70` }}>{c.sub}</p>
+                        </div>
+                        <div className="flex-1 min-w-0" style={{ height: 48 }}>
+                          <Spark points={c.spark} color={c.accent} />
                         </div>
                       </div>
-                      <div className="p-5 pt-4">
-                        <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#D1D5DB', marginBottom: 12 }}>Tendencia · 14 días</p>
-                        {chartSales14.length >= 2 ? activeModal.chart : <div className="h-32 flex items-center justify-center text-sm text-gray-300">Sin datos suficientes</div>}
-                      </div>
-                      <div className="px-5 pb-5">
-                        <button onClick={() => { setKpiModal(null); onShowBudgetDashboard?.(); }}
-                          className="w-full py-2.5 rounded-xl text-sm font-medium transition-all"
-                          style={{ background: `${activeModal.color}0D`, color: activeModal.color, border: `1px solid ${activeModal.color}20` }}>
-                          Ver presupuesto completo →
-                        </button>
-                      </div>
                     </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            );
-          })()}
+                    )}
+                </div>
+                </>);
 
-          {/* ── PRODUCT × TICKET ANALYSIS ── */}
-          {!isGerente && salesReports && salesReports.length > 0 && selectedStore &&
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="mb-5">
-            <ProductTicketAnalysis storeId={selectedStore} budget={budget} />
+            })()}
+
+            {/* ── PRODUCT × TICKET ANALYSIS ── */}
+            {salesReports && salesReports.length > 0 && selectedStore &&
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}>
+              
+                <ProductTicketAnalysis storeId={selectedStore} budget={budget} />
+              </motion.div>
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
           </motion.div>
           }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
           {/* ── WEEKLY COMPARISON ── */}
           {!isGerente &&
@@ -1086,13 +1578,13 @@ export default function HomeWorkspace({
             </motion.div>
           }
 
-          {/* ── CLIMA BANNER — compact version ── */}
+          {/* ── CLIMA BANNER ── */}
           <motion.div
             id="climate-section"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="mb-4 lg:mb-6 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+            className="mb-4 lg:mb-7 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
 
             {/* Card 1 — Temperatura del día + impacto en ventas */}
             {(() => {
@@ -1258,10 +1750,10 @@ export default function HomeWorkspace({
 
           </motion.div>
 
-          <div className="flex items-center gap-2 mt-8 mb-3">
-            <div className="h-px flex-1" style={{ background: '#EFEFF3' }} />
-            <p style={{ fontSize: 9, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#D1D5DB' }}>Popsy Analytics</p>
-            <div className="h-px flex-1" style={{ background: '#EFEFF3' }} />
+          <div className="flex items-center justify-center gap-2 mt-8 mb-3">
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, transparent, rgba(194,24,117,0.12))' }} />
+            <p className="text-[8px] font-semibold tracking-[0.22em] uppercase" style={{ color: 'rgba(194,24,117,0.35)' }}>Popsy AI Workspace</p>
+            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(194,24,117,0.12), transparent)' }} />
           </div>
         </div>
 
