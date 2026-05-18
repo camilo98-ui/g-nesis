@@ -34,8 +34,8 @@ export default function TakeawayCard({ dailySales = [], budget = 0, onBudgetChan
     const daysInMonth = endOfMonth(now).getDate();
     const daysRemaining = daysInMonth - dayOfMonth;
 
-    // Daily average based on days with data
-    const dailyAvg = daysWithData > 0 ? totalSold / daysWithData : 0;
+    // Daily average based on days elapsed in month (not just days with data)
+    const dailyAvg = dayOfMonth > 0 ? totalSold / dayOfMonth : 0;
 
     // Projection: sold + (avg * remaining days)
     const projection = totalSold + (dailyAvg * daysRemaining);
