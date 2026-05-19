@@ -43,9 +43,17 @@ function StatCard({ label, value, sub, subColor, highlight, last }) {
     <div style={{
       flex: 1,
       padding: '14px 18px',
-      borderRight: last ? 'none' : `1px solid ${PINK_SOFT}`,
-      background: highlight ? 'rgba(194,24,117,0.015)' : 'transparent',
+      borderRight: last ? 'none' : `1px solid rgba(194,24,117,0.1)`,
+      background: highlight ? 'rgba(194,24,117,0.03)' : '#ffffff',
+      position: 'relative',
     }}>
+      {highlight && (
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+          background: `linear-gradient(90deg, ${PINK}, rgba(194,24,117,0.3))`,
+          borderRadius: '0 0 2px 2px'
+        }} />
+      )}
       <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
       <p style={{
         fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1,
@@ -155,16 +163,16 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth }) {
           </g>
         ))}
 
-        {/* META line — gray dashed */}
+        {/* META line — green dashed */}
         {metaDaily != null && metaDaily > 0 && (() => {
           const my = yOf(metaDaily);
           return (
             <>
               <line x1={PAD_L} y1={my} x2={W - PAD_R} y2={my}
-                stroke="#94a3b8" strokeWidth="1.2" strokeDasharray="6 4" strokeOpacity="0.65" />
-              <rect x={W - PAD_R + 2} y={my - 7} width={30} height={12} rx="3" fill="#f1f5f9" />
+                stroke="#10b981" strokeWidth="1.5" strokeDasharray="6 4" strokeOpacity="0.7" />
+              <rect x={W - PAD_R + 2} y={my - 7} width={30} height={12} rx="3" fill="rgba(16,185,129,0.12)" />
               <text x={W - PAD_R + 17} y={my + 3.5} textAnchor="middle"
-                style={{ fontSize: 7.5, fill: '#64748b', fontWeight: 800, fontFamily: 'Inter Tight, sans-serif' }}>
+                style={{ fontSize: 7.5, fill: '#10b981', fontWeight: 800, fontFamily: 'Inter Tight, sans-serif' }}>
                 META
               </text>
             </>
@@ -378,7 +386,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
           <p style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 2 }}>
             Producto para Llevar
           </p>
-          <p style={{ fontSize: 38, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.045em', lineHeight: 1, fontFamily: 'Inter Tight, Inter, sans-serif' }}>
+          <p style={{ fontSize: 38, fontWeight: 900, color: PINK, letterSpacing: '-0.045em', lineHeight: 1, fontFamily: 'Inter Tight, Inter, sans-serif' }}>
             {fmt(analysis.totalSold)}
           </p>
           <p style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9ca3af', marginTop: 3 }}>
@@ -408,26 +416,40 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
           )}
         </div>
 
-        {/* Trend badge */}
-        {trendVsProj != null && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4, minWidth: 90 }}>
+        {/* Trend badge + proj compliance */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4, minWidth: 100 }}>
+          {trendVsProj != null && (
+            <>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '5px 12px', borderRadius: 24,
+                background: trendUp ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)',
+                border: `1.5px solid ${trendUp ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.2)'}`,
+              }}>
+                {trendUp
+                  ? <TrendingUp style={{ width: 12, height: 12, color: '#10b981' }} />
+                  : <TrendingDown style={{ width: 12, height: 12, color: '#ef4444' }} />
+                }
+                <span style={{ fontSize: 12, fontWeight: 800, color: trendUp ? '#10b981' : '#ef4444' }}>
+                  {trendVsProj > 0 ? '+' : ''}{trendVsProj.toFixed(0)}%
+                </span>
+              </div>
+              <p style={{ fontSize: 8.5, color: '#94a3b8', fontWeight: 500 }}>vs proyección</p>
+            </>
+          )}
+          {analysis.projCompliance != null && (
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: '5px 12px', borderRadius: 24,
-              background: trendUp ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)',
-              border: `1.5px solid ${trendUp ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.2)'}`,
+              padding: '3px 10px', borderRadius: 20,
+              background: analysis.projCompliance >= 100 ? 'rgba(16,185,129,0.08)' : 'rgba(194,24,117,0.08)',
+              border: `1px solid ${analysis.projCompliance >= 100 ? 'rgba(16,185,129,0.2)' : PINK_MID}`,
             }}>
-              {trendUp
-                ? <TrendingUp style={{ width: 12, height: 12, color: '#10b981' }} />
-                : <TrendingDown style={{ width: 12, height: 12, color: '#ef4444' }} />
-              }
-              <span style={{ fontSize: 12, fontWeight: 800, color: trendUp ? '#10b981' : '#ef4444' }}>
-                {trendVsProj > 0 ? '+' : ''}{trendVsProj.toFixed(0)}%
+              <span style={{ fontSize: 10, fontWeight: 800, color: analysis.projCompliance >= 100 ? '#10b981' : PINK }}>
+                {analysis.projCompliance.toFixed(0)}% PPT
               </span>
             </div>
-            <p style={{ fontSize: 8.5, color: '#94a3b8', fontWeight: 500 }}>vs proyección</p>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Controls */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
@@ -550,7 +572,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                 </div>
                 {budget > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.65" /></svg>
+                    <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.75" /></svg>
                     <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Meta mensual ({fmt(budget)})</span>
                   </div>
                 )}
