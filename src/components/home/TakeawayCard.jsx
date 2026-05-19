@@ -537,6 +537,51 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
           transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
           style={{ overflow: 'hidden' }}>
 
+           {/* ── CHART ── */}
+           <div style={{ padding: '12px 16px 10px', background: 'linear-gradient(180deg, #fdfcff 0%, #ffffff 100%)' }}>
+             {/* Header */}
+             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+               <p style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#374151' }}>
+                 Venta Diaria — {format(new Date(), 'MMM yyyy', { locale: es }).toUpperCase()}
+               </p>
+               {analysis.bestDay &&
+             <p style={{ fontSize: 9, fontWeight: 700, color: PINK }}>
+                   🏆 Mejor día: {fmt(analysis.bestDay.total_takeaway)} · {parseInt(analysis.bestDay.date.split('-')[2])} {format(new Date(analysis.bestDay.date + 'T12:00:00'), 'MMM', { locale: es })}
+                 </p>
+             }
+             </div>
+             {/* Legend */}
+             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 6 }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                 <div style={{ width: 10, height: 10, borderRadius: 3, background: `${PINK}55` }} />
+                 <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Venta diaria</span>
+               </div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                 <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke={PINK} strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.55" /></svg>
+                 <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Promedio actual ({fmt(analysis.dailyAvg)})</span>
+               </div>
+               {budget > 0 ?
+             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                   <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.75" /></svg>
+                   <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Meta mensual ({fmt(budget)})</span>
+                 </div> :
+
+             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                   <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.75" /></svg>
+                   <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Proyección/día ({fmt(analysis.projection / analysis.daysInMonth)})</span>
+                 </div>
+             }
+             </div>
+
+             <RichBarChart
+             pts={analysis.chartData}
+             dailyAvg={analysis.dailyAvg}
+             budget={budget}
+             daysInMonth={analysis.daysInMonth}
+             projection={analysis.projection} />
+
+           </div>
+
            {/* ── 4 KPI ROW ── */}
            <div style={{
            display: 'flex',
@@ -642,51 +687,6 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                 </div>
 
               </div>
-            </div>
-
-            {/* ── CHART ── */}
-            <div style={{ padding: '12px 16px 10px', background: 'linear-gradient(180deg, #fdfcff 0%, #ffffff 100%)' }}>
-              {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <p style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#374151' }}>
-                  Venta Diaria — {format(new Date(), 'MMM yyyy', { locale: es }).toUpperCase()}
-                </p>
-                {analysis.bestDay &&
-              <p style={{ fontSize: 9, fontWeight: 700, color: PINK }}>
-                    🏆 Mejor día: {fmt(analysis.bestDay.total_takeaway)} · {parseInt(analysis.bestDay.date.split('-')[2])} {format(new Date(analysis.bestDay.date + 'T12:00:00'), 'MMM', { locale: es })}
-                  </p>
-              }
-              </div>
-              {/* Legend */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: 3, background: `${PINK}55` }} />
-                  <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Venta diaria</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke={PINK} strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.55" /></svg>
-                  <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Promedio actual ({fmt(analysis.dailyAvg)})</span>
-                </div>
-                {budget > 0 ?
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.75" /></svg>
-                    <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Meta mensual ({fmt(budget)})</span>
-                  </div> :
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.75" /></svg>
-                    <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Proyección/día ({fmt(analysis.projection / analysis.daysInMonth)})</span>
-                  </div>
-              }
-              </div>
-
-              <RichBarChart
-              pts={analysis.chartData}
-              dailyAvg={analysis.dailyAvg}
-              budget={budget}
-              daysInMonth={analysis.daysInMonth}
-              projection={analysis.projection} />
-            
             </div>
 
             {/* ── FOOTER INSIGHT ── */}
