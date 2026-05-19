@@ -148,7 +148,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const { setPageData } = useNova() || {};
 
-  const [selectedStore, setSelectedStore] = useState('');
+  const [selectedStore, setSelectedStore] = useState(() => localStorage.getItem('selectedStore') || '');
   const [dateRange, setDateRange] = useState(null);
   const [activeMetric, setActiveMetric] = useState(null);
   const [projectionMetric, setProjectionMetric] = useState(null);
@@ -189,11 +189,6 @@ export default function Dashboard() {
     fetchWeather();
   }, [selectedStore]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('selectedStore');
-    if (saved) setSelectedStore(saved);
-  }, []);
-
   const handleStoreChange = (store) => {
     setSelectedStore(store);
     localStorage.setItem('selectedStore', store);
@@ -208,19 +203,27 @@ export default function Dashboard() {
         const oldCode = selectedStore.replace('BTA', 'BOGOTA');
         allSales = await base44.entities.DailySales.filter({ store_id: oldCode }, '-date', 200);
       }
-      // Deduplicar por fecha: conservar el registro más recientemente actualizado
+      // Deduplicar por fecha: conservar el registro más reciente (por created_date)
       const byDate = {};
       for (const s of allSales) {
-        const dateKey = s.date?.split('T')[0] || s.date;
-        if (!byDate[dateKey] || new Date(s.updated_date) > new Date(byDate[dateKey].updated_date)) {
+        const dateKey = (s.date || '').split('T')[0];
+        if (!dateKey) continue;
+        if (!byDate[dateKey]) {
           byDate[dateKey] = s;
+        } else {
+          // conservar el más recientemente creado
+          const existing = new Date(byDate[dateKey].created_date || 0).getTime();
+          const current = new Date(s.created_date || 0).getTime();
+          if (current > existing) byDate[dateKey] = s;
         }
       }
       return Object.values(byDate);
     },
     enabled: !!selectedStore,
     staleTime: 0,
-    gcTime: 10 * 60 * 1000
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   const { data: budgets = [] } = useQuery({
