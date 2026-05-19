@@ -1412,6 +1412,21 @@ export default function HomeWorkspace({
 
             })()}
 
+            {/* ── TAKEAWAY CARD ── */}
+            {!isGerente &&
+            <TakeawayCard
+              dailySales={todaySales}
+              budget={takeawayBudgetOverride ?? activeBudget?.takeaway_budget ?? 0}
+              storeBudget={activeBudget?.sales_budget ?? 0}
+              onBudgetChange={async (val) => {
+                setTakeawayBudgetOverride(val);
+                if (activeBudget?.id) {
+                  await base44.entities.Budget.update(activeBudget.id, { takeaway_budget: val });
+                }
+              }}
+            />
+            }
+
             {/* ── PRODUCT × TICKET ANALYSIS ── */}
             {salesReports && salesReports.length > 0 && selectedStore &&
             <motion.div
@@ -1527,21 +1542,6 @@ export default function HomeWorkspace({
           {/* ── WEEKLY COMPARISON ── */}
           {!isGerente &&
           <WeeklyComparison dailySales={todaySales} />
-          }
-
-          {/* ── TAKEAWAY CARD ── */}
-          {!isGerente &&
-          <TakeawayCard
-            dailySales={todaySales}
-            budget={takeawayBudgetOverride ?? activeBudget?.takeaway_budget ?? 0}
-            storeBudget={activeBudget?.sales_budget ?? 0}
-            onBudgetChange={async (val) => {
-              setTakeawayBudgetOverride(val);
-              if (activeBudget?.id) {
-                await base44.entities.Budget.update(activeBudget.id, { takeaway_budget: val });
-              }
-            }}
-          />
           }
 
           {/* ── PREMIUM MAIN CHART ── */}
