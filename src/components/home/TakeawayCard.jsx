@@ -277,44 +277,23 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
 
         })()}
 
-        {/* Hover tooltip — simple & clean */}
+        {/* Hover tooltip — minimal label */}
         {tooltip && (() => {
           const tx = xOf(hovered);
           const ty = yOf(tooltip.value);
           const metaDaily = budget > 0 ? budget / daysInMonth : null;
           const met = metaDaily != null && tooltip.value >= metaDaily;
-          const TW = 130, TH = 50;
-          const clampedX = Math.min(Math.max(tx, PAD_L + TW / 2 + 6), W - PAD_R - TW / 2 - 6);
-          const tooltipY = ty - TH - 12;
-          const accentColor = met ? '#10b981' : '#f59e0b';
+          const label = `Día ${tooltip.day} · ${fmt(tooltip.value)}${metaDaily != null ? (met ? ' ✓' : ' ✗') : ''}`;
+          const textLen = label.length * 4.2 + 12;
+          const clampedX = Math.min(Math.max(tx, PAD_L + textLen / 2 + 4), W - PAD_R - textLen / 2 - 4);
           return (
             <g>
-              {/* dot on curve */}
-              <circle cx={tx} cy={ty} r="3.5" fill={PINK} />
-              {/* tooltip card */}
-              <rect x={clampedX - TW/2} y={tooltipY} width={TW} height={TH} rx="6"
-                fill="white" stroke={PINK} strokeWidth="1" 
-                filter="drop-shadow(0 2px 8px rgba(0,0,0,0.12))" />
-              {/* accent stripe */}
-              <rect x={clampedX - TW/2} y={tooltipY} width={TW} height="2.5" rx="3"
-                fill={accentColor} />
-              {/* day + value */}
-              <text x={clampedX - TW/2 + 10} y={tooltipY + 17}
-                style={{ fontSize: 8, fill: '#94a3b8', fontWeight: 600, fontFamily: 'Inter Tight, sans-serif', textTransform: 'uppercase' }}>
-                Día {tooltip.day}
+              <circle cx={tx} cy={ty} r="2.5" fill={PINK} />
+              <text x={clampedX} y={ty - 12}
+                textAnchor="middle"
+                style={{ fontSize: 9, fill: '#1e293b', fontWeight: 700, fontFamily: 'Inter Tight, sans-serif' }}>
+                {label}
               </text>
-              <text x={clampedX - TW/2 + 10} y={tooltipY + 33}
-                style={{ fontSize: 13, fill: PINK, fontWeight: 900, fontFamily: 'Inter Tight, sans-serif' }}>
-                {fmt(tooltip.value)}
-              </text>
-              {/* budget status small */}
-              {metaDaily != null && (
-                <text x={clampedX + TW/2 - 8} y={tooltipY + 33}
-                  textAnchor="end"
-                  style={{ fontSize: 7.5, fill: accentColor, fontWeight: 700, fontFamily: 'Inter Tight, sans-serif' }}>
-                  {met ? '✓ Meta' : '✗ Bajo'}
-                </text>
-              )}
             </g>
           );
         })()}
