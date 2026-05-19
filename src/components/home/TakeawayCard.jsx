@@ -526,7 +526,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                   const target = budget * 1.02;
                   smartPPT = daysRemaining > 0 ? Math.max((target - totalSold) / daysRemaining, dailyAvg) : dailyAvg;
                   label = 'Meta Diaria Hoy';
-                  color = '#f59e0b';
+                  color = '#0ea5a0';
                   sub = `Para cerrar al 102% del PPT`;
                 }
                 return (
