@@ -277,27 +277,57 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
 
         })()}
 
-        {/* Hover tooltip in SVG */}
+        {/* Hover tooltip in SVG — rich card */}
         {tooltip && (() => {
           const tx = xOf(hovered);
           const ty = yOf(tooltip.value);
-          const label = fmt(tooltip.value);
-          const bw = label.length * 6 + 16;
-          const bh2 = 16;
-          const clampedX = Math.min(Math.max(tx, PAD_L + bw / 2 + 4), W - PAD_R - bw / 2 - 4);
+          const metaDaily = budget > 0 ? budget / daysInMonth : null;
+          const met = metaDaily != null && tooltip.value >= metaDaily;
+          const pct = metaDaily != null ? (tooltip.value / metaDaily * 100).toFixed(0) : null;
+          const TW = 148, TH = metaDaily != null ? 62 : 44;
+          const clampedX = Math.min(Math.max(tx, PAD_L + TW / 2 + 4), W - PAD_R - TW / 2 - 4);
+          const clampedY = ty - TH - 14 < PAD_T ? ty + 14 : ty - TH - 14;
+          const accentColor = met ? '#10b981' : '#f59e0b';
           return (
             <g>
+              {/* vertical guide */}
               <line x1={tx} y1={PAD_T} x2={tx} y2={PAD_T + chartH}
-              stroke={PINK} strokeWidth="1" strokeOpacity="0.2" />
-              <circle cx={tx} cy={ty} r="4" fill={PINK} fillOpacity="0.9" />
-              <rect x={clampedX - bw / 2} y={ty - bh2 - 6} width={bw} height={bh2} rx="5"
-              fill="#1e293b" fillOpacity="0.92" />
-              <text x={clampedX} y={ty - bh2 - 6 + bh2 / 2 + 3.5} textAnchor="middle"
-              style={{ fontSize: 9, fill: 'white', fontWeight: 700, fontFamily: 'Inter Tight, sans-serif' }}>
-                {label}
+                stroke={PINK} strokeWidth="1" strokeOpacity="0.18" strokeDasharray="3 2" />
+              {/* dot on curve */}
+              <circle cx={tx} cy={ty} r="5" fill="white" stroke={PINK} strokeWidth="2" />
+              <circle cx={tx} cy={ty} r="2.5" fill={PINK} />
+              {/* card shadow */}
+              <rect x={clampedX - TW/2 + 2} y={clampedY + 2} width={TW} height={TH} rx="9"
+                fill="rgba(0,0,0,0.12)" />
+              {/* card bg */}
+              <rect x={clampedX - TW/2} y={clampedY} width={TW} height={TH} rx="9"
+                fill="#0f172a" />
+              {/* accent top bar */}
+              <rect x={clampedX - TW/2} y={clampedY} width={TW} height={3} rx="3"
+                fill={accentColor} />
+              {/* day label */}
+              <text x={clampedX - TW/2 + 10} y={clampedY + 16}
+                style={{ fontSize: 8, fill: '#94a3b8', fontWeight: 600, fontFamily: 'Inter Tight, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                DÍA {tooltip.day}
               </text>
-            </g>);
-
+              {/* value */}
+              <text x={clampedX - TW/2 + 10} y={clampedY + 31}
+                style={{ fontSize: 14, fill: 'white', fontWeight: 900, fontFamily: 'Inter Tight, sans-serif', letterSpacing: '-0.02em' }}>
+                {fmt(tooltip.value)}
+              </text>
+              {/* budget status */}
+              {metaDaily != null && (
+                <>
+                  <rect x={clampedX - TW/2 + 8} y={clampedY + 38} width={TW - 16} height={16} rx="4"
+                    fill={met ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'} />
+                  <text x={clampedX - TW/2 + 16} y={clampedY + 49}
+                    style={{ fontSize: 8, fill: accentColor, fontWeight: 800, fontFamily: 'Inter Tight, sans-serif' }}>
+                    {met ? `✓ Meta cumplida · ${pct}%` : `✗ Bajo meta · ${pct}%`}
+                  </text>
+                </>
+              )}
+            </g>
+          );
         })()}
 
         {/* X axis labels */}
