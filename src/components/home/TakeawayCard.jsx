@@ -527,27 +527,24 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               margin: '10px 6px',
               borderRadius: 12,
               border: `1.5px solid ${PINK_MID}`,
-              display: 'flex', alignItems: 'center', gap: 12,
+              display: 'flex', alignItems: 'center', gap: 14,
               minWidth: 180,
               background: '#ffffff',
               boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
             }}>
                 {analysis.storeContribution != null &&
-              <ArcRing pct={analysis.storeContribution} />
-              }
+                  <ArcRing pct={analysis.storeContribution} />
+                }
                 <div>
-                  <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 5 }}>
+                  <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
                     Aporte Tienda
                   </p>
-                  <p style={{ fontSize: 18, fontWeight: 900, letterSpacing: '-0.025em', color: '#7c3aed', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
-                    {analysis.storeContribution != null ? `${analysis.storeContribution.toFixed(1)}%` : '—'}
-                  </p>
-                  <p style={{ fontSize: 8.5, color: '#94a3b8', marginTop: 4, fontWeight: 500 }}>al PPT total</p>
+                  <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 500 }}>al PPT total</p>
                   {analysis.storeContribProjected != null &&
-                <p style={{ fontSize: 8.5, color: '#94a3b8', fontWeight: 600, marginTop: 1 }}>
+                    <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginTop: 2 }}>
                       Prom. tiendas: {analysis.storeContribProjected.toFixed(1)}%
                     </p>
-                }
+                  }
                 </div>
               </div>
             </div>
