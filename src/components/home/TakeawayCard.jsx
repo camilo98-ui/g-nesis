@@ -46,6 +46,8 @@ function StatCard({ label, value, sub, subColor, highlight, last }) {
       borderRight: last ? 'none' : `1px solid rgba(194,24,117,0.1)`,
       background: highlight ? 'rgba(194,24,117,0.03)' : '#ffffff',
       position: 'relative',
+      borderTop: `1px solid rgba(194,24,117,0.08)`,
+      borderBottom: `1px solid rgba(194,24,117,0.08)`,
     }}>
       {highlight && (
         <div style={{
@@ -96,8 +98,12 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
   const metaDaily = budget > 0 ? budget / daysInMonth : null;
   // When no budget, show projection-per-day as reference line (green)
   const projDaily = (!budget || budget === 0) && projection > 0 ? projection / daysInMonth : null;
-  const topVal = Math.max(...pts.map(p => p.value), metaDaily || 0, projDaily || 0, dailyAvg || 0, 1);
-  const maxVal = topVal * 1.15;
+  // Use only actual bar values for scale (not projection), so bars fill the chart well
+  const barMax = Math.max(...pts.map(p => p.value).filter(v => v > 0), 1);
+  const lineMax = Math.max(metaDaily || 0, projDaily || 0, dailyAvg || 0, 0);
+  // Give 20% headroom above the tallest bar; lines can go slightly above if needed
+  const topVal = Math.max(barMax * 1.2, lineMax * 1.05);
+  const maxVal = topVal;
 
   const xOf = (i) => PAD_L + (i + 0.5) / pts.length * chartW;
   const yOf = (v) => PAD_T + chartH - Math.max(0, Math.min(v / maxVal, 1)) * chartH;
@@ -565,7 +571,10 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               <div style={{
                 padding: '14px 18px',
                 display: 'flex', alignItems: 'center', gap: 12,
-                minWidth: 180
+                minWidth: 180,
+                borderTop: `1px solid rgba(194,24,117,0.08)`,
+                borderBottom: `1px solid rgba(194,24,117,0.08)`,
+                borderLeft: `1px solid rgba(194,24,117,0.1)`,
               }}>
                 {analysis.storeContribution != null && (
                   <ArcRing pct={Math.min(analysis.storeContribution * 13, 100)} />
