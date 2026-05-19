@@ -43,11 +43,9 @@ function StatCard({ label, value, sub, subColor, highlight, last }) {
     <div style={{
       flex: 1,
       padding: '14px 18px',
-      borderRight: last ? 'none' : `1px solid rgba(194,24,117,0.1)`,
-      background: highlight ? 'rgba(194,24,117,0.03)' : '#ffffff',
+      borderRight: last ? 'none' : `1px solid ${PINK_MID}`,
+      background: highlight ? 'rgba(194,24,117,0.04)' : '#ffffff',
       position: 'relative',
-      borderTop: `1px solid rgba(194,24,117,0.08)`,
-      borderBottom: `1px solid rgba(194,24,117,0.08)`,
     }}>
       {highlight && (
         <div style={{
@@ -72,8 +70,8 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
   const [hovered, setHovered] = useState(null);
   const svgRef = useRef(null);
 
-  const W = 580, H = 180;
-  const PAD_L = 48, PAD_R = 46, PAD_T = 24, PAD_B = 26;
+  const W = 580, H = 200;
+  const PAD_L = 48, PAD_R = 46, PAD_T = 20, PAD_B = 28;
   const chartW = W - PAD_L - PAD_R;
   const chartH = H - PAD_T - PAD_B;
 
@@ -108,7 +106,7 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
   const xOf = (i) => PAD_L + (i + 0.5) / pts.length * chartW;
   const yOf = (v) => PAD_T + chartH - Math.max(0, Math.min(v / maxVal, 1)) * chartH;
 
-  const barW = Math.max(3, chartW / pts.length - 3);
+  const barW = Math.max(4, chartW / pts.length - 2);
   const maxIdx = pts.reduce((mi, p, i, a) => p.value > a[mi].value ? i : mi, 0);
 
   const curvePts = pts.map((p, i) => [xOf(i), yOf(p.value)]);
@@ -237,7 +235,7 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
         {/* Bars */}
         {pts.map((p, i) => {
           if (p.value === 0) return null;
-          const bh = Math.max((p.value / maxVal) * chartH, 3);
+          const bh = Math.max((p.value / maxVal) * chartH, 5);
           const bx = PAD_L + i / pts.length * chartW + (chartW / pts.length - barW) / 2;
           const by = PAD_T + chartH - bh;
           const isTop = i === maxIdx;
@@ -547,8 +545,10 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             {/* ── 4 KPI ROW ── */}
             <div style={{
               display: 'flex',
-              borderBottom: `1px solid ${PINK_SOFT}`,
-              background: 'linear-gradient(180deg, #fdfcff 0%, #ffffff 100%)'
+              borderBottom: `1px solid ${PINK_MID}`,
+              borderTop: `1px solid ${PINK_SOFT}`,
+              background: 'linear-gradient(180deg, #fdfcff 0%, #ffffff 100%)',
+              boxShadow: `inset 0 -1px 0 ${PINK_SOFT}`
             }}>
               <StatCard
                 label="Vendido Acumulado"
@@ -572,9 +572,8 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                 padding: '14px 18px',
                 display: 'flex', alignItems: 'center', gap: 12,
                 minWidth: 180,
-                borderTop: `1px solid rgba(194,24,117,0.08)`,
-                borderBottom: `1px solid rgba(194,24,117,0.08)`,
-                borderLeft: `1px solid rgba(194,24,117,0.1)`,
+                borderLeft: `1px solid ${PINK_MID}`,
+                background: '#ffffff',
               }}>
                 {analysis.storeContribution != null && (
                   <ArcRing pct={Math.min(analysis.storeContribution * 13, 100)} />
