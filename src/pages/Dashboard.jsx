@@ -202,11 +202,11 @@ export default function Dashboard() {
   const { data: dailySales = [] } = useQuery({
     queryKey: ['dailySales', selectedStore],
     queryFn: async () => {
-      let allSales = await base44.entities.DailySales.filter({ store_id: selectedStore });
+      let allSales = await base44.entities.DailySales.filter({ store_id: selectedStore }, '-date', 200);
       // Si no hay resultados, intentar con código antiguo (BOGOTA)
       if (allSales.length === 0 && selectedStore.startsWith('BTA')) {
         const oldCode = selectedStore.replace('BTA', 'BOGOTA');
-        allSales = await base44.entities.DailySales.filter({ store_id: oldCode });
+        allSales = await base44.entities.DailySales.filter({ store_id: oldCode }, '-date', 200);
       }
       // Deduplicar por fecha: conservar el registro más recientemente actualizado
       const byDate = {};
@@ -219,38 +219,36 @@ export default function Dashboard() {
       return Object.values(byDate);
     },
     enabled: !!selectedStore,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
     gcTime: 10 * 60 * 1000
   });
 
   const { data: budgets = [] } = useQuery({
     queryKey: ['budgets', selectedStore],
     queryFn: async () => {
-      let allBudgets = await base44.entities.Budget.filter({ store_id: selectedStore });
-      // Si no hay resultados, intentar con código antiguo (BOGOTA)
+      let allBudgets = await base44.entities.Budget.filter({ store_id: selectedStore }, '-month', 50);
       if (allBudgets.length === 0 && selectedStore.startsWith('BTA')) {
         const oldCode = selectedStore.replace('BTA', 'BOGOTA');
-        allBudgets = await base44.entities.Budget.filter({ store_id: oldCode });
+        allBudgets = await base44.entities.Budget.filter({ store_id: oldCode }, '-month', 50);
       }
-      return allBudgets; // retornar todos, filtrar dinámicamente según dateRange
+      return allBudgets;
     },
     enabled: !!selectedStore,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 0,
     gcTime: 15 * 60 * 1000
   });
   const { data: dailyBudgets = [] } = useQuery({
     queryKey: ['dailyBudgets', selectedStore],
     queryFn: async () => {
-      let results = await base44.entities.DailyBudget.filter({ store_id: selectedStore });
-      // Si no hay resultados, intentar con código antiguo (BOGOTA)
+      let results = await base44.entities.DailyBudget.filter({ store_id: selectedStore }, '-date', 200);
       if (results.length === 0 && selectedStore.startsWith('BTA')) {
         const oldCode = selectedStore.replace('BTA', 'BOGOTA');
-        results = await base44.entities.DailyBudget.filter({ store_id: oldCode });
+        results = await base44.entities.DailyBudget.filter({ store_id: oldCode }, '-date', 200);
       }
       return results;
     },
     enabled: !!selectedStore,
-    staleTime: 10 * 60 * 1000
+    staleTime: 0
   });
 
   const { data: shiftRecords = [] } = useQuery({
