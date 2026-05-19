@@ -533,7 +533,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
             }}>
                 {analysis.storeContribution != null &&
-              <ArcRing pct={Math.min(analysis.storeContribution * 13, 100)} />
+              <ArcRing pct={analysis.storeContribution} />
               }
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 5 }}>
