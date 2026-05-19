@@ -234,113 +234,113 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
       }} />
 
       {/* ── HEADER ROW ── */}
-      <div
-        className="flex items-center gap-3 px-4 pt-4 pb-3 cursor-pointer hidden"
-        onClick={() => setExpanded((e) => !e)}>
-        
-        {/* Icon */}
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: PINK_SOFT, border: `1px solid ${PINK_MID}` }}>
-          <ShoppingBag style={{ width: 16, height: 16, color: PINK }} />
-        </div>
+      
 
-        {/* Values */}
-        <div className="flex-1 min-w-0">
-          <p style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 2 }}>
-            Producto para Llevar
-          </p>
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <span style={{ fontSize: 19, fontWeight: 800, color: '#1e293b', letterSpacing: '-0.03em', fontFamily: 'Inter Tight, Inter, sans-serif', lineHeight: 1 }}>
-              {fmt(analysis.totalSold)}
-            </span>
-            <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8' }}>real</span>
-            <span style={{ width: 1, height: 10, background: '#e2e8f0', display: 'inline-block', margin: '0 2px' }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: PINK, letterSpacing: '-0.02em' }}>
-              {fmt(analysis.projection)}
-            </span>
-            <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8' }}>proy.</span>
-            {projCompliance != null &&
-            <span style={{ fontSize: 9, fontWeight: 700, color: isOnTrack ? '#10b981' : '#f59e0b',
-              background: isOnTrack ? 'rgba(16,185,129,0.08)' : 'rgba(245,158,11,0.08)',
-              borderRadius: 5, padding: '1px 5px' }}>
-                {projCompliance.toFixed(0)}% PPT
-              </span>
-            }
-            {trendPct != null &&
-            <span style={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: 9, fontWeight: 700,
-              color: trendUp ? '#10b981' : '#ef4444' }}>
-                {trendUp ? <TrendingUp style={{ width: 9, height: 9 }} /> : <TrendingDown style={{ width: 9, height: 9 }} />}
-                {Math.abs(trendPct).toFixed(0)}%
-              </span>
-            }
-          </div>
-          <p style={{ fontSize: 8, color: '#cbd5e1', fontWeight: 500, marginTop: 2 }}>
-            {analysis.daysWithData}d con datos · avg {fmt(analysis.dailyAvg)}/día
-          </p>
-        </div>
 
-        <SparkLine />
-        <ArcRing pct={compliance} />
 
-        <div style={{ color: '#cbd5e1', flexShrink: 0 }}>
-          {expanded ?
-          <ChevronUp style={{ width: 14, height: 14 }} /> :
-          <ChevronDown style={{ width: 14, height: 14 }} />}
-        </div>
-      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
 
       {/* ── BUDGET BAR ── */}
-      <div className="px-4 pb-3">
-        <div className="flex items-center justify-between mb-1">
-          {editingBudget ?
-          <div className="flex items-center gap-1.5 flex-1 mr-2" onClick={(e) => e.stopPropagation()}>
-              <input
-              autoFocus type="number" value={budgetInput}
-              onChange={(e) => setBudgetInput(e.target.value)}
-              placeholder="PPT llevar del mes..."
-              style={{
-                flex: 1, fontSize: 10, fontWeight: 600, color: '#374151',
-                border: `1px solid ${PINK_MID}`, borderRadius: 6, padding: '2px 6px',
-                outline: 'none', background: 'white', height: 22
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {onBudgetChange?.(Number(budgetInput));setEditingBudget(false);}
-                if (e.key === 'Escape') setEditingBudget(false);
-              }} />
-            
-              <button onClick={() => {onBudgetChange?.(Number(budgetInput));setEditingBudget(false);}}
-            style={{ color: '#10b981', cursor: 'pointer', display: 'flex', padding: 2 }}>
-                <Check style={{ width: 12, height: 12 }} />
-              </button>
-              <button onClick={() => setEditingBudget(false)}
-            style={{ color: '#94a3b8', cursor: 'pointer', display: 'flex', padding: 2 }}>
-                <X style={{ width: 12, height: 12 }} />
-              </button>
-            </div> :
+      
 
-          <div className="flex items-center gap-1.5 cursor-pointer"
-          onClick={(e) => {e.stopPropagation();setBudgetInput(budget > 0 ? String(budget) : '');setEditingBudget(true);}}>
-              <span style={{ fontSize: 7.5, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.08em' }}>
-                {budget > 0 ? `PPT LLEVAR ${fmt(budget)}` : 'Agregar PPT del mes'}
-              </span>
-              <Pencil style={{ width: 8, height: 8, color: '#cbd5e1' }} />
-            </div>
-          }
-          {!editingBudget && compliance != null &&
-          <span style={{ fontSize: 7.5, fontWeight: 700, color: PINK }}>{compliance.toFixed(1)}%</span>
-          }
-        </div>
-        {budget > 0 &&
-        <div style={{ height: 3.5, borderRadius: 9999, background: PINK_SOFT, overflow: 'hidden' }}>
-            <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(compliance || 0, 100)}%` }}
-            transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-            style={{ height: '100%', borderRadius: 9999, background: `linear-gradient(90deg, ${PINK}, rgba(194,24,117,0.5))` }} />
-          
-          </div>
-        }
-      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
 
       {/* ── EXPANDED SECTION ── */}
       <AnimatePresence>
