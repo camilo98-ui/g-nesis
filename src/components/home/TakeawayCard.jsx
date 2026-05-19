@@ -573,13 +573,13 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               }
               return (
                 <div style={{
-                  flex: 1, padding: '14px 18px', margin: '10px 6px',
+                  flex: 1, padding: '10px 14px', margin: '8px 6px',
                   borderRadius: 12,
                   border: `1.5px solid ${color}40`,
                   background: `${color}06`,
                   position: 'relative',
                   boxShadow: `0 2px 10px ${color}15`,
-                  display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 110
+                  display: 'flex', flexDirection: 'column', gap: 2
                 }}>
                     <div>
                       <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
@@ -596,10 +596,9 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             
               {/* Proyección de cierre card con ícono y badge */}
               <div style={{
-                flex: 1, padding: '14px 18px', margin: '10px 6px', borderRadius: 12,
+                flex: 1, padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
                 border: `1.5px solid rgba(194,24,117,0.3)`, background: 'rgba(194,24,117,0.04)',
-                boxShadow: '0 2px 12px rgba(194,24,117,0.08)', display: 'flex', flexDirection: 'column',
-                justifyContent: 'space-between', minHeight: 110
+                boxShadow: '0 2px 12px rgba(194,24,117,0.08)', display: 'flex', flexDirection: 'column', gap: 2
               }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Proyección de Cierre</p>
@@ -611,10 +610,9 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
 
               {/* Promedio por día card con ícono */}
               <div style={{
-                flex: 1, padding: '14px 18px', margin: '10px 6px', borderRadius: 12,
+                flex: 1, padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
                 border: `1.5px solid ${PINK_MID}`, background: '#ffffff',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column',
-                justifyContent: 'space-between', minHeight: 110
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 2
               }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Promedio por Día</p>
@@ -626,10 +624,9 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             
               {/* Aporte tienda */}
               <div style={{
-                padding: '14px 18px', margin: '10px 6px', borderRadius: 12,
+                padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
                 border: `1.5px solid ${PINK_MID}`, minWidth: 160, background: '#ffffff',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column',
-                justifyContent: 'space-between', minHeight: 110
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 2
               }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Aporte Tienda</p>
