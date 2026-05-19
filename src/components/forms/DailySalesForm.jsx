@@ -76,8 +76,9 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      // Buscar si ya existe un registro para esa fecha (para no pisar el otro tab)
-      let existingRecord = editingRecord;
+      // Si estamos editando, usar SIEMPRE el registro original (sin buscar por fecha)
+      // Esto evita que se actualice un día diferente al editado
+      let existingRecord = data._editingRecord || null;
       if (!existingRecord) {
         const existing = await base44.entities.DailySales.filter({ 
           store_id: storeId, 
@@ -155,7 +156,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       queryClient.invalidateQueries({ queryKey: ['gerenteHomeSales'] });
       queryClient.invalidateQueries({ queryKey: ['home-today-sales'] });
       
-      toast.success(editingRecord ? '¡Venta actualizada!' : '¡Venta registrada!');
+      toast.success('¡Venta guardada correctamente!');
       
       setShowSuccess(true);
       setTimeout(() => {
@@ -199,7 +200,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       return;
     }
     
-    createMutation.mutate({ ...formData, activeTab });
+    createMutation.mutate({ ...formData, activeTab, _editingRecord: editingRecord });
   };
 
   const handleEdit = (record) => {
