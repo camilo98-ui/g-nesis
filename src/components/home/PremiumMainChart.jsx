@@ -163,224 +163,224 @@ export default function PremiumMainChart({ dailySales = [], activeBudget = null,
 
   if (!pts.length) return null;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-      className="mb-4 lg:mb-6 rounded-2xl overflow-hidden hidden"
-      style={{
-        background: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(40px)',
-        border: '1px solid rgba(0,0,0,0.06)',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)'
-      }}>
-
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-wrap gap-2">
-        <div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-0.5">Ventas del Mes</p>
-          <p className="text-[13px] font-black text-slate-800" style={{ letterSpacing: '-0.02em' }}>
-            {metrics ? fmt(metrics.total) : '—'} acumulado
-          </p>
-        </div>
-        <div className="flex items-center gap-3 text-[10px]">
-          {metrics?.change != null &&
-          <span className={`flex items-center gap-1 font-semibold ${parseFloat(metrics.change) >= 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
-              {parseFloat(metrics.change) >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-              {metrics.change > 0 ? '+' : ''}{metrics.change}% vs ayer
-            </span>
-          }
-          {metrics?.complianceAvg && budgetVal > 0 &&
-          <span className="text-slate-400 font-medium">{metrics.complianceAvg}% cumpl.</span>
-          }
-          {/* Legend */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#ec4899' }} />
-              <span className="text-slate-400">Ventas</span>
-            </div>
-            {budgetVal > 0 &&
-            <div className="flex items-center gap-1">
-                <svg width="14" height="2"><line x1="0" y1="1" x2="14" y2="1" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 2" /></svg>
-                <span className="text-slate-400">Meta</span>
-              </div>
-            }
-            <div className="flex items-center gap-1">
-              <svg width="14" height="2"><line x1="0" y1="1" x2="14" y2="1" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
-              <span className="text-slate-400">Prom</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Chart */}
-      <div style={{ width: '100%', overflowX: 'auto' }}>
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          width="100%"
-          height={H}
-          style={{ display: 'block', minWidth: 320 }}
-          onMouseLeave={() => setHoverIdx(null)}>
-
-          <defs>
-            <linearGradient id="pmcAreaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ec4899" stopOpacity="0.28" />
-              <stop offset="55%" stopColor="#ec4899" stopOpacity="0.10" />
-              <stop offset="100%" stopColor="#ec4899" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="pmcBarGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ec4899" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#f9a8d4" stopOpacity="0.18" />
-            </linearGradient>
-            <linearGradient id="pmcBarGradHover" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#C21875" stopOpacity="1" />
-              <stop offset="100%" stopColor="#ec4899" stopOpacity="0.7" />
-            </linearGradient>
-            <linearGradient id="pmcBarGradPeak" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#be185d" stopOpacity="1" />
-              <stop offset="100%" stopColor="#C21875" stopOpacity="0.85" />
-            </linearGradient>
-            <filter id="pmcGlow">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
-          </defs>
-
-          {/* Y-axis grid lines */}
-          {yTicks.map(({ val, y }) =>
-          <g key={val}>
-              <line x1={PAD_L} y1={y} x2={W - PAD_R} y2={y}
-            stroke={val === 0 ? '#e2e8f0' : '#f1f5f9'} strokeWidth={val === 0 ? 1 : 0.8}
-            strokeDasharray={val === 0 ? '' : '4 4'} />
-              <text x={PAD_L - 6} y={y + 4} textAnchor="end" fontSize={9} fill="#94a3b8" fontFamily="system-ui">
-                {fmt(val)}
-              </text>
-            </g>
-          )}
-
-          {/* Bars */}
-          {pts.map((p, i) => {
-            if (p.value === 0) return null;
-            const bh = Math.max(p.value / maxVal * chartH, 5);
-            const bx = toX(i) - barW / 2;
-            const by = PAD_T + chartH - bh;
-            const isPeak = i === peakIdx;
-            const isHov = i === hoverIdx;
-            const grad = isPeak ? 'url(#pmcBarGradPeak)' : isHov ? 'url(#pmcBarGradHover)' : 'url(#pmcBarGrad)';
-            return (
-              <rect
-                key={i}
-                x={bx} y={by} width={barW} height={bh}
-                rx={3} ry={3}
-                fill={grad}
-                style={{ cursor: 'pointer', transition: 'opacity 0.15s' }}
-                opacity={hoverIdx !== null && !isHov && !isPeak ? 0.55 : 1}
-                onMouseEnter={() => setHoverIdx(i)} />);
+  return null;
 
 
-          })}
 
-          {/* Area fill */}
-          {areaPath &&
-          <path d={areaPath} fill="url(#pmcAreaGrad)" />
-          }
 
-          {/* Smooth line */}
-          {linePath &&
-          <path d={linePath} fill="none" stroke="#ec4899" strokeWidth={2.2}
-          strokeLinecap="round" strokeLinejoin="round" filter="url(#pmcGlow)" />
-          }
 
-          {/* AVG line */}
-          {avgVal > 0 &&
-          <g>
-              <line x1={PAD_L} y1={avgY} x2={W - PAD_R} y2={avgY}
-            stroke="#94a3b8" strokeWidth={1.2} strokeDasharray="4 3" opacity={0.7} />
-              <rect x={W - PAD_R + 2} y={avgY - 8} width={28} height={16} rx={4} fill="#94a3b8" opacity={0.85} />
-              <text x={W - PAD_R + 16} y={avgY + 4} textAnchor="middle" fontSize={7.5} fill="#fff" fontWeight="700">AVG</text>
-            </g>
-          }
 
-          {/* Budget/Meta line */}
-          {budgetY !== null && budgetVal > 0 &&
-          <g>
-              <line x1={PAD_L} y1={budgetY} x2={W - PAD_R} y2={budgetY}
-            stroke="#10b981" strokeWidth={1.5} strokeDasharray="6 3" opacity={0.8} />
-              <rect x={W - PAD_R + 2} y={budgetY - 8} width={32} height={16} rx={4} fill="#10b981" opacity={0.85} />
-              <text x={W - PAD_R + 18} y={budgetY + 4} textAnchor="middle" fontSize={7.5} fill="#fff" fontWeight="700">META</text>
-            </g>
-          }
 
-          {/* Peak label */}
-          {peakIdx >= 0 && pts[peakIdx]?.value > 0 && (() => {
-            const px = toX(peakIdx);
-            const py = toY(pts[peakIdx].value);
-            const labelW = 68,labelH = 22;
-            const lx = Math.min(Math.max(px - labelW / 2, PAD_L), W - PAD_R - labelW);
-            return (
-              <g filter="url(#pmcGlow)">
-                <rect x={lx} y={py - labelH - 6} width={labelW} height={labelH} rx={8}
-                fill="url(#pmcBarGradPeak)" />
-                <text x={lx + labelW / 2} y={py - labelH - 6 + 14} textAnchor="middle"
-                fontSize={11} fontWeight="800" fill="#fff" fontFamily="system-ui">
-                  {fmt(pts[peakIdx].value)}
-                </text>
-                {/* connector dot */}
-                <circle cx={px} cy={py} r={4} fill="#be185d" />
-                <circle cx={px} cy={py} r={7} fill="#be185d" opacity={0.2} />
-              </g>);
 
-          })()}
 
-          {/* Hover dots */}
-          {pts.map((p, i) => {
-            if (p.value === 0 || i === peakIdx) return null;
-            const cx = toX(i),cy = toY(p.value);
-            return (
-              <circle key={i} cx={cx} cy={cy} r={hoverIdx === i ? 5 : 3}
-              fill="#ec4899" opacity={hoverIdx === i ? 1 : 0}
-              style={{ transition: 'r 0.15s, opacity 0.15s', pointerEvents: 'none' }} />);
 
-          })}
 
-          {/* X-axis labels — show every N */}
-          {pts.map((p, i) => {
-            const step = pts.length <= 10 ? 1 : pts.length <= 20 ? 2 : 3;
-            if (i % step !== 0) return null;
-            return (
-              <text key={i} x={toX(i)} y={H - 6} textAnchor="middle" fontSize={9}
-              fill={i === hoverIdx ? '#C21875' : '#94a3b8'} fontFamily="system-ui">
-                {p.day}
-              </text>);
 
-          })}
 
-          {/* Hover tooltip */}
-          {hoverIdx !== null && pts[hoverIdx]?.value > 0 &&
-          <ChartTooltip
-            data={pts[hoverIdx]}
-            x={toX(hoverIdx)}
-            y={toY(pts[hoverIdx].value)}
-            chartH={chartH}
-            PAD_B={PAD_B} />
 
-          }
 
-          {/* Invisible hover targets */}
-          {pts.map((p, i) =>
-          <rect key={i}
-          x={toX(i) - chartW / pts.length / 2}
-          y={PAD_T}
-          width={chartW / pts.length}
-          height={chartH}
-          fill="transparent"
-          onMouseEnter={() => setHoverIdx(i)}
-          style={{ cursor: p.value > 0 ? 'pointer' : 'default' }} />
 
-          )}
-        </svg>
-      </div>
-    </motion.div>);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
