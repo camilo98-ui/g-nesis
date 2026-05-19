@@ -17,7 +17,6 @@ import ZonePerformanceComparison from '@/components/sales/ZonePerformanceCompari
 import WeatherSalesImpactChart from '@/components/weather/WeatherSalesImpactChart';
 
 import GrowthVelocityChart from '@/components/management/GrowthVelocityChart';
-import PremiumMainChart from '@/components/home/PremiumMainChart';
 import StoreReportGenerator from '@/components/reports/StoreReportGenerator';
 import PresentationGenerator from '@/components/reports/PresentationGenerator';
 import CompraValeModal from '@/components/dashboard/CompraValeModal';
@@ -1452,11 +1451,63 @@ export default function Dashboard() {
             className="space-y-6">
 
                 {/* Main Charts Row */}
-                <div className="space-y-6">
-                  <PremiumMainChart
-                    dailySales={dailySales}
-                    activeBudget={currentBudget?.sales_budget ? currentBudget : null}
-                    dailyBudgets={dailyBudgets} />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Sales Trend */}
+                  <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                          Ventas Diarias {showComparison && '- Comparativo'}
+                        </CardTitle>
+                      </div>
+                      <ChartInsight
+                    data={chartData}
+                    metric="ventas"
+                    formatCurrency={formatCurrency}
+                    comparisonData={showComparison ? comparisonTotals : null} />
+                  
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chartData}>
+                            <defs>
+                              <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                              </linearGradient>
+                              <linearGradient id="comparisonGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                            <YAxis tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 11 }} />
+                            <Tooltip
+                          contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                          labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDate || label}
+                          formatter={(v, name) => [formatCurrency(v), name]} />
+
+                            <Legend />
+                            {showComparison && comparisonTotals &&
+                        <Area
+                          type="monotone"
+                          dataKey="ventasComparacion"
+                          stroke="#94a3b8"
+                          strokeWidth={2}
+                          fill="url(#comparisonGrad)"
+                          name="Período Anterior"
+                          strokeDasharray="5 5" />
+
+                        }
+                            <Area type="monotone" dataKey="ventas" stroke="#10b981" strokeWidth={2} fill="url(#salesGrad)" name={showComparison ? "Período Actual" : "Ventas"} />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
 
                   {/* Rendimiento vs Zona */}
                   <ZonePerformanceComparison storeId={selectedStore} formatCurrency={formatCurrency} currentDateRange={weekFilter || dateRange} gregorianMode={gregorianMode} />
