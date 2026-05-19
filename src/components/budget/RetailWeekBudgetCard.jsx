@@ -295,7 +295,7 @@ export default function RetailWeekBudgetCard({ dailySales, activeBudget, dailyBu
 
             <>
               {/* 3 Cards compactos: PPT, Brecha, Proyección */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+              <div className="hidden grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
                 {/* Card 1: PPT del Día */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
