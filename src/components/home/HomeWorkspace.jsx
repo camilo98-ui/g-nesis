@@ -860,7 +860,7 @@ export default function HomeWorkspace({
                   <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
                 </div>
                 {!isGerente &&
-                <div className="flex items-center gap-1.5 flex-shrink-0">
+                <div className="hidden items-center gap-1.5 flex-shrink-0">
                   <motion.button
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
