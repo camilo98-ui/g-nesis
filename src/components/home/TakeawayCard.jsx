@@ -589,11 +589,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                       </p>
                       <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: '#94a3b8' }}>{sub}</p>
                     </div>
-                    <div style={{ marginTop: 10 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 9, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Target style={{ width: 16, height: 16, color }} />
-                      </div>
-                    </div>
+
                   </div>);
 
             })()}
@@ -610,18 +606,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                   <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: PINK }}>{fmt(analysis.projection)}</p>
                   <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: PINK }}>al cierre del mes</p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(194,24,117,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <TrendingUp style={{ width: 16, height: 16, color: PINK }} />
-                  </div>
-                  {analysis.projCompliance != null &&
-                    <span style={{ fontSize: 9, fontWeight: 800, color: analysis.projCompliance >= 100 ? '#10b981' : PINK,
-                      background: analysis.projCompliance >= 100 ? 'rgba(16,185,129,0.1)' : 'rgba(194,24,117,0.1)',
-                      padding: '3px 8px', borderRadius: 99 }}>
-                      {analysis.projCompliance.toFixed(0)}% PPT
-                    </span>
-                  }
-                </div>
+
               </div>
 
               {/* Promedio por día card con ícono */}
@@ -636,11 +621,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                   <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: '#1e293b' }}>{fmt(analysis.dailyAvg)}</p>
                   <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: '#94a3b8' }}>{analysis.daysRemaining} días restantes</p>
                 </div>
-                <div style={{ marginTop: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CalendarDays style={{ width: 16, height: 16, color: '#6366f1' }} />
-                  </div>
-                </div>
+
               </div>
             
               {/* Aporte tienda */}
@@ -664,15 +645,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Store style={{ width: 16, height: 16, color: '#6366f1' }} />
-                  </div>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <ArrowUpRight style={{ width: 11, height: 11 }} />
-                    0.6pp
-                  </span>
-                </div>
+
               </div>
             </div>
 
