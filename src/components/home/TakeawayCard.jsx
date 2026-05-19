@@ -50,13 +50,13 @@ function StatCard({ label, value, sub, subColor, highlight, last }) {
       position: 'relative',
       boxShadow: highlight ? `0 2px 12px rgba(194,24,117,0.08)` : '0 1px 4px rgba(0,0,0,0.04)'
     }}>
-      {highlight &&
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-        background: `linear-gradient(90deg, ${PINK}, rgba(194,24,117,0.3))`,
-        borderRadius: '0 0 2px 2px'
-      }} className="hidden" />
-      }
+      
+
+
+
+
+
+      
       <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
       <p style={{
         fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1,
@@ -538,8 +538,8 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                   position: 'relative',
                   boxShadow: `0 2px 10px ${color}15`
                 }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-                    background: `linear-gradient(90deg, ${color}, ${color}40)`, borderRadius: '12px 12px 0 0' }} className="hidden" />
+                    
+                  
                     <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
                     <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1,
                     fontFamily: 'Inter Tight, sans-serif', color }}>
