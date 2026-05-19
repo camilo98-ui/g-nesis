@@ -145,18 +145,18 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
     const coords = pts.map((v, i) => [i / (pts.length - 1) * W, H - v / max * (H - 6) - 3]);
     const d = coords.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
     const areaD = `${d} L${W},${H} L0,${H} Z`;
-    return (
-      <svg viewBox={`0 0 ${W} ${H}`} fill="none" style={{ width: 56, height: 20, flexShrink: 0 }} className="hidden">
-        <defs>
-          <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={PINK} stopOpacity="0.18" />
-            <stop offset="100%" stopColor={PINK} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={areaD} fill="url(#sparkFill)" />
-        <path d={d} stroke={PINK} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        {coords[coords.length - 1] && <circle cx={coords[coords.length - 1][0]} cy={coords[coords.length - 1][1]} r="2" fill={PINK} />}
-      </svg>);
+    return null;
+
+
+
+
+
+
+
+
+
+
+
 
   };
 
