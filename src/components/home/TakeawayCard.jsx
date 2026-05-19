@@ -73,7 +73,7 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
   const [hovered, setHovered] = useState(null);
   const svgRef = useRef(null);
 
-  const W = 580,H = 200;
+  const W = 580,H = 140;
   const PAD_L = 48,PAD_R = 46,PAD_T = 20,PAD_B = 28;
   const chartW = W - PAD_L - PAD_R;
   const chartH = H - PAD_T - PAD_B;
