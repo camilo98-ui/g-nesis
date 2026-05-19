@@ -76,40 +76,52 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const salesValue = parseFloat(data.total_sales) || 0;
-      const ticketsValue = parseInt(data.total_tickets) || 0;
-      const transactionsValue = parseInt(data.total_transactions) || 0;
-      const suggestedValue = parseInt(data.total_suggested) || 0;
-      
-      const recordData = {
-        store_id: storeId,
-        date: data.date,
-        total_sales: salesValue,
-        total_tickets: ticketsValue,
-        total_transactions: transactionsValue,
-        total_suggested: suggestedValue,
-        total_takeaway: parseFloat(data.total_takeaway) || 0
-      };
-      
-      let record;
-      let action = 'create';
-      if (editingRecord) {
-        // Actualizar registro existente
-        record = await base44.entities.DailySales.update(editingRecord.id, recordData);
-        action = 'update';
-      } else {
-        // Verificar si ya existe registro para esa fecha
+      // Buscar si ya existe un registro para esa fecha (para no pisar el otro tab)
+      let existingRecord = editingRecord;
+      if (!existingRecord) {
         const existing = await base44.entities.DailySales.filter({ 
           store_id: storeId, 
           date: data.date 
         });
-        
-        if (existing.length > 0) {
-          record = await base44.entities.DailySales.update(existing[0].id, recordData);
-          action = 'update';
-        } else {
-          record = await base44.entities.DailySales.create(recordData);
-        }
+        if (existing.length > 0) existingRecord = existing[0];
+      }
+
+      // Construir los datos según el tab activo, preservando el otro campo
+      let recordData;
+      if (data.activeTab === 'llevar') {
+        // Solo actualizar total_takeaway, preservar ventas existentes
+        recordData = {
+          store_id: storeId,
+          date: data.date,
+          total_sales: existingRecord?.total_sales ?? 0,
+          total_tickets: existingRecord?.total_tickets ?? 0,
+          total_transactions: existingRecord?.total_transactions ?? 0,
+          total_suggested: existingRecord?.total_suggested ?? 0,
+          total_takeaway: parseFloat(data.total_takeaway) || 0
+        };
+      } else {
+        // Solo actualizar ventas, preservar total_takeaway existente
+        recordData = {
+          store_id: storeId,
+          date: data.date,
+          total_sales: parseFloat(data.total_sales) || 0,
+          total_tickets: parseInt(data.total_tickets) || 0,
+          total_transactions: parseInt(data.total_transactions) || 0,
+          total_suggested: parseInt(data.total_suggested) || 0,
+          total_takeaway: existingRecord?.total_takeaway ?? 0
+        };
+      }
+
+      const salesValue = recordData.total_sales;
+      const transactionsValue = recordData.total_transactions;
+
+      let record;
+      let action = 'create';
+      if (existingRecord) {
+        record = await base44.entities.DailySales.update(existingRecord.id, recordData);
+        action = 'update';
+      } else {
+        record = await base44.entities.DailySales.create(recordData);
       }
       
       // Crear log sin requerir autenticación
@@ -187,7 +199,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       return;
     }
     
-    createMutation.mutate(formData);
+    createMutation.mutate({ ...formData, activeTab });
   };
 
   const handleEdit = (record) => {
