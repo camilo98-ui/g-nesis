@@ -350,115 +350,57 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+            transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
             style={{ borderTop: `1px solid ${PINK_SOFT}`, overflow: 'hidden' }}
           >
-            <div className="px-4 pt-4 pb-5" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-              {/* ── KPI CARDS ── */}
-              <div className="grid grid-cols-3 gap-2">
-                {/* Real */}
-                <div style={{ borderRadius: 14, padding: '10px 12px', background: PINK_SOFT, border: `1px solid ${PINK_MID}` }}>
-                  <p style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
-                    Venta Real
-                  </p>
-                  <p style={{ fontSize: 16, fontWeight: 800, color: '#1e293b', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
-                    {fmt(analysis.totalSold)}
-                  </p>
-                  {compliance != null && (
-                    <p style={{ fontSize: 8, color: PINK, marginTop: 3, fontWeight: 600 }}>
-                      {compliance.toFixed(1)}% del PPT
-                    </p>
-                  )}
+            {/* ── STAT ROW: 4 métricas clave de un vistazo ── */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', borderBottom: `1px solid ${PINK_SOFT}` }}>
+              {[
+                { label: 'Vendido', value: fmt(analysis.totalSold), sub: compliance != null ? `${compliance.toFixed(0)}% PPT` : `${analysis.daysWithData}d`, color: '#1e293b', subColor: PINK },
+                { label: 'Proyección', value: fmt(analysis.projection), sub: projCompliance != null ? `${projCompliance.toFixed(0)}% PPT` : `al cierre`, color: PINK, subColor: isOnTrack ? '#10b981' : '#f59e0b' },
+                { label: 'Promedio/día', value: fmt(analysis.dailyAvg), sub: analysis.dailyNeeded != null ? `meta ${fmt(analysis.dailyNeeded)}` : `${analysis.daysRemaining}d restantes`, color: '#374151', subColor: '#94a3b8' },
+                { label: 'Aporte tienda', value: analysis.storeContribution != null ? `${analysis.storeContribution.toFixed(1)}%` : '—', sub: analysis.storeContribProjected != null ? `proy. ${analysis.storeContribProjected.toFixed(1)}%` : 'del PPT tienda', color: '#7c3aed', subColor: '#94a3b8' },
+              ].map((s, i) => (
+                <div key={i} style={{ padding: '10px 12px', borderRight: i < 3 ? `1px solid ${PINK_SOFT}` : 'none' }}>
+                  <p style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 3 }}>{s.label}</p>
+                  <p style={{ fontSize: 14, fontWeight: 800, color: s.color, letterSpacing: '-0.02em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>{s.value}</p>
+                  <p style={{ fontSize: 8, fontWeight: 600, color: s.subColor, marginTop: 3 }}>{s.sub}</p>
                 </div>
+              ))}
+            </div>
 
-                {/* Proyección */}
-                <div style={{ borderRadius: 14, padding: '10px 12px', background: '#fafafa', border: '1px solid rgba(0,0,0,0.07)' }}>
-                  <p style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
-                    Proy. Cierre
-                  </p>
-                  <p style={{ fontSize: 16, fontWeight: 800, color: PINK, letterSpacing: '-0.02em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
-                    {fmt(analysis.projection)}
-                  </p>
-                  {projCompliance != null && (
-                    <p style={{ fontSize: 8, color: '#64748b', marginTop: 3, fontWeight: 600 }}>
-                      {projCompliance.toFixed(1)}% del PPT
-                    </p>
-                  )}
-                </div>
-
-                {/* Aporte al PPT tienda */}
-                <div style={{ borderRadius: 14, padding: '10px 12px', background: '#fafafa', border: '1px solid rgba(0,0,0,0.07)' }}>
-                  <p style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>
-                    Aporte PPT Tienda
-                  </p>
-                  {analysis.storeContribution != null ? (
-                    <>
-                      <p style={{ fontSize: 16, fontWeight: 800, color: '#7c3aed', letterSpacing: '-0.02em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
-                        {analysis.storeContribution.toFixed(1)}%
-                      </p>
-                      {analysis.storeContribProjected != null && (
-                        <p style={{ fontSize: 8, color: '#94a3b8', marginTop: 3, fontWeight: 600 }}>
-                          proy. {analysis.storeContribProjected.toFixed(1)}%
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p style={{ fontSize: 9, color: '#cbd5e1', fontWeight: 500, marginTop: 4 }}>Sin PPT tienda</p>
-                  )}
-                </div>
-              </div>
-
-              {/* ── CHART ── */}
-              <div style={{
-                borderRadius: 16, padding: '14px 14px 8px',
-                background: 'linear-gradient(145deg, #fff5f9 0%, #fdf2f8 100%)',
-                border: `1px solid ${PINK_MID}`,
-              }}>
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8' }}>
-                      Comportamiento diario
-                    </p>
-                    <p style={{ fontSize: 9, color: '#cbd5e1', fontWeight: 500, marginTop: 1 }}>
-                      Venta de producto para llevar — {format(new Date(), 'MMMM yyyy')}
-                    </p>
-                  </div>
-                  {analysis.bestDay && (
-                    <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontSize: 7, color: '#94a3b8', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Mejor día</p>
-                      <p style={{ fontSize: 9, fontWeight: 700, color: PINK }}>
-                        {fmt(analysis.bestDay.total_takeaway)} · {parseInt(analysis.bestDay.date.split('-')[2])}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                <BarChart />
-              </div>
-
-              {/* ── INSIGHT ── */}
-              <div style={{
-                borderRadius: 12, padding: '9px 12px',
-                background: isOnTrack === false
-                  ? 'rgba(245,158,11,0.05)'
-                  : isOnTrack === true
-                    ? 'rgba(16,185,129,0.05)'
-                    : PINK_SOFT,
-                border: `1px solid ${isOnTrack === false ? 'rgba(245,158,11,0.14)' : isOnTrack === true ? 'rgba(16,185,129,0.14)' : PINK_MID}`,
-              }}>
-                <p style={{ fontSize: 9.5, fontWeight: 600, lineHeight: 1.55, color: '#374151' }}>
-                  {budget === 0
-                    ? `📦 Llevas ${fmt(analysis.totalSold)} real. Proyección al cierre: ${fmt(analysis.projection)}.${analysis.storeContribution != null ? ` Aportas el ${analysis.storeContribution.toFixed(1)}% del PPT de la tienda.` : ''}`
-                    : compliance == null
-                      ? '📦 Registra ventas de llevar para ver el análisis.'
-                      : compliance >= 100
-                        ? `🚀 ¡Ya superaste el PPT! (${compliance.toFixed(0)}%). Proyección cierre: ${fmt(analysis.projection)} (${projCompliance?.toFixed(0)}%).`
-                        : isOnTrack
-                          ? `✅ Vas bien. ${compliance.toFixed(0)}% real, proyección ${projCompliance?.toFixed(0)}% del PPT. Meta diaria: ${fmt(analysis.dailyNeeded ?? 0)}/día.`
-                          : `⚠️ Ritmo bajo. Necesitas ${fmt(analysis.dailyNeeded ?? 0)}/día. Proyección: ${projCompliance?.toFixed(0)}% del PPT.`
-                  }
+            {/* ── CHART ── */}
+            <div style={{ padding: '12px 14px 10px', background: 'linear-gradient(180deg, #fff8fb 0%, #ffffff 100%)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8' }}>
+                  Venta diaria — {format(new Date(), 'MMMM yyyy')}
                 </p>
+                {analysis.bestDay && (
+                  <p style={{ fontSize: 8, fontWeight: 700, color: PINK }}>
+                    🏆 mejor: {fmt(analysis.bestDay.total_takeaway)} · día {parseInt(analysis.bestDay.date.split('-')[2])}
+                  </p>
+                )}
               </div>
+              <BarChart />
+            </div>
+
+            {/* ── INSIGHT STRIP ── */}
+            <div style={{
+              margin: '0 12px 12px',
+              borderRadius: 10, padding: '8px 11px',
+              background: isOnTrack === false ? 'rgba(245,158,11,0.06)' : isOnTrack === true ? 'rgba(16,185,129,0.06)' : PINK_SOFT,
+              border: `1px solid ${isOnTrack === false ? 'rgba(245,158,11,0.15)' : isOnTrack === true ? 'rgba(16,185,129,0.15)' : PINK_MID}`,
+            }}>
+              <p style={{ fontSize: 9.5, fontWeight: 600, lineHeight: 1.5, color: '#374151' }}>
+                {budget === 0
+                  ? `📦 ${fmt(analysis.totalSold)} vendido · proy. ${fmt(analysis.projection)}${analysis.storeContribution != null ? ` · aporta ${analysis.storeContribution.toFixed(1)}% al PPT tienda` : ''}`
+                  : compliance >= 100
+                    ? `🚀 ¡PPT superado! ${compliance.toFixed(0)}% real · proy. ${fmt(analysis.projection)}`
+                    : isOnTrack
+                      ? `✅ En ritmo. ${compliance?.toFixed(0)}% real · proy. ${projCompliance?.toFixed(0)}% · necesitas ${fmt(analysis.dailyNeeded ?? 0)}/día`
+                      : `⚠️ Ritmo bajo · necesitas ${fmt(analysis.dailyNeeded ?? 0)}/día · proy. ${projCompliance?.toFixed(0)}% del PPT`
+                }
+              </p>
             </div>
           </motion.div>
         )}
