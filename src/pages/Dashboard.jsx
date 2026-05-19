@@ -55,10 +55,67 @@ function PremiumMetricCard({ title, value, budget, icon: Icon, color, onClick, i
     }).format(val);
   };
 
-  return null;
+  return (
+    <motion.div
+      whileHover={{ y: -2, transition: { duration: 0.18 } }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`relative rounded-2xl p-4 cursor-pointer overflow-hidden transition-all ${isActive ? 'ring-2' : ''}`}
+      style={{
+        background: 'rgba(255,255,255,0.92)',
+        backdropFilter: 'blur(40px)',
+        border: `1px solid ${color}20`,
+        boxShadow: isActive
+          ? `0 8px 32px ${color}25, 0 0 0 2px ${color}40`
+          : `0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)`,
+        ringColor: color
+      }}>
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
+        style={{ background: `linear-gradient(90deg, ${color}, ${color}40, transparent)` }} />
 
+      {/* Icon + change */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+          style={{ background: `${color}12` }}>
+          <Icon style={{ color, width: 15, height: 15 }} />
+        </div>
+        {budget > 0 && (
+          <span className="text-[10px] font-bold tabular-nums"
+            style={{ color: value >= budget ? '#10b981' : '#f59e0b' }}>
+            {(value / budget * 100).toFixed(0)}%
+          </span>
+        )}
+      </div>
 
+      {/* Value */}
+      <p className="text-[22px] font-black leading-none tracking-tight mb-0.5 tabular-nums"
+        style={{ color, letterSpacing: '-0.03em' }}>
+        {title === 'Transacciones' || title === 'Sugeridos'
+          ? value.toLocaleString('es-CO')
+          : formatValue(value)}
+      </p>
+      <p className="text-[11px] font-medium text-slate-400 mb-2">{title}</p>
 
+      {/* Budget bar */}
+      {budget > 0 && (
+        <div className="w-full h-1 rounded-full bg-slate-100">
+          <div className="h-1 rounded-full transition-all"
+            style={{
+              width: `${Math.min(value / budget * 100, 100)}%`,
+              background: value >= budget ? '#10b981' : color
+            }} />
+        </div>
+      )}
+
+      {/* Comparison */}
+      {showComparison && comparisonValue != null && comparisonValue > 0 && (
+        <div className={`flex items-center gap-1 mt-2 text-[10px] font-semibold ${isChangePositive ? 'text-emerald-500' : 'text-rose-400'}`}>
+          {isChangePositive ? '▲' : '▼'} {Math.abs(change).toFixed(1)}% vs anterior
+        </div>
+      )}
+    </motion.div>
+  );
 
 
 
