@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, ChevronDown, ChevronUp, Pencil, Check, X, TrendingUp, TrendingDown } from 'lucide-react';
+import { ShoppingBag, ChevronDown, ChevronUp, Pencil, Check, X, TrendingUp, Target, TrendingDown, CalendarDays, Store, ArrowUpRight } from 'lucide-react';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -454,8 +454,8 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
           </div>
         </div>
 
-        {/* Bottom row: two KPI blocks side by side */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', gap: 0, alignItems: 'center' }}>
+        {/* Bottom row: Real + Progress Bar + Proyección */}
+        <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr 200px', gap: 0, alignItems: 'center' }}>
           {/* Real acumulado */}
           <div>
             <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
@@ -465,14 +465,56 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               {fmt(analysis.totalSold)}
             </p>
           </div>
-          {/* Vertical divider */}
-          <div style={{ width: 1, height: 48, background: PINK_SOFT, margin: '0 20px' }} />
+
+          {/* Progress Bar Central */}
+          <div style={{ padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            {/* Percentage label */}
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#374151' }}>
+              <span style={{ fontSize: 15, fontWeight: 900, color: '#1e293b' }}>
+                {budget > 0 ? `${Math.round((analysis.totalSold / budget) * 100)}%` : '—'}
+              </span>
+              <span style={{ color: '#94a3b8', fontWeight: 500, marginLeft: 4 }}>del objetivo</span>
+            </div>
+            {/* Track */}
+            <div style={{ width: '100%', height: 8, borderRadius: 99, background: 'rgba(194,24,117,0.12)', position: 'relative', overflow: 'visible' }}>
+              {budget > 0 && (() => {
+                const pct = Math.min((analysis.totalSold / budget) * 100, 100);
+                return (
+                  <>
+                    <div style={{
+                      position: 'absolute', left: 0, top: 0, height: '100%',
+                      width: `${pct}%`, borderRadius: 99,
+                      background: `linear-gradient(90deg, ${PINK} 0%, rgba(194,24,117,0.7) 100%)`,
+                      transition: 'width 0.6s cubic-bezier(0.23,1,0.32,1)'
+                    }} />
+                    {/* Dot at end of progress */}
+                    <div style={{
+                      position: 'absolute', top: '50%', left: `${pct}%`,
+                      transform: 'translate(-50%, -50%)',
+                      width: 14, height: 14, borderRadius: '50%',
+                      background: PINK, border: '2.5px solid white',
+                      boxShadow: `0 0 6px ${PINK}66`
+                    }} />
+                  </>
+                );
+              })()}
+            </div>
+            {/* Gap label */}
+            <p style={{ fontSize: 9.5, color: '#94a3b8', fontWeight: 500 }}>
+              {budget > 0
+                ? analysis.totalSold >= budget
+                  ? '¡Meta superada! 🎉'
+                  : `Faltan ${fmt(budget - analysis.totalSold)} para la meta`
+                : 'Agrega PPT para ver progreso'}
+            </p>
+          </div>
+
           {/* Proyección */}
-          <div>
+          <div style={{ textAlign: 'right' }}>
             <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
               Proyección de Cierre
             </p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'flex-end' }}>
               <p style={{ fontSize: 34, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
                 {fmt(analysis.projection)}
               </p>
@@ -536,56 +578,100 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                   border: `1.5px solid ${color}40`,
                   background: `${color}06`,
                   position: 'relative',
-                  boxShadow: `0 2px 10px ${color}15`
+                  boxShadow: `0 2px 10px ${color}15`,
+                  display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 110
                 }}>
-                    
-                  
-                    <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
-                    <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1,
-                    fontFamily: 'Inter Tight, sans-serif', color }}>
-                      {smartPPT != null ? fmt(Math.round(smartPPT)) : '—'}
-                    </p>
-                    <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: '#94a3b8' }}>{sub}</p>
+                    <div>
+                      <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
+                      <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1,
+                      fontFamily: 'Inter Tight, sans-serif', color }}>
+                        {smartPPT != null ? fmt(Math.round(smartPPT)) : '—'}
+                      </p>
+                      <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: '#94a3b8' }}>{sub}</p>
+                    </div>
+                    <div style={{ marginTop: 10 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: 9, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Target style={{ width: 16, height: 16, color }} />
+                      </div>
+                    </div>
                   </div>);
 
             })()}
             
-              <StatCard
-              label="Proyección de Cierre"
-              value={fmt(analysis.projection)}
-              sub="al cierre del mes"
-              subColor={PINK}
-              highlight />
-            
-              <StatCard
-              label="Promedio por Día"
-              value={fmt(analysis.dailyAvg)}
-              sub={`${analysis.daysRemaining} días restantes`} />
+              {/* Proyección de cierre card con ícono y badge */}
+              <div style={{
+                flex: 1, padding: '14px 18px', margin: '10px 6px', borderRadius: 12,
+                border: `1.5px solid rgba(194,24,117,0.3)`, background: 'rgba(194,24,117,0.04)',
+                boxShadow: '0 2px 12px rgba(194,24,117,0.08)', display: 'flex', flexDirection: 'column',
+                justifyContent: 'space-between', minHeight: 110
+              }}>
+                <div>
+                  <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Proyección de Cierre</p>
+                  <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: PINK }}>{fmt(analysis.projection)}</p>
+                  <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: PINK }}>al cierre del mes</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(194,24,117,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TrendingUp style={{ width: 16, height: 16, color: PINK }} />
+                  </div>
+                  {analysis.projCompliance != null &&
+                    <span style={{ fontSize: 9, fontWeight: 800, color: analysis.projCompliance >= 100 ? '#10b981' : PINK,
+                      background: analysis.projCompliance >= 100 ? 'rgba(16,185,129,0.1)' : 'rgba(194,24,117,0.1)',
+                      padding: '3px 8px', borderRadius: 99 }}>
+                      {analysis.projCompliance.toFixed(0)}% PPT
+                    </span>
+                  }
+                </div>
+              </div>
+
+              {/* Promedio por día card con ícono */}
+              <div style={{
+                flex: 1, padding: '14px 18px', margin: '10px 6px', borderRadius: 12,
+                border: `1.5px solid ${PINK_MID}`, background: '#ffffff',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column',
+                justifyContent: 'space-between', minHeight: 110
+              }}>
+                <div>
+                  <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Promedio por Día</p>
+                  <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: '#1e293b' }}>{fmt(analysis.dailyAvg)}</p>
+                  <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: '#94a3b8' }}>{analysis.daysRemaining} días restantes</p>
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CalendarDays style={{ width: 16, height: 16, color: '#6366f1' }} />
+                  </div>
+                </div>
+              </div>
             
               {/* Aporte tienda */}
               <div style={{
-              padding: '14px 18px',
-              margin: '10px 6px',
-              borderRadius: 12,
-              border: `1.5px solid ${PINK_MID}`,
-              display: 'flex', alignItems: 'center', gap: 14,
-              minWidth: 180,
-              background: '#ffffff',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
-            }}>
-                {analysis.storeContribution != null &&
-              <ArcRing pct={analysis.storeContribution} />
-              }
+                padding: '14px 18px', margin: '10px 6px', borderRadius: 12,
+                border: `1.5px solid ${PINK_MID}`, minWidth: 160, background: '#ffffff',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column',
+                justifyContent: 'space-between', minHeight: 110
+              }}>
                 <div>
-                  <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
-                    Aporte Tienda
-                  </p>
-                  <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 500 }}>al PPT total</p>
-                  {analysis.storeContribProjected != null &&
-                <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginTop: 2 }}>
-                      Prom. tiendas: {analysis.storeContribProjected.toFixed(1)}%
-                    </p>
-                }
+                  <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Aporte Tienda</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {analysis.storeContribution != null && <ArcRing pct={analysis.storeContribution} size={52} />}
+                    <div>
+                      <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 500 }}>al PPT total</p>
+                      {analysis.storeContribProjected != null &&
+                        <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginTop: 2 }}>
+                          Prom. tiendas: {analysis.storeContribProjected.toFixed(1)}%
+                        </p>
+                      }
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Store style={{ width: 16, height: 16, color: '#6366f1' }} />
+                  </div>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <ArrowUpRight style={{ width: 11, height: 11 }} />
+                    0.6pp
+                  </span>
                 </div>
               </div>
             </div>
