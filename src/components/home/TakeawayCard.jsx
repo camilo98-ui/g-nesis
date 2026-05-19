@@ -55,7 +55,7 @@ function StatCard({ label, value, sub, subColor, highlight, last }) {
         position: 'absolute', top: 0, left: 0, right: 0, height: 2,
         background: `linear-gradient(90deg, ${PINK}, rgba(194,24,117,0.3))`,
         borderRadius: '0 0 2px 2px'
-      }} />
+      }} className="hidden" />
       }
       <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
       <p style={{
@@ -477,7 +477,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                 {fmt(analysis.projection)}
               </p>
               {analysis.projCompliance != null &&
-                <span style={{ fontSize: 13, fontWeight: 800, color: analysis.projCompliance >= 100 ? '#10b981' : PINK, fontFamily: 'Inter Tight, sans-serif' }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: analysis.projCompliance >= 100 ? '#10b981' : PINK, fontFamily: 'Inter Tight, sans-serif' }}>
                   {analysis.projCompliance.toFixed(0)}% PPT
                 </span>
               }
@@ -502,53 +502,53 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             display: 'flex',
             flexWrap: 'wrap',
             padding: '0 4px',
-            background: 'linear-gradient(180deg, #fdfcff 0%, #ffffff 100%)',
+            background: 'linear-gradient(180deg, #fdfcff 0%, #ffffff 100%)'
           }}>
               {/* PPT diario recomendado */}
               {(() => {
-                const { totalSold, dailyAvg, daysRemaining, daysInMonth, dayOfMonth, projCompliance } = analysis;
-                // Si voy bien (proyección >= 100% del PPT), sugiero incremento del 5%
-                // Si voy mal, calculo lo necesario para cerrar al 100%
-                let smartPPT, label, color, sub;
-                if (budget <= 0) {
-                  smartPPT = dailyAvg > 0 ? dailyAvg * 1.05 : null;
-                  label = 'Meta Diaria Sugerida';
-                  color = PINK;
-                  sub = 'Sin PPT definido';
-                } else if (projCompliance != null && projCompliance >= 100) {
-                  // Voy bien — sugiero mantener ritmo con +5%
-                  smartPPT = dailyAvg * 1.05;
-                  label = 'Meta Diaria Hoy';
-                  color = '#10b981';
-                  sub = `Proy. ${projCompliance.toFixed(0)}% PPT · sigue fuerte 🚀`;
-                } else {
-                  // Voy mal — calculo diario para cerrar al 102%
-                  const target = budget * 1.02;
-                  smartPPT = daysRemaining > 0 ? Math.max((target - totalSold) / daysRemaining, dailyAvg) : dailyAvg;
-                  label = 'Meta Diaria Hoy';
-                  color = '#0ea5a0';
-                  sub = `Para cerrar al 102% del PPT`;
-                }
-                return (
-                  <div style={{
-                    flex: 1, padding: '14px 18px', margin: '10px 6px',
-                    borderRadius: 12,
-                    border: `1.5px solid ${color}40`,
-                    background: `${color}06`,
-                    position: 'relative',
-                    boxShadow: `0 2px 10px ${color}15`
-                  }}>
+              const { totalSold, dailyAvg, daysRemaining, daysInMonth, dayOfMonth, projCompliance } = analysis;
+              // Si voy bien (proyección >= 100% del PPT), sugiero incremento del 5%
+              // Si voy mal, calculo lo necesario para cerrar al 100%
+              let smartPPT, label, color, sub;
+              if (budget <= 0) {
+                smartPPT = dailyAvg > 0 ? dailyAvg * 1.05 : null;
+                label = 'Meta Diaria Sugerida';
+                color = PINK;
+                sub = 'Sin PPT definido';
+              } else if (projCompliance != null && projCompliance >= 100) {
+                // Voy bien — sugiero mantener ritmo con +5%
+                smartPPT = dailyAvg * 1.05;
+                label = 'Meta Diaria Hoy';
+                color = '#10b981';
+                sub = `Proy. ${projCompliance.toFixed(0)}% PPT · sigue fuerte 🚀`;
+              } else {
+                // Voy mal — calculo diario para cerrar al 102%
+                const target = budget * 1.02;
+                smartPPT = daysRemaining > 0 ? Math.max((target - totalSold) / daysRemaining, dailyAvg) : dailyAvg;
+                label = 'Meta Diaria Hoy';
+                color = '#f59e0b';
+                sub = `Para cerrar al 102% del PPT`;
+              }
+              return (
+                <div style={{
+                  flex: 1, padding: '14px 18px', margin: '10px 6px',
+                  borderRadius: 12,
+                  border: `1.5px solid ${color}40`,
+                  background: `${color}06`,
+                  position: 'relative',
+                  boxShadow: `0 2px 10px ${color}15`
+                }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-                      background: `linear-gradient(90deg, ${color}, ${color}40)`, borderRadius: '12px 12px 0 0' }} />
+                    background: `linear-gradient(90deg, ${color}, ${color}40)`, borderRadius: '12px 12px 0 0' }} className="hidden" />
                     <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
                     <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1,
-                      fontFamily: 'Inter Tight, sans-serif', color }}>
+                    fontFamily: 'Inter Tight, sans-serif', color }}>
                       {smartPPT != null ? fmt(Math.round(smartPPT)) : '—'}
                     </p>
                     <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: '#94a3b8' }}>{sub}</p>
-                  </div>
-                );
-              })()}
+                  </div>);
+
+            })()}
             
               <StatCard
               label="Proyección de Cierre"
@@ -574,18 +574,18 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
             }}>
                 {analysis.storeContribution != null &&
-                  <ArcRing pct={analysis.storeContribution} />
-                }
+              <ArcRing pct={analysis.storeContribution} />
+              }
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
                     Aporte Tienda
                   </p>
                   <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 500 }}>al PPT total</p>
                   {analysis.storeContribProjected != null &&
-                    <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginTop: 2 }}>
+                <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginTop: 2 }}>
                       Prom. tiendas: {analysis.storeContribProjected.toFixed(1)}%
                     </p>
-                  }
+                }
                 </div>
               </div>
             </div>
