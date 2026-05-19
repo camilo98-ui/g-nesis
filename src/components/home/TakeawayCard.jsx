@@ -242,7 +242,9 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
         </div>
 
         <SparkLine />
-        <ArcRing pct={compliance} />
+        {(compliance != null || projCompliance != null) && (
+          <ArcRing pct={compliance ?? projCompliance} />
+        )}
 
         <div style={{ color: '#cbd5e1', flexShrink: 0 }}>
           {expanded ? <ChevronUp style={{ width: 14, height: 14 }} /> : <ChevronDown style={{ width: 14, height: 14 }} />}
