@@ -43,9 +43,12 @@ function StatCard({ label, value, sub, subColor, highlight, last }) {
     <div style={{
       flex: 1,
       padding: '14px 18px',
-      borderRight: last ? 'none' : `1px solid ${PINK_MID}`,
+      margin: '10px 6px',
+      borderRadius: 12,
+      border: `1.5px solid ${highlight ? 'rgba(194,24,117,0.3)' : PINK_MID}`,
       background: highlight ? 'rgba(194,24,117,0.04)' : '#ffffff',
-      position: 'relative'
+      position: 'relative',
+      boxShadow: highlight ? `0 2px 12px rgba(194,24,117,0.08)` : '0 1px 4px rgba(0,0,0,0.04)'
     }}>
       {highlight &&
       <div style={{
@@ -494,10 +497,9 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             {/* ── 4 KPI ROW ── */}
             <div style={{
             display: 'flex',
-            borderBottom: `1px solid ${PINK_MID}`,
-            borderTop: `1px solid ${PINK_SOFT}`,
+            flexWrap: 'wrap',
+            padding: '0 4px',
             background: 'linear-gradient(180deg, #fdfcff 0%, #ffffff 100%)',
-            boxShadow: `inset 0 -1px 0 ${PINK_SOFT}`
           }}>
               <StatCard
               label="Vendido Acumulado"
@@ -519,10 +521,13 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               {/* Aporte tienda */}
               <div style={{
               padding: '14px 18px',
+              margin: '10px 6px',
+              borderRadius: 12,
+              border: `1.5px solid ${PINK_MID}`,
               display: 'flex', alignItems: 'center', gap: 12,
               minWidth: 180,
-              borderLeft: `1px solid ${PINK_MID}`,
-              background: '#ffffff'
+              background: '#ffffff',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
             }}>
                 {analysis.storeContribution != null &&
               <ArcRing pct={Math.min(analysis.storeContribution * 13, 100)} />
