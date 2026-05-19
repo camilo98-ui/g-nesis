@@ -399,7 +399,9 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
         borderRadius: '12px 12px 0 0' }} />
 
       {/* ── HERO HEADER ── */}
-      <div style={{ padding: '18px 20px 16px', borderBottom: `1px solid ${PINK_SOFT}` }}>
+      <div 
+        onClick={() => setExpanded((e) => !e)}
+        style={{ padding: '18px 20px 16px', borderBottom: `1px solid ${PINK_SOFT}`, cursor: 'pointer', userSelect: 'none' }}>
         {/* Top row: title + controls */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -446,7 +448,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                 <Pencil style={{ width: 9, height: 9 }} />
               </button>
             }
-            <button onClick={() => setExpanded((e) => !e)} style={{ color: '#cbd5e1', cursor: 'pointer', padding: 2 }}>
+            <button onClick={(e) => {e.stopPropagation(); setExpanded((e) => !e);}} style={{ color: '#cbd5e1', cursor: 'pointer', padding: 2 }}>
               {expanded ? <ChevronUp style={{ width: 16, height: 16 }} /> : <ChevronDown style={{ width: 16, height: 16 }} />}
             </button>
           </div>
