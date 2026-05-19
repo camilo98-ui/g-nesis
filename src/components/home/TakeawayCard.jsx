@@ -66,7 +66,7 @@ function StatCard({ label, value, sub, subColor, highlight, last }) {
 }
 
 // ── Main Chart ──
-function RichBarChart({ pts, dailyAvg, budget, daysInMonth }) {
+function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
   const [hovered, setHovered] = useState(null);
   const svgRef = useRef(null);
 
@@ -94,7 +94,9 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth }) {
   }
 
   const metaDaily = budget > 0 ? budget / daysInMonth : null;
-  const topVal = Math.max(...pts.map(p => p.value), metaDaily || 0, dailyAvg || 0, 1);
+  // When no budget, show projection-per-day as reference line (green)
+  const projDaily = (!budget || budget === 0) && projection > 0 ? projection / daysInMonth : null;
+  const topVal = Math.max(...pts.map(p => p.value), metaDaily || 0, projDaily || 0, dailyAvg || 0, 1);
   const maxVal = topVal * 1.15;
 
   const xOf = (i) => PAD_L + (i + 0.5) / pts.length * chartW;
@@ -174,6 +176,22 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth }) {
               <text x={W - PAD_R + 17} y={my + 3.5} textAnchor="middle"
                 style={{ fontSize: 7.5, fill: '#10b981', fontWeight: 800, fontFamily: 'Inter Tight, sans-serif' }}>
                 META
+              </text>
+            </>
+          );
+        })()}
+
+        {/* PROJ line — green dashed (when no budget) */}
+        {projDaily != null && projDaily > 0 && (() => {
+          const py = yOf(projDaily);
+          return (
+            <>
+              <line x1={PAD_L} y1={py} x2={W - PAD_R} y2={py}
+                stroke="#10b981" strokeWidth="1.5" strokeDasharray="6 4" strokeOpacity="0.75" />
+              <rect x={W - PAD_R + 2} y={py - 7} width={34} height={12} rx="3" fill="rgba(16,185,129,0.12)" />
+              <text x={W - PAD_R + 19} y={py + 3.5} textAnchor="middle"
+                style={{ fontSize: 7.5, fill: '#10b981', fontWeight: 800, fontFamily: 'Inter Tight, sans-serif' }}>
+                PROY
               </text>
             </>
           );
@@ -320,6 +338,12 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
     const projCompliance = budget > 0 ? projection / budget * 100 : null;
     const trendVsProj = projCompliance != null ? projCompliance - 100 : null;
 
+    // Progress through month (how much of month has elapsed)
+    const monthProgress = dayOfMonth / daysInMonth * 100;
+    // Expected sold by now if on track to meet projection
+    const expectedByNow = projection * (dayOfMonth / daysInMonth);
+    const paceVsProjection = totalSold > 0 ? totalSold / expectedByNow * 100 : null;
+
     const storeContribution = storeBudget > 0 ? totalSold / storeBudget * 100 : null;
     const storeContribProjected = storeBudget > 0 ? projection / storeBudget * 100 : null;
 
@@ -344,7 +368,8 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
       compliance, projCompliance, trendVsProj,
       chartData, bestDay, dailyNeeded,
       daysRemaining, daysInMonth, dayOfMonth,
-      storeContribution, storeContribProjected, isOnTrack
+      storeContribution, storeContribProjected, isOnTrack,
+      paceVsProjection, monthProgress
     };
   }, [dailySales, budget, storeBudget]);
 
@@ -401,19 +426,34 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
         <div style={{ width: 1, height: 64, background: PINK_SOFT, flexShrink: 0, alignSelf: 'center' }} />
 
         {/* Projection block — right next to big number */}
-        <div style={{ minWidth: 110 }}>
+        <div style={{ minWidth: 130 }}>
           <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.13em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
             Proyección de Cierre
           </p>
-          <p style={{ fontSize: 26, fontWeight: 900, color: PINK, letterSpacing: '-0.035em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
-            {fmt(analysis.projection)}
-          </p>
-          <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 500, marginTop: 4 }}>al cierre del mes</p>
-          {analysis.projCompliance != null && (
-            <p style={{ fontSize: 9, color: PINK, fontWeight: 700, marginTop: 3 }}>
-              {analysis.projCompliance.toFixed(0)}% del PPT
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+            <p style={{ fontSize: 26, fontWeight: 900, color: PINK, letterSpacing: '-0.035em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
+              {fmt(analysis.projection)}
             </p>
-          )}
+            {analysis.projCompliance != null ? (
+              <span style={{
+                fontSize: 13, fontWeight: 900, color: analysis.projCompliance >= 100 ? '#10b981' : PINK,
+                fontFamily: 'Inter Tight, sans-serif', letterSpacing: '-0.02em'
+              }}>
+                {analysis.projCompliance.toFixed(0)}% PPT
+              </span>
+            ) : analysis.paceVsProjection != null && (
+              <span style={{
+                fontSize: 13, fontWeight: 900,
+                color: analysis.paceVsProjection >= 95 ? '#10b981' : analysis.paceVsProjection >= 75 ? '#f59e0b' : '#ef4444',
+                fontFamily: 'Inter Tight, sans-serif', letterSpacing: '-0.02em'
+              }}>
+                {analysis.paceVsProjection.toFixed(0)}%
+              </span>
+            )}
+          </div>
+          <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 500, marginTop: 4 }}>
+            {analysis.projCompliance != null ? 'al cierre del mes' : `ritmo del mes · ${analysis.monthProgress.toFixed(0)}% transcurrido`}
+          </p>
         </div>
 
         {/* Trend badge + proj compliance */}
@@ -570,10 +610,15 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                   <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke={PINK} strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.55" /></svg>
                   <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Promedio actual ({fmt(analysis.dailyAvg)})</span>
                 </div>
-                {budget > 0 && (
+                {budget > 0 ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.75" /></svg>
                     <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Meta mensual ({fmt(budget)})</span>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.75" /></svg>
+                    <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Proyección/día ({fmt(analysis.projection / analysis.daysInMonth)})</span>
                   </div>
                 )}
               </div>
@@ -583,6 +628,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                 dailyAvg={analysis.dailyAvg}
                 budget={budget}
                 daysInMonth={analysis.daysInMonth}
+                projection={analysis.projection}
               />
             </div>
 
