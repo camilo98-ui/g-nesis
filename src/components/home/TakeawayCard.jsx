@@ -434,64 +434,13 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
           <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.13em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
             Proyección de Cierre
           </p>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-            <p style={{ fontSize: 26, fontWeight: 900, color: PINK, letterSpacing: '-0.035em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
-              {fmt(analysis.projection)}
-            </p>
-            {analysis.projCompliance != null ?
-            <span style={{
-              fontSize: 13, fontWeight: 900, color: analysis.projCompliance >= 100 ? '#10b981' : PINK,
-              fontFamily: 'Inter Tight, sans-serif', letterSpacing: '-0.02em'
-            }}>
-                {analysis.projCompliance.toFixed(0)}% PPT
-              </span> :
-            analysis.paceVsProjection != null &&
-            <span style={{
-              fontSize: 13, fontWeight: 900,
-              color: analysis.paceVsProjection >= 95 ? '#10b981' : analysis.paceVsProjection >= 75 ? '#f59e0b' : '#ef4444',
-              fontFamily: 'Inter Tight, sans-serif', letterSpacing: '-0.02em'
-            }}>
-                {analysis.paceVsProjection.toFixed(0)}%
-              </span>
-            }
-          </div>
-          <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 500, marginTop: 4 }}>
-            {analysis.projCompliance != null ? 'al cierre del mes' : `ritmo del mes · ${analysis.monthProgress.toFixed(0)}% transcurrido`}
+          <p style={{ fontSize: 26, fontWeight: 900, color: PINK, letterSpacing: '-0.035em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
+            {fmt(analysis.projection)}
           </p>
-        </div>
-
-        {/* Trend badge + proj compliance */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4, minWidth: 100 }}>
-          {trendVsProj != null &&
-          <>
-              <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: '5px 12px', borderRadius: 24,
-              background: trendUp ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)',
-              border: `1.5px solid ${trendUp ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.2)'}`
-            }}>
-                {trendUp ?
-              <TrendingUp style={{ width: 12, height: 12, color: '#10b981' }} /> :
-              <TrendingDown style={{ width: 12, height: 12, color: '#ef4444' }} />
-              }
-                <span style={{ fontSize: 12, fontWeight: 800, color: trendUp ? '#10b981' : '#ef4444' }}>
-                  {trendVsProj > 0 ? '+' : ''}{trendVsProj.toFixed(0)}%
-                </span>
-              </div>
-              <p style={{ fontSize: 8.5, color: '#94a3b8', fontWeight: 500 }}>vs proyección</p>
-            </>
-          }
           {analysis.projCompliance != null &&
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4,
-            padding: '3px 10px', borderRadius: 20,
-            background: analysis.projCompliance >= 100 ? 'rgba(16,185,129,0.08)' : 'rgba(194,24,117,0.08)',
-            border: `1px solid ${analysis.projCompliance >= 100 ? 'rgba(16,185,129,0.2)' : PINK_MID}`
-          }} className="hidden">
-              <span style={{ fontSize: 10, fontWeight: 800, color: analysis.projCompliance >= 100 ? '#10b981' : PINK }}>
-                {analysis.projCompliance.toFixed(0)}% PPT
-              </span>
-            </div>
+            <p style={{ fontSize: 13, fontWeight: 900, color: analysis.projCompliance >= 100 ? '#10b981' : PINK, fontFamily: 'Inter Tight, sans-serif', marginTop: 4 }}>
+              {analysis.projCompliance.toFixed(0)}% PPT
+            </p>
           }
         </div>
 
