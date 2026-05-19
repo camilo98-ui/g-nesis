@@ -401,85 +401,88 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
         borderRadius: '12px 12px 0 0' }} />
 
       {/* ── HERO HEADER ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 20, padding: '22px 20px 18px',
-        borderBottom: `1px solid ${PINK_SOFT}` }}>
-
-        {/* Icon */}
-        <div style={{
-          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-          background: PINK_LIGHT, border: `1.5px solid ${PINK_MID}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <ShoppingBag style={{ width: 24, height: 24, color: PINK }} />
-        </div>
-
-        {/* Big number block */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 2 }}>
-            Producto para Llevar
-          </p>
-          <p style={{ fontSize: 38, fontWeight: 900, color: PINK, letterSpacing: '-0.045em', lineHeight: 1, fontFamily: 'Inter Tight, Inter, sans-serif' }}>
-            {fmt(analysis.totalSold)}
-          </p>
-          <p style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9ca3af', marginTop: 3 }}>
-            Real Acumulado
-          </p>
-          <p style={{ fontSize: 9, color: '#cbd5e1', fontWeight: 500, marginTop: 4 }}>
-            {analysis.daysWithData} días con datos · avg {fmt(analysis.dailyAvg)}/día
-          </p>
-        </div>
-
-        {/* Divider */}
-        <div style={{ width: 1, height: 64, background: PINK_SOFT, flexShrink: 0, alignSelf: 'center' }} />
-
-        {/* Projection block — right next to big number */}
-        <div style={{ minWidth: 130 }}>
-          <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.13em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
-            Proyección de Cierre
-          </p>
-          <p style={{ fontSize: 26, fontWeight: 900, color: PINK, letterSpacing: '-0.035em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
-            {fmt(analysis.projection)}
-          </p>
-          {analysis.projCompliance != null &&
-            <p style={{ fontSize: 13, fontWeight: 900, color: analysis.projCompliance >= 100 ? '#10b981' : PINK, fontFamily: 'Inter Tight, sans-serif', marginTop: 4 }}>
-              {analysis.projCompliance.toFixed(0)}% PPT
-            </p>
-          }
-        </div>
-
-        {/* Controls */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-          <button onClick={() => setExpanded((e) => !e)} style={{ color: '#cbd5e1', cursor: 'pointer', padding: 2 }}>
-            {expanded ?
-            <ChevronUp style={{ width: 16, height: 16 }} /> :
-            <ChevronDown style={{ width: 16, height: 16 }} />}
-          </button>
-          {editingBudget ?
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} onClick={(e) => e.stopPropagation()}>
-              <input autoFocus type="number" value={budgetInput}
-            onChange={(e) => setBudgetInput(e.target.value)}
-            placeholder="PPT..."
-            style={{ width: 82, fontSize: 10, border: `1px solid ${PINK_MID}`, borderRadius: 6, padding: '3px 6px', outline: 'none', color: '#374151' }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {onBudgetChange?.(Number(budgetInput));setEditingBudget(false);}
-              if (e.key === 'Escape') setEditingBudget(false);
-            }} />
-            
-              <button onClick={() => {onBudgetChange?.(Number(budgetInput));setEditingBudget(false);}} style={{ color: '#10b981' }}>
-                <Check style={{ width: 12, height: 12 }} />
+      <div style={{ padding: '18px 20px 16px', borderBottom: `1px solid ${PINK_SOFT}` }}>
+        {/* Top row: title + controls */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+              background: PINK_LIGHT, border: `1.5px solid ${PINK_MID}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <ShoppingBag style={{ width: 18, height: 18, color: PINK }} />
+            </div>
+            <div>
+              <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#9ca3af', lineHeight: 1 }}>
+                Producto para Llevar
+              </p>
+              <p style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500, marginTop: 2 }}>
+                {analysis.daysWithData} días registrados · avg {fmt(analysis.dailyAvg)}/día
+              </p>
+            </div>
+          </div>
+          {/* Controls */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {editingBudget ?
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} onClick={(e) => e.stopPropagation()}>
+                <input autoFocus type="number" value={budgetInput}
+              onChange={(e) => setBudgetInput(e.target.value)}
+              placeholder="PPT..."
+              style={{ width: 82, fontSize: 10, border: `1px solid ${PINK_MID}`, borderRadius: 6, padding: '3px 6px', outline: 'none', color: '#374151' }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {onBudgetChange?.(Number(budgetInput));setEditingBudget(false);}
+                if (e.key === 'Escape') setEditingBudget(false);
+              }} />
+                <button onClick={() => {onBudgetChange?.(Number(budgetInput));setEditingBudget(false);}} style={{ color: '#10b981' }}>
+                  <Check style={{ width: 12, height: 12 }} />
+                </button>
+                <button onClick={() => setEditingBudget(false)} style={{ color: '#94a3b8' }}>
+                  <X style={{ width: 12, height: 12 }} />
+                </button>
+              </div> :
+            <button
+              onClick={() => {setBudgetInput(budget > 0 ? String(budget) : '');setEditingBudget(true);}}
+              style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 9, color: '#94a3b8', fontWeight: 600, letterSpacing: '0.05em', cursor: 'pointer',
+                padding: '4px 10px', borderRadius: 8, border: `1px solid ${PINK_MID}`, background: PINK_LIGHT }}>
+                {budget > 0 ? `PPT ${fmt(budget)}` : 'Agregar PPT'}
+                <Pencil style={{ width: 9, height: 9 }} />
               </button>
-              <button onClick={() => setEditingBudget(false)} style={{ color: '#94a3b8' }}>
-                <X style={{ width: 12, height: 12 }} />
-              </button>
-            </div> :
-
-          <button
-            onClick={() => {setBudgetInput(budget > 0 ? String(budget) : '');setEditingBudget(true);}}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 8, color: '#94a3b8', fontWeight: 600, letterSpacing: '0.06em', cursor: 'pointer' }}>
-              {budget > 0 ? `PPT ${fmt(budget)}` : 'Agregar PPT'}
-              <Pencil style={{ width: 8, height: 8 }} />
+            }
+            <button onClick={() => setExpanded((e) => !e)} style={{ color: '#cbd5e1', cursor: 'pointer', padding: 2 }}>
+              {expanded ? <ChevronUp style={{ width: 16, height: 16 }} /> : <ChevronDown style={{ width: 16, height: 16 }} />}
             </button>
-          }
+          </div>
+        </div>
+
+        {/* Bottom row: two KPI blocks side by side */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', gap: 0, alignItems: 'center' }}>
+          {/* Real acumulado */}
+          <div>
+            <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
+              Real Acumulado
+            </p>
+            <p style={{ fontSize: 34, fontWeight: 900, color: PINK, letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, Inter, sans-serif' }}>
+              {fmt(analysis.totalSold)}
+            </p>
+          </div>
+          {/* Vertical divider */}
+          <div style={{ width: 1, height: 48, background: PINK_SOFT, margin: '0 20px' }} />
+          {/* Proyección */}
+          <div>
+            <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
+              Proyección de Cierre
+            </p>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <p style={{ fontSize: 34, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
+                {fmt(analysis.projection)}
+              </p>
+              {analysis.projCompliance != null &&
+                <span style={{ fontSize: 13, fontWeight: 800, color: analysis.projCompliance >= 100 ? '#10b981' : PINK, fontFamily: 'Inter Tight, sans-serif' }}>
+                  {analysis.projCompliance.toFixed(0)}% PPT
+                </span>
+              }
+            </div>
+          </div>
         </div>
       </div>
 
