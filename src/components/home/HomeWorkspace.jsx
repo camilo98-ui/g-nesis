@@ -915,58 +915,29 @@ export default function HomeWorkspace({
             transition={{ duration: 0.6 }}
             className="mb-6 space-y-3">
 
-            {/* Nova AI Strip — HERO PREMIUM */}
+            {/* Nova AI Copilot Card — HERO PREMIUM */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative overflow-hidden rounded-2xl cursor-default"
+              className="relative overflow-hidden"
               style={{
-                background: 'rgba(255,255,255,0.92)',
-                backdropFilter: 'blur(40px)',
-                border: '1px solid rgba(0,0,0,0.07)',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1)'
+                borderRadius: 24,
+                background: 'rgba(255,255,255,0.94)',
+                backdropFilter: 'blur(48px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(48px) saturate(160%)',
+                border: '1px solid rgba(255,255,255,0.72)',
+                boxShadow: '0 8px 36px rgba(0,0,0,0.07), 0 2px 8px rgba(194,24,117,0.07), inset 0 1px 0 rgba(255,255,255,1)',
               }}>
-              
-              {/* Top accent line */}
-              <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent 5%, rgba(0,0,0,0.06) 40%, rgba(0,0,0,0.04) 70%, transparent 95%)' }} />
-              <div className="flex items-center h-16 px-6 gap-4">
-                
-                {/* Avatar Nova Mascota */}
-                <motion.div
-                  animate={{
-                    scale: [1, 1.02, 1]
-                  }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.14) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(194, 24, 117, 0.08) 100%)',
-                    border: '1.5px solid rgba(194, 24, 117, 0.18)',
-                    boxShadow: '0 0 20px rgba(194, 24, 117, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.6)'
-                  }}>
-                  
-                  {/* Glow pulsante */}
-                  <motion.div
-                    animate={{ opacity: [0.2, 0.4, 0.2] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(194, 24, 117, 0.25), transparent 70%)',
-                      filter: 'blur(10px)',
-                      zIndex: 1
-                    }} />
-                  
-                  {/* Imagen mascota Nova */}
-                  <MascotCanvas width={72} height={72} style={{ scale: 1.4, position: 'relative', zIndex: 10 }} />
-                  
-                </motion.div>
 
-                {/* Separador elegante */}
-                <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-200 to-transparent opacity-30 flex-shrink-0" />
+              {/* Ambient top glow */}
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: 80, pointerEvents: 'none', zIndex: 0,
+                background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(251,207,232,0.28) 0%, transparent 70%)',
+              }} />
 
-                {/* Nova Rotating Insights */}
+              <div className="relative z-10 flex items-center px-5 py-4 gap-4">
                 <NovaInsightStrip dailySales={todaySales} budget={budgetData} latestWeather={latestWeather} />
-
               </div>
             </motion.div>
 
