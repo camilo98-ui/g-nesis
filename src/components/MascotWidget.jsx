@@ -198,6 +198,9 @@ export default function MascotWidget() {
   const suggestions = SUGGESTIONS[path] || SUGGESTIONS.default;
   const { getSectionsSummary } = useNova() || {};
 
+  // Don't render on PYGDashboard (modal overlay pages)
+  if (path === '/PYGDashboard') return null;
+
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       const welcome = PROACTIVE_MESSAGES[path] || PROACTIVE_MESSAGES.default;
