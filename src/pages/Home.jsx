@@ -1490,29 +1490,31 @@ export default function Home() {
       {/* Store Sales Modal */}
       <Suspense fallback={null}>
         {showStoreSales &&
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowStoreSales(false)}>
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowStoreSales(false)}>
             <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            initial={{ scale: 0.95, opacity: 0, y: 16 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border-2 border-white/60">
+            className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden">
             
-              <div className="bg-gradient-to-r from-fuchsia-500 via-pink-500 to-violet-500 p-5 text-white text-center relative">
-                <button onClick={() => setShowStoreSales(false)} className="absolute top-4 right-4 text-white/80 hover:text-white">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {/* Header */}
+              <div className="relative pt-8 pb-4 px-6 text-center">
+                <button
+                  onClick={() => setShowStoreSales(false)}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <motion.div
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}>
-                
-                  <TrendingUp className="w-10 h-10 mx-auto mb-2" />
-                </motion.div>
-                <h2 className="text-xl font-black">Registrar Ventas</h2>
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-3">
+                  <TrendingUp className="w-6 h-6 text-rose-500" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Registrar Venta</h2>
+                <p className="text-sm text-gray-400 mt-1">Agrega los detalles de la venta realizada</p>
               </div>
 
-              <div className="p-6 max-h-[70vh] overflow-y-auto">
+              <div className="px-6 pb-6 max-h-[80vh] overflow-y-auto">
                 <DailySalesForm storeId={selectedStore} onSuccess={() => setShowStoreSales(false)} />
               </div>
             </motion.div>
