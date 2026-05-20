@@ -26,6 +26,7 @@ import WeeklyComparison from './WeeklyComparison';
 import TakeawayCard from './TakeawayCard';
 import NovaInsightStrip from './NovaInsightStrip';
 import PYGIntelligenceOS from '@/components/reports/PYGIntelligenceOS';
+import PYGIntelligenceOSv2 from '@/components/reports/PYGIntelligenceOSv2';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -1689,7 +1690,7 @@ export default function HomeWorkspace({
 
           </motion.div>
 
-          {/* ── OVERLAY: P&G Intelligence Dashboard with Tabs ── */}
+          {/* ── OVERLAY: P&G Intelligence Dashboard — CINEMATIC VERSION ── */}
           <AnimatePresence mode="wait">
            {activeView === 'pyg' && (
              <motion.div key="pyg-overlay"
@@ -1698,8 +1699,8 @@ export default function HomeWorkspace({
                exit={{ opacity: 0 }}
                transition={{ duration: 0.25 }}
                className="absolute inset-0 z-30 overflow-y-auto"
-               style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(12px)' }}>
-               <PYGIntelligenceOS
+               style={{ background: 'linear-gradient(to bottom, #f8f5fc 0%, #faf8fc 50%, #f5f2fa 100%)' }}>
+               <PYGIntelligenceOSv2
                  storeId={selectedStore}
                  onClose={() => { setActiveView(null); setActiveNav('home'); }}
                />
