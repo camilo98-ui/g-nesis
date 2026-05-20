@@ -283,19 +283,19 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
           const ty = yOf(tooltip.value);
           const metaDaily = budget > 0 ? budget / daysInMonth : null;
           const met = metaDaily != null && tooltip.value >= metaDaily;
-          const label = `Día ${tooltip.day} · ${fmt(tooltip.value)}${metaDaily != null ? (met ? ' ✓' : ' ✗') : ''}`;
+          const label = `Día ${tooltip.day} · ${fmt(tooltip.value)}${metaDaily != null ? met ? ' ✓' : ' ✗' : ''}`;
           const textLen = label.length * 4.2 + 12;
           const clampedX = Math.min(Math.max(tx, PAD_L + textLen / 2 + 4), W - PAD_R - textLen / 2 - 4);
           return (
             <g>
               <circle cx={tx} cy={ty} r="2.5" fill={PINK} />
               <text x={clampedX} y={ty - 12}
-                textAnchor="middle"
-                style={{ fontSize: 9, fill: '#1e293b', fontWeight: 700, fontFamily: 'Inter Tight, sans-serif' }}>
+              textAnchor="middle"
+              style={{ fontSize: 9, fill: '#1e293b', fontWeight: 700, fontFamily: 'Inter Tight, sans-serif' }}>
                 {label}
               </text>
-            </g>
-          );
+            </g>);
+
         })()}
 
         {/* X axis labels */}
@@ -396,10 +396,10 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
       {/* Top accent line */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3,
         background: `linear-gradient(90deg, ${PINK} 0%, rgba(194,24,117,0.3) 60%, transparent 100%)`,
-        borderRadius: '12px 12px 0 0' }} />
+        borderRadius: '12px 12px 0 0' }} className="hidden" />
 
       {/* ── HERO HEADER ── */}
-      <div 
+      <div
         onClick={() => setExpanded((e) => !e)}
         style={{ padding: '18px 20px 16px', borderBottom: `1px solid ${PINK_SOFT}`, cursor: 'pointer', userSelect: 'none' }}>
         {/* Top row: title + controls */}
@@ -448,7 +448,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                 <Pencil style={{ width: 9, height: 9 }} />
               </button>
             }
-            <button onClick={(e) => {e.stopPropagation(); setExpanded((e) => !e);}} style={{ color: '#cbd5e1', cursor: 'pointer', padding: 2 }}>
+            <button onClick={(e) => {e.stopPropagation();setExpanded((e) => !e);}} style={{ color: '#cbd5e1', cursor: 'pointer', padding: 2 }}>
               {expanded ? <ChevronUp style={{ width: 16, height: 16 }} /> : <ChevronDown style={{ width: 16, height: 16 }} />}
             </button>
           </div>
@@ -471,14 +471,14 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             {/* Percentage label */}
             <div style={{ fontSize: 11, fontWeight: 700, color: '#374151' }}>
               <span style={{ fontSize: 15, fontWeight: 900, color: '#1e293b' }}>
-                {budget > 0 ? `${Math.round((analysis.totalSold / budget) * 100)}%` : '—'}
+                {budget > 0 ? `${Math.round(analysis.totalSold / budget * 100)}%` : '—'}
               </span>
               <span style={{ color: '#94a3b8', fontWeight: 500, marginLeft: 4 }}>del objetivo</span>
             </div>
             {/* Track */}
             <div style={{ width: '100%', height: 8, borderRadius: 99, background: 'rgba(194,24,117,0.12)', position: 'relative', overflow: 'visible' }}>
               {budget > 0 && (() => {
-                const pct = Math.min((analysis.totalSold / budget) * 100, 100);
+                const pct = Math.min(analysis.totalSold / budget * 100, 100);
                 return (
                   <>
                     <div style={{
@@ -495,17 +495,17 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                       background: PINK, border: '2.5px solid white',
                       boxShadow: `0 0 6px ${PINK}66`
                     }} />
-                  </>
-                );
+                  </>);
+
               })()}
             </div>
             {/* Gap label */}
             <p style={{ fontSize: 9.5, color: '#94a3b8', fontWeight: 500 }}>
-              {budget > 0
-                ? analysis.totalSold >= budget
-                  ? '¡Meta superada! 🎉'
-                  : `Faltan ${fmt(budget - analysis.totalSold)} para la meta`
-                : 'Agrega PPT para ver progreso'}
+              {budget > 0 ?
+              analysis.totalSold >= budget ?
+              '¡Meta superada! 🎉' :
+              `Faltan ${fmt(budget - analysis.totalSold)} para la meta` :
+              'Agrega PPT para ver progreso'}
             </p>
           </div>
 
@@ -547,10 +547,10 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                  Venta Diaria — {format(new Date(), 'MMM yyyy', { locale: es }).toUpperCase()}
                </p>
                {analysis.bestDay &&
-             <p style={{ fontSize: 9, fontWeight: 700, color: PINK }}>
+              <p style={{ fontSize: 9, fontWeight: 700, color: PINK }}>
                    🏆 Mejor día: {fmt(analysis.bestDay.total_takeaway)} · {parseInt(analysis.bestDay.date.split('-')[2])} {format(new Date(analysis.bestDay.date + 'T12:00:00'), 'MMM', { locale: es })}
                  </p>
-             }
+              }
              </div>
              {/* Legend */}
              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 6 }}>
@@ -563,33 +563,33 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                  <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Promedio actual ({fmt(analysis.dailyAvg)})</span>
                </div>
                {budget > 0 ?
-             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                    <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.75" /></svg>
                    <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Meta mensual ({fmt(budget)})</span>
                  </div> :
 
-             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                    <svg width="16" height="4"><line x1="0" y1="2" x2="16" y2="2" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 3" strokeOpacity="0.75" /></svg>
                    <span style={{ fontSize: 8, color: '#94a3b8', fontWeight: 500 }}>Proyección/día ({fmt(analysis.projection / analysis.daysInMonth)})</span>
                  </div>
-             }
+              }
              </div>
 
              <RichBarChart
-             pts={analysis.chartData}
-             dailyAvg={analysis.dailyAvg}
-             budget={budget}
-             daysInMonth={analysis.daysInMonth}
-             projection={analysis.projection} />
+              pts={analysis.chartData}
+              dailyAvg={analysis.dailyAvg}
+              budget={budget}
+              daysInMonth={analysis.daysInMonth}
+              projection={analysis.projection} />
 
            </div>
 
            {/* ── 4 KPI ROW ── */}
            <div style={{
-           display: 'flex',
-           flexWrap: 'wrap',
-           padding: '0 4px',
-           background: 'linear-gradient(180deg, #fdfcff 0%, #ffffff 100%)'
+            display: 'flex',
+            flexWrap: 'wrap',
+            padding: '0 4px',
+            background: 'linear-gradient(180deg, #fdfcff 0%, #ffffff 100%)'
           }}>
               {/* PPT diario recomendado */}
               {(() => {
@@ -641,10 +641,10 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             
               {/* Proyección de cierre card con ícono y badge */}
               <div style={{
-                flex: 1, padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
-                border: `1.5px solid rgba(194,24,117,0.3)`, background: 'rgba(194,24,117,0.04)',
-                boxShadow: '0 2px 12px rgba(194,24,117,0.08)', display: 'flex', flexDirection: 'column', gap: 2
-              }}>
+              flex: 1, padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
+              border: `1.5px solid rgba(194,24,117,0.3)`, background: 'rgba(194,24,117,0.04)',
+              boxShadow: '0 2px 12px rgba(194,24,117,0.08)', display: 'flex', flexDirection: 'column', gap: 2
+            }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Proyección de Cierre</p>
                   <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: PINK }}>{fmt(analysis.projection)}</p>
@@ -655,10 +655,10 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
 
               {/* Promedio por día card con ícono */}
               <div style={{
-                flex: 1, padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
-                border: `1.5px solid ${PINK_MID}`, background: '#ffffff',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 2
-              }}>
+              flex: 1, padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
+              border: `1.5px solid ${PINK_MID}`, background: '#ffffff',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 2
+            }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Promedio por Día</p>
                   <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: '#1e293b' }}>{fmt(analysis.dailyAvg)}</p>
@@ -669,10 +669,10 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             
               {/* Aporte tienda */}
               <div style={{
-                padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
-                border: `1.5px solid ${PINK_MID}`, minWidth: 160, background: '#ffffff',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 2
-              }}>
+              padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
+              border: `1.5px solid ${PINK_MID}`, minWidth: 160, background: '#ffffff',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 2
+            }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Aporte Tienda</p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -680,10 +680,10 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                     <div>
                       <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 500 }}>al PPT total</p>
                       {analysis.storeContribProjected != null &&
-                        <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginTop: 2 }}>
+                    <p style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, marginTop: 2 }}>
                           Prom. tiendas: {analysis.storeContribProjected.toFixed(1)}%
                         </p>
-                      }
+                    }
                     </div>
                   </div>
                 </div>
