@@ -236,34 +236,33 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-2">
         {/* Fecha */}
-        <div className="border border-gray-200 rounded-2xl p-3">
-          <p className="text-xs font-semibold text-gray-500 mb-1.5">Fecha de la venta</p>
+        <div className="border border-gray-200 rounded-xl p-2">
+          <p className="text-xs font-semibold text-gray-500 mb-1">Fecha de la venta</p>
           <input
             type="date"
             value={formData.date}
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100 transition-all"
+            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-700 outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100 transition-all"
           />
         </div>
 
         {/* Tab: Llevar */}
         {activeTab === 'llevar' && (
-          <div className="border border-gray-200 rounded-2xl p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center">
-                <ShoppingBag className="w-4 h-4 text-violet-600" />
+          <div className="border border-gray-200 rounded-xl p-2">
+            <div className="flex items-center gap-1.5 mb-1">
+              <div className="w-5 h-5 bg-violet-100 rounded-md flex items-center justify-center">
+                <ShoppingBag className="w-3 h-3 text-violet-600" />
               </div>
-              <p className="text-sm font-semibold text-gray-700">Venta Producto para Llevar</p>
+              <p className="text-xs font-semibold text-gray-700">Venta Producto para Llevar</p>
             </div>
-            <p className="text-xs text-gray-400 mb-3">Ingresa el total vendido en producto para llevar</p>
             <input
               type="number"
               placeholder="0"
               value={formData.total_takeaway}
               onChange={(e) => setFormData({ ...formData, total_takeaway: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 outline-none focus:border-violet-300 focus:ring-2 focus:ring-violet-100 transition-all"
+              className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-700 outline-none focus:border-violet-300 focus:ring-2 focus:ring-violet-100 transition-all"
             />
           </div>
         )}
@@ -272,80 +271,71 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         {activeTab === 'ventas' && (
           <div className="grid grid-cols-2 gap-2">
             {/* Ventas */}
-            <div className="border border-gray-200 rounded-2xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+            <div className="border border-gray-200 rounded-xl p-2">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <div className="w-5 h-5 bg-emerald-100 rounded-md flex items-center justify-center">
+                  <DollarSign className="w-3 h-3 text-emerald-600" />
                 </div>
-                <p className="text-sm font-semibold text-gray-700">Ventas</p>
+                <p className="text-xs font-semibold text-gray-700">Ventas</p>
               </div>
-              <p className="text-xs text-gray-400 mb-2">Ingresa el valor total de ventas</p>
               <input
                 type="number"
                 placeholder="0"
                 value={formData.total_sales}
                 onChange={(e) => setFormData({ ...formData, total_sales: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 outline-none focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100 transition-all"
+                className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-semibold text-gray-700 outline-none focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100 transition-all"
               />
-              <p className="text-[10px] text-gray-400 mt-1">Valor total en pesos</p>
             </div>
 
             {/* Ticket Promedio */}
-            <div className="border border-gray-200 rounded-2xl p-3 bg-gray-50">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 bg-sky-100 rounded-lg flex items-center justify-center">
-                  <Receipt className="w-3.5 h-3.5 text-sky-600" />
+            <div className="border border-gray-200 rounded-xl p-2 bg-gray-50">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <div className="w-5 h-5 bg-sky-100 rounded-md flex items-center justify-center">
+                  <Receipt className="w-3 h-3 text-sky-600" />
                 </div>
-                <p className="text-sm font-semibold text-gray-700">Ticket Promedio</p>
-                <Info className="w-3 h-3 text-gray-300" />
+                <p className="text-xs font-semibold text-gray-700">Ticket Prom.</p>
               </div>
-              <p className="text-xs text-gray-400 mb-2">Calculado automáticamente</p>
               <input
                 type="text"
-                placeholder="Calculado automáticamente"
+                placeholder="Auto"
                 value={averageTicket ? `$${averageTicket.toLocaleString('es-CO')}` : ''}
                 readOnly
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-400 bg-white outline-none cursor-default"
+                className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-semibold text-gray-400 bg-white outline-none cursor-default"
               />
-              <p className="text-[10px] text-gray-400 mt-1">Se calcula al guardar la venta</p>
             </div>
 
             {/* Transacciones */}
-            <div className="border border-gray-200 rounded-2xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 bg-violet-100 rounded-lg flex items-center justify-center">
-                  <Zap className="w-3.5 h-3.5 text-violet-600" />
+            <div className="border border-gray-200 rounded-xl p-2">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <div className="w-5 h-5 bg-violet-100 rounded-md flex items-center justify-center">
+                  <Zap className="w-3 h-3 text-violet-600" />
                 </div>
-                <p className="text-sm font-semibold text-gray-700">Transacciones</p>
+                <p className="text-xs font-semibold text-gray-700">Transacciones</p>
               </div>
-              <p className="text-xs text-gray-400 mb-2">Cantidad de transacciones</p>
               <input
                 type="number"
                 placeholder="0"
                 value={formData.total_transactions}
                 onChange={(e) => setFormData({ ...formData, total_transactions: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 outline-none focus:border-violet-300 focus:ring-2 focus:ring-violet-100 transition-all"
+                className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-semibold text-gray-700 outline-none focus:border-violet-300 focus:ring-2 focus:ring-violet-100 transition-all"
               />
-              <p className="text-[10px] text-gray-400 mt-1">Número total de transacciones</p>
             </div>
 
             {/* Sugeridos */}
-            <div className="border border-gray-200 rounded-2xl p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 bg-pink-100 rounded-lg flex items-center justify-center">
-                  <Gift className="w-3.5 h-3.5 text-pink-600" />
+            <div className="border border-gray-200 rounded-xl p-2">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <div className="w-5 h-5 bg-pink-100 rounded-md flex items-center justify-center">
+                  <Gift className="w-3 h-3 text-pink-600" />
                 </div>
-                <p className="text-sm font-semibold text-gray-700">Sugeridos</p>
+                <p className="text-xs font-semibold text-gray-700">Sugeridos</p>
               </div>
-              <p className="text-xs text-gray-400 mb-2">Productos sugeridos</p>
               <input
                 type="number"
                 placeholder="0"
                 value={formData.total_suggested}
                 onChange={(e) => setFormData({ ...formData, total_suggested: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-gray-700 outline-none focus:border-pink-300 focus:ring-2 focus:ring-pink-100 transition-all"
+                className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-semibold text-gray-700 outline-none focus:border-pink-300 focus:ring-2 focus:ring-pink-100 transition-all"
               />
-              <p className="text-[10px] text-gray-400 mt-1">Número de productos sugeridos</p>
             </div>
           </div>
         )}
