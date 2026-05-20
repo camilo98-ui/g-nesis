@@ -1222,33 +1222,19 @@ export default function PYGModal({ onClose, storeId }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 overflow-y-auto"
-      style={{ background: '#fafafa' }}>
+      style={{ background: '#060d1b' }}>
 
-      {/* Subtle background figures */}
+      {/* Ambient glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Soft pink orb top-left */}
-        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.07) 0%, transparent 70%)', filter: 'blur(40px)' }} />
-        {/* Soft blue orb bottom-right */}
-        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)', filter: 'blur(40px)' }} />
-        {/* Center soft glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full"
-          style={{ background: 'radial-gradient(ellipse, rgba(194,24,117,0.04) 0%, transparent 65%)', filter: 'blur(60px)' }} />
-        {/* Decorative grid dots */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.035]" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
-              <circle cx="1.5" cy="1.5" r="1.5" fill="#C21875" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#dots)" />
-        </svg>
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full opacity-10"
+          style={{ background: MAGENTA, filter: 'blur(80px)' }} />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full opacity-10"
+          style={{ background: NEON_BLUE, filter: 'blur(80px)' }} />
       </div>
 
       {/* Header */}
       <div className="sticky top-0 z-10"
-        style={{ background: 'rgba(250,250,250,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(194,24,117,0.1)' }}>
+        style={{ background: 'rgba(6,13,27,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(148,163,184,0.08)' }}>
         <div className="max-w-7xl mx-auto px-5 py-4">
           <div className="flex items-center justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
@@ -1257,13 +1243,13 @@ export default function PYGModal({ onClose, storeId }) {
                 <BarChart3 className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="font-black text-xl leading-tight tracking-tight" style={{ color: '#1e1b2e' }}>P&G Intelligence</h1>
+                <h1 className="font-black text-xl text-white leading-tight tracking-tight">P&G Intelligence</h1>
                 <p className="text-slate-500 text-xs">{storeCode} · {currentYear} · {primaryRecord ? MONTHS_FULL[(selectedMonth || 1) - 1] : 'Sin datos'}</p>
               </div>
             </div>
             <button onClick={onClose} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
-              style={{ background: 'rgba(194,24,117,0.06)', border: '1px solid rgba(194,24,117,0.15)' }}>
-              <X className="w-5 h-5 text-slate-500" />
+              style={{ background: 'rgba(148,163,184,0.1)', border: '1px solid rgba(148,163,184,0.12)' }}>
+              <X className="w-5 h-5 text-slate-400" />
             </button>
           </div>
 
@@ -1271,15 +1257,15 @@ export default function PYGModal({ onClose, storeId }) {
             {/* Month selector */}
             <div className="relative">
               <button onClick={() => setMonthDropdownOpen(!monthDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all"
-                style={{ background: 'rgba(194,24,117,0.06)', border: '1px solid rgba(194,24,117,0.15)', color: '#374151' }}>
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black text-slate-300 transition-all"
+                style={{ background: 'rgba(148,163,184,0.1)', border: '1px solid rgba(148,163,184,0.15)' }}>
                 📅 {selectedMonth ? MONTHS_SHORT[selectedMonth - 1] : 'Mes'}
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${monthDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {monthDropdownOpen && (
                 <div className="absolute top-full left-0 mt-3 rounded-2xl shadow-2xl z-20 p-4"
-                  style={{ background: '#ffffff', border: '1px solid rgba(194,24,117,0.15)', minWidth: 280, backdropFilter: 'blur(12px)' }}>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Seleccionar mes</p>
+                  style={{ background: '#0d1526', border: '1px solid rgba(148,163,184,0.18)', minWidth: 280, backdropFilter: 'blur(12px)' }}>
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 px-1">Seleccionar mes</p>
                   <div className="grid grid-cols-3 gap-2">
                     {MONTHS_SHORT.map((m, i) => {
                       const hasData = allRecords.some(r => r.month === i + 1);
@@ -1289,11 +1275,11 @@ export default function PYGModal({ onClose, storeId }) {
                           onClick={() => { setSelectedMonth(i + 1); setMonthDropdownOpen(false); }}
                           className="flex flex-col items-center justify-center rounded-xl py-3 px-2 transition-all"
                           style={{
-                            background: isSelected ? MAGENTA : hasData ? 'rgba(194,24,117,0.05)' : 'transparent',
-                            color: isSelected ? 'white' : hasData ? '#374151' : '#c4b5c4',
+                            background: isSelected ? MAGENTA : hasData ? 'rgba(148,163,184,0.07)' : 'transparent',
+                            color: isSelected ? 'white' : hasData ? '#cbd5e1' : '#2d3748',
                             cursor: hasData ? 'pointer' : 'not-allowed',
-                            border: isSelected ? `1px solid ${MAGENTA}` : '1px solid rgba(194,24,117,0.12)',
-                            boxShadow: isSelected ? `0 0 14px ${MAGENTA}40` : 'none',
+                            border: isSelected ? `1px solid ${MAGENTA}` : '1px solid rgba(148,163,184,0.1)',
+                            boxShadow: isSelected ? `0 0 14px ${MAGENTA}50` : 'none',
                           }}>
                           <span className="text-sm font-black">{m}</span>
                           {hasData && (
@@ -1310,13 +1296,13 @@ export default function PYGModal({ onClose, storeId }) {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 rounded-xl p-1" style={{ background: 'rgba(194,24,117,0.05)', border: '1px solid rgba(194,24,117,0.12)' }}>
+            <div className="flex gap-1 rounded-xl p-1" style={{ background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.1)' }}>
               {tabs.map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                   className="px-4 py-1.5 rounded-lg text-xs font-black transition-all"
                   style={{
                     background: activeTab === tab.id ? MAGENTA : 'transparent',
-                    color: activeTab === tab.id ? 'white' : '#6b7280',
+                    color: activeTab === tab.id ? 'white' : '#94a3b8',
                   }}>
                   {tab.label}
                 </button>
@@ -1334,10 +1320,10 @@ export default function PYGModal({ onClose, storeId }) {
             <p className="text-slate-500 font-medium">Cargando datos financieros…</p>
           </div>
         ) : !primaryRecord ? (
-          <div className="flex flex-col items-center justify-center py-40 text-slate-500">
+          <div className="flex flex-col items-center justify-center py-40 text-slate-600">
             <BarChart3 className="w-20 h-20 mb-4 opacity-20" />
-            <p className="font-bold text-slate-500 text-xl">Sin datos para {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
-            <p className="text-sm mt-2 text-slate-400">Disponibles: {allRecords.map(r => MONTHS_SHORT[r.month - 1]).join(', ')}</p>
+            <p className="font-bold text-slate-400 text-xl">Sin datos para {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
+            <p className="text-sm mt-2 text-slate-600">Disponibles: {allRecords.map(r => MONTHS_SHORT[r.month - 1]).join(', ')}</p>
           </div>
         ) : (
           <>
@@ -1345,15 +1331,15 @@ export default function PYGModal({ onClose, storeId }) {
             {activeTab === 'overview' && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
                 {/* Gauges */}
-                <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,24,117,0.1)', boxShadow: '0 2px 16px rgba(194,24,117,0.05)' }}>
+                <div className="rounded-2xl p-6" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-widest" style={{ color: '#374151' }}>KPIs Clave — {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
+                      <p className="text-xs font-black text-slate-300 uppercase tracking-widest">KPIs Clave — {MONTHS_FULL[(selectedMonth || 1) - 1]}</p>
                       {prevRecord && <p className="text-[10px] text-slate-500 mt-0.5">vs {MONTHS_FULL[(selectedMonth - 2 + 12) % 12]} · Toca para análisis detallado</p>}
                     </div>
                     {prevRecord && (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black"
-                        style={{ background: 'rgba(194,24,117,0.06)', border: '1px solid rgba(194,24,117,0.12)', color: '#6b7280' }}>
+                        style={{ background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.12)', color: '#94a3b8' }}>
                         <span style={{ color: '#34d399' }}>●</span> Actual &nbsp;
                         <span style={{ color: '#475569' }}>●</span> Anterior
                       </div>
@@ -1405,25 +1391,25 @@ export default function PYGModal({ onClose, storeId }) {
 
                 {/* Donut + Waterfall */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,24,117,0.1)', boxShadow: '0 2px 16px rgba(194,24,117,0.05)' }}>
-                     <p className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: '#374151' }}>Distribución del Peso</p>
-                     <p className="text-[10px] text-slate-500 mb-4">Estructura de uso de cada peso de venta</p>
+                  <div className="rounded-2xl p-5" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
+                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-1">Distribución del Peso</p>
+                    <p className="text-[10px] text-slate-600 mb-4">Estructura de uso de cada peso de venta</p>
                     <DonutBreakdown ebitda={ebitda} costReal={costReal} personal={personal} gastos={gastos} />
                   </div>
-                  <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,24,117,0.1)', boxShadow: '0 2px 16px rgba(194,24,117,0.05)' }}>
-                     <p className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: '#374151' }}>Waterfall Financiero</p>
-                     <p className="text-[10px] text-slate-500 mb-2">Cómo se llega al EBITDA desde el 100% de venta</p>
+                  <div className="rounded-2xl p-5" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
+                    <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-1">Waterfall Financiero</p>
+                    <p className="text-[10px] text-slate-600 mb-2">Cómo se llega al EBITDA desde el 100% de venta</p>
                     <WaterfallChart data={waterfallData} />
                   </div>
                 </div>
 
                 {/* Mini EBITDA trend */}
                 {trendData.length >= 2 && (
-                  <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,24,117,0.1)', boxShadow: '0 2px 16px rgba(194,24,117,0.05)' }}>
+                  <div className="rounded-2xl p-5" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <p className="text-xs font-black uppercase tracking-widest" style={{ color: '#374151' }}>Evolución EBITDA {currentYear}</p>
-                        <p className="text-[10px] text-slate-500">{trendData.length} meses cargados</p>
+                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Evolución EBITDA {currentYear}</p>
+                        <p className="text-[10px] text-slate-600">{trendData.length} meses cargados</p>
                       </div>
                       <div className="flex items-center gap-1 text-[10px] text-slate-400">
                         <Flame className="w-3 h-3" style={{ color: MAGENTA }} />
@@ -1435,12 +1421,12 @@ export default function PYGModal({ onClose, storeId }) {
                 )}
 
                 {/* Insights */}
-                <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,24,117,0.1)', boxShadow: '0 2px 16px rgba(194,24,117,0.05)' }}>
+                <div className="rounded-2xl p-5" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ background: `${MAGENTA}15` }}>
+                    <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ background: `${MAGENTA}20` }}>
                       <Zap className="w-3.5 h-3.5" style={{ color: MAGENTA }} />
                     </div>
-                    <p className="font-black text-sm" style={{ color: '#1e1b2e' }}>Análisis Cuantitativo & Alertas</p>
+                    <p className="font-black text-slate-200 text-sm">Análisis Cuantitativo & Alertas</p>
                   </div>
                   <QuantInsights primaryRecord={primaryRecord} prevRecord={prevRecord} trendData={trendData} />
                 </div>
@@ -1457,13 +1443,13 @@ export default function PYGModal({ onClose, storeId }) {
             {/* ── SIMULADOR ─────────────────────────────────────────────── */}
             {activeTab === 'simulator' && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,24,117,0.1)', boxShadow: '0 2px 16px rgba(194,24,117,0.05)' }}>
+                <div className="rounded-2xl p-6" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${MAGENTA}15` }}>
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${MAGENTA}20` }}>
                       <Target className="w-4 h-4" style={{ color: MAGENTA }} />
                     </div>
                     <div>
-                      <h3 className="font-black text-sm" style={{ color: '#1e1b2e' }}>Simulador EBITDA</h3>
+                      <h3 className="font-black text-slate-200 text-sm">Simulador EBITDA</h3>
                       <p className="text-[10px] text-slate-500">¿Cuánto necesito para mejorar?</p>
                     </div>
                   </div>
@@ -1475,8 +1461,8 @@ export default function PYGModal({ onClose, storeId }) {
                   const curr = trendData.find(d => d.month === selectedMonth);
                   if (!curr || bestMonth.month === selectedMonth) return null;
                   return (
-                    <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,24,117,0.1)', boxShadow: '0 2px 16px rgba(194,24,117,0.05)' }}>
-                      <h3 className="font-black mb-1 text-sm" style={{ color: '#1e1b2e' }}>¿Qué pasó diferente en {bestMonth.mes}?</h3>
+                    <div className="rounded-2xl p-6" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
+                      <h3 className="font-black text-slate-200 mb-1 text-sm">¿Qué pasó diferente en {bestMonth.mes}?</h3>
                       <p className="text-[10px] text-slate-500 mb-4">Mejor mes vs seleccionado</p>
                       <div className="grid grid-cols-2 gap-3">
                         {['EBITDA', 'C.Real', 'Personal', 'Gastos'].map(k => {
@@ -1484,11 +1470,11 @@ export default function PYGModal({ onClose, storeId }) {
                           const diff = cv != null && bv != null ? cv - bv : null;
                           const better = k === 'EBITDA' ? (diff ?? 0) >= 0 : (diff ?? 0) <= 0;
                           return (
-                            <div key={k} className="rounded-xl p-4" style={{ background: 'rgba(194,24,117,0.03)', border: '1px solid rgba(194,24,117,0.1)' }}>
+                            <div key={k} className="rounded-xl p-4" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.08)' }}>
                               <p className="text-[10px] font-black text-slate-500 uppercase mb-1">{k === 'C.Real' ? 'Costo Real' : k}</p>
                               <div className="flex items-end gap-2">
-                                <span className="font-black text-xl" style={{ color: '#1e1b2e' }}>{cv?.toFixed(1)}%</span>
-                                <span className="text-sm text-slate-500 mb-0.5">vs {bv?.toFixed(1)}%</span>
+                                <span className="font-black text-xl text-slate-200">{cv?.toFixed(1)}%</span>
+                                <span className="text-sm text-slate-600 mb-0.5">vs {bv?.toFixed(1)}%</span>
                               </div>
                               {diff != null && (
                                 <p className="text-xs font-black mt-1" style={{ color: better ? '#34d399' : '#f87171' }}>
@@ -1508,8 +1494,8 @@ export default function PYGModal({ onClose, storeId }) {
             {/* ── DESGLOSE ──────────────────────────────────────────────── */}
             {activeTab === 'breakdown' && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,24,117,0.1)', boxShadow: '0 2px 16px rgba(194,24,117,0.05)' }}>
-                  <p className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: '#374151' }}>
+                <div className="rounded-2xl p-6" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
+                  <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-4">
                     Desglose Completo — {MONTHS_FULL[(selectedMonth || 1) - 1]}
                   </p>
                   <CostTable primaryRecord={primaryRecord} prevRecord={prevRecord} />
@@ -1520,8 +1506,8 @@ export default function PYGModal({ onClose, storeId }) {
                   try { others = Object.entries(JSON.parse(primaryRecord.otros_gastos)).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]); } catch {}
                   if (!others.length) return null;
                   return (
-                    <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194,24,117,0.1)', boxShadow: '0 2px 16px rgba(194,24,117,0.05)' }}>
-                       <p className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: '#374151' }}>Otros Gastos Detallados</p>
+                    <div className="rounded-2xl p-6" style={{ background: 'rgba(148,163,184,0.04)', border: '1px solid rgba(148,163,184,0.1)' }}>
+                      <p className="text-xs font-black text-slate-300 uppercase tracking-widest mb-4">Otros Gastos Detallados</p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {others.map(([k, v]) => (
                           <div key={k} className="rounded-xl p-4" style={{ background: `${MAGENTA}08`, border: `1px solid ${MAGENTA}15` }}>

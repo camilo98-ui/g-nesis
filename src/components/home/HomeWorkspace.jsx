@@ -25,8 +25,6 @@ import ProductTicketAnalysis from '@/components/reports/ProductTicketAnalysis';
 import WeeklyComparison from './WeeklyComparison';
 import TakeawayCard from './TakeawayCard';
 import NovaInsightStrip from './NovaInsightStrip';
-import PYGIntelligenceOS from '@/components/reports/PYGIntelligenceOS';
-import PYGIntelligenceOSv2 from '@/components/reports/PYGIntelligenceOSv2';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -70,10 +68,9 @@ function getGreeting() {
 }
 
 const NAV_ITEMS = [
-{ icon: LayoutDashboard, label: 'Inicio', path: null, color: '#C21875', onClick: 'onGoHome', roles: ['lider', 'embajador', 'gerente'] },
 { icon: LayoutDashboard, label: 'Tienda', path: 'Dashboard', color: '#C21875', roles: ['lider', 'embajador', 'gerente'] },
 { icon: TrendingUp, label: 'P&G', path: 'PYGDashboard', color: '#374151', roles: ['gerente'] },
-{ icon: TrendingUp, label: 'P&G Intelligence', path: null, color: '#C21875', onClick: 'onShowPYGModal', roles: ['lider', 'embajador'] },
+{ icon: TrendingUp, label: 'P&G Tienda', path: null, color: '#374151', onClick: 'onShowPYGModal', roles: ['lider', 'embajador'] },
 { icon: FileText, label: 'Informe', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: Clock, label: 'Txn por hora', path: 'HourlyTransactions', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: BarChart3, label: 'Participación', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
@@ -315,8 +312,7 @@ export default function HomeWorkspace({
   const greeting = getGreeting();
   const GreetIcon = greeting.icon;
   const { setPageData } = useNova() || {};
-  const [activeNav, setActiveNav] = useState('home');
-  const [activeView, setActiveView] = useState(null); // null = home, or path key
+  const [activeNav, setActiveNav] = useState('Dashboard');
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -781,29 +777,20 @@ export default function HomeWorkspace({
         <div className="flex-1 px-2.5 space-y-px overflow-y-auto pb-2">
           <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.14em] px-3 mb-2">Navegación</p>
           {filteredNav.map((item) => {
-            const viewKey = item.path || item.onClick || item.label;
             const handleClick = () => {
               if (!item.path) {
-                if (item.onClick === 'onShowPYGModal') {
-                  setActiveView('pyg');
-                  setActiveNav('pyg');
-                } else if (item.onClick === 'onGoHome') {
-                  setActiveView(null);
-                  setActiveNav('home');
-                }
+                if (item.onClick === 'onShowPYGModal') onShowPYGModal?.();
                 return;
               }
               if (item.label === 'Informe') {
                 setShowAIReport(true);
                 return;
               }
-              // Show inline in center content
-              setActiveView(item.path);
               setActiveNav(item.path);
+              window.location.href = `/${item.path}`;
             };
-            const isActive = activeNav === (item.path || (item.onClick === 'onShowPYGModal' ? 'pyg' : item.onClick === 'onGoHome' ? 'home' : item.label));
             return (
-              <NavItem key={item.label} item={item} isActive={isActive} onClick={handleClick} />);
+              <NavItem key={item.label} item={item} isActive={activeNav === item.path} onClick={handleClick} />);
 
           })}
         </div>
@@ -832,18 +819,10 @@ export default function HomeWorkspace({
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 min-w-0 flex overflow-hidden relative" style={{ height: '100vh' }}>
+      <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh' }}>
 
         {/* CENTER — scrollable */}
-        <div className="flex-1 min-w-0 overflow-y-auto">
-
-          {/* ── HOME CONTENT (always visible behind P&G dashboard) ── */}
-          <motion.div key="home-content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="p-3 sm:p-5 lg:p-8">
+        <div className="flex-1 min-w-0 overflow-y-auto p-3 sm:p-5 lg:p-8">
 
           {/* TOP BAR */}
           <motion.div
@@ -1687,27 +1666,7 @@ export default function HomeWorkspace({
             <p className="text-[8px] font-semibold tracking-[0.22em] uppercase" style={{ color: 'rgba(194,24,117,0.35)' }}>Popsy AI Workspace</p>
             <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(194,24,117,0.12), transparent)' }} />
           </div>
-
-          </motion.div>
-
-          {/* ── OVERLAY: P&G Intelligence Dashboard — CINEMATIC VERSION ── */}
-          <AnimatePresence mode="wait">
-           {activeView === 'pyg' && (
-             <motion.div key="pyg-overlay"
-               initial={{ opacity: 0 }}
-               animate={{ opacity: 1 }}
-               exit={{ opacity: 0 }}
-               transition={{ duration: 0.25 }}
-               className="absolute inset-0 z-30 overflow-y-auto"
-               style={{ background: 'linear-gradient(to bottom, #f8f5fc 0%, #faf8fc 50%, #f5f2fa 100%)' }}>
-               <PYGIntelligenceOSv2
-                 storeId={selectedStore}
-                 onClose={() => { setActiveView(null); setActiveNav('home'); }}
-               />
-             </motion.div>
-           )}
-          </AnimatePresence>
-          </div>
+        </div>
 
         {/* ── RIGHT AI PANEL ── */}
         

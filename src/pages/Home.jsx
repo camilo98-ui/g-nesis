@@ -31,7 +31,7 @@ import KpisReportUploader from '@/components/reports/KpisReportUploader.jsx';
 import ParticipacionModal from '@/components/reports/ParticipacionModal.jsx';
 import AggregatorsUploader from '@/components/reports/AggregatorsUploader.jsx';
 import PYGUploader from '@/components/reports/PYGUploader.jsx';
-import PYGIntelligenceOS from '@/components/reports/PYGIntelligenceOS.jsx';
+import PYGModal from '@/components/reports/PYGModal.jsx';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 
@@ -1638,10 +1638,10 @@ export default function Home() {
         }
       </AnimatePresence>
 
-      {/* P&G Intelligence OS — full-screen cinematic experience */}
+      {/* Modal P&G de tienda (Gerente con tienda seleccionada) */}
       <AnimatePresence>
         {showPYGModal &&
-        <PYGIntelligenceOS
+        <PYGModal
           storeId={selectedStore}
           onClose={() => setShowPYGModal(false)} />
         }
