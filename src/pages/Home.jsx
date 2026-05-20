@@ -1499,19 +1499,62 @@ export default function Home() {
             className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden">
             
               {/* Header */}
-              <div className="relative pt-8 pb-4 px-6 text-center">
+              <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fff 0%, #fff 100%)' }}>
+                {/* Soft pink glow wave — left */}
+                <div className="absolute -left-16 -top-10 w-56 h-56 rounded-full pointer-events-none"
+                  style={{ background: 'radial-gradient(circle, rgba(251,207,232,0.55) 0%, rgba(253,231,243,0.25) 50%, transparent 75%)', filter: 'blur(24px)' }} />
+                {/* Abstract gradient shape — center */}
+                <div className="absolute left-1/2 -translate-x-1/2 -top-8 w-80 h-32 pointer-events-none"
+                  style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(244,114,182,0.10) 0%, transparent 80%)' }} />
+                {/* Dotted pattern — top right */}
+                <div className="absolute top-0 right-0 w-32 h-28 pointer-events-none overflow-hidden">
+                  <svg width="128" height="112" viewBox="0 0 128 112" fill="none">
+                    {Array.from({ length: 6 }).map((_, row) =>
+                      Array.from({ length: 8 }).map((_, col) => (
+                        <circle key={`${row}-${col}`} cx={col * 16 + 8} cy={row * 16 + 8} r="1.5"
+                          fill="#f9a8d4" opacity={0.35 - row * 0.04} />
+                      ))
+                    )}
+                  </svg>
+                </div>
+
+                {/* Close button */}
                 <button
                   onClick={() => setShowStoreSales(false)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-105"
+                  style={{ background: 'rgba(0,0,0,0.05)', backdropFilter: 'blur(8px)' }}>
+                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-                <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-3">
-                  <TrendingUp className="w-6 h-6 text-rose-500" />
+
+                {/* Floating icon */}
+                <div className="relative z-10 pt-8 pb-5 px-6 text-center">
+                  <div className="relative inline-flex items-center justify-center mb-4">
+                    {/* Outer glow ring */}
+                    <div className="absolute inset-0 rounded-2xl"
+                      style={{ background: 'linear-gradient(135deg, rgba(251,207,232,0.6), rgba(244,114,182,0.2))', filter: 'blur(10px)', transform: 'scale(1.3)' }} />
+                    {/* Icon container */}
+                    <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center"
+                      style={{
+                        background: 'linear-gradient(145deg, #fff 0%, #fdf2f8 100%)',
+                        boxShadow: '0 4px 20px rgba(244,114,182,0.2), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)',
+                        border: '1px solid rgba(251,207,232,0.5)'
+                      }}>
+                      <TrendingUp className="w-6 h-6" style={{ color: '#e11d48' }} />
+                    </div>
+                  </div>
+
+                  <h2 className="text-[20px] font-bold text-gray-900 tracking-tight" style={{ letterSpacing: '-0.02em' }}>
+                    Registrar Venta
+                  </h2>
+                  <p className="text-[13px] mt-1 font-medium" style={{ color: '#94a3b8' }}>
+                    Agrega los detalles de la venta realizada
+                  </p>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Registrar Venta</h2>
-                <p className="text-sm text-gray-400 mt-1">Agrega los detalles de la venta realizada</p>
+
+                {/* Bottom separator line */}
+                <div className="h-px mx-6" style={{ background: 'linear-gradient(90deg, transparent, rgba(244,114,182,0.15), rgba(244,114,182,0.08), transparent)' }} />
               </div>
 
               <div className="px-6 pb-6 max-h-[80vh] overflow-y-auto">
