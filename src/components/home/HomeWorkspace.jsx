@@ -920,23 +920,24 @@ export default function HomeWorkspace({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative overflow-hidden"
+              className="relative"
               style={{
-                borderRadius: 24,
-                background: 'rgba(255,255,255,0.94)',
+                borderRadius: 28,
+                background: 'rgba(255,255,255,0.95)',
                 backdropFilter: 'blur(48px) saturate(160%)',
                 WebkitBackdropFilter: 'blur(48px) saturate(160%)',
-                border: '1px solid rgba(255,255,255,0.72)',
-                boxShadow: '0 8px 36px rgba(0,0,0,0.07), 0 2px 8px rgba(194,24,117,0.07), inset 0 1px 0 rgba(255,255,255,1)',
+                border: '1px solid rgba(255,255,255,0.75)',
+                boxShadow: '0 8px 40px rgba(0,0,0,0.06), 0 2px 10px rgba(194,24,117,0.06), inset 0 1px 0 rgba(255,255,255,1)',
               }}>
 
               {/* Ambient top glow */}
               <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, height: 80, pointerEvents: 'none', zIndex: 0,
-                background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(251,207,232,0.28) 0%, transparent 70%)',
+                position: 'absolute', top: 0, left: 0, right: 0, height: 80,
+                pointerEvents: 'none', zIndex: 0, borderRadius: '28px 28px 0 0',
+                background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(251,207,232,0.25) 0%, transparent 70%)',
               }} />
 
-              <div className="relative z-10 flex items-center px-5 py-4 gap-4">
+              <div className="relative z-10 flex items-center px-6 py-5 gap-4">
                 <NovaInsightStrip dailySales={todaySales} budget={budgetData} latestWeather={latestWeather} />
               </div>
             </motion.div>
