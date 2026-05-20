@@ -461,7 +461,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
               Real Acumulado
             </p>
-            <p style={{ fontSize: 34, fontWeight: 900, color: PINK, letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, Inter, sans-serif' }}>
+            <p style={{ fontSize: 24, fontWeight: 900, color: PINK, letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, Inter, sans-serif' }}>
               {fmt(analysis.totalSold)}
             </p>
           </div>
@@ -515,7 +515,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               Proyección de Cierre
             </p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'flex-end' }}>
-              <p style={{ fontSize: 34, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
+              <p style={{ fontSize: 24, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
                 {fmt(analysis.projection)}
               </p>
               {analysis.projCompliance != null &&
