@@ -847,7 +847,7 @@ export default function HomeWorkspace({
                       {new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
                     <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-none"
-                    style={{ letterSpacing: '-0.04em', color: '#1a1a2e' }}>
+                    style={{ letterSpacing: '-0.04em', color: '#64748b' }}>
                       {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{LEADERS[selectedStore] || 'Tienda'}</span>
                     </h1>
                   </div>
