@@ -193,37 +193,22 @@ export default function MascotWidget() {
   const inputRef = useRef(null);
   const alertCheckRef = useRef(null);
 
-  const [userName, setUserName] = useState('');
   const path = location?.pathname || '/';
   const pageCtx = PAGE_CONTEXTS[path] || { name: 'App', focus: 'operaciones generales de la tienda.' };
   const suggestions = SUGGESTIONS[path] || SUGGESTIONS.default;
   const { getSectionsSummary } = useNova() || {};
 
   useEffect(() => {
-    base44.auth.me().then(u => {
-      if (u?.full_name) {
-        const firstName = u.full_name.split(' ')[0];
-        setUserName(firstName);
-      }
-    }).catch(() => {});
-  }, []);
-
-  const getWelcome = (p) => {
-    const base = PROACTIVE_MESSAGES[p] || PROACTIVE_MESSAGES.default;
-    if (!userName) return base;
-    // Insert name after "Hola." or "Hola,"
-    return base.replace(/^Hola\./, `Hola, ${userName}.`).replace(/^Hola,/, `Hola, ${userName},`);
-  };
-
-  useEffect(() => {
     if (isOpen && messages.length === 0) {
-      setMessages([{ role: 'assistant', content: getWelcome(path) }]);
+      const welcome = PROACTIVE_MESSAGES[path] || PROACTIVE_MESSAGES.default;
+      setMessages([{ role: 'assistant', content: welcome }]);
     }
   }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
-      setMessages([{ role: 'assistant', content: getWelcome(path) }]);
+      const welcome = PROACTIVE_MESSAGES[path] || PROACTIVE_MESSAGES.default;
+      setMessages([{ role: 'assistant', content: welcome }]);
     }
   }, [path]);
 
@@ -552,7 +537,8 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
   };
 
   const reset = () => {
-    setMessages([{ role: 'assistant', content: getWelcome(path) }]);
+    const welcome = PROACTIVE_MESSAGES[path] || PROACTIVE_MESSAGES.default;
+    setMessages([{ role: 'assistant', content: welcome }]);
   };
 
   return (
