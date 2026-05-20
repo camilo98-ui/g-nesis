@@ -4,9 +4,9 @@ import { ShoppingBag, ChevronDown, ChevronUp, Pencil, Check, X, TrendingUp, Targ
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-const PINK = '#e879a0';
-const PINK_SOFT = 'rgba(244,114,182,0.08)';
-const PINK_MID = 'rgba(244,114,182,0.18)';
+const PINK = '#db2777';
+const PINK_SOFT = 'rgba(219,39,119,0.08)';
+const PINK_MID = 'rgba(219,39,119,0.18)';
 const PINK_LIGHT = '#fdf2f8';
 
 function fmt(val) {
@@ -227,7 +227,7 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
           y={PAD_T}
           width={chartW / pts.length}
           height={chartH}
-          fill="rgba(244,114,182,0.04)"
+          fill="rgba(219,39,119,0.04)"
           rx="2" />
 
         }
@@ -390,7 +390,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
       style={{
         background: '#ffffff',
         border: `1px solid ${PINK_MID}`,
-        boxShadow: `0 4px 24px rgba(244,114,182,0.08), 0 1px 4px rgba(0,0,0,0.04)`
+        boxShadow: `0 4px 24px rgba(219,39,119,0.08), 0 1px 4px rgba(0,0,0,0.04)`
       }}>
       
       {/* Top accent line */}
@@ -476,7 +476,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               <span style={{ color: '#94a3b8', fontWeight: 500, marginLeft: 4 }}>del objetivo</span>
             </div>
             {/* Track */}
-            <div style={{ width: '100%', height: 8, borderRadius: 99, background: 'rgba(244,114,182,0.12)', position: 'relative', overflow: 'visible' }}>
+            <div style={{ width: '100%', height: 8, borderRadius: 99, background: 'rgba(219,39,119,0.12)', position: 'relative', overflow: 'visible' }}>
               {budget > 0 && (() => {
                 const pct = Math.min((analysis.totalSold / budget) * 100, 100);
                 return (
@@ -642,8 +642,8 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               {/* Proyección de cierre card con ícono y badge */}
               <div style={{
                 flex: 1, padding: '10px 14px', margin: '8px 6px', borderRadius: 12,
-                border: `1.5px solid rgba(244,114,182,0.25)`, background: 'rgba(244,114,182,0.04)',
-                boxShadow: '0 2px 12px rgba(244,114,182,0.08)', display: 'flex', flexDirection: 'column', gap: 2
+                border: `1.5px solid rgba(219,39,119,0.25)`, background: 'rgba(219,39,119,0.04)',
+                boxShadow: '0 2px 12px rgba(219,39,119,0.08)', display: 'flex', flexDirection: 'column', gap: 2
               }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Proyección de Cierre</p>
@@ -696,7 +696,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '11px 18px',
             borderTop: `1px solid ${PINK_SOFT}`,
-            background: isOnTrack === false ? 'rgba(245,158,11,0.04)' : isOnTrack === true ? 'rgba(16,185,129,0.04)' : 'rgba(244,114,182,0.04)'
+            background: isOnTrack === false ? 'rgba(245,158,11,0.04)' : isOnTrack === true ? 'rgba(16,185,129,0.04)' : 'rgba(219,39,119,0.04)'
           }}>
               <p style={{ fontSize: 10, fontWeight: 600, color: '#374151' }}>
                 🧁 {fmt(analysis.totalSold)} vendido · proy. {fmt(analysis.projection)}
