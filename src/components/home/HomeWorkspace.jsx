@@ -1385,7 +1385,7 @@ export default function HomeWorkspace({
                       }}>
                       
                       {/* Top accent bar — fully opaque */}
-                      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl hidden" style={{ background: `linear-gradient(90deg, ${c.accent}, ${c.accent}40, transparent)` }} />
+                      
                       {/* Bottom ambient bleed */}
                       <div className="absolute bottom-0 left-0 right-0 h-12 rounded-b-2xl pointer-events-none" style={{ background: `linear-gradient(0deg, ${c.accent}06, transparent)` }} />
 
