@@ -831,63 +831,18 @@ export default function HomeWorkspace({
       </motion.aside>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 min-w-0 flex overflow-hidden" style={{ height: '100vh' }}>
+      <main className="flex-1 min-w-0 flex overflow-hidden relative" style={{ height: '100vh' }}>
 
         {/* CENTER — scrollable */}
         <div className="flex-1 min-w-0 overflow-y-auto">
 
-          {/* ── INLINE VIEW: P&G Intelligence ── */}
-          <AnimatePresence mode="wait">
-            {activeView === 'pyg' && (
-              <motion.div key="pyg-view"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-                className="h-full">
-                <PYGIntelligenceOS
-                  storeId={selectedStore}
-                  onClose={() => { setActiveView(null); setActiveNav('home'); }}
-                />
-              </motion.div>
-            )}
-
-            {/* ── INLINE VIEW: External pages in iframe-like embed ── */}
-            {activeView && activeView !== 'pyg' && (
-              <motion.div key={`view-${activeView}`}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-                className="h-full flex flex-col">
-                {/* Back bar */}
-                <div className="flex items-center gap-3 px-5 py-3 flex-shrink-0"
-                  style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(194,24,117,0.08)' }}>
-                  <button
-                    onClick={() => { setActiveView(null); setActiveNav('home'); }}
-                    className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all"
-                    style={{ background: 'rgba(194,24,117,0.06)', color: '#C21875', border: '1px solid rgba(194,24,117,0.15)' }}>
-                    ← Volver al inicio
-                  </button>
-                  <span className="text-xs font-bold text-slate-500">{activeView}</span>
-                </div>
-                <iframe
-                  src={`/${activeView}`}
-                  className="flex-1 w-full border-0"
-                  title={activeView}
-                  style={{ minHeight: 'calc(100vh - 52px)' }}
-                />
-              </motion.div>
-            )}
-
-            {/* ── HOME CONTENT ── */}
-            {!activeView && (
-              <motion.div key="home-content"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="p-3 sm:p-5 lg:p-8">
+          {/* ── HOME CONTENT (always visible behind P&G dashboard) ── */}
+          <motion.div key="home-content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="p-3 sm:p-5 lg:p-8">
 
           {/* TOP BAR */}
           <motion.div
@@ -1732,10 +1687,26 @@ export default function HomeWorkspace({
             <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(194,24,117,0.12), transparent)' }} />
           </div>
 
-              </motion.div>
-            )}
+          </motion.div>
+
+          {/* ── OVERLAY: P&G Intelligence Dashboard with Tabs ── */}
+          <AnimatePresence mode="wait">
+           {activeView === 'pyg' && (
+             <motion.div key="pyg-overlay"
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               transition={{ duration: 0.25 }}
+               className="absolute inset-0 z-30 overflow-y-auto"
+               style={{ background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(12px)' }}>
+               <PYGIntelligenceOS
+                 storeId={selectedStore}
+                 onClose={() => { setActiveView(null); setActiveNav('home'); }}
+               />
+             </motion.div>
+           )}
           </AnimatePresence>
-        </div>
+          </div>
 
         {/* ── RIGHT AI PANEL ── */}
         
