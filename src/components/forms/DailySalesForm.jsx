@@ -214,7 +214,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
       </AnimatePresence>
 
       {/* Tabs */}
-      <div className="flex border border-gray-200 rounded-2xl overflow-hidden mb-5">
+      <div className="flex border border-gray-200 rounded-2xl overflow-hidden mb-3">
         {[
           { id: 'ventas', label: 'Ventas', Icon: BarChart2 },
           { id: 'llevar', label: 'Llevar', Icon: ShoppingBag }
@@ -223,7 +223,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-all"
+            className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold transition-all"
             style={{
               background: activeTab === tab.id ? '#fff' : 'transparent',
               color: activeTab === tab.id ? '#e11d48' : '#9ca3af',
@@ -236,15 +236,15 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Fecha */}
-        <div className="border border-gray-200 rounded-2xl p-4">
-          <p className="text-xs font-semibold text-gray-500 mb-2">Fecha de la venta</p>
+        <div className="border border-gray-200 rounded-2xl p-3">
+          <p className="text-xs font-semibold text-gray-500 mb-1.5">Fecha de la venta</p>
           <input
             type="date"
             value={formData.date}
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold text-gray-700 outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100 transition-all"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100 transition-all"
           />
         </div>
 
@@ -270,16 +270,16 @@ export default function DailySalesForm({ storeId, onSuccess }) {
 
         {/* Tab: Ventas — grid 2 columnas */}
         {activeTab === 'ventas' && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {/* Ventas */}
-            <div className="border border-gray-200 rounded-2xl p-4">
+            <div className="border border-gray-200 rounded-2xl p-3">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-4 h-4 text-emerald-600" />
+                <div className="w-6 h-6 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
                 </div>
                 <p className="text-sm font-semibold text-gray-700">Ventas</p>
               </div>
-              <p className="text-xs text-gray-400 mb-3">Ingresa el valor total de ventas</p>
+              <p className="text-xs text-gray-400 mb-2">Ingresa el valor total de ventas</p>
               <input
                 type="number"
                 placeholder="0"
@@ -291,15 +291,15 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             </div>
 
             {/* Ticket Promedio */}
-            <div className="border border-gray-200 rounded-2xl p-4 bg-gray-50">
+            <div className="border border-gray-200 rounded-2xl p-3 bg-gray-50">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-7 h-7 bg-sky-100 rounded-lg flex items-center justify-center">
-                  <Receipt className="w-4 h-4 text-sky-600" />
+                <div className="w-6 h-6 bg-sky-100 rounded-lg flex items-center justify-center">
+                  <Receipt className="w-3.5 h-3.5 text-sky-600" />
                 </div>
                 <p className="text-sm font-semibold text-gray-700">Ticket Promedio</p>
                 <Info className="w-3 h-3 text-gray-300" />
               </div>
-              <p className="text-xs text-gray-400 mb-3">Calculado automáticamente</p>
+              <p className="text-xs text-gray-400 mb-2">Calculado automáticamente</p>
               <input
                 type="text"
                 placeholder="Calculado automáticamente"
@@ -311,14 +311,14 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             </div>
 
             {/* Transacciones */}
-            <div className="border border-gray-200 rounded-2xl p-4">
+            <div className="border border-gray-200 rounded-2xl p-3">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-violet-600" />
+                <div className="w-6 h-6 bg-violet-100 rounded-lg flex items-center justify-center">
+                  <Zap className="w-3.5 h-3.5 text-violet-600" />
                 </div>
                 <p className="text-sm font-semibold text-gray-700">Transacciones</p>
               </div>
-              <p className="text-xs text-gray-400 mb-3">Cantidad de transacciones</p>
+              <p className="text-xs text-gray-400 mb-2">Cantidad de transacciones</p>
               <input
                 type="number"
                 placeholder="0"
@@ -330,14 +330,14 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             </div>
 
             {/* Sugeridos */}
-            <div className="border border-gray-200 rounded-2xl p-4">
+            <div className="border border-gray-200 rounded-2xl p-3">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-7 h-7 bg-pink-100 rounded-lg flex items-center justify-center">
-                  <Gift className="w-4 h-4 text-pink-600" />
+                <div className="w-6 h-6 bg-pink-100 rounded-lg flex items-center justify-center">
+                  <Gift className="w-3.5 h-3.5 text-pink-600" />
                 </div>
                 <p className="text-sm font-semibold text-gray-700">Sugeridos</p>
               </div>
-              <p className="text-xs text-gray-400 mb-3">Productos sugeridos</p>
+              <p className="text-xs text-gray-400 mb-2">Productos sugeridos</p>
               <input
                 type="number"
                 placeholder="0"
@@ -351,18 +351,18 @@ export default function DailySalesForm({ storeId, onSuccess }) {
         )}
 
         {/* Botones */}
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-3 pt-1">
           <button
             type="button"
             onClick={() => { resetForm(); if (onSuccess) onSuccess(); }}
-            className="flex-1 py-3.5 rounded-2xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all"
+            className="flex-1 py-2.5 rounded-2xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-all"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={createMutation.isPending}
-            className="flex-1 py-3.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all"
+            className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all"
             style={{ background: 'linear-gradient(135deg, #e11d48, #be185d)' }}
           >
             {createMutation.isPending ? (
