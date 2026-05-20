@@ -59,7 +59,7 @@ function StatCard({ label, value, sub, subColor, highlight, last }) {
       
       <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
       <p style={{
-        fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1,
+        fontSize: 22, fontWeight: 300, letterSpacing: '-0.01em', lineHeight: 1,
         fontFamily: 'Inter Tight, sans-serif',
         color: highlight ? PINK : '#64748b'
       }}>{value}</p>
@@ -461,7 +461,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
             <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 4 }}>
               Real Acumulado
             </p>
-            <p style={{ fontSize: 34, fontWeight: 900, color: PINK, letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, Inter, sans-serif' }}>
+            <p style={{ fontSize: 34, fontWeight: 200, color: PINK, letterSpacing: '0em', lineHeight: 1, fontFamily: 'Inter Tight, Inter, sans-serif' }}>
               {fmt(analysis.totalSold)}
             </p>
           </div>
@@ -470,7 +470,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
           <div style={{ padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
             {/* Percentage label */}
             <div style={{ fontSize: 11, fontWeight: 700, color: '#374151' }}>
-              <span style={{ fontSize: 15, fontWeight: 900, color: '#64748b' }}>
+              <span style={{ fontSize: 15, fontWeight: 300, color: '#64748b' }}>
                 {budget > 0 ? `${Math.round((analysis.totalSold / budget) * 100)}%` : '—'}
               </span>
               <span style={{ color: '#94a3b8', fontWeight: 500, marginLeft: 4 }}>del objetivo</span>
@@ -515,11 +515,11 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               Proyección de Cierre
             </p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'flex-end' }}>
-              <p style={{ fontSize: 34, fontWeight: 900, color: '#64748b', letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
+              <p style={{ fontSize: 34, fontWeight: 200, color: '#64748b', letterSpacing: '0em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
                 {fmt(analysis.projection)}
               </p>
               {analysis.projCompliance != null &&
-              <span style={{ fontSize: 13, fontWeight: 800, color: analysis.projCompliance >= 100 ? '#10b981' : PINK, fontFamily: 'Inter Tight, sans-serif' }}>
+              <span style={{ fontSize: 13, fontWeight: 400, color: analysis.projCompliance >= 100 ? '#10b981' : PINK, fontFamily: 'Inter Tight, sans-serif' }}>
                   {analysis.projCompliance.toFixed(0)}% PPT
                 </span>
               }
@@ -628,7 +628,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
                 }}>
                     <div>
                       <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>{label}</p>
-                      <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1,
+                      <p style={{ fontSize: 22, fontWeight: 300, letterSpacing: '-0.01em', lineHeight: 1,
                       fontFamily: 'Inter Tight, sans-serif', color }}>
                         {smartPPT != null ? fmt(Math.round(smartPPT)) : '—'}
                       </p>
@@ -647,7 +647,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Proyección de Cierre</p>
-                  <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: PINK }}>{fmt(analysis.projection)}</p>
+                  <p style={{ fontSize: 22, fontWeight: 300, letterSpacing: '-0.01em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: PINK }}>{fmt(analysis.projection)}</p>
                   <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: PINK }}>al cierre del mes</p>
                 </div>
 
@@ -661,7 +661,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Promedio por Día</p>
-                  <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: '#64748b' }}>{fmt(analysis.dailyAvg)}</p>
+                  <p style={{ fontSize: 22, fontWeight: 300, letterSpacing: '-0.01em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: '#64748b' }}>{fmt(analysis.dailyAvg)}</p>
                   <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: '#94a3b8' }}>{analysis.daysRemaining} días restantes</p>
                 </div>
 
