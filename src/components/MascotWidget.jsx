@@ -196,12 +196,10 @@ export default function MascotWidget() {
   const alertCheckRef = useRef(null);
 
   const path = location?.pathname || '/';
+  const isHidden = path === '/PYGDashboard';
   const pageCtx = PAGE_CONTEXTS[path] || { name: 'App', focus: 'operaciones generales de la tienda.' };
   const suggestions = SUGGESTIONS[path] || SUGGESTIONS.default;
   const { getSectionsSummary } = useNova() || {};
-
-  // Don't render on PYGDashboard
-  if (path === '/PYGDashboard') return null;
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -545,6 +543,8 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
     const welcome = PROACTIVE_MESSAGES[path] || PROACTIVE_MESSAGES.default;
     setMessages([{ role: 'assistant', content: welcome }]);
   };
+
+  if (isHidden) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end gap-0">
