@@ -24,6 +24,7 @@ import { useNova } from '@/components/NovaContext';
 import ProductTicketAnalysis from '@/components/reports/ProductTicketAnalysis';
 import WeeklyComparison from './WeeklyComparison';
 import TakeawayCard from './TakeawayCard';
+import NovaInsightStrip from './NovaInsightStrip';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -961,91 +962,10 @@ export default function HomeWorkspace({
                 </motion.div>
 
                 {/* Separador elegante */}
-                <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-250 to-transparent opacity-25" />
+                <div className="w-px h-10 bg-gradient-to-b from-transparent via-slate-200 to-transparent opacity-30 flex-shrink-0" />
 
-                {/* Insight Premium — Clima + Impacto en Ventas */}
-                 <div className="flex-1 min-w-0 flex items-center gap-3">
-                    <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
-                    className="flex items-center gap-2 flex-wrap">
-                      {(() => {
-                      const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
-                      const tempMax = latestWeather?.temperature_max;
-                      const tempMin = latestWeather?.temperature_min;
-                      const precip = latestWeather?.precipitation ?? 0;
-                      const humidity = latestWeather?.humidity ?? 0;
-
-                      if (!latestWeather) return <span className="text-[12px] text-slate-400">Cargando clima...</span>;
-
-                      const isHot = temp > 26;
-                      const isCold = temp < 18;
-                      const isRainy = precip >= 3;
-
-                      const weatherIcon = isRainy ? '🌧' : isHot ? '☀️' : isCold ? '❄️' : '🌤';
-                      const weatherLabel = isRainy ? 'Lluvioso' : isHot ? 'Caluroso' : isCold ? 'Frío' : 'Fresco';
-                      const accentColor = isHot && !isRainy ? '#f97316' : isRainy ? '#6366f1' : isCold ? '#38bdf8' : '#10b981';
-
-                      // Impacto estimado en ventas helados
-                      const salesImpact = isHot && !isRainy ? '+18–25%' : isRainy ? '−12–18%' : isCold ? '−8–12%' : '+5–10%';
-                      const impactLabel = isHot && !isRainy ? '🔥 Día ideal — ventas al alza' : isRainy ? '⚠️ Lluvia reduce tráfico' : isCold ? '❄️ Frío puede afectar ventas' : '✅ Buenas condiciones';
-                      const impactColor = isHot && !isRainy ? '#10b981' : isRainy ? '#ef4444' : isCold ? '#6366f1' : '#10b981';
-
-                      return (
-                        <>
-                            {/* Temp badge */}
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg flex-shrink-0"
-                          style={{ background: `${accentColor}10`, border: `1px solid ${accentColor}20` }}>
-                              <span className="text-[13px]">{weatherIcon}</span>
-                              <span className="text-[13px] font-black leading-none" style={{ color: accentColor }}>{temp != null ? `${Math.round(temp)}°C` : '—'}</span>
-                              {tempMax != null && tempMin != null &&
-                            <span className="text-[9px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</span>
-                            }
-                              <span className="text-[9px] font-semibold" style={{ color: accentColor }}>{weatherLabel}</span>
-                            </div>
-
-                            {/* Separador */}
-                            <div className="w-px h-5 bg-slate-200 flex-shrink-0 hidden sm:block" />
-
-                            {/* Impacto ventas */}
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-[11.5px] font-semibold text-slate-600 truncate">{impactLabel}</span>
-                              <span className="text-[11px] font-black flex-shrink-0" style={{ color: impactColor }}>{salesImpact}</span>
-                            </div>
-
-                            {/* Lluvia */}
-                            {precip > 0 &&
-                          <span className="text-[10px] text-slate-400 font-medium flex-shrink-0 hidden sm:block">· {precip.toFixed(1)} mm hoy</span>
-                          }
-                          </>);
-
-                    })()}
-                    </motion.div>
-                  </div>
-
-                {/* Botón Premium SaaS */}
-                <motion.button
-                  whileHover={{ scale: 1.04, y: -0.5 }}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => window.location.href = '/WeatherSalesImpact'}
-                  className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold flex-shrink-0 backdrop-blur-md transition-all duration-300 relative overflow-hidden group cursor-pointer"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(194, 24, 117, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%)',
-                    border: '1.5px solid rgba(194, 24, 117, 0.15)',
-                    color: '#C21875',
-                    boxShadow: '0 4px 12px rgba(194, 24, 117, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
-                  }}>
-                  <motion.div
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute inset-0 rounded-lg"
-                    style={{
-                      background: 'radial-gradient(circle at center, rgba(194, 24, 117, 0.08), transparent)',
-                      zIndex: -1
-                    }} />
-                  Ver análisis
-                </motion.button>
+                {/* Nova Rotating Insights */}
+                <NovaInsightStrip dailySales={todaySales} budget={budgetData} latestWeather={latestWeather} />
 
               </div>
             </motion.div>
