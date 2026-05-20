@@ -1529,35 +1529,32 @@ export default function Home() {
                 </button>
 
                 {/* Floating icon */}
-                <div className="relative z-10 pt-8 pb-5 px-6 text-center">
-                  <div className="relative inline-flex items-center justify-center mb-4">
-                    {/* Outer glow ring */}
-                    <div className="absolute inset-0 rounded-2xl"
-                      style={{ background: 'linear-gradient(135deg, rgba(251,207,232,0.6), rgba(244,114,182,0.2))', filter: 'blur(10px)', transform: 'scale(1.3)' }} />
-                    {/* Icon container */}
-                    <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center"
+                <div className="relative z-10 pt-4 pb-3 px-6 flex items-center gap-3">
+                  <div className="relative inline-flex items-center justify-center flex-shrink-0">
+                    <div className="relative w-9 h-9 rounded-xl flex items-center justify-center"
                       style={{
                         background: 'linear-gradient(145deg, #fff 0%, #fdf2f8 100%)',
-                        boxShadow: '0 4px 20px rgba(244,114,182,0.2), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)',
+                        boxShadow: '0 2px 10px rgba(244,114,182,0.2), inset 0 1px 0 rgba(255,255,255,1)',
                         border: '1px solid rgba(251,207,232,0.5)'
                       }}>
-                      <TrendingUp className="w-6 h-6" style={{ color: '#e11d48' }} />
+                      <TrendingUp className="w-4 h-4" style={{ color: '#e11d48' }} />
                     </div>
                   </div>
-
-                  <h2 className="text-[20px] font-bold text-gray-900 tracking-tight" style={{ letterSpacing: '-0.02em' }}>
-                    Registrar Venta
-                  </h2>
-                  <p className="text-[13px] mt-1 font-medium" style={{ color: '#94a3b8' }}>
-                    Agrega los detalles de la venta realizada
-                  </p>
+                  <div>
+                    <h2 className="text-[16px] font-bold text-gray-900 tracking-tight leading-tight" style={{ letterSpacing: '-0.02em' }}>
+                      Registrar Venta
+                    </h2>
+                    <p className="text-[11px] font-medium" style={{ color: '#94a3b8' }}>
+                      Agrega los detalles de la venta realizada
+                    </p>
+                  </div>
                 </div>
 
                 {/* Bottom separator line */}
                 <div className="h-px mx-6" style={{ background: 'linear-gradient(90deg, transparent, rgba(244,114,182,0.15), rgba(244,114,182,0.08), transparent)' }} />
               </div>
 
-              <div className="px-6 pb-6 max-h-[80vh] overflow-y-auto">
+              <div className="px-5 pb-5 max-h-[65vh] overflow-y-auto">
                 <DailySalesForm storeId={selectedStore} onSuccess={() => setShowStoreSales(false)} />
               </div>
             </motion.div>
