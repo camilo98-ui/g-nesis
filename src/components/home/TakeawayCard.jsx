@@ -394,9 +394,9 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
       }}>
       
       {/* Top accent line */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-        background: `linear-gradient(90deg, ${PINK} 0%, rgba(194,24,117,0.3) 60%, transparent 100%)`,
-        borderRadius: '12px 12px 0 0' }} className="hidden" />
+      
+
+      
 
       {/* ── HERO HEADER ── */}
       <div
