@@ -109,7 +109,7 @@ export default function Layout({ children, currentPageName }) {
           <div className="w-full relative z-10 overflow-y-auto">
             {children}
           </div>
-          <MascotWidget />
+          {currentPageName !== 'PYGDashboard' && <MascotWidget />}
           </main>
           </div>
           </ErrorBoundary>
