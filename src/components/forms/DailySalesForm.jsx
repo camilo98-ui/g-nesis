@@ -600,7 +600,7 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                 {salesHistory.map((record) => (
                   <div key={record.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all">
                     <div className="flex-1">
-                      <p className="font-bold text-gray-700">{format(new Date(record.date), 'dd MMM yyyy', { locale: es })}</p>
+                      <p className="font-bold text-gray-700">{format(new Date(record.date + 'T12:00:00'), 'dd MMM yyyy', { locale: es })}</p>
                       <div className="flex gap-4 text-sm text-gray-600 mt-1">
                         <span>💰 ${record.total_sales?.toLocaleString('es-CO')}</span>
                         <span>🎫 {record.total_transactions}</span>
