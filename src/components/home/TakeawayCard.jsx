@@ -515,7 +515,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               Proyección de Cierre
             </p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'flex-end' }}>
-              <p style={{ fontSize: 34, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
+              <p style={{ fontSize: 34, fontWeight: 900, color: '#64748b', letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif' }}>
                 {fmt(analysis.projection)}
               </p>
               {analysis.projCompliance != null &&
