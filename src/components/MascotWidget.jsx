@@ -544,10 +544,10 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
     setMessages([{ role: 'assistant', content: welcome }]);
   };
 
-  if (isHidden) return null;
-
   return (
-    <div className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end gap-0">
+    <div 
+      style={{ display: isHidden ? 'none' : 'flex' }}
+      className="fixed bottom-4 right-4 z-[9999] flex flex-col items-end gap-0">
       {/* Alerts panel */}
       <NovaAlerts alerts={alerts} onDismiss={(id) => setAlerts(prev => prev.filter(a => a.id !== id))} />
 
