@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, BarChart2, TrendingUp, TrendingDown, AlertTriangle, Zap, Brain } from 'lucide-react';
 
@@ -526,17 +527,18 @@ export default function NovaInsightStrip({ dailySales, budget, latestWeather, on
         </div>
       </div>
 
-      {/* ── Analytics Panel ── */}
-      <AnimatePresence>
-        {showPanel && (
+      {/* ── Analytics Panel — rendered via portal so it's above everything ── */}
+      {showPanel && createPortal(
+        <AnimatePresence>
           <AnalyticsPanel
             onClose={() => setShowPanel(false)}
             insights={insights}
             dailySales={dailySales}
             budget={budget}
           />
-        )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 }
