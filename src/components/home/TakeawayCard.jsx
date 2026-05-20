@@ -315,7 +315,7 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
 
 // ══════════════════════════════════════════
 export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget = 0, onBudgetChange }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput, setBudgetInput] = useState('');
 
