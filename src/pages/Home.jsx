@@ -1496,7 +1496,7 @@ export default function Home() {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden">
+            className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col" style={{ maxHeight: '92vh' }}>
             
               {/* Header */}
               <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fff 0%, #fff 100%)' }}>
@@ -1507,7 +1507,7 @@ export default function Home() {
                 <div className="absolute left-1/2 -translate-x-1/2 -top-8 w-80 h-32 pointer-events-none"
                   style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(244,114,182,0.10) 0%, transparent 80%)' }} />
                 {/* Dotted pattern — top right */}
-                <div className="absolute top-0 right-0 w-32 h-28 pointer-events-none overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-20 pointer-events-none overflow-hidden">
                   <svg width="128" height="112" viewBox="0 0 128 112" fill="none">
                     {Array.from({ length: 6 }).map((_, row) =>
                       Array.from({ length: 8 }).map((_, col) => (
@@ -1554,7 +1554,7 @@ export default function Home() {
                 <div className="h-px mx-6" style={{ background: 'linear-gradient(90deg, transparent, rgba(244,114,182,0.15), rgba(244,114,182,0.08), transparent)' }} />
               </div>
 
-              <div className="px-5 pb-5 max-h-[65vh] overflow-y-auto">
+              <div className="px-5 pb-5 overflow-y-auto flex-1">
                 <DailySalesForm storeId={selectedStore} onSuccess={() => setShowStoreSales(false)} />
               </div>
             </motion.div>
