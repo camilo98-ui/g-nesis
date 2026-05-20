@@ -444,21 +444,21 @@ export default function NovaInsightStrip({ dailySales, budget, latestWeather, on
         {/* CENTER — Insight text */}
         <div className="flex-1 min-w-0 overflow-hidden">
           {/* Category tag */}
-          <div className="flex items-center gap-2 mb-1.5 hidden">
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg"
-            style={{ background: typeTag.bg, border: `1px solid ${typeTag.border}` }}>
-              <div style={{ width: 5, height: 5, borderRadius: '50%', background: current.color, flexShrink: 0 }} />
-              <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: current.color }}>
-                {typeTag.label}
-              </span>
-            </div>
-            {/* Live dot */}
-            <motion.div
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 1.8, repeat: Infinity }}
-              style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e', flexShrink: 0, boxShadow: '0 0 6px rgba(34,197,94,0.6)' }} />
-            
-          </div>
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
 
           {/* Headline */}
           <AnimatePresence mode="wait">
