@@ -550,56 +550,92 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 16 }}
+            initial={{ opacity: 0, scale: 0.94, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 16 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 300 }}
-            className="w-64 flex flex-col rounded-2xl overflow-hidden mb-1"
+            exit={{ opacity: 0, scale: 0.94, y: 20 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            className="flex flex-col mb-2"
             style={{
-              height: 390,
-              background: 'rgba(255,255,255,0.94)',
-              backdropFilter: 'blur(48px) saturate(160%)',
-              WebkitBackdropFilter: 'blur(48px) saturate(160%)',
-              border: '1px solid rgba(255,255,255,0.6)',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.12), 0 4px 16px rgba(190,24,93,0.10), inset 0 1px 0 rgba(255,255,255,0.8)',
+              width: 288,
+              height: 460,
+              borderRadius: 28,
+              overflow: 'hidden',
+              background: 'rgba(255,255,255,0.88)',
+              backdropFilter: 'blur(64px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(64px) saturate(180%)',
+              border: '1px solid rgba(255,255,255,0.75)',
+              boxShadow: '0 32px 80px rgba(0,0,0,0.10), 0 8px 24px rgba(194,24,117,0.12), 0 0 0 0.5px rgba(194,24,117,0.06), inset 0 1px 0 rgba(255,255,255,1)',
             }}
           >
-            {/* Header */}
-            <div className="flex items-center gap-2 px-3 py-2.5 flex-shrink-0"
+            {/* Ambient pink glow top */}
+            <div className="absolute top-0 left-0 right-0 h-28 pointer-events-none"
               style={{
-                background: 'rgba(255,255,255,0.85)',
-                borderBottom: '1px solid rgba(0,0,0,0.05)',
-                backdropFilter: 'blur(20px)',
-              }}>
-              <div className="w-7 h-7 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center"
-                style={{ border: '1px solid rgba(190,24,93,0.15)', background: 'rgba(255,240,248,0.8)' }}>
-                <MascotCanvas width={32} height={32} />
+                background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(251,207,232,0.35) 0%, transparent 70%)',
+                zIndex: 0,
+              }} />
+
+            {/* Header */}
+            <div className="relative z-10 flex items-center gap-2.5 px-4 pt-4 pb-3 flex-shrink-0"
+              style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+
+              {/* Avatar with glow ring */}
+              <div className="relative flex-shrink-0">
+                <motion.div
+                  animate={{ boxShadow: ['0 0 0 0 rgba(194,24,117,0)', '0 0 0 4px rgba(194,24,117,0.12)', '0 0 0 0 rgba(194,24,117,0)'] }}
+                  transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-9 h-9 rounded-2xl overflow-hidden flex items-center justify-center"
+                  style={{
+                    background: 'linear-gradient(145deg, #fff8fc 0%, #fce7f3 100%)',
+                    border: '1px solid rgba(244,114,182,0.22)',
+                    boxShadow: '0 2px 12px rgba(194,24,117,0.14)',
+                  }}>
+                  <MascotCanvas width={36} height={36} />
+                </motion.div>
+                {/* Online dot */}
+                <div style={{
+                  position: 'absolute', bottom: 0, right: 0,
+                  width: 9, height: 9, borderRadius: '50%',
+                  background: '#22c55e',
+                  border: '1.5px solid white',
+                  boxShadow: '0 0 6px rgba(34,197,94,0.7)',
+                }} />
               </div>
+
+              {/* Name + subtitle */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-slate-800 tracking-tight">Nova</span>
-                  <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full text-rose-600"
-                    style={{ background: 'rgba(190,24,93,0.08)', letterSpacing: '0.04em' }}>
-                    AI
-                  </span>
-                  <div className="live-dot ml-auto" />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#1f2937', letterSpacing: '-0.02em' }}>Nova</span>
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+                    background: 'linear-gradient(135deg, #be185d, #f472b6)',
+                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    textTransform: 'uppercase',
+                  }}>AI App</span>
                 </div>
-                <p className="text-[9px] text-slate-400 font-medium tracking-wide">{pageCtx.name}</p>
+                <p style={{ fontSize: 9.5, color: '#9ca3af', fontWeight: 500, marginTop: 0 }}>{pageCtx.name} · activo ahora</p>
               </div>
-              <div className="flex items-center gap-0.5">
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-1">
                 <button onClick={reset}
-                  className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
-                  <RotateCcw className="w-3 h-3" />
+                  className="w-7 h-7 flex items-center justify-center rounded-xl transition-all"
+                  style={{ background: 'rgba(0,0,0,0.04)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.08)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}>
+                  <RotateCcw className="w-3 h-3" style={{ color: '#6b7280' }} />
                 </button>
                 <button onClick={() => setIsOpen(false)}
-                  className="w-6 h-6 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
-                  <X className="w-3 h-3" />
+                  className="w-7 h-7 flex items-center justify-center rounded-xl transition-all"
+                  style={{ background: 'rgba(0,0,0,0.04)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.08)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}>
+                  <X className="w-3 h-3" style={{ color: '#6b7280' }} />
                 </button>
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-3 py-2.5 space-y-2"
+            {/* Messages — scrollable body */}
+            <div className="relative z-10 flex-1 overflow-y-auto px-3.5 py-3 space-y-2.5"
               style={{ scrollbarWidth: 'none' }}>
               {messages.map((msg, i) => (
                 <ChatMessage key={i} msg={msg} />
@@ -607,12 +643,12 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
               {isLoading && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                   className="flex items-start gap-2">
-                  <div className="w-6 h-6 rounded-lg overflow-hidden flex-shrink-0"
-                    style={{ border: '1px solid rgba(190,24,93,0.15)', background: 'rgba(255,240,248,0.8)' }}>
+                  <div className="w-6 h-6 rounded-xl overflow-hidden flex-shrink-0"
+                    style={{ border: '1px solid rgba(244,114,182,0.2)', background: 'rgba(255,240,248,0.9)' }}>
                     <MascotCanvas width={24} height={24} />
                   </div>
-                  <div className="rounded-xl rounded-tl-sm"
-                    style={{ background: 'rgba(248,248,250,0.9)', border: '1px solid rgba(0,0,0,0.06)' }}>
+                  <div className="rounded-2xl rounded-tl-sm"
+                    style={{ background: 'rgba(250,250,252,0.95)', border: '1px solid rgba(0,0,0,0.05)' }}>
                     <TypingDots />
                   </div>
                 </motion.div>
@@ -622,14 +658,18 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
 
             {/* Suggestions */}
             {messages.length <= 1 && (
-              <div className="px-3 pb-2 flex gap-1 overflow-x-auto flex-shrink-0" style={{ scrollbarWidth: 'none' }}>
+              <div className="relative z-10 px-3.5 pb-2 flex gap-1.5 overflow-x-auto flex-shrink-0" style={{ scrollbarWidth: 'none' }}>
                 {suggestions.map(s => (
                   <button key={s} onClick={() => sendMessage(s)}
-                    className="flex-shrink-0 text-[9px] font-medium px-2 py-1 rounded-lg whitespace-nowrap transition-all hover:bg-rose-50 active:scale-95"
+                    className="flex-shrink-0 whitespace-nowrap transition-all active:scale-95"
                     style={{
-                      border: '1px solid rgba(190,24,93,0.15)',
+                      fontSize: 9.5, fontWeight: 600,
+                      padding: '4px 10px',
+                      borderRadius: 10,
+                      border: '1px solid rgba(244,114,182,0.2)',
                       color: '#be185d',
-                      background: 'rgba(190,24,93,0.04)',
+                      background: 'rgba(253,242,248,0.8)',
+                      letterSpacing: '-0.01em',
                     }}>
                     {s}
                   </button>
@@ -637,12 +677,19 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
               </div>
             )}
 
-            {/* Input */}
-            <div className="px-2.5 pb-2.5 flex-shrink-0">
-              <div className="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5"
+            {/* Divider */}
+            <div className="relative z-10 mx-4 flex-shrink-0"
+              style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(0,0,0,0.05), transparent)' }} />
+
+            {/* Input — fixed bottom */}
+            <div className="relative z-10 px-3 pt-2 pb-3 flex-shrink-0">
+              <div className="flex items-center gap-2 px-3 py-2"
                 style={{
-                  background: 'rgba(248,248,250,1)',
-                  border: '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: 16,
+                  background: 'rgba(248,246,252,0.95)',
+                  border: '1px solid rgba(0,0,0,0.07)',
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.03)',
+                  backdropFilter: 'blur(16px)',
                 }}>
                 <textarea
                   ref={inputRef}
@@ -651,16 +698,28 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
                   onKeyDown={handleKeyDown}
                   placeholder="Pregúntame lo que sea..."
                   rows={1}
-                  className="flex-1 resize-none text-xs bg-transparent outline-none leading-relaxed text-slate-700 placeholder-slate-400"
-                  style={{ maxHeight: 60, minHeight: 18 }}
+                  className="flex-1 resize-none bg-transparent outline-none leading-relaxed"
+                  style={{
+                    fontSize: 11.5, color: '#374151',
+                    maxHeight: 60, minHeight: 18,
+                    fontFamily: 'inherit',
+                  }}
                 />
                 <motion.button
                   onClick={() => sendMessage()}
                   disabled={!input.trim() || isLoading}
-                  whileTap={{ scale: 0.9 }}
-                  className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-all disabled:opacity-30"
-                  style={{ background: input.trim() ? 'linear-gradient(135deg,#be185d,#db2777)' : 'transparent', border: input.trim() ? 'none' : '1px solid rgba(0,0,0,0.1)' }}>
-                  <Send className={`w-2.5 h-2.5 ${input.trim() ? 'text-white' : 'text-slate-400'}`} />
+                  whileTap={{ scale: 0.88 }}
+                  className="flex-shrink-0 flex items-center justify-center transition-all disabled:opacity-25"
+                  style={{
+                    width: 28, height: 28,
+                    borderRadius: 10,
+                    background: input.trim()
+                      ? 'linear-gradient(135deg, #be185d 0%, #e879a0 100%)'
+                      : 'rgba(0,0,0,0.06)',
+                    boxShadow: input.trim() ? '0 2px 10px rgba(194,24,117,0.3)' : 'none',
+                    border: 'none',
+                  }}>
+                  <Send className="w-3 h-3" style={{ color: input.trim() ? '#fff' : '#9ca3af' }} />
                 </motion.button>
               </div>
             </div>
