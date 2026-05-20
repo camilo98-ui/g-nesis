@@ -220,15 +220,6 @@ function buildInsights(dailySales = [], budget = null, weather = null) {
     insights.push({ line1: `Todo indica un cierre sobre objetivo.`, line2: `La consistencia diaria es lo que convierte una semana buena en un mes sólido.`, mood: 'stable' });
   }
 
-  // Deduplication — remove similar moods if pool is too homogeneous
-  // Shuffle for variety using current minute as seed (changes every minute)
-  const minuteSeed = Math.floor(Date.now() / 60000);
-  const shuffled = [...insights].sort((a, b) => {
-    const ha = ((insights.indexOf(a) * 2654435761 + minuteSeed) >>> 0);
-    const hb = ((insights.indexOf(b) * 2654435761 + minuteSeed * 7) >>> 0);
-    return ha - hb;
-  });
-
   // Fallback pool — rich enough to rotate even with no data
   const fallbacks = [
     { line1: `Estoy observando la operación en tiempo real.`, line2: `Sin señales de tensión visible en este momento.`, mood: 'stable' },
@@ -238,17 +229,19 @@ function buildInsights(dailySales = [], budget = null, weather = null) {
     { line1: `Estoy calibrando el análisis con los datos más recientes.`, line2: `En pocos momentos tendré una lectura más precisa del comportamiento actual.`, mood: 'observing' },
   ];
 
-  if (shuffled.length === 0) {
-    // Rotate fallbacks every 2 minutes
-    const fallbackIdx = Math.floor(Date.now() / 120000) % fallbacks.length;
-    return [fallbacks[fallbackIdx], fallbacks[(fallbackIdx + 1) % fallbacks.length], fallbacks[(fallbackIdx + 2) % fallbacks.length]];
-  }
+  if (insights.length === 0) return fallbacks;
 
-  // Return at least 4 insights for interesting rotation, padding with fallbacks if needed
-  const result = shuffled.slice(0, 6);
-  while (result.length < 4) {
-    const fb = fallbacks[result.length % fallbacks.length];
-    if (!result.find(r => r.line1 === fb.line1)) result.push(fb);
+  return insights;
+}
+
+// Fisher-Yates shuffle with a numeric seed
+function seededShuffle(arr, seed) {
+  const result = [...arr];
+  let s = seed;
+  for (let i = result.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    const j = Math.abs(s) % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
 }
@@ -645,20 +638,25 @@ function NovaAnalyticsPanel({ onClose, insights, dailySales, budget }) {
 // MAIN EXPORT
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function NovaInsightStrip({ dailySales = [], budget = null, latestWeather = null }) {
-  const insights = useMemo(
-    () => buildInsights(dailySales, budget, latestWeather),
-    [dailySales, budget, latestWeather]
-  );
+  // Session seed — random on every page load/mount, stable for the session
+  const [sessionSeed] = useState(() => Math.floor(Math.random() * 0xffffffff));
+
+  const insights = useMemo(() => {
+    const raw = buildInsights(dailySales, budget, latestWeather);
+    // Shuffle order with session seed so every refresh shows a different sequence
+    return seededShuffle(raw, sessionSeed);
+  }, [dailySales, budget, latestWeather, sessionSeed]);
 
   const [idx, setIdx] = useState(0);
   const [showPanel, setShowPanel] = useState(false);
   const [line1Done, setLine1Done] = useState(false);
   const [isHoveringCTA, setIsHoveringCTA] = useState(false);
 
-  // Stagger initial index to distribute across insights
+  // Start at index 0 (shuffle already randomized the order)
   useEffect(() => {
-    setIdx(Math.floor(Math.random() * insights.length));
-  }, [insights.length]);
+    setIdx(0);
+    setLine1Done(false);
+  }, [insights]);
 
   // Auto-rotate insights every 8s
   useEffect(() => {
