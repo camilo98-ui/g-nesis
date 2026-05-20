@@ -1496,8 +1496,18 @@ export default function Home() {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden">
-            
+            className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden relative">
+
+              {/* Close button */}
+              <button
+                onClick={() => setShowStoreSales(false)}
+                className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-105"
+                style={{ background: 'rgba(0,0,0,0.06)' }}>
+                <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
               {/* Header */}
               <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fff 0%, #fff 100%)' }}>
                 {/* Soft pink glow wave — left */}
@@ -1518,15 +1528,7 @@ export default function Home() {
                   </svg>
                 </div>
 
-                {/* Close button */}
-                <button
-                  onClick={() => setShowStoreSales(false)}
-                  className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-105"
-                  style={{ background: 'rgba(0,0,0,0.05)', backdropFilter: 'blur(8px)' }}>
-                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+
 
                 {/* Floating icon */}
                 <div className="relative z-10 pt-8 pb-5 px-6 text-center">
