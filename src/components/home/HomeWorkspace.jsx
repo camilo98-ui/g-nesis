@@ -70,7 +70,7 @@ function getGreeting() {
 const NAV_ITEMS = [
 { icon: LayoutDashboard, label: 'Tienda', path: 'Dashboard', color: '#C21875', roles: ['lider', 'embajador', 'gerente'] },
 { icon: TrendingUp, label: 'P&G', path: 'PYGDashboard', color: '#374151', roles: ['gerente'] },
-{ icon: TrendingUp, label: 'P&G Tienda', path: null, color: '#374151', onClick: 'onShowPYGModal', roles: ['lider', 'embajador'] },
+{ icon: TrendingUp, label: 'P&G Intelligence', path: null, color: '#C21875', onClick: 'onShowPYGModal', roles: ['lider', 'embajador'] },
 { icon: FileText, label: 'Informe', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: Clock, label: 'Txn por hora', path: 'HourlyTransactions', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: BarChart3, label: 'Participación', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
