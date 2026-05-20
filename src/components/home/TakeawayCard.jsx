@@ -61,7 +61,7 @@ function StatCard({ label, value, sub, subColor, highlight, last }) {
       <p style={{
         fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1,
         fontFamily: 'Inter Tight, sans-serif',
-        color: highlight ? PINK : '#1e293b'
+        color: highlight ? PINK : '#64748b'
       }}>{value}</p>
       {sub && <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: subColor || '#94a3b8' }}>{sub}</p>}
     </div>);
@@ -291,7 +291,7 @@ function RichBarChart({ pts, dailyAvg, budget, daysInMonth, projection }) {
               <circle cx={tx} cy={ty} r="2.5" fill={PINK} />
               <text x={clampedX} y={ty - 12}
                 textAnchor="middle"
-                style={{ fontSize: 9, fill: '#1e293b', fontWeight: 700, fontFamily: 'Inter Tight, sans-serif' }}>
+                style={{ fontSize: 9, fill: '#64748b', fontWeight: 700, fontFamily: 'Inter Tight, sans-serif' }}>
                 {label}
               </text>
             </g>
@@ -470,7 +470,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
           <div style={{ padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
             {/* Percentage label */}
             <div style={{ fontSize: 11, fontWeight: 700, color: '#374151' }}>
-              <span style={{ fontSize: 15, fontWeight: 900, color: '#1e293b' }}>
+              <span style={{ fontSize: 15, fontWeight: 900, color: '#64748b' }}>
                 {budget > 0 ? `${Math.round((analysis.totalSold / budget) * 100)}%` : '—'}
               </span>
               <span style={{ color: '#94a3b8', fontWeight: 500, marginLeft: 4 }}>del objetivo</span>
@@ -661,7 +661,7 @@ export default function TakeawayCard({ dailySales = [], budget = 0, storeBudget 
               }}>
                 <div>
                   <p style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 6 }}>Promedio por Día</p>
-                  <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: '#1e293b' }}>{fmt(analysis.dailyAvg)}</p>
+                  <p style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'Inter Tight, sans-serif', color: '#64748b' }}>{fmt(analysis.dailyAvg)}</p>
                   <p style={{ fontSize: 9.5, marginTop: 5, fontWeight: 600, color: '#94a3b8' }}>{analysis.daysRemaining} días restantes</p>
                 </div>
 
