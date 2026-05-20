@@ -312,6 +312,13 @@ export default function HomeWorkspace({
   const greeting = getGreeting();
   const GreetIcon = greeting.icon;
   const { setPageData } = useNova() || {};
+  const [authUserName, setAuthUserName] = useState('');
+
+  useEffect(() => {
+    base44.auth.me().then(u => {
+      if (u?.full_name) setAuthUserName(u.full_name.split(' ')[0]);
+    }).catch(() => {});
+  }, []);
   const [activeNav, setActiveNav] = useState('Dashboard');
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [inputVal, setInputVal] = useState('');
@@ -848,7 +855,7 @@ export default function HomeWorkspace({
                     </p>
                     <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-none"
                     style={{ letterSpacing: '-0.04em', color: '#64748b' }}>
-                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{LEADERS[selectedStore] || 'Tienda'}</span>
+                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{authUserName || LEADERS[selectedStore] || 'Tienda'}</span>
                     </h1>
                   </div>
                 </div>
