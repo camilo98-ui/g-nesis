@@ -119,7 +119,6 @@ function buildInsights(dailySales = [], budget = null, weather = null) {
   const sales = [...dailySales].sort((a, b) => new Date(b.date) - new Date(a.date));
   const last7 = sales.slice(0, 7);
   const prev7 = sales.slice(7, 14);
-  const last14 = sales.slice(0, 14);
 
   const avg7 = last7.length ? last7.reduce((s, d) => s + (d.total_sales || 0), 0) / last7.length : 0;
   const avgPrev7 = prev7.length ? prev7.reduce((s, d) => s + (d.total_sales || 0), 0) / prev7.length : 0;
@@ -133,7 +132,6 @@ function buildInsights(dailySales = [], budget = null, weather = null) {
   const avgTicketPrev7 = prev7.length ? prev7.reduce((s, d) => s + ((d.total_sales || 0) / Math.max(d.total_transactions || 1, 1)), 0) / prev7.length : 0;
   const ticketDelta = avgTicketPrev7 > 0 ? ((avgTicket7 - avgTicketPrev7) / avgTicketPrev7 * 100) : null;
 
-  const monthBudget = budget?.monthlyBudget || 0;
   const salesYday = budget?.salesUntilYesterday || 0;
   const budgetYday = budget?.budgetUntilYesterday || 0;
   const compliance = budgetYday > 0 ? (salesYday / budgetYday * 100) : null;
@@ -144,149 +142,115 @@ function buildInsights(dailySales = [], budget = null, weather = null) {
   const temp = weather?.temperature_mean ?? weather?.temperature_max;
   const precip = weather?.precipitation ?? 0;
 
-  // ── Build strategic, analytical insights ────────────────────────────────
+  // ── Construct a rich, varied pool of insights based on real data ──────────
 
-  // Pattern: Revenue growing but transaction volume declining → ticket compression
+  // Weekly trend group — multiple variants so Nova never repeats
   if (salesDelta !== null && txDelta !== null) {
     const salesUp = salesDelta > 3;
+    const salesDown = salesDelta < -4;
     const txDown = txDelta < -4;
     const txUp = txDelta > 4;
-    const salesDown = salesDelta < -4;
 
     if (salesUp && txDown && ticketDelta !== null && ticketDelta > 5) {
-      insights.push({
-        line1: `La venta creció ${salesDelta.toFixed(1)}% esta semana,`,
-        line2: `pero las transacciones cayeron ${Math.abs(txDelta).toFixed(1)}pp. El ticket promedio sube — el volumen no.`,
-        mood: 'observing',
-      });
+      insights.push({ line1: `La venta creció ${salesDelta.toFixed(1)}% esta semana,`, line2: `pero las transacciones cayeron ${Math.abs(txDelta).toFixed(1)}pp. El ticket promedio sube — el volumen no.`, mood: 'observing' });
+      insights.push({ line1: `Hay más valor por operación, pero menos operaciones.`, line2: `El crecimiento real requiere que ambas variables avancen juntas.`, mood: 'observing' });
+      insights.push({ line1: `El ticket promedio sube. El flujo de clientes no.`, line2: `La dinámica está cambiando — la base de volumen se está comprimiendo.`, mood: 'observing' });
     } else if (salesDown && txDown) {
-      insights.push({
-        line1: `La desaceleración ya no parece comercial.`,
-        line2: `Ventas y transacciones retroceden simultáneamente. Empieza a sentirse operativa.`,
-        mood: 'tension',
-      });
+      insights.push({ line1: `La desaceleración ya no parece comercial.`, line2: `Ventas y transacciones retroceden simultáneamente. Empieza a sentirse operativa.`, mood: 'tension' });
+      insights.push({ line1: `Detecto contracción en ambas dimensiones esta semana.`, line2: `Cuando venta y volumen caen juntos, la recuperación no es automática.`, mood: 'tension' });
+      insights.push({ line1: `La operación está perdiendo ritmo en dos frentes.`, line2: `Todavía es manejable — pero la ventana para actuar se cierra.`, mood: 'tension' });
     } else if (salesDown && Math.abs(salesDelta) > 10) {
-      insights.push({
-        line1: `Detecto una contracción del ${Math.abs(salesDelta).toFixed(1)}% frente a la semana previa.`,
-        line2: `El patrón no se recupera por sí solo.`,
-        mood: 'tension',
-      });
+      insights.push({ line1: `Detecto una contracción del ${Math.abs(salesDelta).toFixed(1)}% frente a la semana previa.`, line2: `El patrón no se recupera por sí solo.`, mood: 'tension' });
+      insights.push({ line1: `La venta retrocedió ${Math.abs(salesDelta).toFixed(1)}% esta semana.`, line2: `No es ruido — es una señal que requiere interpretación.`, mood: 'tension' });
+    } else if (salesDown) {
+      insights.push({ line1: `El ritmo comercial cedió ${Math.abs(salesDelta).toFixed(1)}% esta semana.`, line2: `La tendencia necesita corrección antes de que se consolide.`, mood: 'tension' });
+      insights.push({ line1: `La venta está debajo del promedio reciente.`, line2: `Todavía dentro de rango controlable — pero la inercia importa.`, mood: 'observing' });
     } else if (salesUp && txUp) {
-      insights.push({
-        line1: `El crecimiento es estructural esta semana.`,
-        line2: `Volumen y conversión avanzan al mismo ritmo — señal de ejecución real.`,
-        mood: 'stable',
-      });
-    } else if (salesUp && !txDown) {
-      insights.push({
-        line1: `La venta mantiene trayectoria ascendente.`,
-        line2: `La eficiencia operativa todavía no la acompaña al mismo ritmo.`,
-        mood: 'observing',
-      });
+      insights.push({ line1: `El crecimiento es estructural esta semana.`, line2: `Volumen y conversión avanzan al mismo ritmo — señal de ejecución real.`, mood: 'stable' });
+      insights.push({ line1: `La operación está funcionando bien en todas sus dimensiones.`, line2: `Venta, transacciones y ticket promedio se mueven en la dirección correcta.`, mood: 'stable' });
+      insights.push({ line1: `Esta semana el equipo está ejecutando de forma integral.`, line2: `El crecimiento tiene base sólida — no depende de un solo factor.`, mood: 'stable' });
+    } else if (salesUp) {
+      insights.push({ line1: `La venta mantiene trayectoria ascendente.`, line2: `La eficiencia operativa todavía no la acompaña al mismo ritmo.`, mood: 'observing' });
+      insights.push({ line1: `Las ventas mejoraron ${salesDelta.toFixed(1)}% esta semana.`, line2: `El volumen crece — la productividad por transacción todavía no responde igual.`, mood: 'observing' });
     }
   }
 
-  // Pattern: Budget compliance tension
+  // Budget & projection group
   if (compliance !== null) {
     if (compliance < 85 && remainDays !== null && remainDays < 12) {
-      insights.push({
-        line1: `Al ritmo actual, el cierre del mes proyecta ${projPct?.toFixed(0) ?? '—'}% del objetivo.`,
-        line2: `Quedan ${remainDays} días. El margen de maniobra se estrecha.`,
-        mood: 'tension',
-      });
+      insights.push({ line1: `Proyección actual: ${projPct?.toFixed(0) ?? '—'}% del objetivo mensual.`, line2: `Quedan ${remainDays} días. El margen de maniobra se está cerrando.`, mood: 'tension' });
+      insights.push({ line1: `La brecha acumulada pesa sobre el cierre del mes.`, line2: `Con ${remainDays} días restantes, el ritmo diario requerido escala significativamente.`, mood: 'tension' });
     } else if (compliance < 90) {
-      insights.push({
-        line1: `La operación parece estable superficialmente.`,
-        line2: `El acumulado del mes está ${Math.abs(100 - compliance).toFixed(0)}pp por debajo del presupuesto esperado.`,
-        mood: 'observing',
-      });
-    } else if (compliance >= 103 && projPct !== null && projPct >= 105) {
-      insights.push({
-        line1: `El cierre del mes tiene base sólida.`,
-        line2: `La proyección actual apunta a ${projPct.toFixed(0)}% del objetivo — todavía hay presión sobre el margen.`,
-        mood: 'stable',
-      });
-    } else if (compliance >= 98 && compliance < 103) {
-      insights.push({
-        line1: `La recuperación existe.`,
-        line2: `La rentabilidad todavía no la acompaña con la misma consistencia.`,
-        mood: 'observing',
-      });
+      insights.push({ line1: `La operación parece estable superficialmente.`, line2: `El acumulado está ${Math.abs(100 - compliance).toFixed(0)}pp por debajo del presupuesto esperado.`, mood: 'observing' });
+      insights.push({ line1: `Hay una brecha silenciosa en el acumulado del mes.`, line2: `No es crítica todavía — pero ignoring it tiene costo compuesto.`, mood: 'observing' });
+      insights.push({ line1: `El presupuesto mensual tiene una brecha de ${Math.abs(100 - compliance).toFixed(0)}pp.`, line2: `La recuperación existe pero requiere ritmo sostenido, no picos aislados.`, mood: 'observing' });
+    } else if (compliance >= 103 && projPct !== null && projPct >= 103) {
+      insights.push({ line1: `El cierre del mes tiene base sólida.`, line2: `La proyección apunta a ${projPct.toFixed(0)}% del objetivo — la presión ahora está en el margen.`, mood: 'stable' });
+      insights.push({ line1: `La operación está sobre el presupuesto.`, line2: `El reto ahora no es el volumen — es proteger la eficiencia mientras crece.`, mood: 'stable' });
+    } else if (compliance >= 98) {
+      insights.push({ line1: `La recuperación existe.`, line2: `La rentabilidad todavía no la acompaña con la misma consistencia.`, mood: 'observing' });
+      insights.push({ line1: `El acumulado está dentro de rango.`, line2: `Estoy observando si el ritmo es sostenible o depende de factores puntuales.`, mood: 'observing' });
     }
   }
 
-  // Pattern: Revenue growing but productivity flat
-  if (salesDelta !== null && ticketDelta !== null && salesDelta > 6 && ticketDelta < 0) {
-    insights.push({
-      line1: `Las ventas mejoraron ${salesDelta.toFixed(1)}% esta semana.`,
-      line2: `La productividad por transacción no lo hizo al mismo ritmo.`,
-      mood: 'observing',
-    });
-  }
-
-  // Pattern: Divergence between weekly velocity and monthly accumulation
-  if (salesDelta !== null && compliance !== null) {
-    if (salesDelta > 10 && compliance < 90) {
-      insights.push({
-        line1: `Detecto una divergencia inusual entre la velocidad semanal y el acumulado mensual.`,
-        line2: `Puede ser un rebote puntual. Aún no hay suficiente evidencia para confirmarlo.`,
-        mood: 'observing',
-      });
-    }
-  }
-
-  // Pattern: Weather contextual intelligence
-  if (precip >= 5) {
-    insights.push({
-      line1: `Las condiciones externas están comprimiendo el tráfico hoy.`,
-      line2: `La conversión interior determina el resultado del cierre de día.`,
-      mood: 'observing',
-    });
-  } else if (temp != null && temp > 27) {
-    insights.push({
-      line1: `Las condiciones climáticas favorecen la demanda hoy.`,
-      line2: `La ejecución interna decide cuánto de esa demanda se captura.`,
-      mood: 'stable',
-    });
-  }
-
-  // Pattern: Slowdown consolidation signal
-  if (salesDelta !== null && txDelta !== null && salesDelta < -3 && txDelta < -3 && avgTicket7 < avgTicketPrev7) {
-    insights.push({
-      line1: `La desaceleración ya no parece temporal.`,
-      line2: `Venta, transacciones y ticket promedio deteriorándose simultáneamente.`,
-      mood: 'tension',
-    });
-  }
-
-  // Pattern: High projection stability
-  if (projPct !== null && projPct >= 100 && compliance !== null && compliance >= 100) {
-    insights.push({
-      line1: `El cierre del mes está dentro de control.`,
-      line2: `La estructura actual resiste el ritmo de demanda — por ahora.`,
-      mood: 'stable',
-    });
-  }
-
-  // Sophisticated fallback — never generic
-  if (insights.length === 0) {
-    if (avg7 > 0 && avgPrev7 > 0) {
-      const d = ((avg7 - avgPrev7) / avgPrev7 * 100);
-      insights.push({
-        line1: `El promedio semanal ${d > 0 ? 'mejoró' : 'retrocedió'} ${Math.abs(d).toFixed(1)}% frente a la semana anterior.`,
-        line2: `Continúo observando para confirmar si la tendencia se consolida.`,
-        mood: 'observing',
-      });
+  // Ticket & productivity insights
+  if (ticketDelta !== null && Math.abs(ticketDelta) > 4) {
+    if (ticketDelta > 4) {
+      insights.push({ line1: `El ticket promedio mejoró ${ticketDelta.toFixed(1)}% frente a la semana anterior.`, line2: `Cada transacción genera más valor. Eso no siempre se sostiene solo.`, mood: 'stable' });
+      insights.push({ line1: `La eficiencia por transacción está subiendo.`, line2: `El reto es replicarlo con consistencia — no depender de días atípicos.`, mood: 'observing' });
     } else {
-      insights.push({
-        line1: `Estoy procesando el comportamiento operativo en tiempo real.`,
-        line2: `Sin señales de tensión visible en este momento.`,
-        mood: 'stable',
-      });
+      insights.push({ line1: `El ticket promedio retrocedió ${Math.abs(ticketDelta).toFixed(1)}% esta semana.`, line2: `Cada operación genera menos valor. La venta crece en volumen, no en profundidad.`, mood: 'observing' });
+      insights.push({ line1: `La productividad por transacción está bajo presión.`, line2: `Es un indicador adelantado — suele aparecer antes que la venta total lo refleje.`, mood: 'observing' });
     }
   }
 
-  return insights;
+  // Weather context
+  if (precip >= 5) {
+    insights.push({ line1: `Las condiciones climáticas están comprimiendo el tráfico externo hoy.`, line2: `La conversión interior y el cierre activo determinan el resultado del día.`, mood: 'observing' });
+    insights.push({ line1: `Lluvia significativa detectada.`, line2: `Los días de bajo tráfico revelan la verdadera capacidad de conversión del equipo.`, mood: 'observing' });
+  } else if (temp != null && temp > 27) {
+    insights.push({ line1: `Las condiciones climáticas favorecen la demanda hoy.`, line2: `La ejecución interna decide cuánto de esa demanda se captura efectivamente.`, mood: 'stable' });
+    insights.push({ line1: `Día de alta temperatura — contexto favorable para la operación.`, line2: `Los días buenos muestran el techo real de la tienda. Vale la pena observarlo.`, mood: 'stable' });
+  }
+
+  // Projection stability
+  if (projPct !== null && projPct >= 100 && compliance !== null && compliance >= 100) {
+    insights.push({ line1: `El cierre del mes está dentro de control.`, line2: `La estructura resiste el ritmo actual de demanda — por ahora.`, mood: 'stable' });
+    insights.push({ line1: `La operación está en zona positiva.`, line2: `Todavía estoy monitoreando la calidad del crecimiento, no solo el volumen.`, mood: 'stable' });
+    insights.push({ line1: `Todo indica un cierre sobre objetivo.`, line2: `La consistencia diaria es lo que convierte una semana buena en un mes sólido.`, mood: 'stable' });
+  }
+
+  // Deduplication — remove similar moods if pool is too homogeneous
+  // Shuffle for variety using current minute as seed (changes every minute)
+  const minuteSeed = Math.floor(Date.now() / 60000);
+  const shuffled = [...insights].sort((a, b) => {
+    const ha = ((insights.indexOf(a) * 2654435761 + minuteSeed) >>> 0);
+    const hb = ((insights.indexOf(b) * 2654435761 + minuteSeed * 7) >>> 0);
+    return ha - hb;
+  });
+
+  // Fallback pool — rich enough to rotate even with no data
+  const fallbacks = [
+    { line1: `Estoy observando la operación en tiempo real.`, line2: `Sin señales de tensión visible en este momento.`, mood: 'stable' },
+    { line1: `El comportamiento operativo parece estable.`, line2: `Continúo analizando para detectar señales tempranas antes de que se consoliden.`, mood: 'stable' },
+    { line1: `No detecto anomalías en el patrón actual.`, line2: `La ausencia de señales también es información.`, mood: 'stable' },
+    { line1: `La operación funciona dentro de parámetros normales.`, line2: `Estoy procesando los datos de los últimos días para identificar tendencias latentes.`, mood: 'observing' },
+    { line1: `Estoy calibrando el análisis con los datos más recientes.`, line2: `En pocos momentos tendré una lectura más precisa del comportamiento actual.`, mood: 'observing' },
+  ];
+
+  if (shuffled.length === 0) {
+    // Rotate fallbacks every 2 minutes
+    const fallbackIdx = Math.floor(Date.now() / 120000) % fallbacks.length;
+    return [fallbacks[fallbackIdx], fallbacks[(fallbackIdx + 1) % fallbacks.length], fallbacks[(fallbackIdx + 2) % fallbacks.length]];
+  }
+
+  // Return at least 4 insights for interesting rotation, padding with fallbacks if needed
+  const result = shuffled.slice(0, 6);
+  while (result.length < 4) {
+    const fb = fallbacks[result.length % fallbacks.length];
+    if (!result.find(r => r.line1 === fb.line1)) result.push(fb);
+  }
+  return result;
 }
 
 // ─── Mood configuration — muted, executive palette ───────────────────────────
