@@ -399,7 +399,7 @@ export default function HomeWorkspace({
     return Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear();
   }) : null;
 
-  useEffect(() => { setTakeawayBudgetOverride(null); }, [activeBudget?.id]);
+  useEffect(() => {setTakeawayBudgetOverride(null);}, [activeBudget?.id]);
 
   const budgetData = useMemo(() => {
     if (!activeBudget?.sales_budget) return null;
@@ -971,37 +971,37 @@ export default function HomeWorkspace({
                     transition={{ delay: 0.3, duration: 0.6 }}
                     className="flex items-center gap-2 flex-wrap">
                       {(() => {
-                        const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
-                        const tempMax = latestWeather?.temperature_max;
-                        const tempMin = latestWeather?.temperature_min;
-                        const precip = latestWeather?.precipitation ?? 0;
-                        const humidity = latestWeather?.humidity ?? 0;
+                      const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
+                      const tempMax = latestWeather?.temperature_max;
+                      const tempMin = latestWeather?.temperature_min;
+                      const precip = latestWeather?.precipitation ?? 0;
+                      const humidity = latestWeather?.humidity ?? 0;
 
-                        if (!latestWeather) return <span className="text-[12px] text-slate-400">Cargando clima...</span>;
+                      if (!latestWeather) return <span className="text-[12px] text-slate-400">Cargando clima...</span>;
 
-                        const isHot = temp > 26;
-                        const isCold = temp < 18;
-                        const isRainy = precip >= 3;
+                      const isHot = temp > 26;
+                      const isCold = temp < 18;
+                      const isRainy = precip >= 3;
 
-                        const weatherIcon = isRainy ? '🌧' : isHot ? '☀️' : isCold ? '❄️' : '🌤';
-                        const weatherLabel = isRainy ? 'Lluvioso' : isHot ? 'Caluroso' : isCold ? 'Frío' : 'Fresco';
-                        const accentColor = isHot && !isRainy ? '#f97316' : isRainy ? '#6366f1' : isCold ? '#38bdf8' : '#10b981';
+                      const weatherIcon = isRainy ? '🌧' : isHot ? '☀️' : isCold ? '❄️' : '🌤';
+                      const weatherLabel = isRainy ? 'Lluvioso' : isHot ? 'Caluroso' : isCold ? 'Frío' : 'Fresco';
+                      const accentColor = isHot && !isRainy ? '#f97316' : isRainy ? '#6366f1' : isCold ? '#38bdf8' : '#10b981';
 
-                        // Impacto estimado en ventas helados
-                        const salesImpact = isHot && !isRainy ? '+18–25%' : isRainy ? '−12–18%' : isCold ? '−8–12%' : '+5–10%';
-                        const impactLabel = isHot && !isRainy ? '🔥 Día ideal — ventas al alza' : isRainy ? '⚠️ Lluvia reduce tráfico' : isCold ? '❄️ Frío puede afectar ventas' : '✅ Buenas condiciones';
-                        const impactColor = isHot && !isRainy ? '#10b981' : isRainy ? '#ef4444' : isCold ? '#6366f1' : '#10b981';
+                      // Impacto estimado en ventas helados
+                      const salesImpact = isHot && !isRainy ? '+18–25%' : isRainy ? '−12–18%' : isCold ? '−8–12%' : '+5–10%';
+                      const impactLabel = isHot && !isRainy ? '🔥 Día ideal — ventas al alza' : isRainy ? '⚠️ Lluvia reduce tráfico' : isCold ? '❄️ Frío puede afectar ventas' : '✅ Buenas condiciones';
+                      const impactColor = isHot && !isRainy ? '#10b981' : isRainy ? '#ef4444' : isCold ? '#6366f1' : '#10b981';
 
-                        return (
-                          <>
+                      return (
+                        <>
                             {/* Temp badge */}
                             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg flex-shrink-0"
-                              style={{ background: `${accentColor}10`, border: `1px solid ${accentColor}20` }}>
+                          style={{ background: `${accentColor}10`, border: `1px solid ${accentColor}20` }}>
                               <span className="text-[13px]">{weatherIcon}</span>
                               <span className="text-[13px] font-black leading-none" style={{ color: accentColor }}>{temp != null ? `${Math.round(temp)}°C` : '—'}</span>
                               {tempMax != null && tempMin != null &&
-                                <span className="text-[9px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</span>
-                              }
+                            <span className="text-[9px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</span>
+                            }
                               <span className="text-[9px] font-semibold" style={{ color: accentColor }}>{weatherLabel}</span>
                             </div>
 
@@ -1016,11 +1016,11 @@ export default function HomeWorkspace({
 
                             {/* Lluvia */}
                             {precip > 0 &&
-                              <span className="text-[10px] text-slate-400 font-medium flex-shrink-0 hidden sm:block">· {precip.toFixed(1)} mm hoy</span>
-                            }
-                          </>
-                        );
-                      })()}
+                          <span className="text-[10px] text-slate-400 font-medium flex-shrink-0 hidden sm:block">· {precip.toFixed(1)} mm hoy</span>
+                          }
+                          </>);
+
+                    })()}
                     </motion.div>
                   </div>
 
@@ -1385,7 +1385,7 @@ export default function HomeWorkspace({
                       }}>
                       
                       {/* Top accent bar — fully opaque */}
-                      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl" style={{ background: `linear-gradient(90deg, ${c.accent}, ${c.accent}40, transparent)` }} />
+                      <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl hidden" style={{ background: `linear-gradient(90deg, ${c.accent}, ${c.accent}40, transparent)` }} />
                       {/* Bottom ambient bleed */}
                       <div className="absolute bottom-0 left-0 right-0 h-12 rounded-b-2xl pointer-events-none" style={{ background: `linear-gradient(0deg, ${c.accent}06, transparent)` }} />
 
@@ -1423,8 +1423,8 @@ export default function HomeWorkspace({
                 if (activeBudget?.id) {
                   await base44.entities.Budget.update(activeBudget.id, { takeaway_budget: val });
                 }
-              }}
-            />
+              }} />
+
             }
 
             {/* ── PRODUCT × TICKET ANALYSIS ── */}
