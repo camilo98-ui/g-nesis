@@ -5,6 +5,7 @@ import { X, Send, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
+import { usePYGDashboard } from './PYGDashboardContext';
 import NovaAlerts from '@/components/NovaAlerts';
 
 
@@ -196,7 +197,8 @@ export default function MascotWidget() {
   const alertCheckRef = useRef(null);
 
   const path = location?.pathname || '/';
-  const isHidden = path === '/PYGDashboard';
+  const { isPYGDashboardOpen } = usePYGDashboard();
+  const isHidden = path === '/PYGDashboard' || isPYGDashboardOpen;
   const pageCtx = PAGE_CONTEXTS[path] || { name: 'App', focus: 'operaciones generales de la tienda.' };
   const suggestions = SUGGESTIONS[path] || SUGGESTIONS.default;
   const { getSectionsSummary } = useNova() || {};

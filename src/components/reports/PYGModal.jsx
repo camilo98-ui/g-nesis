@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { usePYGDashboard } from '@/components/PYGDashboardContext';
 import PYGTrendsPanel from './PYGTrendsPanel';
 import {
   X, TrendingUp, TrendingDown, Loader2, BarChart3, Zap,
@@ -1144,8 +1145,14 @@ function CostTable({ primaryRecord, prevRecord }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function PYGModal({ onClose, storeId }) {
+  const { setIsPYGDashboardOpen } = usePYGDashboard();
   const storeCode = extractStoreCode(storeId);
   const now = new Date();
+
+  useEffect(() => {
+    setIsPYGDashboardOpen(true);
+    return () => setIsPYGDashboardOpen(false);
+  }, [setIsPYGDashboardOpen]);
   const currentYear = now.getFullYear();
 
   const { data: allRecords = [], isLoading } = useQuery({

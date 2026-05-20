@@ -16,6 +16,7 @@ import PowerBIReport from './pages/PowerBIReport';
 import ProductTicketAnalysisPage from './pages/ProductTicketAnalysisPage';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { NovaProvider } from '@/components/NovaContext';
+import { PYGDashboardProvider } from '@/components/PYGDashboardContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -86,6 +87,7 @@ function App() {
   return (
     <AuthProvider>
       <NovaProvider>
+      <PYGDashboardProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <NavigationTracker />
@@ -94,6 +96,7 @@ function App() {
         <Toaster />
         <VisualEditAgent />
       </QueryClientProvider>
+      </PYGDashboardProvider>
       </NovaProvider>
     </AuthProvider>
   )
