@@ -7,6 +7,13 @@ import ReactMarkdown from 'react-markdown';
 import { useLocation } from 'react-router-dom';
 import NovaAlerts from '@/components/NovaAlerts';
 
+// Hook para determinar si debe renderizar Nova
+function useShouldRenderNova() {
+  const location = useLocation();
+  const hiddenPages = ['/PYGDashboard'];
+  return !hiddenPages.includes(location.pathname);
+}
+
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
 
 // Renders the mascot on a canvas with white background removed
@@ -180,6 +187,7 @@ function ChatMessage({ msg }) {
 }
 
 export default function MascotWidget() {
+  const shouldRender = useShouldRenderNova();
   const location = useLocation();
   const { pageData } = useNova() || {};
   const [isOpen, setIsOpen] = useState(false);
@@ -198,8 +206,7 @@ export default function MascotWidget() {
   const suggestions = SUGGESTIONS[path] || SUGGESTIONS.default;
   const { getSectionsSummary } = useNova() || {};
 
-  // Don't render on PYGDashboard (modal overlay pages)
-  if (path === '/PYGDashboard') return null;
+  if (!shouldRender) return null;
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
