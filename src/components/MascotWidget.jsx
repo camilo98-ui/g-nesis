@@ -153,11 +153,13 @@ function ChatMessage({ msg }) {
           <MascotCanvas width={24} height={24} />
         </div>
       )}
-      <div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${isNova ? 'rounded-tl-sm' : 'rounded-tr-sm'}`}
+      <div className={`max-w-[88%] rounded-xl px-3 py-2.5 text-xs leading-relaxed ${isNova ? 'rounded-tl-sm' : 'rounded-tr-sm'}`}
         style={isNova ? {
           background: 'rgba(248,248,250,0.9)',
           border: '1px solid rgba(0,0,0,0.06)',
           color: '#1a1a2e',
+          minWidth: 0,
+          overflowX: 'hidden',
         } : {
           background: 'linear-gradient(135deg, #be185d 0%, #db2777 100%)',
           color: 'white',
@@ -166,10 +168,26 @@ function ChatMessage({ msg }) {
         {isNova ? (
           <ReactMarkdown
             components={{
-              p: ({ children }) => <p className="mb-0.5 last:mb-0">{children}</p>,
+              p: ({ children }) => <p className="mb-1 last:mb-0 text-xs leading-relaxed">{children}</p>,
               strong: ({ children }) => <strong className="font-semibold" style={{ color: '#be185d' }}>{children}</strong>,
-              ul: ({ children }) => <ul className="list-none space-y-0.5 mt-0.5">{children}</ul>,
-              li: ({ children }) => <li className="flex gap-1"><span style={{ color: '#be185d' }}>·</span>{children}</li>,
+              ul: ({ children }) => <ul className="space-y-0.5 mt-1 mb-1 pl-0">{children}</ul>,
+              ol: ({ children }) => <ol className="space-y-0.5 mt-1 mb-1 pl-0 list-none counter-reset-item">{children}</ol>,
+              li: ({ children }) => <li className="flex gap-1.5 text-xs"><span style={{ color: '#be185d', flexShrink: 0 }}>▸</span><span>{children}</span></li>,
+              h1: ({ children }) => <p className="font-bold text-xs mb-1" style={{ color: '#be185d' }}>{children}</p>,
+              h2: ({ children }) => <p className="font-bold text-xs mb-1" style={{ color: '#be185d' }}>{children}</p>,
+              h3: ({ children }) => <p className="font-semibold text-xs mb-0.5" style={{ color: '#6b7280' }}>{children}</p>,
+              table: ({ children }) => (
+                <div className="overflow-x-auto my-1.5 rounded-lg" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+                  <table className="w-full text-[10px] border-collapse">{children}</table>
+                </div>
+              ),
+              thead: ({ children }) => <thead style={{ background: 'rgba(194,24,117,0.06)' }}>{children}</thead>,
+              th: ({ children }) => <th className="px-2 py-1 text-left font-semibold" style={{ color: '#be185d', borderBottom: '1px solid rgba(0,0,0,0.07)', whiteSpace: 'nowrap' }}>{children}</th>,
+              td: ({ children }) => <td className="px-2 py-1" style={{ borderBottom: '1px solid rgba(0,0,0,0.04)', whiteSpace: 'nowrap' }}>{children}</td>,
+              tr: ({ children }) => <tr className="hover:bg-pink-50/50 transition-colors">{children}</tr>,
+              code: ({ children }) => <code className="px-1 py-0.5 rounded text-[10px]" style={{ background: 'rgba(194,24,117,0.06)', color: '#be185d', fontFamily: 'monospace' }}>{children}</code>,
+              blockquote: ({ children }) => <div className="pl-2 my-1" style={{ borderLeft: '2px solid rgba(194,24,117,0.3)', color: '#6b7280' }}>{children}</div>,
+              hr: () => <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.07)', margin: '6px 0' }} />,
             }}
           >
             {msg.content}
@@ -396,75 +414,22 @@ ${d.kpi_proyeccion ? `- Valor: ${d.kpi_proyeccion} ${d.kpi_proyeccion_meta ? ` �
       }).join('\n')}`
       : '';
 
-    const SYSTEM_PROMPT_ANALYTICS = `You are NOVA — the central intelligence engine of this business platform.
+    const SYSTEM_PROMPT_ANALYTICS = `Eres Nova — analista de inteligencia de negocio para Popsy Colombia.
 
-NOT A CHATBOT. YOU ARE AN ELITE BUSINESS ANALYST.
+RESPONDE EN ESPAÑOL. SIEMPRE.
 
-Your Identity:
-✓ Chief Financial Officer mentality
-✓ World-class business analyst
-✓ Strategic operations consultant
-✓ Executive intelligence system
-✓ Predictive forecasting specialist
+REGLAS DE RESPUESTA:
+- Sé concisa y directa. Máximo 5-6 líneas salvo que pidan análisis profundo.
+- Usa **negritas** solo para cifras clave y conclusiones importantes.
+- Si muestras datos comparativos, usa una tabla markdown limpia.
+- Si listas items, usa listas con bullets (-).
+- No repitas el mismo dato de formas distintas.
+- No incluyas secciones que no aporten valor directo a la pregunta.
+- Prioridad: cifra clave → comparativo relevante → recomendación concreta.
+- Nunca más de lo necesario.
 
-CORE MANDATE:
-- Analyze DEEPLY before responding
-- NEVER give generic answers
-- ALWAYS quantify with numbers
-- ALWAYS compare periods
-- ALWAYS explain cause-and-effect
-- ALWAYS identify opportunities AND risks
-- ALWAYS provide strategic recommendations
-
-COMPETENCIES YOU MUST MASTER:
-✓ EBITDA analysis and margin interpretation
-✓ KPI interdependencies and chain reactions
-✓ Anomaly detection (variance >10% = investigate)
-✓ Historical pattern recognition and trends
-✓ Operational efficiency diagnostics
-✓ Financial risk assessment
-✓ Predictive forecasting and scenarios
-✓ Strategic opportunity identification
-✓ Root cause analysis
-
-THINKING REQUIREMENTS:
-Before answering, you MUST:
-1. Extract core metrics from data
-2. Compare against previous periods
-3. Calculate percentage changes
-4. Identify what's abnormal
-5. Determine why changes happened
-6. Assess financial/operational impact
-7. Forecast future outcomes
-8. Recommend specific actions
-
-BAD EXAMPLE (You will NEVER do this):
-"Sales increased this month."
-
-GOOD EXAMPLE (What you WILL do):
-"Sales increased 12.4% YoY, driven by premium product participation (now 34% vs 26%) during peak hours. However, EBITDA margin contracted 180bps due to labor cost concentration (4-8pm shift premium). Recommend dynamic pricing on premium items and labor scheduling optimization for 15-20bps margin recovery."
-
-COMMUNICATION STYLE:
-- Concise but deeply insightful
-- Professional executive language
-- Always numbers-focused
-- Naturally intelligent
-- Proactively flag risks
-- Proactively identify opportunities
-- Always explain reasoning
-- Speak as a peer to executives
-
-RESPONSE STRUCTURE FOR EVERY ANALYSIS:
-1. **Key Finding**: Direct answer with primary number
-2. **Comparison**: How it compares to historical data
-3. **Root Causes**: What's driving the numbers
-4. **Impact Assessment**: Financial and operational implications
-5. **Anomalies**: Unusual patterns or deviations
-6. **Risk & Opportunity**: Both sides of the equation
-7. **Strategic Recommendations**: Specific, actionable improvements
-8. **Expected Outcome**: What happens if you follow the recommendations
-
-You speak Spanish. Be intelligent. Be strategic. Be proactive. Be the elite business intelligence engine this platform deserves.`;
+CUANDO HAY DATOS REALES: úsalos. Cita números exactos. Compara vs meta o período anterior. Detecta anomalías.
+CUANDO NO HAY DATOS: responde como experto en retail/finanzas. Sin inventar cifras.`;
 
     const contextPrompt = `${SYSTEM_PROMPT_ANALYTICS}
 
@@ -563,8 +528,8 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
             className="flex flex-col mb-2"
             style={{
-              width: 288,
-              height: 460,
+              width: 360,
+              height: 540,
               borderRadius: 28,
               overflow: 'hidden',
               background: 'rgba(255,255,255,0.88)',
