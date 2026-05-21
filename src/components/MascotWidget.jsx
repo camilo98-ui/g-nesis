@@ -138,6 +138,16 @@ function TypingDots() {
   );
 }
 
+// Fix tables that arrive as inline pipe-text (no newlines between rows)
+function fixMarkdownTables(text) {
+  if (!text) return text;
+  // Insert newline before every | that starts a new row (after closing |)
+  let result = text.replace(/(\|[^\n]+\|)\s*(\|)/g, '$1\n$2');
+  // Ensure separator row (|---|) has its own line
+  result = result.replace(/([^\n])\s*(\|\s*[-:]+\s*\|)/g, '$1\n$2');
+  return result;
+}
+
 function ChatMessage({ msg }) {
   const isNova = msg.role === 'assistant';
   return (
@@ -190,7 +200,7 @@ function ChatMessage({ msg }) {
               hr: () => <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.07)', margin: '6px 0' }} />,
             }}
           >
-            {msg.content}
+            {fixMarkdownTables(msg.content)}
           </ReactMarkdown>
         ) : (
           <p>{msg.content}</p>
