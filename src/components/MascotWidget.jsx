@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useLocation } from 'react-router-dom';
 import { usePYGDashboard } from './PYGDashboardContext';
 import NovaAlerts from '@/components/NovaAlerts';
@@ -177,6 +178,7 @@ function ChatMessage({ msg }) {
       >
         {isNova ? (
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             components={{
               p: ({ children }) => <p className="mb-1 last:mb-0 text-xs leading-relaxed">{children}</p>,
               strong: ({ children }) => <strong className="font-semibold" style={{ color: '#be185d' }}>{children}</strong>,
