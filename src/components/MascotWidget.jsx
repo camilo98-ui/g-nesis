@@ -162,21 +162,21 @@ function parseNovaContent(text) {
 
 function MetricsBlock({ data }) {
   return (
-    <div className="grid gap-1.5 my-1.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
+    <div className="grid gap-1 my-1.5" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
       {data.map((item, i) => (
-        <div key={i} className="rounded-xl px-2.5 py-2"
+        <div key={i} className="rounded-lg px-2 py-1.5"
           style={{
             background: item.highlight ? 'linear-gradient(135deg, rgba(190,24,93,0.08) 0%, rgba(244,114,182,0.06) 100%)' : 'rgba(248,246,252,0.9)',
             border: item.highlight ? '1px solid rgba(190,24,93,0.18)' : '1px solid rgba(0,0,0,0.05)',
           }}>
-          <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 2 }}>
+          <p style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 1, lineHeight: 1.2 }}>
             {item.label}
           </p>
-          <p style={{ fontSize: 13, fontWeight: 700, color: item.highlight ? '#be185d' : '#1f2937', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: item.highlight ? '#be185d' : '#1f2937', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
             {item.value}
           </p>
           {item.meta && (
-            <p style={{ fontSize: 9.5, color: '#6b7280', marginTop: 2, fontWeight: 500 }}>{item.meta}</p>
+            <p style={{ fontSize: 8.5, color: '#6b7280', marginTop: 1, fontWeight: 500, lineHeight: 1.2 }}>{item.meta}</p>
           )}
         </div>
       ))}
