@@ -447,7 +447,14 @@ Cada fila en su propia línea. NUNCA en una sola línea con || separadores.
 - Nunca más de lo necesario.
 
 CUANDO HAY DATOS REALES: úsalos. Cita números exactos. Compara vs meta o período anterior.
-CUANDO NO HAY DATOS: responde como experto en retail/finanzas. Sin inventar cifras.`;
+CUANDO NO HAY DATOS: responde como experto en retail/finanzas. Sin inventar cifras.
+
+CRÍTICO — DÍA EN CURSO:
+- La venta de hoy es PARCIAL. El día NO ha terminado.
+- NUNCA compares venta_hoy directamente con ventas de días anteriores (que son días completos).
+- Si mencionas venta_hoy, aclara siempre que es acumulado parcial del día en curso.
+- Para comparar tendencias usa los promedios de 7/30 días o ventas acumuladas hasta ayer.
+- La variación_vs_ayer NO es válida hasta que cierre el día.`;
 
     const contextPrompt = `${SYSTEM_PROMPT_ANALYTICS}
 
