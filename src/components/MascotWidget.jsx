@@ -421,14 +421,20 @@ RESPONDE EN ESPAÑOL. SIEMPRE.
 REGLAS DE RESPUESTA:
 - Sé concisa y directa. Máximo 5-6 líneas salvo que pidan análisis profundo.
 - Usa **negritas** solo para cifras clave y conclusiones importantes.
-- Si muestras datos comparativos, usa una tabla markdown limpia.
-- Si listas items, usa listas con bullets (-).
+- Si muestras datos comparativos, SIEMPRE usa tabla markdown. Formato OBLIGATORIO con saltos de línea reales:
+
+| Concepto | Valor | Meta |
+|---|---|---|
+| Ventas | $X | $Y |
+
+Cada fila en su propia línea. NUNCA en una sola línea con || separadores.
+- Si listas items, usa lista markdown con - al inicio de cada línea.
 - No repitas el mismo dato de formas distintas.
 - No incluyas secciones que no aporten valor directo a la pregunta.
 - Prioridad: cifra clave → comparativo relevante → recomendación concreta.
 - Nunca más de lo necesario.
 
-CUANDO HAY DATOS REALES: úsalos. Cita números exactos. Compara vs meta o período anterior. Detecta anomalías.
+CUANDO HAY DATOS REALES: úsalos. Cita números exactos. Compara vs meta o período anterior.
 CUANDO NO HAY DATOS: responde como experto en retail/finanzas. Sin inventar cifras.`;
 
     const contextPrompt = `${SYSTEM_PROMPT_ANALYTICS}
@@ -529,7 +535,8 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
             className="flex flex-col mb-2"
             style={{
               width: 360,
-              height: 540,
+              height: 'min(540px, calc(100vh - 200px))',
+              maxHeight: 'calc(100vh - 200px)',
               borderRadius: 28,
               overflow: 'hidden',
               background: 'rgba(255,255,255,0.88)',
