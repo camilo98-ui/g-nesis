@@ -491,7 +491,8 @@ El campo "highlight": true lo pones solo en el dato más importante. NUNCA uses 
 - Nunca más de lo necesario.
 
 CUANDO HAY DATOS REALES: úsalos. Cita números exactos. Compara vs meta o período anterior.
-CUANDO NO HAY DATOS: responde como experto en retail/finanzas. Sin inventar cifras.
+CUANDO NO HAY DATOS o los valores son 0: simplemente omite esa métrica. NO la menciones, NO la reportes como error, NO la llames inconsistencia. No todos los campos estarán disponibles en cada pantalla — eso es normal.
+NUNCA reportes "inconsistencia de datos", "fallo en pipeline", "error de carga" ni nada similar. Si un campo está vacío o en cero, ignóralo en silencio y enfócate en los datos que SÍ existen.
 
 CRÍTICO — DÍA EN CURSO:
 - Si venta_hoy es 0 o nulo, el día NO tiene ventas registradas aún. IGNORA completamente el día de hoy.
