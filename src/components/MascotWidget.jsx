@@ -399,10 +399,10 @@ IDENTIFICACIÓN
 - Equipo activo: ${d.cajeros_activos ?? '?'} cajeros
 
 DESEMPEÑO DEL DÍA
-${d.venta_hoy != null ? `- Venta de hoy: ${fmt(d.venta_hoy)} · ${d.transacciones_hoy ?? 0} transacciones` : '- Sin datos de ventas hoy'}
-${d.ticket_promedio_hoy ? `- Ticket promedio hoy: ${fmt(d.ticket_promedio_hoy)}` : ''}
-${d.variacion_vs_ayer != null ? `- Variación vs ayer: ${d.variacion_vs_ayer > 0 ? '+' : ''}${d.variacion_vs_ayer}%` : ''}
-${d.cumplimiento_diario != null ? `- Cumplimiento PPT hoy: ${d.cumplimiento_diario}%` : ''}
+${d.venta_hoy > 0 ? `- Venta de hoy (PARCIAL, día en curso): ${fmt(d.venta_hoy)} · ${d.transacciones_hoy ?? 0} transacciones` : '- Venta de hoy: SIN REGISTROS AÚN — ignorar para análisis'}
+${d.venta_hoy > 0 && d.ticket_promedio_hoy ? `- Ticket promedio hoy: ${fmt(d.ticket_promedio_hoy)}` : ''}
+${d.venta_hoy > 0 && d.variacion_vs_ayer != null ? `- Variación vs ayer (parcial): ${d.variacion_vs_ayer > 0 ? '+' : ''}${d.variacion_vs_ayer}% (NO comparable, día incompleto)` : ''}
+${d.venta_hoy > 0 && d.cumplimiento_diario != null ? `- Cumplimiento PPT hoy: ${d.cumplimiento_diario}% (parcial)` : ''}
 
 PRESUPUESTO Y METAS
 - Presupuesto mensual: ${fmt(d.presupuesto_mes || 0)}
@@ -494,11 +494,13 @@ CUANDO HAY DATOS REALES: úsalos. Cita números exactos. Compara vs meta o perí
 CUANDO NO HAY DATOS: responde como experto en retail/finanzas. Sin inventar cifras.
 
 CRÍTICO — DÍA EN CURSO:
-- La venta de hoy es PARCIAL. El día NO ha terminado.
-- NUNCA compares venta_hoy directamente con ventas de días anteriores (que son días completos).
-- Si mencionas venta_hoy, aclara siempre que es acumulado parcial del día en curso.
-- Para comparar tendencias usa los promedios de 7/30 días o ventas acumuladas hasta ayer.
-- La variación_vs_ayer NO es válida hasta que cierre el día.`;
+- Si venta_hoy es 0 o nulo, el día NO tiene ventas registradas aún. IGNORA completamente el día de hoy.
+- En ese caso, basa TODO el análisis en las ventas acumuladas hasta ayer y el histórico cerrado (7/30 días).
+- NUNCA proyectes ni estimes lo que puede pasar hoy si no hay ventas reales de hoy.
+- NUNCA compares venta_hoy con días anteriores cerrados (son bases distintas: parcial vs. completo).
+- La variación_vs_ayer y cumplimiento_diario son irrelevantes si el día está en 0.
+- Cuando no hay datos de hoy, usa: ventas_acumuladas, brecha_mes, proyeccion_cierre, promedios 7/30 días.
+- Solo menciona "hoy" si venta_hoy > 0 y el usuario pregunta explícitamente por el día actual.`;
 
     const contextPrompt = `${SYSTEM_PROMPT_ANALYTICS}
 
