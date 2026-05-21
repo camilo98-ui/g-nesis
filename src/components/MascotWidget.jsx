@@ -139,14 +139,49 @@ function TypingDots() {
   );
 }
 
-// Fix tables that arrive as inline pipe-text (no newlines between rows)
-function fixMarkdownTables(text) {
-  if (!text) return text;
-  // Insert newline before every | that starts a new row (after closing |)
-  let result = text.replace(/(\|[^\n]+\|)\s*(\|)/g, '$1\n$2');
-  // Ensure separator row (|---|) has its own line
-  result = result.replace(/([^\n])\s*(\|\s*[-:]+\s*\|)/g, '$1\n$2');
-  return result;
+// Parse :::metrics blocks from Nova's response
+function parseNovaContent(text) {
+  if (!text) return [{ type: 'text', content: text }];
+  const parts = [];
+  const regex = /:::metrics\n([\s\S]*?)\n:::/g;
+  let last = 0;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > last) parts.push({ type: 'text', content: text.slice(last, match.index) });
+    try {
+      const data = JSON.parse(match[1]);
+      parts.push({ type: 'metrics', data });
+    } catch {
+      parts.push({ type: 'text', content: match[0] });
+    }
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push({ type: 'text', content: text.slice(last) });
+  return parts;
+}
+
+function MetricsBlock({ data }) {
+  return (
+    <div className="grid gap-1.5 my-1.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
+      {data.map((item, i) => (
+        <div key={i} className="rounded-xl px-2.5 py-2"
+          style={{
+            background: item.highlight ? 'linear-gradient(135deg, rgba(190,24,93,0.08) 0%, rgba(244,114,182,0.06) 100%)' : 'rgba(248,246,252,0.9)',
+            border: item.highlight ? '1px solid rgba(190,24,93,0.18)' : '1px solid rgba(0,0,0,0.05)',
+          }}>
+          <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#9ca3af', marginBottom: 2 }}>
+            {item.label}
+          </p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: item.highlight ? '#be185d' : '#1f2937', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+            {item.value}
+          </p>
+          {item.meta && (
+            <p style={{ fontSize: 9.5, color: '#6b7280', marginTop: 2, fontWeight: 500 }}>{item.meta}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function ChatMessage({ msg }) {
@@ -177,33 +212,42 @@ function ChatMessage({ msg }) {
         }}
       >
         {isNova ? (
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              p: ({ children }) => <p className="mb-1 last:mb-0 text-xs leading-relaxed">{children}</p>,
-              strong: ({ children }) => <strong className="font-semibold" style={{ color: '#be185d' }}>{children}</strong>,
-              ul: ({ children }) => <ul className="space-y-0.5 mt-1 mb-1 pl-0">{children}</ul>,
-              ol: ({ children }) => <ol className="space-y-0.5 mt-1 mb-1 pl-0 list-none counter-reset-item">{children}</ol>,
-              li: ({ children }) => <li className="flex gap-1.5 text-xs"><span style={{ color: '#be185d', flexShrink: 0 }}>▸</span><span>{children}</span></li>,
-              h1: ({ children }) => <p className="font-bold text-xs mb-1" style={{ color: '#be185d' }}>{children}</p>,
-              h2: ({ children }) => <p className="font-bold text-xs mb-1" style={{ color: '#be185d' }}>{children}</p>,
-              h3: ({ children }) => <p className="font-semibold text-xs mb-0.5" style={{ color: '#6b7280' }}>{children}</p>,
-              table: ({ children }) => (
-                <div className="overflow-x-auto my-1.5 rounded-lg" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
-                  <table className="w-full text-[10px] border-collapse">{children}</table>
-                </div>
-              ),
-              thead: ({ children }) => <thead style={{ background: 'rgba(194,24,117,0.06)' }}>{children}</thead>,
-              th: ({ children }) => <th className="px-2 py-1 text-left font-semibold" style={{ color: '#be185d', borderBottom: '1px solid rgba(0,0,0,0.07)', whiteSpace: 'nowrap' }}>{children}</th>,
-              td: ({ children }) => <td className="px-2 py-1" style={{ borderBottom: '1px solid rgba(0,0,0,0.04)', whiteSpace: 'nowrap' }}>{children}</td>,
-              tr: ({ children }) => <tr className="hover:bg-pink-50/50 transition-colors">{children}</tr>,
-              code: ({ children }) => <code className="px-1 py-0.5 rounded text-[10px]" style={{ background: 'rgba(194,24,117,0.06)', color: '#be185d', fontFamily: 'monospace' }}>{children}</code>,
-              blockquote: ({ children }) => <div className="pl-2 my-1" style={{ borderLeft: '2px solid rgba(194,24,117,0.3)', color: '#6b7280' }}>{children}</div>,
-              hr: () => <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.07)', margin: '6px 0' }} />,
-            }}
-          >
-            {fixMarkdownTables(msg.content)}
-          </ReactMarkdown>
+          <div>
+            {parseNovaContent(msg.content).map((part, i) =>
+              part.type === 'metrics' ? (
+                <MetricsBlock key={i} data={part.data} />
+              ) : (
+                <ReactMarkdown
+                  key={i}
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => <p className="mb-1 last:mb-0 text-xs leading-relaxed">{children}</p>,
+                    strong: ({ children }) => <strong className="font-semibold" style={{ color: '#be185d' }}>{children}</strong>,
+                    ul: ({ children }) => <ul className="space-y-0.5 mt-1 mb-1 pl-0">{children}</ul>,
+                    ol: ({ children }) => <ol className="space-y-0.5 mt-1 mb-1 pl-0 list-none">{children}</ol>,
+                    li: ({ children }) => <li className="flex gap-1.5 text-xs"><span style={{ color: '#be185d', flexShrink: 0 }}>▸</span><span>{children}</span></li>,
+                    h1: ({ children }) => <p className="font-bold text-xs mb-1" style={{ color: '#be185d' }}>{children}</p>,
+                    h2: ({ children }) => <p className="font-bold text-xs mb-1" style={{ color: '#be185d' }}>{children}</p>,
+                    h3: ({ children }) => <p className="font-semibold text-xs mb-0.5" style={{ color: '#6b7280' }}>{children}</p>,
+                    table: ({ children }) => (
+                      <div className="overflow-x-auto my-1.5 rounded-lg" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+                        <table className="w-full text-[10px] border-collapse">{children}</table>
+                      </div>
+                    ),
+                    thead: ({ children }) => <thead style={{ background: 'rgba(194,24,117,0.06)' }}>{children}</thead>,
+                    th: ({ children }) => <th className="px-2 py-1 text-left font-semibold" style={{ color: '#be185d', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>{children}</th>,
+                    td: ({ children }) => <td className="px-2 py-1" style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>{children}</td>,
+                    tr: ({ children }) => <tr className="hover:bg-pink-50/50 transition-colors">{children}</tr>,
+                    code: ({ children }) => <code className="px-1 py-0.5 rounded text-[10px]" style={{ background: 'rgba(194,24,117,0.06)', color: '#be185d' }}>{children}</code>,
+                    blockquote: ({ children }) => <div className="pl-2 my-1" style={{ borderLeft: '2px solid rgba(194,24,117,0.3)', color: '#6b7280' }}>{children}</div>,
+                    hr: () => <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.07)', margin: '6px 0' }} />,
+                  }}
+                >
+                  {part.content}
+                </ReactMarkdown>
+              )
+            )}
+          </div>
         ) : (
           <p>{msg.content}</p>
         )}
@@ -433,13 +477,13 @@ RESPONDE EN ESPAÑOL. SIEMPRE.
 REGLAS DE RESPUESTA:
 - Sé concisa y directa. Máximo 5-6 líneas salvo que pidan análisis profundo.
 - Usa **negritas** solo para cifras clave y conclusiones importantes.
-- Si muestras datos comparativos, SIEMPRE usa tabla markdown. Formato OBLIGATORIO con saltos de línea reales:
+- Cuando tengas DATOS ESTRUCTURADOS (proyecciones, métricas, comparativos), usa EXCLUSIVAMENTE este formato de bloque:
 
-| Concepto | Valor | Meta |
-|---|---|---|
-| Ventas | $X | $Y |
+:::metrics
+[{"label": "Concepto", "value": "$X", "meta": "descripción", "highlight": false}, {"label": "Meta", "value": "$Y", "meta": "referencia", "highlight": true}]
+:::
 
-Cada fila en su propia línea. NUNCA en una sola línea con || separadores.
+El campo "highlight": true lo pones solo en el dato más importante. NUNCA uses tablas markdown (pipes |). NUNCA pongas datos en texto plano si puedes usar el bloque.
 - Si listas items, usa lista markdown con - al inicio de cada línea.
 - No repitas el mismo dato de formas distintas.
 - No incluyas secciones que no aporten valor directo a la pregunta.
