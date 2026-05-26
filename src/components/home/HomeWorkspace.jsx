@@ -75,7 +75,8 @@ const NAV_ITEMS = [
 { icon: Clock, label: 'Txn por hora', path: 'HourlyTransactions', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: BarChart3, label: 'Participación', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: Snowflake, label: 'Mapa Nevera', path: 'FreezerMap', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
-{ icon: BarChart3, label: 'Producto para llevar', path: 'PowerBIReport', color: '#C21875', roles: ['lider', 'embajador', 'gerente'] }];
+{ icon: BarChart3, label: 'Producto para llevar', path: 'PowerBIReport', color: '#C21875', roles: ['lider', 'embajador', 'gerente'] },
+{ icon: Activity, label: 'Radar Competitivo', path: 'RadarCompetitivo', color: '#7c3aed', roles: ['lider', 'gerente'], isSpecial: true }];
 
 
 // ── PREMIUM KPI CARD ─────────────────────────────────────────────────────────
