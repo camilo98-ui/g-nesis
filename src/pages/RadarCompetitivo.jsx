@@ -260,8 +260,8 @@ export default function RadarCompetitivo() {
       const prevTxn = txnSeries[txnSeries.length - 2]?.txn || 0;
       const growth = prevTxn > 0 ? ((lastTxn - prevTxn) / prevTxn) * 100 : 0;
       const color = brandMap[brand];
-      return { brand, color, total, lastTxn, growth, txnSeries, count: sorted.length };
-    }).filter(b => b.total > 0).sort((a, b) => b.total - a.total);
+      return { brand, color, total, lastTxn, growth, txnSeries, count: sorted.length, onlyOneReading: sorted.length === 1 };
+    }).sort((a, b) => b.total - a.total);
   }, [records, brands, brandMap]);
 
   const totalTxns = brandStats.reduce((s, b) => s + b.total, 0);
@@ -416,7 +416,9 @@ export default function RadarCompetitivo() {
                         style={{ color: i === 0 ? '#f59e0b' : '#cbd5e1' }}>#{i+1}</span>
                       <BrandDot color={b.color} size={7}/>
                       <span className="text-xs font-semibold flex-1 text-slate-600 truncate">{b.brand}</span>
-                      <TrendBadge pct={b.growth}/>
+                      {b.onlyOneReading
+                        ? <span className="text-[9px] text-slate-300 font-medium">1ª toma</span>
+                        : <TrendBadge pct={b.growth}/>}
                     </div>
                   ))}
                 </div>
@@ -430,7 +432,7 @@ export default function RadarCompetitivo() {
               <p className="text-[9px] font-black tracking-widest uppercase text-slate-400 mb-4">Presión Competitiva · Participación</p>
               <div className="space-y-3">
                 {brandStats.map(b => {
-                  const pct = Math.round((b.total / totalAll) * 100);
+                  const pct = totalAll > 1 ? Math.round((b.total / totalAll) * 100) : 0;
                   return (
                     <div key={b.brand} className="flex items-center gap-3">
                       <div className="flex items-center gap-2 w-28 flex-shrink-0">
@@ -438,15 +440,17 @@ export default function RadarCompetitivo() {
                         <span className="text-xs font-semibold text-slate-600 truncate">{b.brand}</span>
                       </div>
                       <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: '#f1f5f9' }}>
-                        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
+                        <motion.div initial={{ width: 0 }} animate={{ width: b.onlyOneReading ? '2%' : `${pct}%` }}
                           transition={{ duration: 1, delay: 0.3, ease: [0.23,1,0.32,1] }}
                           className="h-full rounded-full" style={{ background: b.color }}/>
                       </div>
-                      <div className="flex items-center gap-2 w-24 flex-shrink-0 justify-end">
-                        <span className="text-xs font-bold text-slate-700 tabular-nums">{pct}%</span>
-                        <span className="text-[10px] text-slate-400 tabular-nums hidden sm:block">
-                          {b.total.toLocaleString('es-CO')}
-                        </span>
+                      <div className="flex items-center gap-2 w-32 flex-shrink-0 justify-end">
+                        {b.onlyOneReading
+                          ? <span className="text-[10px] text-slate-300 italic">Necesita 2ª toma</span>
+                          : <>
+                              <span className="text-xs font-bold text-slate-700 tabular-nums">{pct}%</span>
+                              <span className="text-[10px] text-slate-400 tabular-nums hidden sm:block">{b.total.toLocaleString('es-CO')}</span>
+                            </>}
                       </div>
                     </div>
                   );
