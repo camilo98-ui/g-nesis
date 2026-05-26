@@ -6,10 +6,6 @@
       "type": "string",
       "description": "Nombre de la competencia"
     },
-    "point_of_sale": {
-      "type": "string",
-      "description": "Punto de venta observado"
-    },
     "date": {
       "type": "string",
       "format": "date",
@@ -17,29 +13,28 @@
     },
     "week": {
       "type": "string",
-      "description": "Semana (ej: 2024-W21)"
+      "description": "Semana (ej: 2026-S21)"
     },
-    "serial_initial": {
+    "serial": {
       "type": "number",
-      "description": "Serial inicial de factura"
-    },
-    "serial_final": {
-      "type": "number",
-      "description": "Serial final de factura"
+      "description": "Serial de factura registrado en esta toma"
     },
     "transactions": {
       "type": "number",
-      "description": "Transacciones estimadas (serial_final - serial_initial)"
+      "description": "Transacciones calculadas vs toma anterior (serial actual - serial anterior)"
     },
     "observations": {
       "type": "string",
       "description": "Observaciones opcionales"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color asignado a la competencia"
     }
   },
   "required": [
     "competition",
     "date",
-    "serial_initial",
-    "serial_final"
+    "serial"
   ]
 }
