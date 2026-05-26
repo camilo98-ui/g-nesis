@@ -6,7 +6,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area
 } from 'recharts';
-import { Plus, X, TrendingUp, TrendingDown, Minus, Activity, ChevronRight, Zap, ArrowLeft } from 'lucide-react';
+import { Plus, X, TrendingUp, TrendingDown, Minus, Activity, ChevronRight, Zap, ArrowLeft, History, Pencil, Trash2, ChevronDown } from 'lucide-react';
 import { format, parseISO, getISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
@@ -215,14 +215,159 @@ function NuevaTomaModa({ open, onClose, onSave, brands, records }) {
   );
 }
 
+// ─── HISTORIAL MODAL ────────────────────────────────────────────────────────
+function HistorialModal({ open, onClose, records, brandMap, onDelete, onEdit }) {
+  const [editingId, setEditingId] = useState(null);
+  const [editSerial, setEditSerial] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editObs, setEditObs] = useState('');
+
+  const sorted = [...records].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const startEdit = (r) => {
+    setEditingId(r.id);
+    setEditSerial(String(r.serial));
+    setEditDate(r.date);
+    setEditObs(r.observations || '');
+  };
+
+  const cancelEdit = () => setEditingId(null);
+
+  const saveEdit = (r) => {
+    onEdit(r.id, { serial: Number(editSerial), date: editDate, observations: editObs });
+    setEditingId(null);
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={onClose}/>
+          <motion.div className="relative z-10 w-full max-w-lg rounded-3xl bg-white flex flex-col"
+            style={{ maxHeight: '85vh', boxShadow: '0 8px 60px rgba(0,0,0,0.12), 0 0 0 1px rgba(194,24,117,0.08)', border: '1px solid rgba(194,24,117,0.1)' }}
+            initial={{ scale: 0.95, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 16 }}
+            transition={{ duration: 0.22, ease: [0.23,1,0.32,1] }}>
+
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 flex-shrink-0">
+              <div>
+                <p className="text-[9px] font-black tracking-[0.22em] uppercase mb-0.5" style={{ color: '#C21875' }}>Radar Competitivo</p>
+                <h2 className="text-lg font-black text-slate-800 tracking-tight">Historial de Tomas</h2>
+              </div>
+              <button onClick={onClose}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+                <X className="w-4 h-4"/>
+              </button>
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {sorted.length === 0 && (
+                <p className="text-sm text-slate-400 text-center py-8">Sin tomas registradas.</p>
+              )}
+              {sorted.map(r => {
+                const color = brandMap[r.competition] || '#C21875';
+                const isEditing = editingId === r.id;
+                return (
+                  <div key={r.id} className="rounded-2xl p-4 transition-all"
+                    style={{ background: isEditing ? 'rgba(194,24,117,0.03)' : '#f8fafc', border: `1px solid ${isEditing ? 'rgba(194,24,117,0.2)' : '#e2e8f0'}` }}>
+                    {!isEditing ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-white text-sm flex-shrink-0"
+                          style={{ background: color }}>{getInitial(r.competition)}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-bold text-slate-800">{r.competition}</span>
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: color }}>
+                              #{r.serial?.toLocaleString('es-CO')}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <span className="text-xs text-slate-400">{r.date}</span>
+                            {r.week && <span className="text-xs text-slate-300">{r.week}</span>}
+                            {r.transactions > 0 && <span className="text-xs font-semibold" style={{ color }}>+{r.transactions.toLocaleString('es-CO')} txn</span>}
+                            {r.observations && <span className="text-xs text-slate-400 italic truncate max-w-xs">{r.observations}</span>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button onClick={() => startEdit(r)}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all">
+                            <Pencil className="w-3.5 h-3.5"/>
+                          </button>
+                          <button onClick={() => onDelete(r.id)}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all">
+                            <Trash2 className="w-3.5 h-3.5"/>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center font-black text-white text-xs flex-shrink-0" style={{ background: color }}>
+                            {getInitial(r.competition)}
+                          </div>
+                          <span className="text-sm font-bold text-slate-700">{r.competition}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Serial</label>
+                            <input type="number" value={editSerial} onChange={e => setEditSerial(e.target.value)}
+                              className="w-full px-3 py-2 rounded-xl text-sm font-bold outline-none"
+                              style={{ background: '#fff', border: '1px solid #e2e8f0' }}/>
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Fecha</label>
+                            <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)}
+                              className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                              style={{ background: '#fff', border: '1px solid #e2e8f0' }}/>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Observaciones</label>
+                          <input value={editObs} onChange={e => setEditObs(e.target.value)}
+                            className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                            style={{ background: '#fff', border: '1px solid #e2e8f0' }}/>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => saveEdit(r)}
+                            className="flex-1 py-2 rounded-xl text-xs font-bold text-white transition-all"
+                            style={{ background: 'linear-gradient(135deg,#C21875,#e11d7a)' }}>Guardar</button>
+                          <button onClick={cancelEdit}
+                            className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition-all">Cancelar</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 export default function RadarCompetitivo() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [historialOpen, setHistorialOpen] = useState(false);
   const qc = useQueryClient();
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['competitiveRecords'],
     queryFn: () => base44.entities.CompetitiveRecord.list('-date', 500)
+  });
+
+  const remove = useMutation({
+    mutationFn: (id) => base44.entities.CompetitiveRecord.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] })
+  });
+
+  const update = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] })
   });
 
   const create = useMutation({
@@ -324,7 +469,12 @@ export default function RadarCompetitivo() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
+            <button onClick={() => setHistorialOpen(true)}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all"
+              style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+              <History className="w-3.5 h-3.5"/> Historial
+            </button>
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
               style={{ background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)' }}>
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 4px rgba(52,211,153,0.7)' }}/>
               <span className="text-[9px] font-bold text-emerald-600 tracking-wider">ACTIVO</span>
@@ -539,6 +689,15 @@ export default function RadarCompetitivo() {
           </>
         )}
       </div>
+
+      <HistorialModal
+        open={historialOpen}
+        onClose={() => setHistorialOpen(false)}
+        records={records}
+        brandMap={brandMap}
+        onDelete={(id) => remove.mutate(id)}
+        onEdit={(id, data) => update.mutate({ id, data })}
+      />
 
       <NuevaTomaModa
         open={modalOpen}
