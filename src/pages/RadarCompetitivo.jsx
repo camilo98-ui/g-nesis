@@ -3,15 +3,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  Cell, LineChart, Line, AreaChart, Area
 } from 'recharts';
 import { Plus, X, TrendingUp, TrendingDown, Minus, Activity, ChevronRight, Zap, ArrowLeft, History, Pencil, Trash2, ChevronDown } from 'lucide-react';
 import { format, parseISO, getISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 
-const AUTO_COLORS = ['#C21875','#6366f1','#f59e0b','#10b981','#3b82f6','#8b5cf6','#f43f5e','#14b8a6','#f97316','#0ea5e9'];
+const AUTO_COLORS = ['#C21875','#e879a0','#c084fc','#f472b6','#fb7185','#a78bfa','#f9a8d4','#e879f9','#fca5a5','#d946ef'];
 
 function getInitial(name) {
   return name ? name.trim()[0].toUpperCase() : '?';
@@ -39,6 +39,27 @@ function TrendBadge({ pct }) {
       {neu ? <Minus className="w-3 h-3"/> : pos ? <TrendingUp className="w-3 h-3"/> : <TrendingDown className="w-3 h-3"/>}
       {pos ? '+' : ''}{pct.toFixed(1)}%
     </span>
+  );
+}
+
+function InfoTooltip({ text }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative inline-flex" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black cursor-help select-none"
+        style={{ background: 'rgba(194,24,117,0.1)', color: '#C21875', border: '1px solid rgba(194,24,117,0.2)' }}>?</span>
+      <AnimatePresence>
+        {show && (
+          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.15 }}
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 rounded-xl p-3 text-xs text-slate-600 leading-relaxed"
+            style={{ background: 'rgba(255,255,255,0.98)', border: '1px solid rgba(194,24,117,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+            {text}
+            <div className="absolute top-full left-1/2 -translate-x-1/2" style={{ width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid rgba(194,24,117,0.2)' }}/>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -412,32 +433,19 @@ export default function RadarCompetitivo() {
   const totalTxns = brandStats.reduce((s, b) => s + b.total, 0);
   const totalAll = totalTxns || 1;
 
-  // Weekly trend data
-  const weeklyData = useMemo(() => {
-    const weeks = {};
-    records.forEach(r => {
-      const w = r.week;
-      if (!w) return;
-      if (!weeks[w]) weeks[w] = {};
-    });
+  // Monthly trend data - grouped by YYYY-MM with readable month names
+  const monthlyData = useMemo(() => {
+    const months = {};
     brandStats.forEach(b => {
       b.txnSeries.forEach(r => {
-        const w = r.week;
-        if (!w) return;
-        if (!weeks[w]) weeks[w] = {};
-        weeks[w][b.brand] = (weeks[w][b.brand] || 0) + r.txn;
+        const monthKey = r.date.substring(0, 7);
+        const monthLabel = format(parseISO(r.date), 'MMM yy', { locale: es });
+        if (!months[monthKey]) months[monthKey] = { month: monthLabel, key: monthKey };
+        months[monthKey][b.brand] = (months[monthKey][b.brand] || 0) + r.txn;
       });
     });
-    return Object.entries(weeks)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-8)
-      .map(([week, vals]) => ({ week: week.replace(/^\d{4}-/, ''), ...vals }));
-  }, [records, brandStats]);
-
-  const radarData = brandStats.map(b => ({
-    subject: b.brand,
-    value: totalAll > 0 ? Math.round((b.total / totalAll) * 100) : 0
-  }));
+    return Object.values(months).sort((a, b) => a.key.localeCompare(b.key)).slice(-8);
+  }, [brandStats]);
 
   const topBrand = brandStats[0];
   const fastestGrowing = [...brandStats].sort((a, b) => b.growth - a.growth)[0];
@@ -525,82 +533,120 @@ export default function RadarCompetitivo() {
           </motion.div>
         ) : (
           <>
-            {/* ── HERO + GAUGE ── */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
-              {/* Hero total */}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="sm:col-span-2 rounded-2xl p-5"
-                style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)', backdropFilter: 'blur(32px)' }}>
-                <p className="text-[9px] font-black tracking-[0.2em] uppercase text-slate-400 mb-1">Actividad Competitiva Detectada</p>
-                <div className="flex items-baseline gap-2 mb-1.5">
-                  <span className="text-4xl sm:text-5xl font-black tracking-tight tabular-nums" style={{ color: '#1e293b', letterSpacing: '-0.04em' }}>
-                    {totalTxns.toLocaleString('es-CO')}
-                  </span>
-                  <span className="text-sm text-slate-400 font-semibold">transacciones estimadas</span>
-                </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  {topBrand && (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-                      style={{ background: `${topBrand.color}0f`, color: topBrand.color, border: `1px solid ${topBrand.color}25` }}>
-                      <TrendingUp className="w-3 h-3"/>
-                      {records.length} tomas · {brands.length} marcas
+            {/* ── TARJETAS DE MARCA ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+              {brandStats.map((b, i) => (
+                <motion.div key={b.brand} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.05 }}
+                  className="rounded-2xl p-4 relative overflow-hidden"
+                  style={{ background: 'rgba(255,255,255,0.95)', border: `1.5px solid ${b.color}22`, boxShadow: `0 2px 20px ${b.color}12` }}>
+                  {/* subtle bg glow */}
+                  <div className="absolute inset-0 opacity-5 pointer-events-none rounded-2xl" style={{ background: `radial-gradient(circle at 80% 20%, ${b.color}, transparent 70%)` }}/>
+                  <div className="relative">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-white text-sm"
+                        style={{ background: `linear-gradient(135deg, ${b.color}, ${b.color}cc)`, boxShadow: `0 4px 12px ${b.color}40` }}>
+                        {getInitial(b.brand)}
+                      </div>
+                      <span className="text-[9px] font-black tracking-wider px-2 py-0.5 rounded-full"
+                        style={{ background: `${b.color}15`, color: b.color }}>#{i + 1}</span>
                     </div>
-                  )}
-                  {fastestGrowing && fastestGrowing.growth > 0 && (
-                    <span className="text-xs text-slate-400">
-                      ↑ {fastestGrowing.brand} +{fastestGrowing.growth.toFixed(0)}% reciente
-                    </span>
-                  )}
-                </div>
-              </motion.div>
+                    <p className="text-xs font-bold text-slate-700 truncate mb-1">{b.brand}</p>
+                    {b.onlyOneReading ? (
+                      <p className="text-[9px] text-slate-300 italic">Registra 2ª toma para ver datos</p>
+                    ) : (
+                      <>
+                        <p className="text-xl font-black tabular-nums" style={{ color: b.color, letterSpacing: '-0.03em' }}>
+                          {b.total.toLocaleString('es-CO')}
+                        </p>
+                        <p className="text-[9px] text-slate-400 mb-2">transacciones totales</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] text-slate-400">últ. toma:</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] font-bold text-slate-600">{b.lastTxn.toLocaleString('es-CO')}</span>
+                            <TrendBadge pct={b.growth}/>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
 
-              {/* Ranking lateral */}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                className="rounded-2xl p-4"
-                style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
-                <p className="text-[9px] font-black tracking-widest uppercase text-slate-400 mb-3">Ranking</p>
-                <div className="space-y-2">
-                  {brandStats.slice(0, 5).map((b, i) => (
-                    <div key={b.brand} className="flex items-center gap-2.5">
-                      <span className="text-[10px] font-black w-4 text-center"
-                        style={{ color: i === 0 ? '#f59e0b' : '#cbd5e1' }}>#{i+1}</span>
-                      <BrandDot color={b.color} size={7}/>
-                      <span className="text-xs font-semibold flex-1 text-slate-600 truncate">{b.brand}</span>
-                      {b.onlyOneReading
-                        ? <span className="text-[9px] text-slate-300 font-medium">1ª toma</span>
-                        : <TrendBadge pct={b.growth}/>}
+            {/* ── GRÁFICA MENSUAL DE BARRAS ── */}
+            {monthlyData.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+                className="rounded-2xl p-5 mb-4"
+                style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Transacciones por Mes</p>
+                  <InfoTooltip text="Muestra cuántas transacciones se estimaron para cada marca en cada mes. Las barras se calculan restando el serial actual al anterior de cada marca."/>
+                </div>
+                <p className="text-[10px] text-slate-300 mb-4">Comparación mensual · calculado desde seriales de factura</p>
+                {/* Legend */}
+                <div className="flex flex-wrap gap-3 mb-3">
+                  {brandStats.map(b => (
+                    <div key={b.brand} className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-sm" style={{ background: b.color }}/>
+                      <span className="text-[10px] font-semibold text-slate-500">{b.brand}</span>
                     </div>
                   ))}
                 </div>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={monthlyData} barCategoryGap="30%" barGap={2}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false}/>
+                    <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false}/>
+                    <YAxis tick={{ fill: '#cbd5e1', fontSize: 10 }} axisLine={false} tickLine={false}
+                      tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}/>
+                    <Tooltip
+                      contentStyle={{ background: 'rgba(255,255,255,0.98)', border: '1px solid rgba(194,24,117,0.15)', borderRadius: 14, fontSize: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }}
+                      cursor={{ fill: 'rgba(194,24,117,0.04)' }}
+                      formatter={(val, name) => [val?.toLocaleString('es-CO') + ' txn', name]}
+                    />
+                    {brandStats.map(b => (
+                      <Bar key={b.brand} dataKey={b.brand} fill={b.color} radius={[4, 4, 0, 0]}
+                        maxBarSize={32}/>
+                    ))}
+                  </BarChart>
+                </ResponsiveContainer>
               </motion.div>
-            </div>
+            )}
 
-            {/* ── PARTICIPATION BARS ── */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+            {/* ── PARTICIPACIÓN VISUAL ── */}
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
               className="rounded-2xl p-5 mb-4"
-              style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
-              <p className="text-[9px] font-black tracking-widest uppercase text-slate-400 mb-4">Presión Competitiva · Participación</p>
-              <div className="space-y-3">
-                {brandStats.map(b => {
-                  const pct = totalAll > 1 ? Math.round((b.total / totalAll) * 100) : 0;
+              style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Cuota de Mercado Estimada</p>
+                <InfoTooltip text="Del total de transacciones estimadas de todas las marcas registradas, ¿qué porcentaje representa cada una? Ayuda a entender quién domina el tráfico de clientes en la zona."/>
+              </div>
+              <p className="text-[10px] text-slate-300 mb-5">Participación del total de transacciones detectadas</p>
+              <div className="space-y-3.5">
+                {brandStats.map((b, i) => {
+                  const pct = totalAll > 1 ? (b.total / totalAll) * 100 : 0;
                   return (
-                    <div key={b.brand} className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 w-28 flex-shrink-0">
-                        <BrandBadge name={b.brand} color={b.color}/>
-                        <span className="text-xs font-semibold text-slate-600 truncate">{b.brand}</span>
-                      </div>
-                      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: '#f1f5f9' }}>
-                        <motion.div initial={{ width: 0 }} animate={{ width: b.onlyOneReading ? '2%' : `${pct}%` }}
-                          transition={{ duration: 1, delay: 0.3, ease: [0.23,1,0.32,1] }}
-                          className="h-full rounded-full" style={{ background: b.color }}/>
-                      </div>
-                      <div className="flex items-center gap-2 w-32 flex-shrink-0 justify-end">
+                    <div key={b.brand}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-lg flex items-center justify-center font-black text-white text-[10px]"
+                            style={{ background: `linear-gradient(135deg, ${b.color}, ${b.color}bb)` }}>{getInitial(b.brand)}</div>
+                          <span className="text-xs font-bold text-slate-700">{b.brand}</span>
+                          {i === 0 && <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full text-white" style={{ background: '#f59e0b' }}>LÍDER</span>}
+                        </div>
                         {b.onlyOneReading
-                          ? <span className="text-[10px] text-slate-300 italic">Necesita 2ª toma</span>
-                          : <>
-                              <span className="text-xs font-bold text-slate-700 tabular-nums">{pct}%</span>
-                              <span className="text-[10px] text-slate-400 tabular-nums hidden sm:block">{b.total.toLocaleString('es-CO')}</span>
-                            </>}
+                          ? <span className="text-[9px] text-slate-300 italic">Sin datos aún</span>
+                          : <div className="flex items-center gap-2">
+                              <span className="text-sm font-black tabular-nums" style={{ color: b.color }}>{pct.toFixed(1)}%</span>
+                              <span className="text-[10px] text-slate-400 tabular-nums">{b.total.toLocaleString('es-CO')} txn</span>
+                            </div>}
+                      </div>
+                      <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'linear-gradient(90deg, #fdf2f8, #fce7f3)' }}>
+                        <motion.div
+                          initial={{ width: 0 }} animate={{ width: b.onlyOneReading ? '1.5%' : `${Math.max(pct, 1)}%` }}
+                          transition={{ duration: 1.2, delay: 0.3 + i * 0.1, ease: [0.23,1,0.32,1] }}
+                          style={{ height: '100%', borderRadius: 9999, background: `linear-gradient(90deg, ${b.color}cc, ${b.color})` }}
+                        />
                       </div>
                     </div>
                   );
@@ -608,78 +654,21 @@ export default function RadarCompetitivo() {
               </div>
             </motion.div>
 
-            {/* ── CHARTS ROW ── */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-              {/* Tendencia semanal */}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                className="md:col-span-3 rounded-2xl p-5"
-                style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
-                <p className="text-[9px] font-black tracking-widest uppercase text-slate-400 mb-4">Tendencia Semanal</p>
-                {weeklyData.length > 1 ? (
-                  <ResponsiveContainer width="100%" height={180}>
-                    <AreaChart data={weeklyData}>
-                      <defs>
-                        {brandStats.map(b => (
-                          <linearGradient key={b.brand} id={`g_${b.brand.replace(/[^a-z0-9]/gi,'')}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={b.color} stopOpacity={0.12}/>
-                            <stop offset="100%" stopColor={b.color} stopOpacity={0}/>
-                          </linearGradient>
-                        ))}
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false}/>
-                      <XAxis dataKey="week" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false}/>
-                      <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false}/>
-                      <Tooltip contentStyle={{ background: 'rgba(255,255,255,0.96)', border: '1px solid #e2e8f0', borderRadius: 12, fontSize: 11, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}/>
-                      {brandStats.map(b => (
-                        <Area key={b.brand} type="monotone" dataKey={b.brand} stroke={b.color} strokeWidth={2}
-                          fill={`url(#g_${b.brand.replace(/[^a-z0-9]/gi,'')})`}
-                          dot={{ fill: b.color, r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }}/>
-                      ))}
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-44 flex items-center justify-center text-sm text-slate-300">
-                    Registra más tomas para ver la tendencia
-                  </div>
-                )}
-              </motion.div>
-
-              {/* Mapa de intensidad */}
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="md:col-span-2 rounded-2xl p-5"
-                style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
-                <p className="text-[9px] font-black tracking-widest uppercase text-slate-400 mb-2">Mapa de Intensidad</p>
-                {radarData.length >= 3 ? (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <RadarChart data={radarData}>
-                      <PolarGrid stroke="#f1f5f9"/>
-                      <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }}/>
-                      <PolarRadiusAxis tick={{ fill: '#cbd5e1', fontSize: 8 }} angle={90}/>
-                      <Radar name="Participación" dataKey="value" stroke="#C21875" fill="#C21875" fillOpacity={0.08} strokeWidth={2}/>
-                    </RadarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-44 flex items-center justify-center text-sm text-slate-300">
-                    3+ marcas para el radar
-                  </div>
-                )}
-              </motion.div>
-            </div>
-
             {/* ── AI INSIGHTS ── */}
-            {insights.length > 1 && (
+            {insights.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
                 className="rounded-2xl p-5"
-                style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
-                <p className="text-[9px] font-black tracking-widest uppercase text-slate-400 mb-4">Insights Automáticos · Nova AI</p>
+                style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.04), rgba(244,114,182,0.04))', border: '1px solid rgba(194,24,117,0.12)', boxShadow: '0 2px 20px rgba(0,0,0,0.03)' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <p className="text-[9px] font-black tracking-widest uppercase" style={{ color: '#C21875' }}>Insights Automáticos · Nova AI</p>
+                  <InfoTooltip text="Análisis generado automáticamente a partir de los datos registrados. Detecta tendencias, marcas en crecimiento o marcas con desaceleración."/>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {insights.map((ins, i) => (
-                    <div key={i} className="flex items-start gap-3 rounded-xl p-3"
-                      style={{ background: 'rgba(194,24,117,0.04)', border: '1px solid rgba(194,24,117,0.09)' }}>
-                      <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                        style={{ background: 'rgba(194,24,117,0.08)' }}>
-                        <Activity className="w-3 h-3" style={{ color: '#C21875' }}/>
-                      </div>
+                    <div key={i} className="flex items-start gap-3 rounded-xl p-3.5"
+                      style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(194,24,117,0.09)' }}>
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[9px] font-black text-white"
+                        style={{ background: 'linear-gradient(135deg,#C21875,#e879a0)' }}>{i+1}</div>
                       <p className="text-xs text-slate-600 font-medium leading-relaxed">{ins}</p>
                     </div>
                   ))}
