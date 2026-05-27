@@ -400,12 +400,12 @@ export default function RadarCompetitivo() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['competitiveRecords'] }); setModalOpen(false); }
   });
 
-  // Derive brands + colors
+  // Derive brands + colors — siempre usa AUTO_COLORS (ignora colores viejos guardados)
   const brandMap = useMemo(() => {
     const map = {};
-    records.forEach((r, i) => {
+    records.forEach(r => {
       if (!map[r.competition]) {
-        map[r.competition] = r.color || AUTO_COLORS[Object.keys(map).length % AUTO_COLORS.length];
+        map[r.competition] = AUTO_COLORS[Object.keys(map).length % AUTO_COLORS.length];
       }
     });
     return map;
