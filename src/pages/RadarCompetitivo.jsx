@@ -4,14 +4,18 @@ import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, LineChart, Line, AreaChart, Area
+  Cell, AreaChart, Area, PieChart, Pie, LineChart, Line
 } from 'recharts';
 import { Plus, X, TrendingUp, TrendingDown, Minus, Activity, ChevronRight, Zap, ArrowLeft, History, Pencil, Trash2, ChevronDown } from 'lucide-react';
 import { format, parseISO, getISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 
-const AUTO_COLORS = ['#C21875','#e879a0','#c084fc','#f472b6','#fb7185','#a78bfa','#f9a8d4','#e879f9','#fca5a5','#d946ef'];
+// Paleta rosa/magenta suave — coherente con el dashboard Popsy
+const AUTO_COLORS = ['#C21875','#e11d48','#9333ea','#2563eb','#0891b2','#059669','#d97706','#db2777','#7c3aed','#ea580c'];
+const SOFT_BG = 'rgba(255,255,255,0.92)';
+const CARD_SHADOW = '0 2px 16px rgba(194,24,117,0.06), 0 1px 4px rgba(0,0,0,0.04)';
+const CARD_BORDER = '1px solid rgba(194,24,117,0.09)';
 
 function getInitial(name) {
   return name ? name.trim()[0].toUpperCase() : '?';
@@ -458,15 +462,25 @@ export default function RadarCompetitivo() {
 
   const activeInsight = insights[0] || 'Sin datos suficientes para generar análisis.';
 
+  // Last-reading comparison data for bar chart
+  const lastReadingData = brandStats
+    .filter(b => !b.onlyOneReading)
+    .map(b => ({ brand: b.brand, value: b.lastTxn, color: b.color }));
+
+  // Pie data
+  const pieData = brandStats
+    .filter(b => b.total > 0)
+    .map(b => ({ name: b.brand, value: b.total, color: b.color }));
+
   return (
     <div className="min-h-screen" style={{ background: 'transparent' }}>
-      <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
+      <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
 
         {/* ── HEADER ── */}
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-6 sm:mb-8">
+          className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Link to="/" className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+            <Link to="/" className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white/80 transition-all">
               <ArrowLeft className="w-4 h-4"/>
             </Link>
             <div>
@@ -478,11 +492,11 @@ export default function RadarCompetitivo() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setHistorialOpen(true)}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-500 hover:bg-white/80 transition-all"
               style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
               <History className="w-3.5 h-3.5"/> Historial
             </button>
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
               style={{ background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.15)' }}>
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 4px rgba(52,211,153,0.7)' }}/>
               <span className="text-[9px] font-bold text-emerald-600 tracking-wider">ACTIVO</span>
@@ -495,19 +509,16 @@ export default function RadarCompetitivo() {
           </div>
         </motion.div>
 
-        {/* ── NOVA AI BANNER ── */}
+        {/* ── NOVA BANNER ── */}
         {insights.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }}
             className="mb-5 rounded-2xl p-4 flex items-center gap-3"
-            style={{ background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(194,24,117,0.12)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(194,24,117,0.08)', border: '1px solid rgba(194,24,117,0.12)' }}>
+            style={{ background: SOFT_BG, border: '1px solid rgba(194,24,117,0.12)', boxShadow: CARD_SHADOW, backdropFilter: 'blur(20px)' }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(194,24,117,0.08)' }}>
               <Zap className="w-4 h-4" style={{ color: '#C21875' }}/>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[8.5px] font-black tracking-widest uppercase mb-0.5" style={{ color: '#C21875' }}>
-                NOVA AI · DETECTANDO ACTIVIDAD
-              </p>
+              <p className="text-[8.5px] font-black tracking-widest uppercase mb-0.5" style={{ color: '#C21875' }}>NOVA AI · ANÁLISIS AUTOMÁTICO</p>
               <p className="text-sm font-medium text-slate-600 truncate">{activeInsight}</p>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0"/>
@@ -533,142 +544,321 @@ export default function RadarCompetitivo() {
           </motion.div>
         ) : (
           <>
-            {/* ── TARJETAS DE MARCA ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
-              {brandStats.map((b, i) => (
-                <motion.div key={b.brand} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.05 }}
+            {/* ── ROW 1: KPI CARDS ── */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+              {[
+                {
+                  label: 'Total Transacciones', value: totalTxns.toLocaleString('es-CO'),
+                  sub: `${records.length} tomas registradas`,
+                  color: '#C21875', icon: Activity,
+                  tip: 'Suma de todas las transacciones estimadas de todos los competidores registrados. Se calcula restando seriales consecutivos.'
+                },
+                {
+                  label: 'Marcas Monitoreadas', value: brands.length,
+                  sub: `${brandStats.filter(b=>!b.onlyOneReading).length} con datos completos`,
+                  color: '#9333ea', icon: Zap,
+                  tip: 'Cantidad de marcas de competencia que estás monitoreando actualmente.'
+                },
+                {
+                  label: 'Líder del Período', value: topBrand?.brand || '—',
+                  sub: topBrand ? `${topBrand.total.toLocaleString('es-CO')} txn totales` : 'Sin datos',
+                  color: '#e11d48', icon: TrendingUp,
+                  tip: 'La marca con mayor volumen de transacciones estimadas en el período total de seguimiento.'
+                },
+                {
+                  label: 'Mayor Crecimiento', value: fastestGrowing && fastestGrowing.growth > 0 ? `+${fastestGrowing.growth.toFixed(0)}%` : '—',
+                  sub: fastestGrowing && fastestGrowing.growth > 0 ? fastestGrowing.brand : 'Sin tendencia',
+                  color: '#059669', icon: TrendingUp,
+                  tip: 'Marca que más creció entre su penúltima y última toma. Un número alto indica que esa marca está acelerando su actividad.'
+                }
+              ].map((kpi, i) => (
+                <motion.div key={kpi.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.06 + i * 0.04 }}
                   className="rounded-2xl p-4 relative overflow-hidden"
-                  style={{ background: 'rgba(255,255,255,0.95)', border: `1.5px solid ${b.color}22`, boxShadow: `0 2px 20px ${b.color}12` }}>
-                  {/* subtle bg glow */}
-                  <div className="absolute inset-0 opacity-5 pointer-events-none rounded-2xl" style={{ background: `radial-gradient(circle at 80% 20%, ${b.color}, transparent 70%)` }}/>
-                  <div className="relative">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-white text-sm"
-                        style={{ background: `linear-gradient(135deg, ${b.color}, ${b.color}cc)`, boxShadow: `0 4px 12px ${b.color}40` }}>
-                        {getInitial(b.brand)}
-                      </div>
-                      <span className="text-[9px] font-black tracking-wider px-2 py-0.5 rounded-full"
-                        style={{ background: `${b.color}15`, color: b.color }}>#{i + 1}</span>
+                  style={{ background: SOFT_BG, border: CARD_BORDER, boxShadow: CARD_SHADOW, backdropFilter: 'blur(20px)' }}>
+                  <div className="absolute top-0 right-0 w-20 h-20 rounded-full opacity-5 -translate-y-6 translate-x-6"
+                    style={{ background: kpi.color }}/>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${kpi.color}12` }}>
+                      <kpi.icon className="w-4 h-4" style={{ color: kpi.color }}/>
                     </div>
-                    <p className="text-xs font-bold text-slate-700 truncate mb-1">{b.brand}</p>
-                    {b.onlyOneReading ? (
-                      <p className="text-[9px] text-slate-300 italic">Registra 2ª toma para ver datos</p>
-                    ) : (
-                      <>
-                        <p className="text-xl font-black tabular-nums" style={{ color: b.color, letterSpacing: '-0.03em' }}>
-                          {b.total.toLocaleString('es-CO')}
-                        </p>
-                        <p className="text-[9px] text-slate-400 mb-2">transacciones totales</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9px] text-slate-400">últ. toma:</span>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] font-bold text-slate-600">{b.lastTxn.toLocaleString('es-CO')}</span>
-                            <TrendBadge pct={b.growth}/>
-                          </div>
-                        </div>
-                      </>
-                    )}
+                    <InfoTooltip text={kpi.tip}/>
                   </div>
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">{kpi.label}</p>
+                  <p className="text-xl font-black tracking-tight truncate" style={{ color: kpi.color }}>{kpi.value}</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5 truncate">{kpi.sub}</p>
                 </motion.div>
               ))}
             </div>
 
-            {/* ── GRÁFICA MENSUAL DE BARRAS ── */}
-            {monthlyData.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-                className="rounded-2xl p-5 mb-4"
-                style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
+            {/* ── ROW 2: ÁREA MENSUAL + PIE CHART ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
+
+              {/* Tendencia mensual — área */}
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
+                className="lg:col-span-3 rounded-2xl p-5"
+                style={{ background: SOFT_BG, border: CARD_BORDER, boxShadow: CARD_SHADOW, backdropFilter: 'blur(20px)' }}>
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Transacciones por Mes</p>
-                  <InfoTooltip text="Muestra cuántas transacciones se estimaron para cada marca en cada mes. Las barras se calculan restando el serial actual al anterior de cada marca."/>
+                  <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Evolución Mensual de Transacciones</p>
+                  <InfoTooltip text="Línea de evolución mensual de cada marca. Te permite ver si una marca está creciendo o bajando su actividad mes a mes. Las fechas muestran el mes en que se registró la toma."/>
                 </div>
-                <p className="text-[10px] text-slate-300 mb-4">Comparación mensual · calculado desde seriales de factura</p>
-                {/* Legend */}
-                <div className="flex flex-wrap gap-3 mb-3">
+                <div className="flex flex-wrap gap-3 mb-3 mt-1">
                   {brandStats.map(b => (
                     <div key={b.brand} className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-sm" style={{ background: b.color }}/>
+                      <div className="w-2 h-2 rounded-full" style={{ background: b.color }}/>
                       <span className="text-[10px] font-semibold text-slate-500">{b.brand}</span>
                     </div>
                   ))}
                 </div>
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={monthlyData} barCategoryGap="30%" barGap={2}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false}/>
-                    <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false}/>
-                    <YAxis tick={{ fill: '#cbd5e1', fontSize: 10 }} axisLine={false} tickLine={false}
-                      tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}/>
-                    <Tooltip
-                      contentStyle={{ background: 'rgba(255,255,255,0.98)', border: '1px solid rgba(194,24,117,0.15)', borderRadius: 14, fontSize: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }}
-                      cursor={{ fill: 'rgba(194,24,117,0.04)' }}
-                      formatter={(val, name) => [val?.toLocaleString('es-CO') + ' txn', name]}
-                    />
-                    {brandStats.map(b => (
-                      <Bar key={b.brand} dataKey={b.brand} fill={b.color} radius={[4, 4, 0, 0]}
-                        maxBarSize={32}/>
-                    ))}
-                  </BarChart>
-                </ResponsiveContainer>
+                {monthlyData.length > 1 ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <AreaChart data={monthlyData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+                      <defs>
+                        {brandStats.map(b => (
+                          <linearGradient key={b.brand} id={`ag_${b.brand.replace(/[^a-z0-9]/gi,'_')}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={b.color} stopOpacity={0.18}/>
+                            <stop offset="100%" stopColor={b.color} stopOpacity={0}/>
+                          </linearGradient>
+                        ))}
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(194,24,117,0.07)" vertical={false}/>
+                      <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false}/>
+                      <YAxis tick={{ fill: '#cbd5e1', fontSize: 9 }} axisLine={false} tickLine={false}
+                        tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} width={32}/>
+                      <Tooltip
+                        contentStyle={{ background: 'rgba(255,255,255,0.98)', border: '1px solid rgba(194,24,117,0.15)', borderRadius: 12, fontSize: 11, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }}
+                        cursor={{ stroke: 'rgba(194,24,117,0.15)', strokeWidth: 1 }}
+                        formatter={(val, name) => [val?.toLocaleString('es-CO') + ' txn', name]}
+                      />
+                      {brandStats.map(b => (
+                        <Area key={b.brand} type="monotone" dataKey={b.brand}
+                          stroke={b.color} strokeWidth={2.5}
+                          fill={`url(#ag_${b.brand.replace(/[^a-z0-9]/gi,'_')})`}
+                          dot={{ fill: b.color, r: 3, strokeWidth: 0 }}
+                          activeDot={{ r: 5, strokeWidth: 2, stroke: '#fff' }}/>
+                      ))}
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-48 flex flex-col items-center justify-center gap-2">
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(194,24,117,0.07)' }}>
+                      <Activity className="w-5 h-5" style={{ color: '#C21875' }}/>
+                    </div>
+                    <p className="text-xs text-slate-300 text-center">Registra 2 tomas por marca para ver la evolución</p>
+                  </div>
+                )}
               </motion.div>
-            )}
 
-            {/* ── PARTICIPACIÓN VISUAL ── */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-              className="rounded-2xl p-5 mb-4"
-              style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
-              <div className="flex items-center gap-2 mb-1">
-                <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Cuota de Mercado Estimada</p>
-                <InfoTooltip text="Del total de transacciones estimadas de todas las marcas registradas, ¿qué porcentaje representa cada una? Ayuda a entender quién domina el tráfico de clientes en la zona."/>
-              </div>
-              <p className="text-[10px] text-slate-300 mb-5">Participación del total de transacciones detectadas</p>
-              <div className="space-y-3.5">
-                {brandStats.map((b, i) => {
-                  const pct = totalAll > 1 ? (b.total / totalAll) * 100 : 0;
-                  return (
-                    <div key={b.brand}>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg flex items-center justify-center font-black text-white text-[10px]"
-                            style={{ background: `linear-gradient(135deg, ${b.color}, ${b.color}bb)` }}>{getInitial(b.brand)}</div>
-                          <span className="text-xs font-bold text-slate-700">{b.brand}</span>
-                          {i === 0 && <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full text-white" style={{ background: '#f59e0b' }}>LÍDER</span>}
+              {/* Cuota de mercado — donut */}
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
+                className="lg:col-span-2 rounded-2xl p-5 flex flex-col"
+                style={{ background: SOFT_BG, border: CARD_BORDER, boxShadow: CARD_SHADOW, backdropFilter: 'blur(20px)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Cuota de Mercado</p>
+                  <InfoTooltip text="Qué porcentaje del total de transacciones detectadas representa cada marca. Cuanto más grande el trozo, más activa esa marca en el entorno."/>
+                </div>
+                {pieData.length >= 2 ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={160}>
+                      <PieChart>
+                        <Pie data={pieData} dataKey="value" nameKey="name"
+                          cx="50%" cy="50%" innerRadius={44} outerRadius={72}
+                          strokeWidth={2} stroke="#fff">
+                          {pieData.map((entry, i) => <Cell key={i} fill={entry.color}/>)}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{ background: 'rgba(255,255,255,0.98)', border: '1px solid rgba(194,24,117,0.15)', borderRadius: 12, fontSize: 11 }}
+                          formatter={(val, name) => [`${((val/totalAll)*100).toFixed(1)}% · ${val.toLocaleString('es-CO')} txn`, name]}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="space-y-1.5 mt-1">
+                      {pieData.map(d => (
+                        <div key={d.name} className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.color }}/>
+                          <span className="text-[10px] font-semibold text-slate-600 flex-1 truncate">{d.name}</span>
+                          <span className="text-[10px] font-black tabular-nums" style={{ color: d.color }}>
+                            {((d.value / totalAll) * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-xs text-slate-300 text-center">2+ marcas con datos para ver cuota</p>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+
+            {/* ── ROW 3: BARRAS POR MES + ÚLTIMA TOMA ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+
+              {/* Barras agrupadas por mes */}
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26 }}
+                className="rounded-2xl p-5"
+                style={{ background: SOFT_BG, border: CARD_BORDER, boxShadow: CARD_SHADOW, backdropFilter: 'blur(20px)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Transacciones por Mes</p>
+                  <InfoTooltip text="Barras agrupadas por mes. Cada color es una marca. Permite comparar cuál fue más activa en cada mes específico del año."/>
+                </div>
+                <p className="text-[10px] text-slate-300 mb-3">Comparación mensual · {monthlyData.length} meses registrados</p>
+                {monthlyData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={monthlyData} barCategoryGap="28%" barGap={1}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(194,24,117,0.07)" vertical={false}/>
+                      <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false}/>
+                      <YAxis tick={{ fill: '#cbd5e1', fontSize: 9 }} axisLine={false} tickLine={false}
+                        tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} width={28}/>
+                      <Tooltip
+                        contentStyle={{ background: 'rgba(255,255,255,0.98)', border: '1px solid rgba(194,24,117,0.15)', borderRadius: 12, fontSize: 11, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }}
+                        cursor={{ fill: 'rgba(194,24,117,0.04)' }}
+                        formatter={(val, name) => [val?.toLocaleString('es-CO') + ' txn', name]}
+                      />
+                      {brandStats.map(b => (
+                        <Bar key={b.brand} dataKey={b.brand} fill={b.color} radius={[3, 3, 0, 0]} maxBarSize={28}/>
+                      ))}
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-44 flex items-center justify-center">
+                    <p className="text-xs text-slate-300">Sin datos mensuales aún</p>
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Comparación última toma */}
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.30 }}
+                className="rounded-2xl p-5"
+                style={{ background: SOFT_BG, border: CARD_BORDER, boxShadow: CARD_SHADOW, backdropFilter: 'blur(20px)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Última Toma · Transacciones</p>
+                  <InfoTooltip text="Cuántas transacciones registró cada marca en su toma más reciente. Te dice quién fue más activo en el período más reciente que monitoreaste."/>
+                </div>
+                <p className="text-[10px] text-slate-300 mb-3">Actividad en el período más reciente por marca</p>
+                {lastReadingData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={180}>
+                    <BarChart data={lastReadingData} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(194,24,117,0.07)" horizontal={false}/>
+                      <XAxis type="number" tick={{ fill: '#cbd5e1', fontSize: 9 }} axisLine={false} tickLine={false}
+                        tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v}/>
+                      <YAxis type="category" dataKey="brand" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false} width={70}/>
+                      <Tooltip
+                        contentStyle={{ background: 'rgba(255,255,255,0.98)', border: '1px solid rgba(194,24,117,0.15)', borderRadius: 12, fontSize: 11 }}
+                        formatter={(val, name) => [val?.toLocaleString('es-CO') + ' txn', 'Última toma']}
+                      />
+                      <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={22}>
+                        {lastReadingData.map((entry, i) => <Cell key={i} fill={entry.color}/>)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-44 flex items-center justify-center">
+                    <p className="text-xs text-slate-300">Registra 2 tomas para comparar</p>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+
+            {/* ── ROW 4: PARTICIPACIÓN + RANKING ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+
+              {/* Barras de participación */}
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.34 }}
+                className="rounded-2xl p-5"
+                style={{ background: SOFT_BG, border: CARD_BORDER, boxShadow: CARD_SHADOW, backdropFilter: 'blur(20px)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Participación Acumulada</p>
+                  <InfoTooltip text="Del 100% de todas las transacciones detectadas en el período total, ¿cuánto representa cada marca? La barra más larga es el líder de tráfico en la zona."/>
+                </div>
+                <div className="space-y-3 mt-4">
+                  {brandStats.map((b, i) => {
+                    const pct = totalAll > 1 ? (b.total / totalAll) * 100 : 0;
+                    return (
+                      <div key={b.brand}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-5 h-5 rounded-lg flex items-center justify-center font-black text-white text-[9px]"
+                              style={{ background: b.color }}>{getInitial(b.brand)}</div>
+                            <span className="text-xs font-semibold text-slate-700">{b.brand}</span>
+                            {i === 0 && <span className="text-[7px] font-black px-1 py-0.5 rounded-full text-white" style={{ background: '#f59e0b' }}>LÍDER</span>}
+                          </div>
+                          {b.onlyOneReading
+                            ? <span className="text-[9px] text-slate-300 italic">2ª toma pendiente</span>
+                            : <span className="text-xs font-black tabular-nums" style={{ color: b.color }}>{pct.toFixed(1)}%</span>}
+                        </div>
+                        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(194,24,117,0.07)' }}>
+                          <motion.div
+                            initial={{ width: 0 }} animate={{ width: b.onlyOneReading ? '2%' : `${Math.max(pct, 1)}%` }}
+                            transition={{ duration: 1.1, delay: 0.4 + i * 0.08, ease: [0.23,1,0.32,1] }}
+                            style={{ height: '100%', borderRadius: 9999, background: `linear-gradient(90deg, ${b.color}90, ${b.color})` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+
+              {/* Tarjetas de marca */}
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
+                className="rounded-2xl p-5"
+                style={{ background: SOFT_BG, border: CARD_BORDER, boxShadow: CARD_SHADOW, backdropFilter: 'blur(20px)' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <p className="text-[9px] font-black tracking-widest uppercase text-slate-400">Resumen por Marca</p>
+                  <InfoTooltip text="Vista consolidada de cada marca: total de transacciones acumuladas, número de tomas realizadas, y tendencia respecto a la toma anterior."/>
+                </div>
+                <div className="space-y-2">
+                  {brandStats.map((b, i) => (
+                    <div key={b.brand} className="flex items-center gap-3 rounded-xl p-2.5"
+                      style={{ background: `${b.color}06`, border: `1px solid ${b.color}14` }}>
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-xs flex-shrink-0"
+                        style={{ background: `linear-gradient(135deg, ${b.color}cc, ${b.color})` }}>
+                        {getInitial(b.brand)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-slate-700 truncate">{b.brand}</span>
+                          <span className="text-[8px] font-black text-slate-300">·</span>
+                          <span className="text-[9px] text-slate-400">{b.count} toma{b.count !== 1 ? 's' : ''}</span>
                         </div>
                         {b.onlyOneReading
-                          ? <span className="text-[9px] text-slate-300 italic">Sin datos aún</span>
-                          : <div className="flex items-center gap-2">
-                              <span className="text-sm font-black tabular-nums" style={{ color: b.color }}>{pct.toFixed(1)}%</span>
-                              <span className="text-[10px] text-slate-400 tabular-nums">{b.total.toLocaleString('es-CO')} txn</span>
-                            </div>}
+                          ? <p className="text-[9px] text-slate-300 italic">Registra 2ª toma</p>
+                          : <p className="text-[9px] text-slate-400">Últ. toma: <span className="font-bold text-slate-600">{b.lastTxn.toLocaleString('es-CO')} txn</span></p>
+                        }
                       </div>
-                      <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'linear-gradient(90deg, #fdf2f8, #fce7f3)' }}>
-                        <motion.div
-                          initial={{ width: 0 }} animate={{ width: b.onlyOneReading ? '1.5%' : `${Math.max(pct, 1)}%` }}
-                          transition={{ duration: 1.2, delay: 0.3 + i * 0.1, ease: [0.23,1,0.32,1] }}
-                          style={{ height: '100%', borderRadius: 9999, background: `linear-gradient(90deg, ${b.color}cc, ${b.color})` }}
-                        />
+                      <div className="flex flex-col items-end gap-0.5">
+                        {!b.onlyOneReading && (
+                          <>
+                            <span className="text-sm font-black tabular-nums" style={{ color: b.color }}>
+                              {b.total.toLocaleString('es-CO')}
+                            </span>
+                            <TrendBadge pct={b.growth}/>
+                          </>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
 
-            {/* ── AI INSIGHTS ── */}
+            {/* ── ROW 5: AI INSIGHTS ── */}
             {insights.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42 }}
                 className="rounded-2xl p-5"
-                style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.04), rgba(244,114,182,0.04))', border: '1px solid rgba(194,24,117,0.12)', boxShadow: '0 2px 20px rgba(0,0,0,0.03)' }}>
+                style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.04), rgba(233,29,72,0.03))', border: '1px solid rgba(194,24,117,0.10)', boxShadow: CARD_SHADOW }}>
                 <div className="flex items-center gap-2 mb-4">
                   <p className="text-[9px] font-black tracking-widest uppercase" style={{ color: '#C21875' }}>Insights Automáticos · Nova AI</p>
-                  <InfoTooltip text="Análisis generado automáticamente a partir de los datos registrados. Detecta tendencias, marcas en crecimiento o marcas con desaceleración."/>
+                  <InfoTooltip text="Alertas y análisis generados automáticamente. Detecta marcas en aceleración, desaceleración o presión competitiva alta en tu entorno."/>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {insights.map((ins, i) => (
-                    <div key={i} className="flex items-start gap-3 rounded-xl p-3.5"
-                      style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(194,24,117,0.09)' }}>
+                    <div key={i} className="flex items-start gap-3 rounded-xl p-3"
+                      style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(194,24,117,0.08)' }}>
                       <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[9px] font-black text-white"
-                        style={{ background: 'linear-gradient(135deg,#C21875,#e879a0)' }}>{i+1}</div>
+                        style={{ background: 'linear-gradient(135deg,#C21875,#e11d48)' }}>{i+1}</div>
                       <p className="text-xs text-slate-600 font-medium leading-relaxed">{ins}</p>
                     </div>
                   ))}
