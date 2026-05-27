@@ -61,6 +61,53 @@ const PAGE_CONTEXTS = {
   '/WeatherSalesImpact': { name: 'Clima', focus: 'impacto del clima en las ventas, correlaciones de temperatura y predicciones.' },
 };
 
+const APP_KNOWLEDGE = `
+CONOCIMIENTO COMPLETO DE LA APLICACIÓN POPSY COLOMBIA
+
+PÁGINAS Y FUNCIONALIDADES:
+
+DASHBOARD (/): Vista principal. Muestra ventas del día, métricas KPI (PPT, Brecha, Proyección), gráfica semanal, equipo activo. Botones: Registrar ventas del día, Ver informe completo, selector de tienda, tarjetas de KPI clicables.
+
+VENTAS (/Sales): Análisis de ventas por cajero y turno. Tendencias diarias/semanales. Formulario de registro de venta por turno.
+
+PRESUPUESTO (/Budget): Presupuesto mensual por tienda. Campos: ventas, tickets, transacciones, sugeridos, takeaway. Botones: Guardar presupuesto, Ajuste automático semanal (recalcula PPT), gráfica ranking tiendas.
+
+RANKINGS (/Rankings): Clasificación de cajeros por KPIs. Insignias y logros. Filtros de período. Ver perfil completo de cajero.
+
+CAJEROS (/CashiersDashboard): Gestión del equipo. Perfiles de cajeros, historial, rendimiento. Botón agregar cajero.
+
+P&G (/PYGDashboard): Estado de resultados multi-tienda. EBITDA, costos personal, arriendos, servicios, margen bruto. Importar Excel con datos financieros. Modal detalle por tienda. Tendencias mes a mes.
+
+GERENCIA (/Management): Vista ejecutiva. Comparativos entre tiendas, alertas de zona, comparable de ventas vs año anterior, análisis de cumplimiento regional. Selector de semana.
+
+MAPA NEVERA (/FreezerMap): Inventario visual de la nevera. Slots F (frontal) y T (trasero). Niveles: full/medium/low/empty. Editar sabor por slot. Guardar snapshot. Ver historial de snapshots anteriores.
+
+PLANEADOR (/PopsyPlanner): Programación de turnos. Roles disponibles: caja, coneo, bebidas, especialidades, coordinación, cookie_jar, stocker, toma_pedidos, experiencia. Calendario semanal. Solicitudes de cambio de turno. Sugerencia IA de horario óptimo. Exportar PDF.
+
+CALIDAD (/Quality): Checklists de limpieza: apertura (morning), cierre (closing), profunda semanal (deep_weekly), profunda mensual (deep_monthly). Subir fotos de evidencia. Firma digital cajero y supervisor. Incidencias: limpieza, equipo, producto, seguridad, plagas. Niveles de severidad: low/medium/high/critical.
+
+CAPACITACIÓN (/Training): Cursos de formación para cajeros. Categorías: ventas, ticket_promedio, servicio, producto, liderazgo. Niveles 1-5. Quiz con puntaje mínimo. Certificados digitales. Progreso por cajero.
+
+CLIMA (/WeatherSalesImpact): Análisis del impacto del clima en ventas de Bogotá. CONTIENE VISUALES COMPLETOS: mapa de lluvia en tiempo real de Bogotá (BogotaRainMap), gráfica de ventas vs temperatura histórica, card de predicción del clima para mañana, KPIs de temperatura actual y precipitación, tabla de impacto por día, correlación estadística clima-ventas, filtros de período. Los datos vienen de Open-Meteo API. Esta sección SÍ tiene visualización del clima — siempre responde que sí existe y describe qué muestra.
+
+RADAR COMPETITIVO (/RadarCompetitivo): Seguimiento de competidores. Método: se registra el serial (número) de factura del competidor en cada visita, y las transacciones se calculan como la diferencia entre seriales consecutivos. Gráficas: evolución mensual (área), cuota de mercado (donut), tendencia de crecimiento % (líneas), transacciones por mes (barras agrupadas), última toma (barras horizontales), velocidad de crecimiento promedio (barras duales histórico vs última toma), participación acumulada (barras). Botones: Nueva Toma (registrar serial), Historial (ver/editar/eliminar tomas). Insights automáticos de Nova detectan aceleración y desaceleración.
+
+INFORME VENTAS (/SalesReportView): Reporte detallado por producto. Participación %, categorías, departamentos. Subir Excel de KPIs. Filtros de tienda y período.
+
+TRANSACCIONES POR HORA (/HourlyTransactions): Análisis por franja horaria. Vista tienda individual o gerencial multi-tienda.
+
+POWERBI/REPORTE (/PowerBIReport): Carga de archivos Excel para visualización de ventas multi-tienda. Gráficas de barras y líneas.
+
+ANÁLISIS TICKET PRODUCTO (/ProductTicketAnalysis): Correlación entre productos y ticket promedio. Clasificación comercial: Motors, Premium Dormant, etc.
+
+COMPONENTES GLOBALES:
+- Sidebar izquierdo: navegación principal siempre visible en desktop.
+- Nova (mascota): chat IA flotante en todas las páginas excepto P&G.
+- Fondo AI (AIBackground): gradientes rosas animados, puramente visual.
+- Selector de tienda (StoreSelector): disponible en varias páginas, permite cambiar la tienda activa y configurar contraseñas.
+- Filtro de fechas: disponible en el layout global.
+`;
+
 const SYSTEM_PROMPT = `Eres Nova — la asistente de IA de Popsy Colombia.
 
 Eres una IA de clase mundial, como ChatGPT. Puedes responder sobre cualquier tema: operaciones de la tienda, ventas, estrategia de negocio, preguntas generales, conocimiento del mundo, redacción, ideas, matemáticas, o lo que sea que te pregunten.
@@ -84,7 +131,7 @@ Usa estos datos para:
 • Justificar recomendaciones con números reales
 • Hacer proyecciones precisas basadas en el ritmo actual
 
-Varía cómo empiezas cada respuesta. No repitas estructuras. Sé espontánea dentro de la inteligencia.
+Variá cómo empiezas cada respuesta. No repitas estructuras. Sé espontánea dentro de la inteligencia.
 
 REGLAS IRROMPIBLES:
 - Responde sobre CUALQUIER tema, nunca digas que no puedes ayudar.
@@ -93,6 +140,7 @@ REGLAS IRROMPIBLES:
 - No escribas como reporte. Escribe como una conversación inteligente.
 - Mantén el hilo de la conversación.
 - Cuando hables de cifras, usa números exactos del bloque DATOS REALES, no aproximaciones.
+- NUNCA digas que no sabes cómo funciona algo de la app. Siempre tienes el conocimiento completo de toda la aplicación.
 
 LONGITUD:
 - Corta (1-2 líneas): saludos, preguntas simples, confirmaciones.
@@ -473,6 +521,8 @@ ${d.kpi_proyeccion ? `- Valor: ${d.kpi_proyeccion} ${d.kpi_proyeccion_meta ? ` �
     const SYSTEM_PROMPT_ANALYTICS = `Eres Nova — analista de inteligencia de negocio para Popsy Colombia.
 
 RESPONDE EN ESPAÑOL. SIEMPRE.
+
+${APP_KNOWLEDGE}
 
 REGLAS DE RESPUESTA:
 - Sé concisa y directa. Máximo 5-6 líneas salvo que pidan análisis profundo.
