@@ -10,6 +10,7 @@ import { Plus, X, TrendingUp, TrendingDown, Minus, Activity, ChevronRight, Zap, 
 import { format, parseISO, getISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
+import SidebarNav from '@/components/SidebarNav';
 
 // Paleta rosa/pink — igual al home Popsy
 const AUTO_COLORS = ['#C21875','#e11d48','#f43f5e','#fb7185','#ec4899','#f472b6','#db2777','#be185d','#fda4af','#f9a8d4'];
@@ -473,8 +474,9 @@ export default function RadarCompetitivo() {
     .map(b => ({ name: b.brand, value: b.total, color: b.color }));
 
   return (
-    <div className="min-h-screen" style={{ background: 'transparent' }}>
-      <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+    <div className="min-h-screen flex" style={{ background: 'transparent' }}>
+      <SidebarNav />
+      <div className="flex-1 relative z-10 p-4 sm:p-6 lg:p-8 overflow-y-auto">
 
         {/* ── HEADER ── */}
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
