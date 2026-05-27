@@ -446,18 +446,40 @@ export default function MascotWidget() {
     if (isWeatherQuery) {
       try {
         const wRes = await base44.functions.invoke('getWeatherDataForBogota', {});
-        const w = wRes.data;
-        if (w) {
+        const h = wRes?.data?.history;
+        if (h && h.time && h.time.length > 0) {
+          const lastIdx = h.time.length - 1;
+          const today = h.time[lastIdx];
+          const tempMean = h.temperature_2m_mean?.[lastIdx];
+          const tempMax = h.temperature_2m_max?.[lastIdx];
+          const tempMin = h.temperature_2m_min?.[lastIdx];
+          const precip = h.precipitation_sum?.[lastIdx];
+          const humidity = h.relative_humidity_2m_mean?.[lastIdx];
+          const wCode = h.weather_code?.[lastIdx];
+          const wind = h.wind_speed_10m_max?.[lastIdx];
+          // yesterday for comparison
+          const yIdx = lastIdx - 1;
+          const precipYest = h.precipitation_sum?.[yIdx];
+          const tempYest = h.temperature_2m_mean?.[yIdx];
+          const wmoDesc = (code) => {
+            if (code === 0) return 'cielo despejado';
+            if (code <= 3) return 'parcialmente nublado';
+            if (code <= 48) return 'niebla o bruma';
+            if (code <= 67) return 'lluvia';
+            if (code <= 77) return 'nieve';
+            if (code <= 82) return 'chubascos';
+            if (code <= 99) return 'tormenta';
+            return 'variable';
+          };
           weatherBlock = `
-DATO CLIMA BOGOTÁ HOY (responde con esto, NO redirijas):
-- Temperatura actual: ${w.current_temperature ?? w.temperature_current ?? w.temp ?? '—'}°C
-- Temperatura máx/mín: ${w.temperature_max ?? w.temp_max ?? '—'}°C / ${w.temperature_min ?? w.temp_min ?? '—'}°C
-- Precipitación: ${w.precipitation ?? w.rain ?? '—'} mm
-- Humedad: ${w.humidity ?? '—'}%
-- Descripción: ${w.weather_description ?? w.description ?? w.condition ?? '—'}
-- V. viento: ${w.wind_speed ?? '—'} km/h
-${w.forecast ? `- Pronóstico mañana: ${JSON.stringify(w.forecast)}` : ''}
-Responde directamente sobre el clima con estos datos. No digas "dirígete a ningún lado".
+DATO CLIMA BOGOTÁ (fecha: ${today}) — ÚSA ESTOS DATOS DIRECTAMENTE, NO REDIRIJAS:
+- Condición: ${wmoDesc(wCode)}
+- Temperatura promedio: ${tempMean}°C | Máx: ${tempMax}°C | Mín: ${tempMin}°C
+- Precipitación hoy: ${precip} mm${precipYest != null ? ` (ayer: ${precipYest} mm)` : ''}
+- Humedad: ${humidity != null ? humidity + '%' : 'no disponible'}
+- Viento máx: ${wind != null ? wind + ' km/h' : 'no disponible'}
+- Temperatura ayer: ${tempYest}°C
+Responde directamente con estos datos. NUNCA digas "dirígete a la sección" ni "los datos no están disponibles".
 `;
         }
       } catch {}
