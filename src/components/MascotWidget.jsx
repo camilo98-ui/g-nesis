@@ -141,6 +141,7 @@ REGLAS IRROMPIBLES:
 - Mantén el hilo de la conversación.
 - Cuando hables de cifras, usa números exactos del bloque DATOS REALES, no aproximaciones.
 - NUNCA digas que no sabes cómo funciona algo de la app. Siempre tienes el conocimiento completo de toda la aplicación.
+- NUNCA redirijas al usuario a otra sección de la app para responder su pregunta. Si te preguntan sobre el clima, ventas, inventario o cualquier dato, respóndelo TÚ DIRECTAMENTE con los datos que tienes disponibles. Nunca digas "dirígete a la sección X".
 
 LONGITUD:
 - Corta (1-2 líneas): saludos, preguntas simples, confirmaciones.
@@ -437,7 +438,31 @@ export default function MascotWidget() {
     setIsLoading(true);
 
     const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
-    
+
+    // Fetch weather data if query is about weather
+    let weatherBlock = '';
+    const weatherTerms = ['clima', 'lluvia', 'temperatura', 'calor', 'frío', 'tiempo', 'precipitación', 'humedad', 'pronóstico', 'llover', 'lluvioso', 'soleado', 'nublado', 'bog'];
+    const isWeatherQuery = weatherTerms.some(t => userText.toLowerCase().includes(t));
+    if (isWeatherQuery) {
+      try {
+        const wRes = await base44.functions.invoke('getWeatherDataForBogota', {});
+        const w = wRes.data;
+        if (w) {
+          weatherBlock = `
+DATO CLIMA BOGOTÁ HOY (responde con esto, NO redirijas):
+- Temperatura actual: ${w.current_temperature ?? w.temperature_current ?? w.temp ?? '—'}°C
+- Temperatura máx/mín: ${w.temperature_max ?? w.temp_max ?? '—'}°C / ${w.temperature_min ?? w.temp_min ?? '—'}°C
+- Precipitación: ${w.precipitation ?? w.rain ?? '—'} mm
+- Humedad: ${w.humidity ?? '—'}%
+- Descripción: ${w.weather_description ?? w.description ?? w.condition ?? '—'}
+- V. viento: ${w.wind_speed ?? '—'} km/h
+${w.forecast ? `- Pronóstico mañana: ${JSON.stringify(w.forecast)}` : ''}
+Responde directamente sobre el clima con estos datos. No digas "dirígete a ningún lado".
+`;
+        }
+      } catch {}
+    }
+
     const d = pageData || {};
     const dataBlock = pageData ? `
 DATOS REALES DE LA TIENDA (usa estos números exactos al responder):
@@ -556,7 +581,7 @@ CRÍTICO — DÍA EN CURSO:
     const contextPrompt = `${SYSTEM_PROMPT_ANALYTICS}
 
 ACTIVE CONTEXT: ${pageCtx.name}
-${dataBlock}${sectionsSummary}
+${weatherBlock}${dataBlock}${sectionsSummary}
 
 CONVERSATION:
 ${newMessages.map(m => `${m.role === 'user' ? 'Usuario' : 'Nova'}: ${m.content}`).join('\n')}
