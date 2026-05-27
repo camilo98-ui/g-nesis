@@ -11,8 +11,8 @@ import { format, parseISO, getISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 
-// Paleta rosa/magenta suave — coherente con el dashboard Popsy
-const AUTO_COLORS = ['#C21875','#e11d48','#9333ea','#2563eb','#0891b2','#059669','#d97706','#db2777','#7c3aed','#ea580c'];
+// Paleta rosa/pink — igual al home Popsy
+const AUTO_COLORS = ['#C21875','#e11d48','#f43f5e','#fb7185','#ec4899','#f472b6','#db2777','#be185d','#fda4af','#f9a8d4'];
 const SOFT_BG = 'rgba(255,255,255,0.92)';
 const CARD_SHADOW = '0 2px 16px rgba(194,24,117,0.06), 0 1px 4px rgba(0,0,0,0.04)';
 const CARD_BORDER = '1px solid rgba(194,24,117,0.09)';
