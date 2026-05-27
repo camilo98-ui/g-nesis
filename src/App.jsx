@@ -77,7 +77,7 @@ const AuthenticatedApp = () => {
       <Route path="/Budget" element={<LayoutWrapper currentPageName="Budget"><BudgetNew /></LayoutWrapper>} />
       <Route path="/PowerBIReport" element={<LayoutWrapper currentPageName="PowerBIReport"><PowerBIReport /></LayoutWrapper>} />
       <Route path="/ProductTicketAnalysis" element={<LayoutWrapper currentPageName="ProductTicketAnalysis"><ProductTicketAnalysisPage /></LayoutWrapper>} />
-      <Route path="/RadarCompetitivo" element={<RadarCompetitivo />} />
+      <Route path="/RadarCompetitivo" element={<LayoutWrapper currentPageName="RadarCompetitivo"><RadarCompetitivo /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
