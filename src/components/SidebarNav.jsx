@@ -74,7 +74,7 @@ export default function SidebarNav() {
       initial={{ x: -24, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-      className="hidden lg:flex flex-col w-52 min-h-screen flex-shrink-0 sticky top-0 z-20"
+      className="hidden lg:flex flex-col w-52 h-screen flex-shrink-0 sticky top-0 z-20 overflow-hidden"
       style={{
         background: 'rgba(255,255,255,0.82)',
         backdropFilter: 'blur(48px) saturate(160%)',

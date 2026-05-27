@@ -384,9 +384,9 @@ export default function RadarCompetitivo() {
   const pieData = brandStats.filter(b => b.total > 0).map(b => ({ name: b.brand, value: b.total, color: b.color }));
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'transparent' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'transparent' }}>
       <SidebarNav />
-      <div className="flex-1 relative z-10 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+      <div className="flex-1 relative z-10 p-4 sm:p-6 lg:p-8 overflow-y-auto h-screen">
 
         {/* ── HEADER ── */}
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
