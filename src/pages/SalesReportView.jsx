@@ -1264,33 +1264,43 @@ export default function SalesReportView() {
               ];
 
               return (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {cards.map((card, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                      className="rounded-2xl overflow-hidden relative hover:scale-[1.02] transition-transform cursor-default flex flex-col"
-                      style={{ background: '#ffffff', border: `1px solid ${EXEC.border}`, boxShadow: '0 2px 12px rgba(194,24,117,0.07)' }}>
-                      {/* Franja color izquierda */}
-                      <div className="absolute left-0 top-0 bottom-0 w-[4px] rounded-l-2xl" style={{ background: card.color }} />
-                      {/* Contenido superior */}
-                      <div className="pl-5 pr-4 pt-4 pb-2">
-                        <p className="text-sm font-medium mb-3" style={{ color: EXEC.textSecondary }}>{card.label}</p>
-                        <p className="text-3xl font-bold leading-none mb-1" style={{ color: EXEC.textPrimary }}>{card.value}</p>
-                        {card.subLabel && (
-                          <p className="text-xs font-semibold mb-0.5 truncate" style={{ color: card.color }}>{card.subLabel}</p>
-                        )}
-                        {card.prevValue ? (
-                          <p className="text-sm font-normal line-through" style={{ color: 'rgba(0,0,0,0.28)' }}>{card.prevValue}</p>
-                        ) : (
-                          <p className="text-xs" style={{ color: EXEC.textMuted }}>Sin comparativo</p>
-                        )}
-                      </div>
-                      {/* Sparkline al fondo */}
-                      <div className="mt-auto">
-                        <Sparkline values={card.sparkValues} color={card.color} />
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {cards.map((card, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+                    className="rounded-3xl overflow-hidden relative cursor-default flex flex-col"
+                    style={{
+                      background: `linear-gradient(145deg, ${card.color}22 0%, ${card.color}08 100%)`,
+                      border: `1.5px solid ${card.color}30`,
+                      boxShadow: `0 4px 24px ${card.color}18, 0 1px 4px rgba(0,0,0,0.04)`,
+                      transition: 'transform 0.25s, box-shadow 0.25s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = `0 12px 36px ${card.color}28, 0 2px 8px rgba(0,0,0,0.06)`; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 24px ${card.color}18, 0 1px 4px rgba(0,0,0,0.04)`; }}
+                  >
+                    {/* Ícono decorativo top-right */}
+                    <div className="absolute top-3 right-3 w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${card.color}18` }}>
+                      <div className="w-2 h-2 rounded-full" style={{ background: card.color }} />
+                    </div>
+                    {/* Contenido */}
+                    <div className="px-5 pt-5 pb-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.15em] mb-3" style={{ color: card.color }}>{card.label}</p>
+                      <p className="text-2xl font-black leading-none mb-1" style={{ color: '#1e293b' }}>{card.value}</p>
+                      {card.subLabel && (
+                        <p className="text-xs font-bold mt-1 truncate" style={{ color: card.color }}>{card.subLabel}</p>
+                      )}
+                      {card.prevValue ? (
+                        <p className="text-[11px] font-medium mt-1 line-through" style={{ color: 'rgba(0,0,0,0.25)' }}>{card.prevValue}</p>
+                      ) : (
+                        <p className="text-[11px] mt-1" style={{ color: '#94a3b8' }}>Sin comparativo</p>
+                      )}
+                    </div>
+                    {/* Sparkline */}
+                    <div className="mt-auto pt-1">
+                      <Sparkline values={card.sparkValues} color={card.color} />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
               );
             })()}
 
