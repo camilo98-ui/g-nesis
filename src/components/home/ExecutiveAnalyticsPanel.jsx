@@ -161,7 +161,7 @@ function AnalyticsCard({ title, subtitle, children, delay = 0, colSpan = '' }) {
 }
 
 // ── HOURLY HEATMAP ────────────────────────────────────────────────────────────
-const HOURS = ['8a', '9a', '10a', '11a', '12p', '1p', '2p', '3p', '4p', '5p', '6p', '7p', '8p', '9p'];
+const HOURS = ['9a', '10a', '11a', '12p', '1p', '2p', '3p', '4p', '5p', '6p', '7p', '8p', '9p', '10p'];
 const DAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
 function HeatmapCell({ value, max }) {
