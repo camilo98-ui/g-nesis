@@ -364,15 +364,21 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
     queryFn: () => base44.entities.StoreTransactions.list(),
   });
 
-  // Aggregate all stores' hourly data for the current month
+  // Hourly totals for KPIs: only current month
+  const currentMonthRecords = useMemo(() =>
+    storeTransactions.filter(r => Number(r.month) === currentMonth + 1 && Number(r.year) === currentYear),
+    [storeTransactions, currentMonth, currentYear]);
+
   const hourlyTotals = useMemo(() => {
     const HOUR_KEYS = ['hour_9','hour_10','hour_11','hour_12','hour_13','hour_14','hour_15','hour_16','hour_17','hour_18','hour_19','hour_20','hour_21','hour_22'];
-    const totals = HOUR_KEYS.map(k => storeTransactions.reduce((s, r) => s + (r[k] || 0), 0));
+    const totals = HOUR_KEYS.map(k => currentMonthRecords.reduce((s, r) => s + (r[k] || 0), 0));
     return totals;
-  }, [storeTransactions]);
+  }, [currentMonthRecords]);
 
   const totalHourlyTxn = hourlyTotals.reduce((s, v) => s + v, 0);
-  const avgHourlyTxn = totalHourlyTxn > 0 ? Math.round(totalHourlyTxn / hourlyTotals.length) : 0;
+  // avg txn per hour = total monthly txn / 14 hours (divided by number of stores to get per-store avg)
+  const numStores = Math.max(currentMonthRecords.length, 1);
+  const avgHourlyTxn = totalHourlyTxn > 0 ? Math.round(totalHourlyTxn / numStores / 14) : 0;
   const peakHourIndex = hourlyTotals.reduce((maxI, v, i, arr) => v > arr[maxI] ? i : maxI, 0);
   const PEAK_LABELS = ['9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm'];
   // Find top 2-3 consecutive peak hours
