@@ -1,4 +1,6 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, LineChart, Line, BarChart, Bar } from
@@ -351,31 +353,63 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
     filter((d) => d.margen !== null);
   }, [pygReports]);
 
-  // Hourly heatmap data — desde todaySales agrupado por día de semana
-  // Distribuye las transacciones del día usando un patrón horario típico de heladería
-  const heatmapData = useMemo(() => {
-    // Patrón horario normalizado (14 horas: 8a-9p), picos a mediodía y tarde
-    const hourWeights = [0.03, 0.04, 0.06, 0.08, 0.10, 0.12, 0.11, 0.10, 0.09, 0.09, 0.08, 0.06, 0.03, 0.01];
+  // Month/year needed for query
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
 
-    // Acumular transacciones reales por día de semana desde todaySales
-    const dayTxnMap = {}; // { dayOfWeek: total_transactions }
-    const dayCountMap = {}; // { dayOfWeek: count } para promediar
+  // Fetch real hourly transactions from StoreTransactions entity
+  const { data: storeTransactions = [] } = useQuery({
+    queryKey: ['storeTransactions', currentMonth + 1, currentYear],
+    queryFn: () => base44.entities.StoreTransactions.filter({ month: currentMonth + 1, year: currentYear }),
+  });
+
+  // Aggregate all stores' hourly data for the current month
+  const hourlyTotals = useMemo(() => {
+    const HOUR_KEYS = ['hour_9','hour_10','hour_11','hour_12','hour_13','hour_14','hour_15','hour_16','hour_17','hour_18','hour_19','hour_20','hour_21','hour_22'];
+    const totals = HOUR_KEYS.map(k => storeTransactions.reduce((s, r) => s + (r[k] || 0), 0));
+    return totals;
+  }, [storeTransactions]);
+
+  const totalHourlyTxn = hourlyTotals.reduce((s, v) => s + v, 0);
+  const avgHourlyTxn = totalHourlyTxn > 0 ? Math.round(totalHourlyTxn / hourlyTotals.length) : 0;
+  const peakHourIndex = hourlyTotals.reduce((maxI, v, i, arr) => v > arr[maxI] ? i : maxI, 0);
+  const PEAK_LABELS = ['9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm'];
+  // Find top 2-3 consecutive peak hours
+  const peakHoursLabel = (() => {
+    if (totalHourlyTxn === 0) return '4pm-6pm';
+    const avg = avgHourlyTxn;
+    const above = hourlyTotals.map((v, i) => ({ i, v, label: PEAK_LABELS[i] })).filter(h => h.v >= avg);
+    if (above.length === 0) return PEAK_LABELS[peakHourIndex];
+    const first = above[0].label;
+    const last = above[above.length - 1].label;
+    return first === last ? first : `${first}-${last}`;
+  })();
+
+  // Hourly heatmap data — usa pesos reales si hay datos, si no usa patrón típico
+  const heatmapData = useMemo(() => {
+    const totalW = totalHourlyTxn > 0 ? totalHourlyTxn : 1;
+    const hourWeights = totalHourlyTxn > 0
+      ? hourlyTotals.map(v => v / totalW)
+      : [0.03, 0.04, 0.06, 0.08, 0.10, 0.12, 0.11, 0.10, 0.09, 0.09, 0.08, 0.06, 0.03, 0.01];
+
+    const dayTxnMap = {};
+    const dayCountMap = {};
     todaySales.forEach((d) => {
       const date = new Date(d.date);
-      const dow = (date.getDay() + 6) % 7; // 0=Lun...6=Dom
-      if (!dayTxnMap[dow]) {dayTxnMap[dow] = 0;dayCountMap[dow] = 0;}
+      const dow = (date.getDay() + 6) % 7;
+      if (!dayTxnMap[dow]) { dayTxnMap[dow] = 0; dayCountMap[dow] = 0; }
       dayTxnMap[dow] += d.total_transactions || 0;
       dayCountMap[dow]++;
     });
 
-    // Construir heatmap distribuyendo el promedio diario por franja horaria
     return DAYS.flatMap((_, di) =>
-    HOURS.map((_, hi) => {
-      const avgTxn = dayCountMap[di] > 0 ? dayTxnMap[di] / dayCountMap[di] : 0;
-      return { day: di, hour: hi, value: Math.round(avgTxn * hourWeights[hi]) };
-    })
+      HOURS.map((_, hi) => {
+        const avgTxn = dayCountMap[di] > 0 ? dayTxnMap[di] / dayCountMap[di] : 0;
+        return { day: di, hour: hi, value: Math.round(avgTxn * hourWeights[hi]) };
+      })
     );
-  }, [todaySales]);
+  }, [totalHourlyTxn, hourlyTotals, todaySales]);
 
   // Budget compliance
   const activeBudget = budget.find((b) => b.is_active) || budget[0];
@@ -394,9 +428,6 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
   const hasSalesData = sorted30.length > 0;
 
   // ── PROYECCIÓN: solo mes actual ──────────────────────────────────────────────
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth();
-  const currentYear = currentDate.getFullYear();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const dayOfMonth = currentDate.getDate(); // días transcurridos (incluye hoy)
 
@@ -644,11 +675,11 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
             <div className="grid grid-cols-2 gap-2 mb-3">
               <div className="p-1.5 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
                 <p className="text-[8px] text-[#8F96A3] font-medium">Promedio Txn</p>
-                <p className="text-[10px] font-bold text-[#FF4D8D]">{Math.round(sorted30.reduce((s, d) => s + (d.txn || 0), 0) / (sorted30.length || 1))}</p>
+                <p className="text-[10px] font-bold text-[#FF4D8D]">{avgHourlyTxn > 0 ? `${avgHourlyTxn}/h` : Math.round(sorted30.reduce((s, d) => s + (d.txn || 0), 0) / (sorted30.length || 1))}</p>
               </div>
               <div className="p-1.5 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
                 <p className="text-[8px] text-[#8F96A3] font-medium">Peak Hours</p>
-                <p className="text-[10px] font-bold text-[#FF4D8D]">4pm-6pm</p>
+                <p className="text-[10px] font-bold text-[#FF4D8D]">{peakHoursLabel}</p>
               </div>
             </div>
             {/* Mini sparkline de txn por día */}
