@@ -472,77 +472,12 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
         </div>
       </div>
 
-      {/* ── BODY: left sidebar + right charts ── */}
-      <div className="flex flex-1 min-h-0">
+      {/* ── CONTENT ── */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto px-4 py-5 space-y-5">
 
-        {/* ── LEFT SIDEBAR ── */}
-        <div className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-r border-slate-100 bg-white overflow-y-auto">
-          <div className="p-4 border-b border-slate-100">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Tienda</p>
-            <p className="font-black text-slate-900">{storeCode}</p>
-            {selectedPeriod && (
-              <p className="text-xs text-slate-400 mt-0.5">{MONTHS[selectedPeriod.month - 1]} {selectedPeriod.year}</p>
-            )}
-          </div>
-          <div className="p-3 space-y-2 flex-1">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-300 px-1 mb-1">KPIs del Período</p>
-            {kpiCards.map((card, i) => {
-              const p = card.palette;
-              return (
-                <motion.button
-                  key={card.id}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.06 }}
-                  onClick={() => setActiveCard(card.id)}
-                  whileHover={{ x: 3, transition: { duration: 0.15 } }}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full text-left rounded-2xl p-3 cursor-pointer"
-                  style={{ background: p.bg, border: `1.5px solid ${p.border}55` }}
-                >
-                  <div className="h-1 w-full rounded-full mb-2.5" style={{ background: p.icon }} />
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: p.icon + '18' }}>
-                      <card.icon className="w-3 h-3" style={{ color: p.icon }} />
-                    </div>
-                    {card.delta != null && (
-                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${
-                        card.delta >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'
-                      }`}>
-                        {card.delta >= 0 ? <ArrowUpRight className="w-2 h-2" /> : <ArrowDownRight className="w-2 h-2" />}
-                        {Math.abs(card.delta).toFixed(1)}%
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: p.sub + '99' }}>{card.label}</p>
-                  <p className="text-sm font-black leading-tight" style={{ color: p.text }}>{card.value}</p>
-                  <p className="text-[9px] mt-0.5 leading-snug" style={{ color: p.sub + 'aa' }}>{card.sub}</p>
-                </motion.button>
-              );
-            })}
-          </div>
-          <div className="p-4 border-t border-slate-100">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2.5 h-2.5 rounded-sm" style={{ background: MAGENTA }} />
-              <span className="text-[9px] text-slate-400 font-medium">Hora alta</span>
-            </div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2.5 h-2.5 rounded-sm bg-pink-200" />
-              <span className="text-[9px] text-slate-400 font-medium">Normal</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-sm bg-slate-200" />
-              <span className="text-[9px] text-slate-400 font-medium">Bajo</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ── RIGHT: scrollable charts ── */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto px-4 py-5 space-y-5">
-
-            {/* KPI Cards mobile */}
-            <div className="grid grid-cols-2 gap-3 lg:hidden">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {kpiCards.map((card, i) => {
                 const p = card.palette;
                 return (
@@ -984,7 +919,6 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
               </table>
             </div>
 
-          </div>
         </div>
       </div>
 
