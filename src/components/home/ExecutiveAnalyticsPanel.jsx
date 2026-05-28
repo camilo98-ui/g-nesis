@@ -648,7 +648,7 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
               </div>
               <div className="p-1.5 rounded-lg" style={{ background: 'rgba(255, 77, 141, 0.05)' }}>
                 <p className="text-[8px] text-[#8F96A3] font-medium">Peak Hours</p>
-                <p className="text-[10px] font-bold text-[#FF4D8D]">1pm-3pm</p>
+                <p className="text-[10px] font-bold text-[#FF4D8D]">4pm-6pm</p>
               </div>
             </div>
             {/* Mini sparkline de txn por día */}
