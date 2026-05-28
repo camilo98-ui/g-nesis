@@ -358,10 +358,10 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
 
-  // Fetch real hourly transactions from StoreTransactions entity
+  // Fetch ALL StoreTransactions for robust hourly pattern (historical)
   const { data: storeTransactions = [] } = useQuery({
-    queryKey: ['storeTransactions', currentMonth + 1, currentYear],
-    queryFn: () => base44.entities.StoreTransactions.filter({ month: currentMonth + 1, year: currentYear }),
+    queryKey: ['storeTransactionsAll'],
+    queryFn: () => base44.entities.StoreTransactions.list(),
   });
 
   // Aggregate all stores' hourly data for the current month
@@ -386,30 +386,42 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
     return first === last ? first : `${first}-${last}`;
   })();
 
-  // Hourly heatmap data — usa pesos reales si hay datos, si no usa patrón típico
+  // Hourly heatmap: combina pesos horarios reales (storeTransactions) × variación por día (todaySales)
   const heatmapData = useMemo(() => {
-    const totalW = totalHourlyTxn > 0 ? totalHourlyTxn : 1;
-    const hourWeights = totalHourlyTxn > 0
-      ? hourlyTotals.map(v => v / totalW)
-      : [0.03, 0.04, 0.06, 0.08, 0.10, 0.12, 0.11, 0.10, 0.09, 0.09, 0.08, 0.06, 0.03, 0.01];
+    const HOUR_KEYS_14 = ['hour_9','hour_10','hour_11','hour_12','hour_13','hour_14','hour_15','hour_16','hour_17','hour_18','hour_19','hour_20','hour_21','hour_22'];
+    const FALLBACK_WEIGHTS = [0.03, 0.05, 0.07, 0.09, 0.11, 0.12, 0.11, 0.10, 0.09, 0.08, 0.07, 0.05, 0.02, 0.01];
 
+    // Hourly weights from ALL storeTransactions (summed across all stores/months)
+    const rawHourTotals = HOUR_KEYS_14.map(k => storeTransactions.reduce((s, r) => s + (r[k] || 0), 0));
+    const rawSum = rawHourTotals.reduce((s, v) => s + v, 0);
+    const hourWeights = rawSum > 0
+      ? rawHourTotals.map(v => v / rawSum)
+      : FALLBACK_WEIGHTS;
+
+    // Day-of-week average txn from todaySales (Monday=0 … Sunday=6)
     const dayTxnMap = {};
     const dayCountMap = {};
-    todaySales.forEach((d) => {
-      const date = new Date(d.date);
+    (todaySales || []).forEach((d) => {
+      if (!d.date) return;
+      const date = new Date(d.date + 'T12:00:00'); // noon to avoid TZ shift
       const dow = (date.getDay() + 6) % 7;
-      if (!dayTxnMap[dow]) { dayTxnMap[dow] = 0; dayCountMap[dow] = 0; }
+      if (dayTxnMap[dow] === undefined) { dayTxnMap[dow] = 0; dayCountMap[dow] = 0; }
       dayTxnMap[dow] += d.total_transactions || 0;
       dayCountMap[dow]++;
     });
 
+    // If no daily data, assign equal weight to every day
+    const globalAvgTxn = Object.keys(dayTxnMap).length > 0
+      ? Object.values(dayTxnMap).reduce((s, v) => s + v, 0) / Object.keys(dayTxnMap).length
+      : 100;
+
     return DAYS.flatMap((_, di) =>
       HOURS.map((_, hi) => {
-        const avgTxn = dayCountMap[di] > 0 ? dayTxnMap[di] / dayCountMap[di] : 0;
+        const avgTxn = dayCountMap[di] > 0 ? dayTxnMap[di] / dayCountMap[di] : globalAvgTxn * 0.6;
         return { day: di, hour: hi, value: Math.round(avgTxn * hourWeights[hi]) };
       })
     );
-  }, [totalHourlyTxn, hourlyTotals, todaySales]);
+  }, [storeTransactions, todaySales]);
 
   // Budget compliance
   const activeBudget = budget.find((b) => b.is_active) || budget[0];
