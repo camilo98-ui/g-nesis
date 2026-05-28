@@ -1226,7 +1226,7 @@ export default function SalesReportView() {
                   label: 'Venta Total',
                   value: formatCurrency(summary.totalSales),
                   prevValue: prevTotal2 > 0 ? formatCurrency(prevTotal2) : null,
-                  color: '#3b82f6',
+                  color: '#C21875',
                   sparkValues: prevTotal2 > 0
                     ? [prevTotal2 * 0.6, prevTotal2 * 0.7, prevTotal2 * 0.65, prevTotal2 * 0.8, prevTotal2 * 0.75, prevTotal2 * 0.9, prevTotal2, summary.totalSales * 0.85, summary.totalSales * 0.92, summary.totalSales]
                     : null,
@@ -1236,7 +1236,7 @@ export default function SalesReportView() {
                   value: topDeptCurrent ? `${topDeptCurrent.deptPart.toFixed(1)}%` : '—',
                   subLabel: topDeptCurrent ? topDeptCurrent.dept : '—',
                   prevValue: topDeptPrev ? `${topDeptPrev.deptPart.toFixed(1)}%` : null,
-                  color: '#22c55e',
+                  color: '#db2777',
                   sparkValues: topDeptCurrent && topDeptPrev
                     ? [topDeptPrev.deptPart * 0.7, topDeptPrev.deptPart * 0.8, topDeptPrev.deptPart * 0.85, topDeptPrev.deptPart * 0.9, topDeptPrev.deptPart, topDeptPrev.deptPart * 1.02, topDeptCurrent.deptPart * 0.95, topDeptCurrent.deptPart * 0.98, topDeptCurrent.deptPart]
                     : null,
@@ -1246,7 +1246,7 @@ export default function SalesReportView() {
                   value: summary.topProduct ? formatCurrency(summary.topProduct.total_sales) : '—',
                   subLabel: summary.topProduct ? (summary.topProduct.product?.length > 18 ? summary.topProduct.product.slice(0,18)+'…' : summary.topProduct.product) : null,
                   prevValue: prevTopProduct ? formatCurrency(prevTopProduct.total_sales) : null,
-                  color: '#f97316',
+                  color: '#e879a8',
                   sparkValues: prevTopProduct && summary.topProduct
                     ? [prevTopProduct.total_sales * 0.65, prevTopProduct.total_sales * 0.75, prevTopProduct.total_sales * 0.8, prevTopProduct.total_sales * 0.9, prevTopProduct.total_sales, prevTopProduct.total_sales * 1.05, summary.topProduct.total_sales * 0.9, summary.topProduct.total_sales * 0.95, summary.topProduct.total_sales]
                     : null,
@@ -1256,7 +1256,7 @@ export default function SalesReportView() {
                   value: globalDeltaPct !== null ? `${deltaPositive ? '+' : ''}${globalDeltaPct.toFixed(1)}%` : '—',
                   subLabel: globalDeltaPct !== null ? (deltaPositive ? 'Crecimiento' : 'Caída') : 'Sin comparativo',
                   prevValue: prevTotal2 > 0 ? `vs ${prevMonthLabel}` : null,
-                  color: globalDeltaPct === null ? '#a855f7' : deltaPositive ? '#10b981' : '#ef4444',
+                  color: globalDeltaPct === null ? '#C21875' : deltaPositive ? '#10b981' : '#ef4444',
                   sparkValues: prevTotal2 > 0
                     ? [prevTotal2 * 0.75, prevTotal2 * 0.82, prevTotal2 * 0.88, prevTotal2 * 0.92, prevTotal2 * 0.96, prevTotal2, prevTotal2 * 1.02, summary.totalSales * 0.94, summary.totalSales * 0.97, summary.totalSales]
                     : null,
