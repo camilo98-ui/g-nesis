@@ -367,70 +367,50 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
     enabled: true,
   });
 
-  // Hourly totals for KPIs: only current month
-  const currentMonthRecords = useMemo(() =>
-    storeTransactions.filter(r => Number(r.month) === currentMonth + 1 && Number(r.year) === currentYear),
-    [storeTransactions, currentMonth, currentYear]);
-
-  const hourlyTotals = useMemo(() => {
-    const HOUR_KEYS = ['hour_9','hour_10','hour_11','hour_12','hour_13','hour_14','hour_15','hour_16','hour_17','hour_18','hour_19','hour_20','hour_21','hour_22'];
-    const totals = HOUR_KEYS.map(k => currentMonthRecords.reduce((s, r) => s + (r[k] || 0), 0));
-    return totals;
-  }, [currentMonthRecords]);
-
-  const totalHourlyTxn = hourlyTotals.reduce((s, v) => s + v, 0);
-  // avg txn per hour = total monthly txn / 14 hours (divided by number of stores to get per-store avg)
-  const numStores = Math.max(currentMonthRecords.length, 1);
-  const avgHourlyTxn = totalHourlyTxn > 0 ? Math.round(totalHourlyTxn / numStores / 14) : 0;
-  const peakHourIndex = hourlyTotals.reduce((maxI, v, i, arr) => v > arr[maxI] ? i : maxI, 0);
+  // ── Lógica idéntica a StoreHourlyView ──────────────────────────────────────
+  // Usar el registro mensual más reciente de StoreTransactions para esta tienda
+  const HOUR_NUMS = [9,10,11,12,13,14,15,16,17,18,19,20,21,22];
   const PEAK_LABELS = ['9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm'];
-  // Find top 2-3 consecutive peak hours
-  const peakHoursLabel = (() => {
-    if (totalHourlyTxn === 0) return '4pm-6pm';
-    const avg = avgHourlyTxn;
-    const above = hourlyTotals.map((v, i) => ({ i, v, label: PEAK_LABELS[i] })).filter(h => h.v >= avg);
-    if (above.length === 0) return PEAK_LABELS[peakHourIndex];
-    const first = above[0].label;
-    const last = above[above.length - 1].label;
-    return first === last ? first : `${first}-${last}`;
-  })();
 
-  // Hourly heatmap: combina pesos horarios reales (storeTransactions) × variación por día (todaySales)
+  const latestRecord = useMemo(() => {
+    if (!storeTransactions.length) return null;
+    return [...storeTransactions].sort((a, b) =>
+      b.year !== a.year ? b.year - a.year : b.month - a.month
+    )[0];
+  }, [storeTransactions]);
+
+  // hourValues: array de 14 valores hora 9..22, igual que StoreHourlyView
+  const hourValues = useMemo(() =>
+    HOUR_NUMS.map(h => Math.max(0, latestRecord?.[`hour_${h}`] || 0)),
+    [latestRecord]
+  );
+
+  const activeHourVals = hourValues.filter(v => v > 0);
+  const avgHourlyTxn = activeHourVals.length > 0
+    ? Math.round(activeHourVals.reduce((s, v) => s + v, 0) / activeHourVals.length)
+    : 0;
+
+  // Peak block de 3 horas consecutivas (igual que StoreHourlyView)
+  const peakHoursLabel = useMemo(() => {
+    if (!hourValues.some(v => v > 0)) return '4pm-6pm';
+    let maxSum = 0, maxStart = 0;
+    for (let s = 0; s <= hourValues.length - 3; s++) {
+      const sum = hourValues[s] + hourValues[s + 1] + hourValues[s + 2];
+      if (sum > maxSum) { maxSum = sum; maxStart = s; }
+    }
+    return `${PEAK_LABELS[maxStart]}-${PEAK_LABELS[maxStart + 2]}`;
+  }, [hourValues]);
+
+  // Heatmap: usa los valores reales por hora (igual patrón en todas las filas)
+  // — StoreTransactions no tiene desglose por día de semana, así que el patrón
+  //   horario es el mismo en cada fila pero los valores son reales de la tienda
   const heatmapData = useMemo(() => {
-    const HOUR_KEYS_14 = ['hour_9','hour_10','hour_11','hour_12','hour_13','hour_14','hour_15','hour_16','hour_17','hour_18','hour_19','hour_20','hour_21','hour_22'];
-    const FALLBACK_WEIGHTS = [0.03, 0.05, 0.07, 0.09, 0.11, 0.12, 0.11, 0.10, 0.09, 0.08, 0.07, 0.05, 0.02, 0.01];
-
-    // Hourly weights from ALL storeTransactions (summed across all stores/months)
-    const rawHourTotals = HOUR_KEYS_14.map(k => storeTransactions.reduce((s, r) => s + (r[k] || 0), 0));
-    const rawSum = rawHourTotals.reduce((s, v) => s + v, 0);
-    const hourWeights = rawSum > 0
-      ? rawHourTotals.map(v => v / rawSum)
-      : FALLBACK_WEIGHTS;
-
-    // Day-of-week average txn from todaySales (Monday=0 … Sunday=6)
-    const dayTxnMap = {};
-    const dayCountMap = {};
-    (todaySales || []).forEach((d) => {
-      if (!d.date) return;
-      const date = new Date(d.date + 'T12:00:00'); // noon to avoid TZ shift
-      const dow = (date.getDay() + 6) % 7;
-      if (dayTxnMap[dow] === undefined) { dayTxnMap[dow] = 0; dayCountMap[dow] = 0; }
-      dayTxnMap[dow] += d.total_transactions || 0;
-      dayCountMap[dow]++;
-    });
-
-    // If no daily data, assign equal weight to every day
-    const globalAvgTxn = Object.keys(dayTxnMap).length > 0
-      ? Object.values(dayTxnMap).reduce((s, v) => s + v, 0) / Object.keys(dayTxnMap).length
-      : 100;
-
+    const FALLBACK = [3, 5, 7, 9, 11, 12, 11, 10, 9, 8, 7, 5, 2, 1];
+    const weights = hourValues.some(v => v > 0) ? hourValues : FALLBACK;
     return DAYS.flatMap((_, di) =>
-      HOURS.map((_, hi) => {
-        const avgTxn = dayCountMap[di] > 0 ? dayTxnMap[di] / dayCountMap[di] : globalAvgTxn * 0.6;
-        return { day: di, hour: hi, value: Math.round(avgTxn * hourWeights[hi]) };
-      })
+      HOURS.map((_, hi) => ({ day: di, hour: hi, value: weights[hi] }))
     );
-  }, [storeTransactions, todaySales]);
+  }, [hourValues]);
 
   // Budget compliance
   const activeBudget = budget.find((b) => b.is_active) || budget[0];
