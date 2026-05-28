@@ -1462,7 +1462,8 @@ export default function HomeWorkspace({
             cashiers={cashiers}
             pygReports={pygReports}
             shiftRecords={shiftRecords}
-            products={salesReports} />
+            products={salesReports}
+            storeCode={selectedStore} />
 
           }
 

@@ -307,7 +307,7 @@ function DonutChart({ data }) {
 }
 
 // ── MAIN COMPONENT ────────────────────────────────────────────────────────────
-export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], cashiers = [], pygReports = [], shiftRecords = [], products = [] }) {
+export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], cashiers = [], pygReports = [], shiftRecords = [], products = [], storeCode = '' }) {
 
   // Build 30-day trend from todaySales
   const sorted30 = useMemo(() => {
@@ -358,10 +358,13 @@ export default function ExecutiveAnalyticsPanel({ todaySales = [], budget = [], 
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
 
-  // Fetch ALL StoreTransactions for robust hourly pattern (historical)
+  // Fetch StoreTransactions for this store only
   const { data: storeTransactions = [] } = useQuery({
-    queryKey: ['storeTransactionsAll'],
-    queryFn: () => base44.entities.StoreTransactions.list(),
+    queryKey: ['storeTransactions', storeCode],
+    queryFn: () => storeCode
+      ? base44.entities.StoreTransactions.filter({ store_code: storeCode })
+      : base44.entities.StoreTransactions.list(),
+    enabled: true,
   });
 
   // Hourly totals for KPIs: only current month
