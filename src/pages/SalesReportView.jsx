@@ -1264,45 +1264,82 @@ export default function SalesReportView() {
               ];
 
               return (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
                 {cards.map((card, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                    className="rounded-3xl overflow-hidden relative cursor-default flex flex-col"
+                  <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07, duration: 0.4 }}
+                    className="flex flex-col"
                     style={{
-                      background: `linear-gradient(145deg, ${card.color}22 0%, ${card.color}08 100%)`,
-                      border: `1.5px solid ${card.color}30`,
-                      boxShadow: `0 4px 24px ${card.color}18, 0 1px 4px rgba(0,0,0,0.04)`,
-                      transition: 'transform 0.25s, box-shadow 0.25s',
+                      background: '#FFFFFF',
+                      border: '1px solid #F2F2F4',
+                      borderRadius: '24px',
+                      padding: '28px',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.05)',
+                      minHeight: '160px',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = `0 12px 36px ${card.color}28, 0 2px 8px rgba(0,0,0,0.06)`; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 24px ${card.color}18, 0 1px 4px rgba(0,0,0,0.04)`; }}
                   >
-                    {/* Ícono decorativo top-right */}
-                    <div className="absolute top-3 right-3 w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${card.color}18` }}>
-                      <div className="w-2 h-2 rounded-full" style={{ background: card.color }} />
-                    </div>
-                    {/* Contenido */}
-                    <div className="px-5 pt-5 pb-2">
-                      <p className="text-[10px] font-black uppercase tracking-[0.15em] mb-3" style={{ color: card.color }}>{card.label}</p>
-                      <p className="text-2xl font-black leading-none mb-1" style={{ color: '#1e293b' }}>{card.value}</p>
-                      {card.subLabel && (
-                        <p className="text-xs font-bold mt-1 truncate" style={{ color: card.color }}>{card.subLabel}</p>
-                      )}
-                      {card.prevValue ? (
-                        <p className="text-[11px] font-medium mt-1 line-through" style={{ color: 'rgba(0,0,0,0.25)' }}>{card.prevValue}</p>
-                      ) : (
-                        <p className="text-[11px] mt-1" style={{ color: '#94a3b8' }}>Sin comparativo</p>
-                      )}
-                    </div>
-                    {/* Sparkline */}
-                    <div className="mt-auto pt-1">
-                      <Sparkline values={card.sparkValues} color={card.color} />
+                    {/* Label */}
+                    <p style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#94A3B8', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>
+                      {card.label}
+                    </p>
+
+                    {/* Valor principal */}
+                    <p style={{ fontSize: '38px', fontWeight: 600, color: '#0F172A', lineHeight: 1, marginBottom: '10px', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em' }}>
+                      {card.value}
+                    </p>
+
+                    {/* Subtexto */}
+                    {card.subLabel && (
+                      <p style={{ fontSize: '13px', fontWeight: 500, color: '#64748B', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>
+                        {card.subLabel}
+                      </p>
+                    )}
+
+                    {/* Chip indicador */}
+                    <div className="mt-auto flex items-center gap-2 flex-wrap">
+                      {(() => {
+                        if (card.label === 'Variación Total' && card.prevValue) {
+                          const isPositive = card.value && card.value.startsWith('+');
+                          const isNeutral = !card.value || card.value === '—';
+                          return (
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '4px',
+                              fontSize: '12px', fontWeight: 600,
+                              padding: '4px 10px', borderRadius: '999px',
+                              background: isNeutral ? 'rgba(194,24,117,0.07)' : isPositive ? 'rgba(16,185,129,0.09)' : 'rgba(239,68,68,0.08)',
+                              color: isNeutral ? '#C21875' : isPositive ? '#059669' : '#dc2626',
+                              fontFamily: 'Inter, sans-serif',
+                            }}>
+                              {!isNeutral && (isPositive ? '↗' : '↘')} {card.value}
+                            </span>
+                          );
+                        }
+                        if (card.prevValue) {
+                          return (
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '4px',
+                              fontSize: '12px', fontWeight: 500,
+                              padding: '4px 10px', borderRadius: '999px',
+                              background: 'rgba(194,24,117,0.07)',
+                              color: '#C21875',
+                              fontFamily: 'Inter, sans-serif',
+                            }}>
+                              {i === 0 ? '↗ vs anterior' : i === 1 ? 'Líder del mes' : i === 2 ? 'Top producto' : 'Comparativo'}
+                            </span>
+                          );
+                        }
+                        return (
+                          <span style={{
+                            fontSize: '12px', fontWeight: 500, color: '#CBD5E1',
+                            fontFamily: 'Inter, sans-serif',
+                          }}>Sin comparativo</span>
+                        );
+                      })()}
                     </div>
                   </motion.div>
                 ))}
               </div>
               );
-            })()}
+              })()}
 
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
