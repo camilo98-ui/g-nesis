@@ -474,10 +474,10 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
 
       {/* ── CONTENT ── */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 py-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="max-w-5xl mx-auto px-4 py-5 space-y-5">
 
           {/* KPI Cards */}
-          <div className="lg:col-span-2 grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {kpiCards.map((card, i) => {
                 const p = card.palette;
                 return (
@@ -513,7 +513,7 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
             </div>
 
             {/* Gráfica principal: barras horarias */}
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h2 className="font-black text-slate-900">Distribución Horaria de Transacciones</h2>
@@ -553,7 +553,7 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
                   </div>
                 );
               })()}
-              <ResponsiveContainer width="100%" height={340}>
+              <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={barData} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
@@ -609,7 +609,7 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
 
               return (
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                  <h2 className="font-black text-slate-900 mb-1">Crecimiento Hora a Hora</h2>
+                  <h2 className="font-black text-slate-900 mb-1">Transacciones por Hora + Crecimiento</h2>
                   <p className="text-xs text-slate-400 mb-4">Barras = volumen · Línea = cambio vs hora anterior</p>
                   <div className="rounded-2xl px-4 py-3 mb-5 border flex flex-wrap gap-x-6 gap-y-1 text-sm"
                     style={{ background: MAGENTA_PALE, borderColor: MAGENTA + '30' }}>
@@ -662,7 +662,7 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
             })()}
 
             {/* Comparativo */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6" style={{gridRow: 'span 1'}}>
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
               <div className="mb-4">
                 <h2 className="font-black text-slate-900">Comparativo vs {prevName}</h2>
                 <p className="text-xs text-slate-400 mt-0.5">
@@ -843,7 +843,7 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
             )}
 
             {/* Ranking */}
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-x-auto">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-x-auto">
               <h2 className="font-black text-slate-900 mb-2">Ranking de Franjas Horarias</h2>
               {(() => {
                 const sorted = [...sortedRanking];
