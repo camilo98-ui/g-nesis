@@ -6,6 +6,7 @@ import { Clock, TrendingUp, BarChart3, Store, ShieldCheck, ArrowLeft, Search, Ch
 import { Link } from 'react-router-dom';
 import StoreHourlyView from '@/components/hourly/StoreHourlyView';
 import ManagerPanel from '@/components/hourly/ManagerPanel';
+import SidebarNav from '@/components/SidebarNav';
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const HOURS = [9,10,11,12,13,14,15,16,17,18,19,20,21,22];
@@ -114,71 +115,56 @@ export default function HourlyTransactions() {
     }
   };
 
-  // Gerente con sesión → ir directo al panel de carga
-  if (isGerente) {
-    return <ManagerPanel onBack={() => window.history.back()} allRecords={allRecords} refetch={refetch} />;
-  }
-
-  if (view === 'manager') {
-    return <ManagerPanel onBack={() => setView('home')} allRecords={allRecords} refetch={refetch} />;
-  }
-
-  // Mostrar spinner mientras cargan los datos (siempre que estemos en vista tienda y cargando)
-  if (view === 'store' && isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  // Vista de tienda: si viene de sesión, usar sessionStoreRecord; si viene del selector, usar selectedStore
+  // Compute active store
   const activeStore = (view === 'store' && sessionStoreRecord && !selectedStore)
     ? sessionStoreRecord
     : selectedStore;
 
-  if (view === 'store' && activeStore) {
-    const storeCode = extractCode(activeStore.code);
-    const storeCodeLower = storeCode.toLowerCase();
-    // Filtro amplio: código exacto, extractCode del nombre, o nombre contiene alguna palabra del código
-    const storeRecords = allRecords.filter(r => {
+  // Compute store records
+  const storeCode = activeStore ? extractCode(activeStore.code) : null;
+  const storeCodeLower = storeCode ? storeCode.toLowerCase() : '';
+  const storeRecords = useMemo(() => {
+    if (!activeStore || !storeCode) return [];
+    return allRecords.filter(r => {
       const fc = (r.store_code || '').trim();
       const fn = (r.store_name || '').trim();
       const fcExtracted = extractCode(fc);
       const fnExtracted = extractCode(fn);
-      // Match exacto por código
       if (fc === storeCode || fcExtracted === storeCode || fnExtracted === storeCode) return true;
-      // Match por nombre: el store_name contiene el código o viceversa
       if (fn.toLowerCase().includes(storeCodeLower)) return true;
       if (storeCodeLower.includes(fn.toLowerCase()) && fn.length > 3) return true;
-      // Match por palabras clave del nombre de sesión (ej: "COLINA" matchea "Colina Campestre")
       const sessionName = (activeStore.name || '').toLowerCase();
       if (sessionName.length > 3 && fn.toLowerCase().includes(sessionName)) return true;
       if (sessionName.length > 3 && sessionName.includes(fn.toLowerCase()) && fn.length > 3) return true;
       return false;
     });
+  }, [allRecords, activeStore, storeCode, storeCodeLower]);
 
-    // Si no hay datos para esta tienda pero sí hay otros registros, mostrar selector de tiendas
+  // Determine content
+  let mainContent;
+  if (isGerente || view === 'manager') {
+    mainContent = (
+      <ManagerPanel
+        onBack={isGerente ? () => window.history.back() : () => setView('home')}
+        allRecords={allRecords}
+        refetch={refetch}
+      />
+    );
+  } else if (view === 'store' && isLoading) {
+    mainContent = (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin" />
+      </div>
+    );
+  } else if (view === 'store' && activeStore) {
     if (!isLoading && storeRecords.length === 0 && allRecords.length > 0) {
-      // Mostrar la vista de selección con mensaje informativo
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-          <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
-            <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
-              <button onClick={() => window.history.back()} className="w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center transition-all">
-                <ArrowLeft className="w-4 h-4 text-slate-700" />
-              </button>
-              <div>
-                <h1 className="text-lg font-black text-slate-900">Transacciones por Hora</h1>
-                <p className="text-xs text-slate-500">{storeCode} — sin datos cargados aún</p>
-              </div>
-            </div>
-          </div>
-          <div className="max-w-6xl mx-auto px-4 py-12 text-center">
+      mainContent = (
+        <div className="overflow-auto h-full">
+          <div className="max-w-4xl mx-auto px-4 py-12 text-center">
             <BarChart3 className="w-16 h-16 text-slate-200 mx-auto mb-4" />
             <p className="text-slate-600 font-semibold text-lg mb-2">No hay datos para {storeCode}</p>
-            <p className="text-slate-400 text-sm mb-8">El gerente debe cargar el reporte de transacciones. O selecciona otra tienda:</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-3xl mx-auto">
+            <p className="text-slate-400 text-sm mb-8">El gerente debe cargar el reporte. O selecciona otra tienda:</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto">
               {stores.map((store) => (
                 <button
                   key={store.code}
@@ -193,27 +179,26 @@ export default function HourlyTransactions() {
           </div>
         </div>
       );
+    } else {
+      mainContent = (
+        <StoreHourlyView
+          key={storeCode}
+          storeCode={storeCode}
+          storeName={activeStore.name}
+          allRecords={storeRecords}
+          onBack={() => {
+            if (selectedStore) { setView('home'); setSelectedStore(null); }
+            else window.history.back();
+          }}
+        />
+      );
     }
-
-    return (
-      <StoreHourlyView
-        key={storeCode}
-        storeCode={storeCode}
-        storeName={activeStore.name}
-        allRecords={storeRecords}
-        onBack={() => {
-          if (selectedStore) { setView('home'); setSelectedStore(null); }
-          else window.history.back();
-        }}
-      />
-    );
-  }
-
-  // Vista gerente: selector de tiendas
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
+  } else {
+    // Store selector view
+    mainContent = (
+      <div className="overflow-auto h-full">
+        {/* Header */}
+        <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center">
@@ -333,6 +318,16 @@ export default function HourlyTransactions() {
             ))}
           </div>
         )}
+      </div>
+    </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen overflow-hidden">
+      <SidebarNav />
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {mainContent}
       </div>
     </div>
   );

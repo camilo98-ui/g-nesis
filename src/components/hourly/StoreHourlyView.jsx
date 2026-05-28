@@ -416,7 +416,7 @@ export default function StoreHourlyView({ storeCode, storeName, allRecords, onBa
   const activeCardData = activeCard ? kpiCards.find(c => c.id === activeCard) : null;
 
   return (
-    <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
+    <div className="h-full bg-slate-50 flex flex-col overflow-hidden">
 
       {/* Header */}
       <div className="bg-white border-b border-slate-100 shadow-sm flex-shrink-0">
