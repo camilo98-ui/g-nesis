@@ -9,7 +9,7 @@ import {
   Filter, Search, X, Package, Layers, Star, Award,
   ChevronDown, Calendar, ArrowUpRight, ArrowDownRight,
   AlertTriangle, CheckCircle, TrendingDown, Zap, Shield, GitCompare,
-  Download, Printer, Target, Activity, Crown
+  Download, Printer, Target, Activity, Crown, Trophy, Tag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PYGModal from '@/components/reports/PYGModal';
@@ -1167,176 +1167,110 @@ export default function SalesReportView() {
               const prevProductMap2 = {};
               prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevProductMap2[p.product] = p; })));
               const prevTotal2 = prevHierarchy?.reduce((s, h) => s + (h.deptSales || 0), 0) || 0;
-              const prevTotalProducts = Object.keys(prevProductMap2).length;
-              const prevTotalDepts = prevHierarchy?.length || 0;
               const prevTopProduct = Object.values(prevProductMap2).sort((a,b) => b.total_sales - a.total_sales)[0];
 
-              // Sparkline SVG con área rellena y punto final
-              const Sparkline = ({ values, color }) => {
-                const W = 260, H = 80;
-                if (!values || values.length < 2) {
-                  // fallback con curva suave genérica
-                  const fake = [0.3,0.4,0.35,0.5,0.45,0.6,0.55,0.7,0.65,0.85,0.8,1.0];
-                  values = fake;
-                }
-                const max = Math.max(...values); const min = Math.min(...values);
-                const range = max - min || 1;
-                const pts = values.map((v, i) => {
-                  const x = (i / (values.length - 1)) * (W - 20) + 10;
-                  const y = H - 16 - ((v - min) / range) * (H - 32);
-                  return [x, y];
-                });
-                const polyline = pts.map(p => p.join(',')).join(' ');
-                const area = `M ${pts[0][0]},${H - 4} ` + pts.map(p => `L ${p[0]},${p[1]}`).join(' ') + ` L ${pts[pts.length-1][0]},${H - 4} Z`;
-                const lastX = pts[pts.length-1][0];
-                const lastY = pts[pts.length-1][1];
-                const gradId = `sg_${color.replace('#','')}`;
-                return (
-                  <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: 'block' }}>
-                    <defs>
-                      <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={color} stopOpacity="0.35" />
-                        <stop offset="100%" stopColor={color} stopOpacity="0.03" />
-                      </linearGradient>
-                    </defs>
-                    <path d={area} fill={`url(#${gradId})`} />
-                    <polyline fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" points={polyline} />
-                    <circle cx={lastX} cy={lastY} r="5" fill={color} />
-                    <circle cx={lastX} cy={lastY} r="9" fill={color} opacity="0.25" />
-                  </svg>
-                );
-              };
-
-              // Depto líder
               const topDeptCurrent = hierarchy[0];
               const topDeptPrev = prevHierarchy?.[0];
-
-              // Variación general
               const globalDeltaPct = prevTotal2 > 0 ? ((summary.totalSales - prevTotal2) / prevTotal2) * 100 : null;
               const deltaPositive = globalDeltaPct !== null && globalDeltaPct >= 0;
 
-              // Concentración top 5 productos
-              const top5Sales = [...allProducts].sort((a,b) => b.total_sales - a.total_sales).slice(0,5).reduce((s,p) => s + p.total_sales, 0);
-              const concPct = summary.totalSales > 0 ? (top5Sales / summary.totalSales) * 100 : 0;
-              const prevTop5Sales = Object.values(prevProductMap2).sort((a,b) => b.total_sales - a.total_sales).slice(0,5).reduce((s,p) => s + p.total_sales, 0);
-              const prevConcPct = prevTotal2 > 0 ? (prevTop5Sales / prevTotal2) * 100 : 0;
-
-              const cards = [
+              const cardDefs = [
                 {
-                  label: 'Venta Total',
+                  icon: DollarSign,
+                  label: 'VENTA TOTAL',
                   value: formatCurrency(summary.totalSales),
-                  prevValue: prevTotal2 > 0 ? formatCurrency(prevTotal2) : null,
-                  color: '#C21875',
-                  sparkValues: prevTotal2 > 0
-                    ? [prevTotal2 * 0.6, prevTotal2 * 0.7, prevTotal2 * 0.65, prevTotal2 * 0.8, prevTotal2 * 0.75, prevTotal2 * 0.9, prevTotal2, summary.totalSales * 0.85, summary.totalSales * 0.92, summary.totalSales]
-                    : null,
+                  sub: null,
+                  trend: prevTotal2 > 0 ? ((summary.totalSales - prevTotal2) / prevTotal2 * 100) : null,
+                  trendLabel: prevMonthLabel,
                 },
                 {
-                  label: 'Depto. Líder',
+                  icon: Trophy,
+                  label: 'DEPTO. LÍDER',
                   value: topDeptCurrent ? `${topDeptCurrent.deptPart.toFixed(1)}%` : '—',
-                  subLabel: topDeptCurrent ? topDeptCurrent.dept : '—',
-                  prevValue: topDeptPrev ? `${topDeptPrev.deptPart.toFixed(1)}%` : null,
-                  color: '#db2777',
-                  sparkValues: topDeptCurrent && topDeptPrev
-                    ? [topDeptPrev.deptPart * 0.7, topDeptPrev.deptPart * 0.8, topDeptPrev.deptPart * 0.85, topDeptPrev.deptPart * 0.9, topDeptPrev.deptPart, topDeptPrev.deptPart * 1.02, topDeptCurrent.deptPart * 0.95, topDeptCurrent.deptPart * 0.98, topDeptCurrent.deptPart]
-                    : null,
+                  sub: topDeptCurrent?.dept || null,
+                  trend: topDeptCurrent && topDeptPrev ? ((topDeptCurrent.deptPart - topDeptPrev.deptPart) / Math.abs(topDeptPrev.deptPart) * 100) : null,
+                  trendLabel: null,
                 },
                 {
-                  label: 'Top Producto',
+                  icon: Tag,
+                  label: 'TOP PRODUCTO',
                   value: summary.topProduct ? formatCurrency(summary.topProduct.total_sales) : '—',
-                  subLabel: summary.topProduct ? (summary.topProduct.product?.length > 18 ? summary.topProduct.product.slice(0,18)+'…' : summary.topProduct.product) : null,
-                  prevValue: prevTopProduct ? formatCurrency(prevTopProduct.total_sales) : null,
-                  color: '#e879a8',
-                  sparkValues: prevTopProduct && summary.topProduct
-                    ? [prevTopProduct.total_sales * 0.65, prevTopProduct.total_sales * 0.75, prevTopProduct.total_sales * 0.8, prevTopProduct.total_sales * 0.9, prevTopProduct.total_sales, prevTopProduct.total_sales * 1.05, summary.topProduct.total_sales * 0.9, summary.topProduct.total_sales * 0.95, summary.topProduct.total_sales]
-                    : null,
+                  sub: summary.topProduct?.product ? (summary.topProduct.product.length > 20 ? summary.topProduct.product.slice(0,20)+'…' : summary.topProduct.product) : null,
+                  trend: (() => {
+                    if (!summary.topProduct) return null;
+                    const prev = prevProductMap2[summary.topProduct.product];
+                    return prev && prev.total_sales > 0 ? ((summary.topProduct.total_sales - prev.total_sales) / prev.total_sales * 100) : null;
+                  })(),
+                  trendLabel: null,
                 },
                 {
-                  label: 'Variación Total',
-                  value: globalDeltaPct !== null ? `${deltaPositive ? '+' : ''}${globalDeltaPct.toFixed(1)}%` : '—',
-                  subLabel: globalDeltaPct !== null ? (deltaPositive ? 'Crecimiento' : 'Caída') : 'Sin comparativo',
-                  prevValue: prevTotal2 > 0 ? `vs ${prevMonthLabel}` : null,
-                  color: globalDeltaPct === null ? '#C21875' : deltaPositive ? '#10b981' : '#ef4444',
-                  sparkValues: prevTotal2 > 0
-                    ? [prevTotal2 * 0.75, prevTotal2 * 0.82, prevTotal2 * 0.88, prevTotal2 * 0.92, prevTotal2 * 0.96, prevTotal2, prevTotal2 * 1.02, summary.totalSales * 0.94, summary.totalSales * 0.97, summary.totalSales]
-                    : null,
+                  icon: globalDeltaPct !== null && globalDeltaPct >= 0 ? TrendingUp : TrendingDown,
+                  label: 'VARIACIÓN TOTAL',
+                  value: globalDeltaPct !== null ? `${globalDeltaPct >= 0 ? '+' : ''}${globalDeltaPct.toFixed(1)}%` : '—',
+                  sub: globalDeltaPct !== null ? (globalDeltaPct >= 0 ? 'Crecimiento' : 'Caída') : 'Sin comparativo',
+                  subColor: globalDeltaPct !== null ? (globalDeltaPct >= 0 ? '#059669' : '#dc2626') : '#94a3b8',
+                  trend: null,
+                  trendLabel: globalDeltaPct !== null ? `vs ${prevMonthLabel}` : null,
+                  isVariation: true,
                 },
               ];
 
               return (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-                {cards.map((card, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07, duration: 0.4 }}
-                    className="flex flex-col"
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {cardDefs.map((card, i) => {
+                  const Icon = card.icon;
+                  return (
+                  <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
                     style={{
                       background: '#FFFFFF',
-                      border: '1px solid #F2F2F4',
-                      borderRadius: '24px',
-                      padding: '28px',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.05)',
-                      minHeight: '160px',
+                      border: '1px solid #F0F0F3',
+                      borderRadius: '20px',
+                      padding: '24px',
+                      boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
                     }}
                   >
-                    {/* Label */}
-                    <p style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#94A3B8', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>
-                      {card.label}
-                    </p>
+                    {/* Header: icon + label */}
+                    <div className="flex items-center gap-2.5 mb-5">
+                      <div style={{ background: 'rgba(194,24,117,0.08)', borderRadius: '10px', padding: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Icon style={{ width: '15px', height: '15px', color: '#C21875', strokeWidth: 2 }} />
+                      </div>
+                      <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.07em', color: '#94A3B8', fontFamily: 'Inter, sans-serif' }}>{card.label}</span>
+                    </div>
 
                     {/* Valor principal */}
-                    <p style={{ fontSize: '38px', fontWeight: 600, color: '#0F172A', lineHeight: 1, marginBottom: '10px', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em' }}>
+                    <p style={{ fontSize: '28px', fontWeight: 700, color: '#0F172A', lineHeight: 1.1, marginBottom: '6px', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em' }}>
                       {card.value}
                     </p>
 
                     {/* Subtexto */}
-                    {card.subLabel && (
-                      <p style={{ fontSize: '13px', fontWeight: 500, color: '#64748B', marginBottom: '12px', fontFamily: 'Inter, sans-serif' }}>
-                        {card.subLabel}
+                    {card.sub && (
+                      <p style={{ fontSize: '13px', fontWeight: 500, color: card.subColor || '#64748B', marginBottom: '10px', fontFamily: 'Inter, sans-serif' }}>
+                        {card.sub}
                       </p>
                     )}
 
-                    {/* Chip indicador */}
-                    <div className="mt-auto flex items-center gap-2 flex-wrap">
-                      {(() => {
-                        if (card.label === 'Variación Total' && card.prevValue) {
-                          const isPositive = card.value && card.value.startsWith('+');
-                          const isNeutral = !card.value || card.value === '—';
-                          return (
-                            <span style={{
-                              display: 'inline-flex', alignItems: 'center', gap: '4px',
-                              fontSize: '12px', fontWeight: 600,
-                              padding: '4px 10px', borderRadius: '999px',
-                              background: isNeutral ? 'rgba(194,24,117,0.07)' : isPositive ? 'rgba(16,185,129,0.09)' : 'rgba(239,68,68,0.08)',
-                              color: isNeutral ? '#C21875' : isPositive ? '#059669' : '#dc2626',
-                              fontFamily: 'Inter, sans-serif',
-                            }}>
-                              {!isNeutral && (isPositive ? '↗' : '↘')} {card.value}
-                            </span>
-                          );
-                        }
-                        if (card.prevValue) {
-                          return (
-                            <span style={{
-                              display: 'inline-flex', alignItems: 'center', gap: '4px',
-                              fontSize: '12px', fontWeight: 500,
-                              padding: '4px 10px', borderRadius: '999px',
-                              background: 'rgba(194,24,117,0.07)',
-                              color: '#C21875',
-                              fontFamily: 'Inter, sans-serif',
-                            }}>
-                              {i === 0 ? '↗ vs anterior' : i === 1 ? 'Líder del mes' : i === 2 ? 'Top producto' : 'Comparativo'}
-                            </span>
-                          );
-                        }
-                        return (
-                          <span style={{
-                            fontSize: '12px', fontWeight: 500, color: '#CBD5E1',
-                            fontFamily: 'Inter, sans-serif',
-                          }}>Sin comparativo</span>
-                        );
-                      })()}
-                    </div>
+                    {/* Indicador */}
+                    {card.isVariation ? (
+                      card.trendLabel && (
+                        <p style={{ fontSize: '13px', fontWeight: 600, color: card.subColor || '#94A3B8', fontFamily: 'Inter, sans-serif', marginTop: card.sub ? '0' : '8px' }}>
+                          {card.sub} {card.trendLabel}
+                        </p>
+                      )
+                    ) : card.trend !== null ? (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: card.sub ? '4px' : '10px' }}>
+                        {card.trend >= 0
+                          ? <ArrowUpRight style={{ width: '13px', height: '13px', color: '#10b981' }} />
+                          : <ArrowDownRight style={{ width: '13px', height: '13px', color: '#ef4444' }} />}
+                        <span style={{ fontSize: '13px', fontWeight: 600, color: card.trend >= 0 ? '#10b981' : '#ef4444', fontFamily: 'Inter, sans-serif' }}>
+                          {card.trend >= 0 ? '+' : ''}{card.trend.toFixed(1)}%{card.trendLabel ? ` vs ${card.trendLabel}` : ''}
+                        </span>
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '12px', color: '#CBD5E1', fontFamily: 'Inter, sans-serif', marginTop: '8px' }}>Sin comparativo</p>
+                    )}
                   </motion.div>
-                ))}
+                  );
+                })}
               </div>
               );
               })()}
