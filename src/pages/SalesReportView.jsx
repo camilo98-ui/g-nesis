@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SidebarNav from '@/components/SidebarNav';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNova } from '@/components/NovaContext';
@@ -17,30 +18,30 @@ import {
   Cell, RadialBarChart, RadialBar, LineChart, Line, PieChart, Pie
 } from 'recharts';
 
-// ─── Paleta ejecutiva oscura premium ─────────────────────────────────────────
+// ─── Paleta Rosa Popsy Premium ─────────────────────────────────────────────────
 const EXEC = {
-  bg: '#080d1a',
-  bgCard: '#0e1629',
-  bgCardAlt: '#111827',
-  border: 'rgba(99,102,241,0.18)',
-  borderLight: 'rgba(255,255,255,0.06)',
-  accent1: '#6366f1',     // indigo
-  accent2: '#8b5cf6',     // violet
-  accent3: '#06b6d4',     // cyan
-  accent4: '#10b981',     // emerald
-  accent5: '#f59e0b',     // amber
+  bg: '#fdf2f8',
+  bgCard: '#ffffff',
+  bgCardAlt: '#fef6fb',
+  border: 'rgba(194,24,117,0.15)',
+  borderLight: 'rgba(194,24,117,0.08)',
+  accent1: '#C21875',
+  accent2: '#db2777',
+  accent3: '#7c3aed',
+  accent4: '#10b981',
+  accent5: '#f59e0b',
   danger: '#ef4444',
-  grad1: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-  grad2: 'linear-gradient(135deg, #06b6d4, #6366f1)',
+  grad1: 'linear-gradient(135deg, #C21875, #db2777)',
+  grad2: 'linear-gradient(135deg, #9b1564, #C21875)',
   grad3: 'linear-gradient(135deg, #10b981, #06b6d4)',
   grad4: 'linear-gradient(135deg, #f59e0b, #f97316)',
-  gradHero: 'linear-gradient(135deg, #080d1a 0%, #0f172a 40%, #1e1b4b 100%)',
-  textPrimary: '#f1f5f9',
-  textSecondary: '#94a3b8',
-  textMuted: '#475569',
+  gradHero: 'linear-gradient(135deg, #C21875 0%, #9b1564 50%, #7b0f52 100%)',
+  textPrimary: '#1e293b',
+  textSecondary: '#64748b',
+  textMuted: '#94a3b8',
 };
 
-const COLORS = ['#6366f1','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#f472b6','#84cc16'];
+const COLORS = ['#C21875','#db2777','#f472b6','#7c3aed','#10b981','#f59e0b','#6366f1','#84cc16'];
 const MONTHS_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 function formatCurrency(val) {
@@ -110,8 +111,8 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
     const deptExpanded = searchActive ? true : expandedDepts[dept];
 
     rows.push(
-      <tr key={`dept-${dept}`} style={{ borderBottom: `1px solid rgba(99,102,241,0.15)` }}>
-        <td className="py-2.5 px-3 w-8" style={{ background: 'rgba(99,102,241,0.08)' }}>
+      <tr key={`dept-${dept}`} style={{ borderBottom: `1px solid rgba(194,24,117,0.10)` }}>
+        <td className="py-2.5 px-3 w-8" style={{ background: 'rgba(194,24,117,0.06)' }}>
           {!searchActive && (
             <button onClick={() => toggleDept(dept)}
               className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold transition-all"
@@ -120,16 +121,16 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
             </button>
           )}
         </td>
-        <td colSpan={3} className="py-2.5 px-3 font-bold text-sm uppercase tracking-wider" style={{ background: 'rgba(99,102,241,0.08)', color: EXEC.textPrimary }}>{dept}</td>
-        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: 'rgba(99,102,241,0.08)', color: EXEC.accent1 }}>{formatPart(deptPart)}</td>
-        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: 'rgba(99,102,241,0.08)', color: EXEC.accent3 }}>{formatCurrency(deptSales)}</td>
-        <td className="py-2.5 px-3 text-right" style={{ background: 'rgba(99,102,241,0.08)' }}>
+        <td colSpan={3} className="py-2.5 px-3 font-bold text-sm uppercase tracking-wider" style={{ background: 'rgba(194,24,117,0.06)', color: EXEC.textPrimary }}>{dept}</td>
+        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: 'rgba(194,24,117,0.06)', color: EXEC.accent1 }}>{formatPart(deptPart)}</td>
+        <td className="py-2.5 px-3 text-right font-bold text-sm whitespace-nowrap" style={{ background: 'rgba(194,24,117,0.06)', color: EXEC.accent2 }}>{formatCurrency(deptSales)}</td>
+        <td className="py-2.5 px-3 text-right" style={{ background: 'rgba(194,24,117,0.06)' }}>
           {(() => {
             const total = sections.flatMap(s => s.products).reduce((sum, p) => sum + (p.units_sold || 0), 0);
             return total > 0 ? <span className="text-xs font-semibold" style={{ color: EXEC.textSecondary }}>{total.toLocaleString('es-CO')}</span> : <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
           })()}
         </td>
-        <td className="py-2.5 px-3 text-right" style={{ background: 'rgba(99,102,241,0.08)' }}>
+        <td className="py-2.5 px-3 text-right" style={{ background: 'rgba(194,24,117,0.06)' }}>
           {(() => {
             const prevDept = prevHierarchy?.find(h => h.dept === dept);
             if (!prevDept || prevDept.deptPart === 0) return <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
@@ -153,12 +154,12 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
       const hasProducts = section.products && section.products.length > 0;
 
       rows.push(
-        <tr key={`section-${sectionKey}`} style={{ background: 'rgba(255,255,255,0.02)', borderBottom: `1px solid ${EXEC.borderLight}` }}>
+        <tr key={`section-${sectionKey}`} style={{ background: 'rgba(194,24,117,0.02)', borderBottom: `1px solid ${EXEC.borderLight}` }}>
           <td className="py-2 px-3 w-8">
             {hasProducts && !searchActive && (
               <button onClick={() => toggleSection(sectionKey)}
                 className="w-5 h-5 flex items-center justify-center rounded-lg text-xs font-bold transition-all"
-                style={{ border: `1px solid rgba(139,92,246,0.3)`, color: EXEC.accent2, background: EXEC.bgCard }}>
+                style={{ border: `1px solid rgba(194,24,117,0.25)`, color: EXEC.accent1, background: EXEC.bgCard }}>
                 {sectionExpanded ? '−' : '+'}
               </button>
             )}
@@ -210,9 +211,9 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
             onClick={() => onSelectProduct(isSelected ? null : p)}
             className="cursor-pointer transition-all duration-150"
             style={{
-              background: isSelected ? 'rgba(99,102,241,0.15)' : matchSearch ? 'rgba(245,158,11,0.08)' : 'transparent',
+              background: isSelected ? 'rgba(194,24,117,0.08)' : matchSearch ? 'rgba(245,158,11,0.08)' : 'transparent',
               borderBottom: `1px solid ${EXEC.borderLight}`,
-              outline: isSelected ? `1px solid rgba(99,102,241,0.4)` : 'none',
+              outline: isSelected ? `1px solid rgba(194,24,117,0.35)` : 'none',
             }}
           >
             <td className="py-1.5 px-3 w-8"></td>
@@ -614,7 +615,7 @@ Generado automáticamente · ${reportDate}
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2.5">
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0"
-                        style={{ background: i === 0 ? EXEC.grad1 : 'rgba(255,255,255,0.1)' }}>
+                        style={{ background: i === 0 ? EXEC.grad1 : 'rgba(0,0,0,0.07)' }}>
                         {i + 1}
                       </div>
                       <span className="text-sm font-bold" style={{ color: EXEC.textPrimary }}>{h.dept}</span>
@@ -631,7 +632,7 @@ Generado automáticamente · ${reportDate}
                       <span className="text-xs" style={{ color: EXEC.textSecondary }}>{formatCurrency(h.deptSales)}</span>
                     </div>
                   </div>
-                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(194,24,117,0.10)' }}>
                     <motion.div className="h-full rounded-full" style={{ background: barColor }}
                       initial={{ width: 0 }} animate={{ width: `${h.deptPart}%` }} transition={{ duration: 1, delay: i * 0.08 }} />
                   </div>
@@ -649,10 +650,10 @@ Generado automáticamente · ${reportDate}
               const prev = prevProductMap[p.product];
               const pDelta = prev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null;
               return (
-                <div key={i} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${EXEC.borderLight}` }}>
+                <div key={i} className="rounded-xl p-4" style={{ background: '#fafafa', border: '1px solid rgba(0,0,0,0.06)' }}>
                   <div className="flex items-start justify-between mb-2">
                     <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0"
-                      style={{ background: i < 3 ? EXEC.grad1 : 'rgba(255,255,255,0.1)' }}>
+                      style={{ background: i < 3 ? EXEC.grad1 : 'rgba(0,0,0,0.08)' }}>
                       {i + 1}
                     </div>
                     {pDelta !== null && (
@@ -715,14 +716,14 @@ Generado automáticamente · ${reportDate}
         )}
 
         {/* Concentración del negocio */}
-        <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${EXEC.border}` }}>
+        <div className="rounded-2xl p-5" style={{ background: '#fafafa', border: `1px solid ${EXEC.border}` }}>
           <div className="flex items-center justify-between mb-3">
             <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: EXEC.textMuted }}>Concentración del Portafolio</p>
             <span className="text-xs font-black px-3 py-1 rounded-full" style={{ background: concentracionPct > 60 ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)', color: concentracionPct > 60 ? EXEC.accent5 : EXEC.accent4 }}>
               {concentracionPct.toFixed(0)}% en Top 5
             </span>
           </div>
-          <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.06)' }}>
+          <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(194,24,117,0.10)' }}>
             <motion.div className="h-full rounded-full"
               style={{ background: concentracionPct > 60 ? EXEC.grad4 : EXEC.grad3 }}
               initial={{ width: 0 }} animate={{ width: `${Math.min(concentracionPct, 100)}%` }} transition={{ duration: 1.2 }} />
@@ -1093,10 +1094,10 @@ export default function SalesReportView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-indigo-800 border-t-indigo-400 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 text-sm font-medium">Cargando datos...</p>
+          <div className="w-12 h-12 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-500 text-sm font-medium">Cargando datos...</p>
         </div>
       </div>
     );
@@ -1105,9 +1106,10 @@ export default function SalesReportView() {
   const currentMonthLabel = `${MONTHS_NAMES[effectiveMonth - 1]} ${effectiveYear}`;
 
   return (
-    <div className="min-h-screen" style={{ background: EXEC.bg }}>
-      {/* Header ejecutivo oscuro premium */}
-      <div className="sticky top-0 z-30" style={{ background: EXEC.bgCard, borderBottom: `1px solid ${EXEC.border}`, boxShadow: '0 4px 30px rgba(0,0,0,0.4)' }}>
+    <div className="flex h-screen overflow-hidden">
+      <SidebarNav />
+      <div className="flex-1 min-h-0 overflow-y-auto" style={{ background: EXEC.bg }}>
+      <div className="sticky top-0 z-30" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${EXEC.border}`, boxShadow: '0 2px 16px rgba(194,24,117,0.08)' }}>
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3 flex-wrap">
             <button onClick={handleBack} className="p-2 rounded-xl transition-all flex-shrink-0"
@@ -1120,7 +1122,7 @@ export default function SalesReportView() {
             </div>
 
             {/* Selector de mes */}
-            <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(99,102,241,0.1)', border: `1px solid ${EXEC.border}` }}>
+            <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(194,24,117,0.06)', border: `1px solid ${EXEC.border}` }}>
               <Calendar className="w-3.5 h-3.5" style={{ color: EXEC.accent1 }} />
               <select value={selectedMonth} onChange={e => { setSelectedMonth(Number(e.target.value)); setSelectedProduct(null); }}
                 className="text-xs font-bold border-none outline-none cursor-pointer" style={{ background: 'transparent', color: EXEC.textPrimary }}>
@@ -1133,7 +1135,7 @@ export default function SalesReportView() {
             </div>
 
             {hasData && (
-              <div className="rounded-xl px-4 py-2 text-right flex-shrink-0" style={{ background: 'rgba(99,102,241,0.12)', border: `1px solid ${EXEC.border}` }}>
+              <div className="rounded-xl px-4 py-2 text-right flex-shrink-0" style={{ background: 'rgba(194,24,117,0.08)', border: `1px solid ${EXEC.border}` }}>
                 <p className="text-base font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(summary.totalSales)}</p>
                 <p className="text-[10px]" style={{ color: EXEC.textMuted }}>Venta Total</p>
               </div>
@@ -1266,20 +1268,20 @@ export default function SalesReportView() {
                   {cards.map((card, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                       className="rounded-2xl overflow-hidden relative hover:scale-[1.02] transition-transform cursor-default flex flex-col"
-                      style={{ background: '#131929', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      style={{ background: '#ffffff', border: `1px solid ${EXEC.border}`, boxShadow: '0 2px 12px rgba(194,24,117,0.07)' }}>
                       {/* Franja color izquierda */}
                       <div className="absolute left-0 top-0 bottom-0 w-[4px] rounded-l-2xl" style={{ background: card.color }} />
                       {/* Contenido superior */}
                       <div className="pl-5 pr-4 pt-4 pb-2">
-                        <p className="text-sm font-medium mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>{card.label}</p>
-                        <p className="text-3xl font-bold leading-none mb-1" style={{ color: '#ffffff' }}>{card.value}</p>
+                        <p className="text-sm font-medium mb-3" style={{ color: EXEC.textSecondary }}>{card.label}</p>
+                        <p className="text-3xl font-bold leading-none mb-1" style={{ color: EXEC.textPrimary }}>{card.value}</p>
                         {card.subLabel && (
                           <p className="text-xs font-semibold mb-0.5 truncate" style={{ color: card.color }}>{card.subLabel}</p>
                         )}
                         {card.prevValue ? (
-                          <p className="text-sm font-normal line-through" style={{ color: 'rgba(255,255,255,0.3)' }}>{card.prevValue}</p>
+                          <p className="text-sm font-normal line-through" style={{ color: 'rgba(0,0,0,0.28)' }}>{card.prevValue}</p>
                         ) : (
-                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Sin comparativo</p>
+                          <p className="text-xs" style={{ color: EXEC.textMuted }}>Sin comparativo</p>
                         )}
                       </div>
                       {/* Sparkline al fondo */}
@@ -1325,7 +1327,7 @@ export default function SalesReportView() {
                             <span className="text-sm font-black min-w-[3rem] text-right" style={{ color }}>{h.deptPart.toFixed(1)}%</span>
                           </div>
                         </div>
-                        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(194,24,117,0.08)' }}>
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min(h.deptPart, 100)}%` }}
@@ -1350,7 +1352,7 @@ export default function SalesReportView() {
                       <h3 className="font-black text-lg leading-tight" style={{ color: EXEC.textPrimary }}>Top 10 Productos</h3>
                       <p className="text-xs mt-0.5" style={{ color: EXEC.textMuted }}>{currentMonthLabel} · clic para análisis</p>
                     </div>
-                    <div className="text-right rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <div className="text-right rounded-xl px-3 py-2" style={{ background: 'rgba(194,24,117,0.06)' }}>
                       <p className="text-xl font-black" style={{ color: EXEC.textPrimary }}>{allProducts.length}</p>
                       <p className="text-[10px]" style={{ color: EXEC.textMuted }}>productos</p>
                     </div>
@@ -1373,11 +1375,11 @@ export default function SalesReportView() {
                           whileTap={{ scale: 0.99 }}
                           onClick={() => setSelectedProduct(isSelected ? null : p)}
                           className="cursor-pointer rounded-xl px-3 py-2.5 transition-all"
-                          style={{ background: isSelected ? `${EXEC.accent1}18` : 'transparent', border: isSelected ? `1px solid ${EXEC.accent1}40` : '1px solid transparent' }}>
+                          style={{ background: isSelected ? 'rgba(194,24,117,0.08)' : 'transparent', border: isSelected ? `1px solid rgba(194,24,117,0.35)` : '1px solid transparent' }}>
                           <div className="flex items-center gap-2 mb-1.5">
                             <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-black"
                               style={{
-                                background: isTop3 ? (isSelected ? EXEC.accent1 : `${EXEC.accent1}20`) : 'rgba(255,255,255,0.06)',
+                                background: isTop3 ? (isSelected ? EXEC.accent1 : 'rgba(194,24,117,0.10)') : 'rgba(0,0,0,0.05)',
                                 color: isTop3 ? (isSelected ? '#fff' : EXEC.accent1) : EXEC.textMuted
                               }}>
                               {i + 1}
@@ -1393,13 +1395,13 @@ export default function SalesReportView() {
                               <span className="text-xs font-black" style={{ color: EXEC.textPrimary }}>{formatCurrency(p.total_sales)}</span>
                             </div>
                           </div>
-                          <div className="h-1.5 rounded-full overflow-hidden ml-8" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                          <div className="h-1.5 rounded-full overflow-hidden ml-8" style={{ background: 'rgba(194,24,117,0.08)' }}>
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
                               transition={{ duration: 0.8, delay: i * 0.05 }}
                               className="h-full rounded-full"
-                              style={{ background: isSelected ? EXEC.accent1 : isTop3 ? EXEC.grad1 : 'rgba(255,255,255,0.15)' }}
+                              style={{ background: isSelected ? EXEC.accent1 : isTop3 ? EXEC.grad1 : 'rgba(194,24,117,0.25)' }}
                             />
                           </div>
                         </motion.div>
@@ -1510,7 +1512,7 @@ export default function SalesReportView() {
 
             <div className="flex justify-center pb-8">
               <button onClick={handleBack} className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all"
-                style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${EXEC.borderLight}`, color: EXEC.textSecondary }}>
+                style={{ background: 'rgba(194,24,117,0.06)', border: `1px solid ${EXEC.border}`, color: EXEC.textSecondary }}>
                 <ArrowLeft className="w-4 h-4" /> Volver al Panel
               </button>
             </div>
@@ -1521,6 +1523,7 @@ export default function SalesReportView() {
       <AnimatePresence>
         {showPYG && <PYGModal storeId={storeCode} onClose={() => setShowPYG(false)} />}
       </AnimatePresence>
+      </div>
     </div>
   );
 }
