@@ -434,12 +434,14 @@ export default function Home() {
     if (loginPassword === '1998') {
       localStorage.setItem('userRole', selectedRole);
 
-      // Si no hay tienda seleccionada y es gerente, ir al panel ejecutivo
+      // Si no hay tienda seleccionada y es gerente, entrar al Home (panel blanco)
       if (!pendingStore && selectedRole === 'gerente') {
         localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
+        localStorage.setItem('userRole', selectedRole);
         setLoginSuccess(true);
         setTimeout(() => {
-          window.location.href = createPageUrl('ExecutiveDashboard');
+          setIsLoggedIn(true);
+          setIsSubmitting(false);
         }, 800);
         return;
       }
