@@ -254,15 +254,7 @@ export default function Home() {
     buttonText: 'Gestionar mi punto',
     isRecommended: true
   },
-  {
-    id: 'embajador',
-    name: 'Embajador',
-    icon: 'embajador',
-    color: 'from-pink-400 to-rose-500',
-    description: 'Ejecución operativa y apoyo en ventas',
-    iconBaseColor: '#ec4899',
-    buttonText: 'Comenzar mi turno'
-  }];
+  ];
 
 
   // Iconos profesionales por rol con colores dinámicos
