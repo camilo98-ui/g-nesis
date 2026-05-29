@@ -1171,15 +1171,6 @@ export default function ExecutiveDashboard() {
           </div>
         </div>
 
-        {/* Barra de progreso del mes */}
-        <div className="mb-6 h-0.5 bg-white/5 rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${(new Date().getDate() / new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()) * 100}%` }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-          />
-        </div>
 
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
