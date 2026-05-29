@@ -223,7 +223,8 @@ export default function GerenteDashboard() {
       const gap = budgetUntilToday > 0 ? totalSales - budgetUntilToday : null;
       const projPct = budgetUntilToday > 0 ? (totalSales / budgetUntilToday) * 100 : null;
       const pptCompliancePct = monthlyBudget > 0 ? (totalSales / monthlyBudget) * 100 : null;
-      const avgTicket = totalTickets > 0 ? totalSales / totalTickets : 0;
+      // total_tickets is often 0; fall back to total_transactions as denominator
+      const avgTicket = totalTickets > 0 ? totalSales / totalTickets : (totalTx > 0 ? totalSales / totalTx : 0);
 
       const prods = productsByCode[(store.code || '').trim()] || {};
       const top3 = Object.entries(prods).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, amount]) => ({ name, amount }));
@@ -280,7 +281,8 @@ export default function GerenteDashboard() {
   // KPI summary row
   const totalVentas = storeData.reduce((s, d) => s + d.totalSales, 0);
   const totalTx = storeData.reduce((s, d) => s + d.totalTx, 0);
-  const avgTicketGlobal = storeData.filter((d) => d.totalTickets > 0).reduce((s, d) => s + d.avgTicket, 0) / Math.max(storeData.filter((d) => d.totalTickets > 0).length, 1);
+  const storesWithSales = storeData.filter((d) => d.avgTicket > 0);
+  const avgTicketGlobal = storesWithSales.length > 0 ? storesWithSales.reduce((s, d) => s + d.avgTicket, 0) / storesWithSales.length : 0;
   const storesOnTarget = storeData.filter((d) => (d.projPct ?? 0) >= 100).length;
 
   const ventasFormatter = ventasTab === 'proyeccion' || ventasTab === 'cumplimiento' ? fmtPct : fmtM;
