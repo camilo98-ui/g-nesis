@@ -25,6 +25,7 @@ import ProductTicketAnalysis from '@/components/reports/ProductTicketAnalysis';
 import WeeklyComparison from './WeeklyComparison';
 import TakeawayCard from './TakeawayCard';
 import NovaInsightStrip from './NovaInsightStrip';
+import GerenteDashboard from './GerenteDashboard';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -878,7 +879,7 @@ export default function HomeWorkspace({
                     </p>
                     <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-none"
                     style={{ letterSpacing: '-0.04em', color: '#64748b' }}>
-                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{LEADERS[selectedStore] || 'Tienda'}</span>
+                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{isGerente ? 'Camilo' : (LEADERS[selectedStore] || 'Tienda')}</span>
                     </h1>
                   </div>
                 </div>
@@ -921,6 +922,11 @@ export default function HomeWorkspace({
               </div>
             </div>
           </motion.div>
+
+          {/* ── GERENTE DASHBOARD ── */}
+          {isGerente &&
+          <GerenteDashboard />
+          }
 
           {/* ── HERO SECTION: Premium KPI Cards + Nova AI Strip ── */}
           {!isGerente &&
