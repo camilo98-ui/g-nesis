@@ -776,24 +776,53 @@ export default function HomeWorkspace({
 
         {/* Nav */}
         <div className="flex-1 px-2.5 space-y-px overflow-y-auto pb-2">
-          <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.14em] px-3 mb-2">Navegación</p>
-          {filteredNav.map((item) => {
-            const handleClick = () => {
-              if (!item.path) {
-                if (item.onClick === 'onShowPYGModal') onShowPYGModal?.();
-                return;
-              }
-              if (item.label === 'Informe') {
-                setShowAIReport(true);
-                return;
-              }
-              setActiveNav(item.path);
-              window.location.href = `/${item.path}`;
-            };
-            return (
-              <NavItem key={item.label} item={item} isActive={activeNav === item.path} onClick={handleClick} />);
-
-          })}
+          {isGerente ? (
+            <>
+              <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.14em] px-3 mb-2">Cargar Datos</p>
+              {[
+                { label: 'PPT Excel', icon: FileSpreadsheet, onClick: onShowBudgetImporter, color: '#059669' },
+                { label: 'KPIs Participación', icon: BarChart3, onClick: onShowKpisUploader, color: '#6366f1' },
+                { label: 'Agregadores', icon: FileText, onClick: onShowAggregatorsUploader, color: '#f97316' },
+                { label: 'P&G Upload', icon: TrendingUp, onClick: onShowPYGUploader, color: '#0ea5e9' },
+              ].map(({ label, icon: Icon, onClick, color }) => (
+                <motion.button
+                  key={label}
+                  whileHover={{ x: 2 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={onClick}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left"
+                  style={{ background: 'transparent', border: '1px solid transparent', transition: 'all 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.03)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: `${color}15` }}>
+                    <Icon style={{ color, width: 14, height: 14 }} />
+                  </div>
+                  <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: '#6b7280' }}>{label}</span>
+                </motion.button>
+              ))}
+            </>
+          ) : (
+            <>
+              <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-[0.14em] px-3 mb-2">Navegación</p>
+              {filteredNav.map((item) => {
+                const handleClick = () => {
+                  if (!item.path) {
+                    if (item.onClick === 'onShowPYGModal') onShowPYGModal?.();
+                    return;
+                  }
+                  if (item.label === 'Informe') {
+                    setShowAIReport(true);
+                    return;
+                  }
+                  setActiveNav(item.path);
+                  window.location.href = `/${item.path}`;
+                };
+                return (
+                  <NavItem key={item.label} item={item} isActive={activeNav === item.path} onClick={handleClick} />);
+              })}
+            </>
+          )}
         </div>
 
         {/* Footer */}
@@ -890,21 +919,6 @@ export default function HomeWorkspace({
                 </div>
                 }
               </div>
-              {isGerente &&
-              <div className="hidden sm:flex items-center gap-1.5 ml-auto">
-                  {[
-                { label: 'PPT', icon: FileSpreadsheet, onClick: onShowBudgetImporter },
-                { label: 'KPIs', icon: BarChart3, onClick: onShowKpisUploader },
-                { label: 'P&G', icon: TrendingUp, onClick: onShowPYGUploader }].
-                map(({ label, icon: I, onClick }) =>
-                <button key={label} onClick={onClick}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-700 hover:bg-black/[0.04] transition-all"
-                style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
-                      <I style={{ width: 11, height: 11 }} />{label}
-                    </button>
-                )}
-                </div>
-              }
             </div>
           </motion.div>
 
