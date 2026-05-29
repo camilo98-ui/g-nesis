@@ -1,10 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { STORES } from '@/components/StoreSelector';
-import { BarChart3, Package, DollarSign, ArrowUpRight, ArrowDownRight, Sparkles } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, parseISO, isWithinInterval } from 'date-fns';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  Cell, LabelList
+} from 'recharts';
+import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Calendar, TrendingUp, DollarSign, Sparkles, ShoppingBag, CreditCard, Activity } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
 
 const fmtM = (n) => {
   if (n == null || isNaN(n)) return '—';
@@ -14,58 +21,104 @@ const fmtM = (n) => {
   if (abs >= 1_000) return `${sign}$${Math.round(abs / 1_000)}K`;
   return `${sign}$${Math.round(abs)}`;
 };
+const fmtPct = (n) => (n == null || isNaN(n) ? '—' : `${n.toFixed(0)}%`);
 
-function GapChip({ value }) {
-  const isPos = value >= 0;
-  const color = isPos ? '#059669' : '#e11d48';
-  const Icon = isPos ? ArrowUpRight : ArrowDownRight;
+const STORE_COLORS = ['#C21875', '#6366f1', '#0ea5e9', '#f59e0b', '#10b981', '#e11d48', '#8b5cf6', '#06b6d4'];
+
+function ChartTooltip({ active, payload, label, valueFormatter }) {
+  if (!active || !payload?.length) return null;
   return (
-    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-lg"
-      style={{ color, background: `${color}14` }}>
-      <Icon style={{ width: 10, height: 10 }} />
-      {fmtM(Math.abs(value))}
-    </span>
+    <div className="rounded-xl px-3 py-2 text-xs font-medium shadow-xl"
+      style={{ background: 'rgba(255,255,255,0.97)', border: '1px solid rgba(194,24,117,0.15)', backdropFilter: 'blur(20px)' }}>
+      <p className="font-bold text-slate-600 mb-1">{label}</p>
+      {payload.map((p) => (
+        <p key={p.name} style={{ color: p.fill || '#C21875' }}>
+          {valueFormatter ? valueFormatter(p.value) : p.value}
+        </p>
+      ))}
+    </div>
   );
 }
 
-function MiniBar({ pct, color }) {
-  const w = Math.min(Math.max(pct, 0), 100);
+function Section({ icon: Icon, title, subtitle, color, children }) {
+  const c = color || '#C21875';
   return (
-    <div className="w-full h-1.5 rounded-full mt-1.5" style={{ background: `${color}18` }}>
-      <div className="h-1.5 rounded-full transition-all" style={{ width: `${w}%`, background: color }} />
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+      className="rounded-2xl p-5"
+      style={{
+        background: 'rgba(255,255,255,0.92)',
+        backdropFilter: 'blur(40px) saturate(160%)',
+        border: '1px solid rgba(255,255,255,0.7)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1)',
+      }}>
+      <div className="flex items-center gap-2.5 mb-4">
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: `${c}14`, border: `1px solid ${c}20` }}>
+          <Icon style={{ color: c, width: 13, height: 13 }} />
+        </div>
+        <div>
+          <p className="text-[13px] font-black text-slate-700" style={{ letterSpacing: '-0.02em' }}>{title}</p>
+          {subtitle && <p className="text-[10px] text-slate-400 font-medium">{subtitle}</p>}
+        </div>
+      </div>
+      {children}
+    </motion.div>
+  );
+}
+
+function Tab({ label, active, onClick }) {
+  return (
+    <button onClick={onClick}
+      className="px-3 py-1 rounded-lg text-[11px] font-bold transition-all"
+      style={{
+        background: active ? 'rgba(194,24,117,0.10)' : 'transparent',
+        color: active ? '#C21875' : '#94a3b8',
+        border: active ? '1px solid rgba(194,24,117,0.2)' : '1px solid transparent',
+      }}>
+      {label}
+    </button>
+  );
+}
+
+function EmptyState({ msg }) {
+  return (
+    <div className="flex items-center justify-center py-10 text-[11px] text-slate-400">
+      {msg || 'Sin datos para el período'}
     </div>
   );
 }
 
 export default function GerenteDashboard() {
   const now = new Date();
-  const monthStart = startOfMonth(now);
-  const monthEnd = endOfMonth(now);
+  const [startDate, setStartDate] = useState(startOfMonth(now));
+  const [endDate, setEndDate] = useState(now);
+  const [calOpen, setCalOpen] = useState(false);
+  const [pickingEnd, setPickingEnd] = useState(false);
+  const [ventasTab, setVentasTab] = useState('ventas');
 
   const { data: allDailySales = [] } = useQuery({
-    queryKey: ['gerente-all-daily-sales'],
-    queryFn: () => base44.entities.DailySales.list('-date', 500),
+    queryKey: ['gerente-daily-sales'],
+    queryFn: () => base44.entities.DailySales.list('-date', 1000),
     staleTime: 5 * 60 * 1000,
   });
-
   const { data: allBudgets = [] } = useQuery({
-    queryKey: ['gerente-all-budgets'],
+    queryKey: ['gerente-budgets', now.getMonth(), now.getFullYear()],
     queryFn: () => base44.entities.Budget.filter({ month: now.getMonth() + 1, year: now.getFullYear() }),
     staleTime: 10 * 60 * 1000,
   });
-
   const { data: allPYG = [] } = useQuery({
-    queryKey: ['gerente-all-pyg'],
+    queryKey: ['gerente-pyg'],
     queryFn: () => base44.entities.PYGReport.list('-created_date', 200),
     staleTime: 10 * 60 * 1000,
   });
-
   const { data: allSalesReports = [] } = useQuery({
-    queryKey: ['gerente-all-sales-reports'],
-    queryFn: () => base44.entities.SalesReport.list('-created_date', 500),
+    queryKey: ['gerente-sales-reports'],
+    queryFn: () => base44.entities.SalesReport.list('-created_date', 1000),
     staleTime: 10 * 60 * 1000,
   });
-
   const { data: storeEntities = [] } = useQuery({
     queryKey: ['all-stores'],
     queryFn: () => base44.entities.Store.list(),
@@ -75,238 +128,269 @@ export default function GerenteDashboard() {
   const storeData = useMemo(() => {
     const activeStores = storeEntities.filter((s) => s.is_active !== false);
     if (!activeStores.length) return [];
-
+    const interval = { start: startDate, end: endDate };
     const salesByStore = {};
     allDailySales.forEach((d) => {
+      try { if (!isWithinInterval(parseISO(d.date), interval)) return; } catch { return; }
       if (!salesByStore[d.store_id]) salesByStore[d.store_id] = [];
       salesByStore[d.store_id].push(d);
     });
-
     const budgetByStore = {};
     allBudgets.forEach((b) => { budgetByStore[b.store_id] = b; });
-
     const pygByStore = {};
     allPYG.forEach((p) => {
       const key = p.store_code;
-      if (!pygByStore[key] || new Date(p.created_date) > new Date(pygByStore[key].created_date)) {
-        pygByStore[key] = p;
-      }
+      if (!pygByStore[key] || new Date(p.created_date) > new Date(pygByStore[key].created_date)) pygByStore[key] = p;
     });
-
     const productsByStore = {};
     allSalesReports.forEach((r) => {
+      if (!r.store_code || !r.product_name) return;
       if (!productsByStore[r.store_code]) productsByStore[r.store_code] = {};
-      const key = r.product_name || 'Producto';
-      if (!productsByStore[r.store_code][key]) productsByStore[r.store_code][key] = 0;
-      productsByStore[r.store_code][key] += r.sales_amount || 0;
+      productsByStore[r.store_code][r.product_name] = (productsByStore[r.store_code][r.product_name] || 0) + (r.sales_amount || 0);
     });
-
-    return activeStores.map((store) => {
-      const storeSales = (salesByStore[store.id] || []).filter((d) => {
-        try { return isWithinInterval(parseISO(d.date), { start: monthStart, end: monthEnd }); } catch { return false; }
-      });
+    const dayOfMonth = now.getDate();
+    const daysInMonth = endOfMonth(now).getDate();
+    return activeStores.map((store, i) => {
+      const storeSales = salesByStore[store.id] || [];
       const totalSales = storeSales.reduce((s, d) => s + (d.total_sales || 0), 0);
+      const totalTickets = storeSales.reduce((s, d) => s + (d.total_tickets || 0), 0);
+      const totalTx = storeSales.reduce((s, d) => s + (d.total_transactions || 0), 0);
       const budget = budgetByStore[store.id];
       const monthlyBudget = budget?.sales_budget || 0;
-      const dayOfMonth = now.getDate();
-      const daysInMonth = monthEnd.getDate();
-      const budgetUntilToday = monthlyBudget > 0 ? monthlyBudget / daysInMonth * dayOfMonth : 0;
-      const gap = totalSales - budgetUntilToday;
+      const budgetUntilToday = monthlyBudget > 0 ? (monthlyBudget / daysInMonth) * dayOfMonth : 0;
+      const gap = budgetUntilToday > 0 ? totalSales - budgetUntilToday : null;
       const projPct = budgetUntilToday > 0 ? (totalSales / budgetUntilToday) * 100 : null;
-      const monthProjection = dayOfMonth > 0 ? (totalSales / dayOfMonth) * daysInMonth : 0;
-
+      const avgTicket = totalTickets > 0 ? totalSales / totalTickets : 0;
       const prods = productsByStore[store.code] || {};
       const top3 = Object.entries(prods).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, amount]) => ({ name, amount }));
-
       const pyg = pygByStore[store.code] || null;
-      const lastDay = storeSales.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-
-      return { store, totalSales, monthlyBudget, gap, projPct, monthProjection, top3, pyg, lastDay, budgetUntilToday };
+      const color = STORE_COLORS[i % STORE_COLORS.length];
+      const shortName = store.code || store.name?.slice(0, 8) || `T${i + 1}`;
+      return { store, totalSales, totalTickets, totalTx, monthlyBudget, budgetUntilToday, gap, projPct, avgTicket, top3, pyg, color, shortName };
     });
-  }, [storeEntities, allDailySales, allBudgets, allPYG, allSalesReports]);
+  }, [storeEntities, allDailySales, allBudgets, allPYG, allSalesReports, startDate, endDate]);
 
-  if (!storeEntities.length) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-6 h-6 border-2 border-rose-200 border-t-rose-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const ventasChartData = useMemo(() => storeData.map((d) => ({
+    name: d.shortName,
+    value: ventasTab === 'ventas' ? d.totalSales : ventasTab === 'proyeccion' ? (d.projPct ?? 0) : (d.gap ?? 0),
+    color: ventasTab === 'brecha' ? (d.gap >= 0 ? '#10b981' : '#e11d48')
+      : ventasTab === 'proyeccion' ? ((d.projPct ?? 0) >= 100 ? '#10b981' : (d.projPct ?? 0) >= 80 ? '#f59e0b' : '#e11d48')
+      : d.color,
+  })), [storeData, ventasTab]);
+
+  const pygChartData = useMemo(() =>
+    storeData.filter((d) => d.pyg?.margen_ebitda != null).map((d) => ({
+      name: d.shortName,
+      value: parseFloat((d.pyg.margen_ebitda * 100).toFixed(1)),
+      color: d.pyg.margen_ebitda > 0.15 ? '#10b981' : d.pyg.margen_ebitda > 0.05 ? '#f59e0b' : '#e11d48',
+    })), [storeData]);
+
+  const ticketChartData = useMemo(() => storeData.map((d) => ({ name: d.shortName, value: Math.round(d.avgTicket), color: d.color })), [storeData]);
+  const txChartData = useMemo(() => storeData.map((d) => ({ name: d.shortName, value: d.totalTx, color: d.color })), [storeData]);
+
+  const topProductsData = useMemo(() => {
+    const agg = {};
+    allSalesReports.forEach((r) => { if (!r.product_name) return; agg[r.product_name] = (agg[r.product_name] || 0) + (r.sales_amount || 0); });
+    return Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([name, value], i) => ({
+      name: name.length > 24 ? name.slice(0, 24) + '…' : name,
+      value,
+      color: STORE_COLORS[i % STORE_COLORS.length],
+    }));
+  }, [allSalesReports]);
+
+  const ventasFormatter = ventasTab === 'proyeccion' ? fmtPct : fmtM;
+  const noPYGMsg = 'Sin reportes PYG cargados';
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-5">
+
+      {/* HEADER + CALENDAR */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex items-center gap-3 px-1">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'rgba(194,24,117,0.10)', border: '1px solid rgba(194,24,117,0.15)' }}>
-          <BarChart3 style={{ color: '#C21875', width: 15, height: 15 }} />
+        className="rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+        style={{
+          background: 'rgba(255,255,255,0.92)',
+          backdropFilter: 'blur(40px)',
+          border: '1px solid rgba(255,255,255,0.7)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,1)',
+        }}>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(194,24,117,0.10)', border: '1px solid rgba(194,24,117,0.15)' }}>
+            <Activity style={{ color: '#C21875', width: 15, height: 15 }} />
+          </div>
+          <div>
+            <h2 className="text-[15px] font-black text-slate-700" style={{ letterSpacing: '-0.03em' }}>Rendimiento de Tiendas</h2>
+            <p className="text-[10px] text-slate-400 font-medium">
+              {storeData.length} tiendas &middot; {format(startDate, 'dd MMM', { locale: es })} – {format(endDate, 'dd MMM yyyy', { locale: es })}
+            </p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-lg font-black text-slate-700" style={{ letterSpacing: '-0.03em' }}>
-            Rendimiento de Tiendas
-          </h2>
-          <p className="text-[11px] text-slate-400 font-medium">
-            {format(now, 'MMMM yyyy')} &middot; {storeData.length} tiendas activas
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 ml-auto px-2.5 py-1.5 rounded-xl"
+
+        <Popover open={calOpen} onOpenChange={setCalOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2 text-[11px] font-semibold border-rose-200 hover:border-rose-400 rounded-xl">
+              <Calendar style={{ width: 13, height: 13, color: '#C21875' }} />
+              {format(startDate, 'dd MMM', { locale: es })} {'->'} {format(endDate, 'dd MMM', { locale: es })}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-4" align="end">
+            <p className="text-[11px] font-bold text-slate-500 mb-2">{pickingEnd ? 'Fecha fin' : 'Fecha inicio'}</p>
+            <CalendarComponent
+              mode="single"
+              selected={pickingEnd ? endDate : startDate}
+              onSelect={(d) => {
+                if (!d) return;
+                if (!pickingEnd) { setStartDate(d); setPickingEnd(true); }
+                else { setEndDate(d); setPickingEnd(false); setCalOpen(false); }
+              }}
+              locale={es}
+              className="rounded-md border"
+            />
+            <div className="flex gap-2 mt-3">
+              {[
+                { label: 'Hoy', fn: () => { setStartDate(now); setEndDate(now); } },
+                { label: 'Este mes', fn: () => { setStartDate(startOfMonth(now)); setEndDate(now); } },
+                { label: 'Mes ant.', fn: () => { const p = subMonths(now, 1); setStartDate(startOfMonth(p)); setEndDate(endOfMonth(p)); } },
+              ].map(({ label, fn }) => (
+                <Button key={label} size="sm" variant="outline" className="flex-1 text-[10px]"
+                  onClick={() => { fn(); setCalOpen(false); setPickingEnd(false); }}>
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
           style={{ background: 'rgba(194,24,117,0.06)', border: '1px solid rgba(194,24,117,0.12)' }}>
           <Sparkles style={{ color: '#C21875', width: 11, height: 11 }} />
           <span className="text-[10px] font-semibold" style={{ color: '#C21875' }}>Nova activo</span>
         </div>
       </motion.div>
 
-      {/* Store Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {storeData.map(({ store, totalSales, monthlyBudget, gap, projPct, monthProjection, top3, pyg, lastDay, budgetUntilToday }, i) => {
-          const gapColor = gap >= 0 ? '#059669' : '#e11d48';
-          const projColor = projPct == null ? '#94a3b8' : projPct >= 100 ? '#059669' : projPct >= 80 ? '#f59e0b' : '#e11d48';
-          const projLabel = projPct == null ? '—' : `${projPct.toFixed(0)}%`;
-          const pptPct = budgetUntilToday > 0 ? Math.min((totalSales / budgetUntilToday) * 100, 150) : 0;
-          const ebitda = pyg?.margen_ebitda != null ? `${(pyg.margen_ebitda * 100).toFixed(1)}%` : null;
-          const ebitdaColor = pyg?.margen_ebitda > 0.15 ? '#059669' : pyg?.margen_ebitda > 0.05 ? '#f59e0b' : '#e11d48';
+      {/* VENTAS / PROYECCION / BRECHA */}
+      <Section icon={TrendingUp} title="Ventas por Tienda" subtitle="Comparativa entre tiendas" color="#C21875">
+        <div className="flex items-center gap-1.5 mb-4">
+          <Tab label="Ventas" active={ventasTab === 'ventas'} onClick={() => setVentasTab('ventas')} />
+          <Tab label="Proyeccion %" active={ventasTab === 'proyeccion'} onClick={() => setVentasTab('proyeccion')} />
+          <Tab label="Brecha" active={ventasTab === 'brecha'} onClick={() => setVentasTab('brecha')} />
+        </div>
+        {ventasChartData.length === 0
+          ? <EmptyState />
+          : (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={ventasChartData} margin={{ top: 14, right: 10, left: 0, bottom: 0 }} barCategoryGap="28%">
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={ventasTab === 'proyeccion' ? (v) => `${v}%` : fmtM} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={52} />
+                <Tooltip content={<ChartTooltip valueFormatter={ventasFormatter} />} cursor={{ fill: 'rgba(194,24,117,0.04)' }} />
+                <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={56}>
+                  {ventasChartData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                  <LabelList dataKey="value" position="top" formatter={ventasFormatter} style={{ fontSize: 9, fontWeight: 700, fill: '#64748b' }} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )
+        }
+      </Section>
 
-          return (
-            <motion.div
-              key={store.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
-              className="rounded-2xl overflow-hidden"
-              style={{
-                background: 'rgba(255,255,255,0.92)',
-                backdropFilter: 'blur(40px) saturate(160%)',
-                border: '1px solid rgba(255,255,255,0.7)',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,1)',
-              }}>
+      {/* PYG + TICKET */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Section icon={DollarSign} title="P&amp;G · EBITDA por tienda" subtitle="Ultimo reporte cargado" color="#10b981">
+          {pygChartData.length === 0
+            ? <EmptyState msg={noPYGMsg} />
+            : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={pygChartData} margin={{ top: 14, right: 10, left: 0, bottom: 0 }} barCategoryGap="28%">
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={36} />
+                  <Tooltip content={<ChartTooltip valueFormatter={(v) => `${v}%`} />} cursor={{ fill: 'rgba(16,185,129,0.04)' }} />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={52}>
+                    {pygChartData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    <LabelList dataKey="value" position="top" formatter={(v) => `${v}%`} style={{ fontSize: 9, fontWeight: 700, fill: '#64748b' }} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )
+          }
+        </Section>
 
-              {/* Store header */}
-              <div className="px-4 pt-4 pb-3 flex items-center justify-between"
-                style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">{store.code}</p>
-                  <p className="text-[13px] font-black text-slate-700 leading-tight" style={{ letterSpacing: '-0.02em' }}>
-                    {store.name}
-                  </p>
-                </div>
-                {lastDay &&
-                  <div className="text-right">
-                    <p className="text-[9px] text-slate-400 font-medium">Hoy</p>
-                    <p className="text-[11px] font-bold text-slate-600">{fmtM(lastDay.total_sales)}</p>
-                  </div>
-                }
-              </div>
-
-              <div className="p-4 space-y-3">
-                {/* Ventas vs PPT */}
-                <div className="rounded-xl p-3"
-                  style={{ background: 'rgba(194,24,117,0.04)', border: '1px solid rgba(194,24,117,0.08)' }}>
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">Ventas del Mes</p>
-                    <span className="text-[9px] font-semibold" style={{ color: '#C21875' }}>
-                      {pptPct > 0 ? `${pptPct.toFixed(0)}% del PPT` : '—'}
-                    </span>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <p className="text-[20px] font-black text-slate-800 leading-none tabular-nums" style={{ letterSpacing: '-0.03em' }}>
-                      {fmtM(totalSales)}
-                    </p>
-                    <div className="text-right">
-                      <p className="text-[9px] text-slate-400">Meta: {fmtM(budgetUntilToday)}</p>
-                      <GapChip value={gap} />
-                    </div>
-                  </div>
-                  <MiniBar pct={pptPct} color="#C21875" />
-                </div>
-
-                {/* Proyeccion + Brecha */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-xl p-2.5"
-                    style={{ background: `${projColor}0a`, border: `1px solid ${projColor}18` }}>
-                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] mb-1" style={{ color: `${projColor}99` }}>Proyeccion</p>
-                    <p className="text-[16px] font-black leading-none tabular-nums" style={{ color: projColor }}>{projLabel}</p>
-                    <p className="text-[8.5px] text-slate-400 mt-0.5 font-medium">{fmtM(monthProjection)}</p>
-                  </div>
-                  <div className="rounded-xl p-2.5"
-                    style={{ background: `${gapColor}0a`, border: `1px solid ${gapColor}18` }}>
-                    <p className="text-[8px] font-bold uppercase tracking-[0.12em] mb-1" style={{ color: `${gapColor}99` }}>Brecha mes</p>
-                    <p className="text-[13px] font-black leading-none tabular-nums" style={{ color: gapColor }}>
-                      {gap >= 0 ? '+' : ''}{fmtM(gap)}
-                    </p>
-                    <p className="text-[8.5px] text-slate-400 mt-0.5 font-medium">vs PPT acum.</p>
-                  </div>
-                </div>
-
-                {/* Top 3 Productos */}
-                {top3.length > 0 &&
-                  <div className="rounded-xl p-3"
-                    style={{ background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.10)' }}>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-2 flex items-center gap-1">
-                      <Package style={{ width: 9, height: 9 }} />
-                      Top 3 Productos
-                    </p>
-                    <div className="space-y-1.5">
-                      {top3.map((p, idx) => {
-                        const maxAmt = top3[0].amount || 1;
-                        const barPct = (p.amount / maxAmt) * 100;
-                        const colors = ['#6366f1', '#8b5cf6', '#a78bfa'];
-                        return (
-                          <div key={p.name}>
-                            <div className="flex items-center justify-between mb-0.5">
-                              <p className="text-[9.5px] font-semibold text-slate-600 truncate flex-1 pr-2">
-                                <span className="text-[8px] text-slate-400 mr-1">{idx + 1}.</span>
-                                {p.name.length > 22 ? p.name.slice(0, 22) + '…' : p.name}
-                              </p>
-                              <p className="text-[9px] font-bold tabular-nums flex-shrink-0" style={{ color: colors[idx] }}>{fmtM(p.amount)}</p>
-                            </div>
-                            <div className="w-full h-1 rounded-full" style={{ background: `${colors[idx]}18` }}>
-                              <div className="h-1 rounded-full" style={{ width: `${barPct}%`, background: colors[idx] }} />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                }
-
-                {/* PYG */}
-                {pyg &&
-                  <div className="rounded-xl p-3"
-                    style={{ background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.10)' }}>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 mb-2 flex items-center gap-1">
-                      <DollarSign style={{ width: 9, height: 9 }} />
-                      {'P&G'} &middot; {pyg.period || 'Ultimo reporte'}
-                    </p>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {[
-                        { label: 'EBITDA', value: ebitda, color: ebitdaColor },
-                        { label: 'Costo', value: pyg.cost_real != null ? `${(pyg.cost_real * 100).toFixed(1)}%` : null, color: pyg.cost_real < 0.35 ? '#059669' : '#e11d48' },
-                        { label: 'Personal', value: pyg.costo_personal != null ? `${(pyg.costo_personal * 100).toFixed(1)}%` : null, color: '#7c3aed' },
-                      ].filter(x => x.value).map(({ label, value, color }) => (
-                        <div key={label} className="rounded-lg p-1.5 text-center"
-                          style={{ background: `${color}0c`, border: `1px solid ${color}18` }}>
-                          <p className="text-[7.5px] text-slate-400 font-medium mb-0.5">{label}</p>
-                          <p className="text-[11px] font-black tabular-nums" style={{ color }}>{value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                }
-              </div>
-            </motion.div>
-          );
-        })}
+        <Section icon={CreditCard} title="Ticket Promedio" subtitle="Por tienda en el periodo" color="#6366f1">
+          {ticketChartData.every((d) => d.value === 0)
+            ? <EmptyState />
+            : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={ticketChartData} margin={{ top: 14, right: 10, left: 0, bottom: 0 }} barCategoryGap="28%">
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tickFormatter={fmtM} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={46} />
+                  <Tooltip content={<ChartTooltip valueFormatter={fmtM} />} cursor={{ fill: 'rgba(99,102,241,0.04)' }} />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={52}>
+                    {ticketChartData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    <LabelList dataKey="value" position="top" formatter={fmtM} style={{ fontSize: 9, fontWeight: 700, fill: '#64748b' }} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )
+          }
+        </Section>
       </div>
 
-      {!storeData.length &&
-        <div className="text-center py-16 text-slate-400 text-sm">
-          No hay datos de tiendas con presupuesto activo para este mes.
-        </div>
-      }
+      {/* TRANSACCIONES + PARTICIPACION */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Section icon={Activity} title="Transacciones" subtitle="Total por tienda en el periodo" color="#0ea5e9">
+          {txChartData.every((d) => d.value === 0)
+            ? <EmptyState />
+            : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={txChartData} margin={{ top: 14, right: 10, left: 0, bottom: 0 }} barCategoryGap="28%">
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={36} />
+                  <Tooltip content={<ChartTooltip valueFormatter={(v) => v.toLocaleString('es-CO')} />} cursor={{ fill: 'rgba(14,165,233,0.04)' }} />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={52}>
+                    {txChartData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    <LabelList dataKey="value" position="top" style={{ fontSize: 9, fontWeight: 700, fill: '#64748b' }} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )
+          }
+        </Section>
+
+        <Section icon={ShoppingBag} title="Participacion de Productos" subtitle="Top 8 por ventas totales" color="#f59e0b">
+          {topProductsData.length === 0
+            ? <EmptyState msg="Sin datos de productos" />
+            : (
+              <div className="space-y-2.5">
+                {topProductsData.map((p, i) => {
+                  const maxVal = topProductsData[0].value || 1;
+                  const pct = (p.value / maxVal) * 100;
+                  return (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-[10px] font-semibold text-slate-600 truncate flex-1 pr-2">
+                          <span className="text-[9px] text-slate-300 mr-1">{i + 1}.</span>
+                          {p.name}
+                        </span>
+                        <span className="text-[10px] font-bold tabular-nums flex-shrink-0" style={{ color: p.color }}>{fmtM(p.value)}</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full" style={{ background: `${p.color}18` }}>
+                        <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: p.color }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          }
+        </Section>
+      </div>
+
     </div>
   );
 }
