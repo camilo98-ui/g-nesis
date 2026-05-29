@@ -173,17 +173,22 @@ export default function GerenteDashboard() {
 
     const interval = { start: startDate, end: endDate };
 
-    // group daily sales by store_id (UUID match)
-    const salesByStoreId = {};
+    // DailySales.store_id stores the store CODE string (e.g. "BTA 56"), not UUID
+    const salesByCode = {};
     allDailySales.forEach((d) => {
       try { if (!isWithinInterval(parseISO(d.date), interval)) return; } catch { return; }
-      if (!salesByStoreId[d.store_id]) salesByStoreId[d.store_id] = [];
-      salesByStoreId[d.store_id].push(d);
+      const k = (d.store_id || '').trim();
+      if (!salesByCode[k]) salesByCode[k] = [];
+      salesByCode[k].push(d);
     });
 
-    // budget by store_id
+    // budget — may use UUID or code; build lookup for both
     const budgetByStoreId = {};
-    allBudgets.forEach((b) => { budgetByStoreId[b.store_id] = b; });
+    const budgetByCode = {};
+    allBudgets.forEach((b) => {
+      budgetByStoreId[b.store_id] = b;
+      budgetByCode[(b.store_id || '').trim()] = b;
+    });
 
     // PYG by store_code (latest per store)
     const pygByCode = {};
@@ -205,14 +210,14 @@ export default function GerenteDashboard() {
     const daysInMonth = endOfMonth(now).getDate();
 
     return activeStores.map((store, i) => {
-      const storeSales = salesByStoreId[store.id] || [];
+      const storeSales = salesByCode[(store.code || '').trim()] || salesByCode[store.id] || [];
       const totalSales = storeSales.reduce((s, d) => s + (d.total_sales || 0), 0);
       const totalTickets = storeSales.reduce((s, d) => s + (d.total_tickets || 0), 0);
       const totalTx = storeSales.reduce((s, d) => s + (d.total_transactions || 0), 0);
       const totalSuggested = storeSales.reduce((s, d) => s + (d.total_suggested || 0), 0);
       const totalTakeaway = storeSales.reduce((s, d) => s + (d.total_takeaway || 0), 0);
 
-      const budget = budgetByStoreId[store.id];
+      const budget = budgetByStoreId[store.id] || budgetByCode[(store.code || '').trim()];
       const monthlyBudget = budget?.sales_budget || 0;
       const budgetUntilToday = monthlyBudget > 0 ? (monthlyBudget / daysInMonth) * dayOfMonth : 0;
       const gap = budgetUntilToday > 0 ? totalSales - budgetUntilToday : null;
