@@ -1510,7 +1510,7 @@ export default function HomeWorkspace({
           }
 
           {/* ── CLIMA BANNER ── */}
-          <motion.div
+          {!isGerente && <motion.div
             id="climate-section"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1526,10 +1526,8 @@ export default function HomeWorkspace({
               const isHot = temp > 26;
               const isCold = temp < 18;
               const accentColor = isHot ? '#f97316' : isCold ? '#6366f1' : '#38bdf8';
-              // Impacto estimado en ventas por temperatura (helados = más ventas con calor)
               const impactLabel = isHot ? '🔥 +15–25% ventas est.' : isCold ? '❄️ −10–15% ventas est.' : '✅ Condición ideal';
               const impactColor = isHot ? '#f97316' : isCold ? '#6366f1' : '#10b981';
-              // Tendencia de temperatura
               const avgTemp7 = tempData.length > 0 ? tempData.reduce((a, b) => a + b, 0) / tempData.length : 0;
               const tempTrend = temp != null && avgTemp7 > 0 ? temp - avgTemp7 : 0;
               return (
@@ -1555,7 +1553,6 @@ export default function HomeWorkspace({
                         style={{ height: `${pct}%`, background: isLast ? accentColor : `${accentColor}28` }} />);
                     })}
                   </div>
-                  {/* Impacto en ventas */}
                   <div className="rounded-lg px-2 py-1.5 flex items-center gap-1.5" style={{ background: `${impactColor}10`, border: `1px solid ${impactColor}20` }}>
                     <span className="text-[8.5px] font-bold flex-1" style={{ color: impactColor }}>{impactLabel}</span>
                   </div>
@@ -1563,17 +1560,15 @@ export default function HomeWorkspace({
                 </div>);
             })()}
 
-            {/* Card 2 — Lluvia + días afectados + alerta operativa */}
+            {/* Card 2 — Lluvia */}
             {(() => {
               const rainData = weatherLast7.map((d) => d.precipitation || 0);
               const totalRain = rainData.reduce((s, v) => s + v, 0);
               const todayRain = latestWeather?.precipitation ?? 0;
               const rainLevel = totalRain > 20 ? 'Alta' : totalRain > 5 ? 'Moderada' : 'Baja';
               const rainColor = totalRain > 20 ? '#6366f1' : totalRain > 5 ? '#38bdf8' : '#94a3b8';
-              // Días con lluvia significativa
               const rainyDays = rainData.filter((v) => v >= 3).length;
               const dryDays = rainData.length - rainyDays;
-              // Correlación lluvia → tráfico (lluvia = menos tráfico peatonal)
               const trafficAlert = todayRain >= 5 ? { msg: '⚠️ Flujo peatonal reducido', color: '#ef4444' } :
               todayRain >= 2 ? { msg: '🌂 Tráfico moderado', color: '#f59e0b' } :
               { msg: '🚶 Buen tráfico esperado', color: '#10b981' };
@@ -1597,7 +1592,6 @@ export default function HomeWorkspace({
                         style={{ height: `${pct}%`, background: isLast ? rainColor : `${rainColor}30` }} />);
                     })}
                   </div>
-                  {/* Alerta de tráfico/operativa */}
                   <div className="rounded-lg px-2 py-1.5 flex items-center gap-1.5" style={{ background: `${trafficAlert.color}10`, border: `1px solid ${trafficAlert.color}20` }}>
                     <span className="text-[8.5px] font-bold flex-1" style={{ color: trafficAlert.color }}>{trafficAlert.msg}</span>
                   </div>
@@ -1608,7 +1602,7 @@ export default function HomeWorkspace({
                 </div>);
             })()}
 
-            {/* Card 3 — Condición climática + score de venta ideal */}
+            {/* Card 3 — Condición climática */}
             {(() => {
               const humidity = latestWeather?.humidity ?? 0;
               const precip = latestWeather?.precipitation ?? 0;
@@ -1621,10 +1615,8 @@ export default function HomeWorkspace({
               { label: 'Soleado', color: '#f97316', val: sunny },
               { label: 'Nublado', color: '#94a3b8', val: cloudy },
               { label: 'Lluvioso', color: '#6366f1', val: rainy }];
-
               const circ = 2 * Math.PI * 16;
               let cumulative = 0;
-              // Score de condición ideal para ventas de helados (calor + sin lluvia = ideal)
               const salesScore = Math.max(0, Math.min(100, Math.round(
                 (temp > 0 ? Math.min((temp - 10) / 20 * 60, 60) : 0) + (
                 precip < 1 ? 30 : precip < 3 ? 15 : 0) + (
@@ -1666,7 +1658,6 @@ export default function HomeWorkspace({
                       )}
                     </div>
                   </div>
-                  {/* Score de venta ideal */}
                   <div className="rounded-lg px-2 py-1.5" style={{ background: `${scoreColor}10`, border: `1px solid ${scoreColor}20` }}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[8.5px] font-bold" style={{ color: scoreColor }}>{scoreLabel}</span>
@@ -1679,7 +1670,7 @@ export default function HomeWorkspace({
                 </div>);
             })()}
 
-          </motion.div>
+          </motion.div>}
 
           <div className="flex items-center justify-center gap-2 mt-8 mb-3">
             <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, transparent, rgba(194,24,117,0.12))' }} />

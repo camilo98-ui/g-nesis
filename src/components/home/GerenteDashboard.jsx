@@ -122,7 +122,7 @@ export default function GerenteDashboard() {
       const lastDay = storeSales.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 
       return { store, totalSales, monthlyBudget, gap, projPct, monthProjection, top3, pyg, lastDay, budgetUntilToday };
-    }).filter((d) => d.monthlyBudget > 0 || d.totalSales > 0);
+    });
   }, [storeEntities, allDailySales, allBudgets, allPYG, allSalesReports]);
 
   if (!storeEntities.length) {
