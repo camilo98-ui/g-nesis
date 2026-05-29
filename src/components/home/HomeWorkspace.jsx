@@ -924,9 +924,7 @@ export default function HomeWorkspace({
           </motion.div>
 
           {/* ── GERENTE DASHBOARD ── */}
-          {isGerente &&
-          <GerenteDashboard />
-          }
+          {isGerente && <GerenteDashboard />}
 
           {/* ── HERO SECTION: Premium KPI Cards + Nova AI Strip ── */}
           {!isGerente &&
