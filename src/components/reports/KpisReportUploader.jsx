@@ -153,13 +153,17 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       setProgress({ current: 0, total: records.length });
 
       try {
-        const chunkSize = 50;
+        const chunkSize = 20;
         let totalInserted = 0;
         for (let i = 0; i < records.length; i += chunkSize) {
           const chunk = records.slice(i, i + chunkSize);
           await base44.entities.SalesReport.bulkCreate(chunk);
           totalInserted += chunk.length;
           setProgress({ current: totalInserted, total: records.length });
+          // Pausa entre chunks para evitar rate limit
+          if (i + chunkSize < records.length) {
+            await new Promise(r => setTimeout(r, 600));
+          }
         }
         setStatus('success');
         setMessage(`✅ ${totalInserted} productos cargados correctamente.`);
