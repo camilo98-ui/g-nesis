@@ -302,17 +302,11 @@ export default function RadarCompetitivo() {
     base44.auth.me().then(u => setCurrentUserId(u?.id)).catch(() => {});
   }, []);
 
-  const { data: allRecords = [] } = useQuery({
-    queryKey: ['competitiveRecords'],
-    queryFn: () => base44.entities.CompetitiveRecord.list('-date', 500)
+  const { data: records = [] } = useQuery({
+    queryKey: ['competitiveRecords', currentUserId],
+    queryFn: () => base44.entities.CompetitiveRecord.filter({ created_by_id: currentUserId }, '-date', 500),
+    enabled: !!currentUserId
   });
-
-  // Filtrar solo los registros del usuario actual
-  // Si currentUserId aún no cargó, retornar array vacío para evitar mostrar datos de otros
-  const records = useMemo(() => {
-    if (!currentUserId) return [];
-    return allRecords.filter(r => r.created_by_id === currentUserId);
-  }, [allRecords, currentUserId]);
 
   const remove = useMutation({ mutationFn: id => base44.entities.CompetitiveRecord.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
   const update = useMutation({ mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
