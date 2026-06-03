@@ -308,9 +308,9 @@ export default function RadarCompetitivo() {
     enabled: !!currentUserId
   });
 
-  const remove = useMutation({ mutationFn: id => base44.entities.CompetitiveRecord.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
-  const update = useMutation({ mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
-  const create = useMutation({ mutationFn: data => base44.entities.CompetitiveRecord.create(data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['competitiveRecords'] }); setModalOpen(false); } });
+  const remove = useMutation({ mutationFn: id => base44.entities.CompetitiveRecord.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords', currentUserId] }) });
+  const update = useMutation({ mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords', currentUserId] }) });
+  const create = useMutation({ mutationFn: data => base44.entities.CompetitiveRecord.create(data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['competitiveRecords', currentUserId] }); setModalOpen(false); } });
 
   const brandMap = useMemo(() => {
     const map = {};
