@@ -149,30 +149,33 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       setMessage(`📊 ${records.length} filas · ${withUnits} con unidades (col: ${unidadesCol || 'NO ENCONTRADA'}) · procesando...`);
 
       setStatus('uploading');
-      setMessage(`Procesando ${records.length} registros en servidor...`);
+      setMessage(`Eliminando datos anteriores del mismo período...`);
       setProgress({ current: 0, total: records.length });
 
       try {
-        const chunkSize = 10;
+        // 1. Borrar registros anteriores del mismo mes/año para evitar duplicados
+        const existing = await base44.entities.SalesReport.filter({ month: selectedMonth, year: selectedYear });
+        if (existing && existing.length > 0) {
+          const delChunk = 25;
+          for (let i = 0; i < existing.length; i += delChunk) {
+            const ids = existing.slice(i, i + delChunk).map(r => r.id);
+            await Promise.all(ids.map(id => base44.entities.SalesReport.delete(id)));
+            await new Promise(r => setTimeout(r, 400));
+          }
+        }
+
+        // 2. Insertar nuevos registros en chunks grandes
+        const chunkSize = 50;
         let totalInserted = 0;
         for (let i = 0; i < records.length; i += chunkSize) {
           const chunk = records.slice(i, i + chunkSize);
-          let retries = 3;
-          while (retries > 0) {
-            try {
-              await base44.entities.SalesReport.bulkCreate(chunk);
-              break;
-            } catch (e) {
-              retries--;
-              if (retries === 0) throw e;
-              // Esperar más tiempo si hay rate limit
-              await new Promise(r => setTimeout(r, 3000));
-            }
-          }
+          await base44.entities.SalesReport.bulkCreate(chunk);
           totalInserted += chunk.length;
           setProgress({ current: totalInserted, total: records.length });
-          setMessage(`Procesando... ${totalInserted}/${records.length} registros`);
-          await new Promise(r => setTimeout(r, 1500));
+          setMessage(`Subiendo... ${totalInserted}/${records.length} registros`);
+          if (i + chunkSize < records.length) {
+            await new Promise(r => setTimeout(r, 300));
+          }
         }
         setStatus('success');
         setMessage(`✅ ${totalInserted} productos cargados correctamente.`);
