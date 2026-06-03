@@ -1,0 +1,26 @@
+{
+  "name": "Store",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "C\u00f3digo de la tienda (ej: BTA 11)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre completo de la tienda"
+    },
+    "location": {
+      "type": "string",
+      "description": "Ubicaci\u00f3n/Centro comercial"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "code",
+    "name"
+  ]
+}

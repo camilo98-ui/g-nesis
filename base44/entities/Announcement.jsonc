@@ -1,0 +1,50 @@
+{
+  "name": "Announcement",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo del anuncio"
+    },
+    "content": {
+      "type": "string",
+      "description": "Contenido del anuncio"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "importante",
+        "urgente"
+      ],
+      "default": "normal",
+      "description": "Prioridad del anuncio"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Nombre del autor"
+    },
+    "author_role": {
+      "type": "string",
+      "description": "Rol del autor"
+    },
+    "target_stores": {
+      "type": "string",
+      "description": "Tiendas destinatarias (JSON array o 'todas')"
+    },
+    "expires_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de expiraci\u00f3n"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "title",
+    "content",
+    "author_name"
+  ]
+}

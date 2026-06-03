@@ -1,0 +1,59 @@
+{
+  "name": "ShiftRequest",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string"
+    },
+    "cashier_id": {
+      "type": "string"
+    },
+    "cashier_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "shift_change",
+        "day_off",
+        "permission",
+        "vacation"
+      ],
+      "description": "Tipo de solicitud"
+    },
+    "request_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha solicitada"
+    },
+    "original_shift_id": {
+      "type": "string",
+      "description": "ID del turno original (si aplica)"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "reviewed_by": {
+      "type": "string"
+    },
+    "reviewed_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "store_id",
+    "cashier_id",
+    "type",
+    "request_date"
+  ]
+}

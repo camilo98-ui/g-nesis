@@ -1,0 +1,36 @@
+{
+  "name": "FreezerHistory",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del snapshot"
+    },
+    "snapshot": {
+      "type": "string",
+      "description": "JSON string del estado de la nevera"
+    },
+    "filled_slots": {
+      "type": "number",
+      "description": "Cantidad de slots llenos"
+    },
+    "changes_count": {
+      "type": "number",
+      "description": "Cantidad de cambios detectados"
+    },
+    "created_by_user": {
+      "type": "string",
+      "description": "Usuario que gener\u00f3 el historial"
+    }
+  },
+  "required": [
+    "store_id",
+    "date",
+    "snapshot"
+  ]
+}

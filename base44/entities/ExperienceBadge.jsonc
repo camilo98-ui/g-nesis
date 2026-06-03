@@ -1,0 +1,43 @@
+{
+  "name": "ExperienceBadge",
+  "type": "object",
+  "properties": {
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del anfitri\u00f3n"
+    },
+    "badge_type": {
+      "type": "string",
+      "enum": [
+        "primer_excelente",
+        "racha_5",
+        "racha_10",
+        "racha_20",
+        "maestro_experiencia",
+        "cien_encuestas",
+        "perfecto_dia",
+        "estrella_servicio",
+        "embajador_popsy"
+      ],
+      "description": "Tipo de insignia"
+    },
+    "earned_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha en que se gan\u00f3"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descripci\u00f3n del logro"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji o \u00edcono"
+    }
+  },
+  "required": [
+    "cashier_id",
+    "badge_type",
+    "earned_date"
+  ]
+}

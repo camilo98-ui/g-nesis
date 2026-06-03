@@ -1,0 +1,56 @@
+{
+  "name": "CashierGoal",
+  "type": "object",
+  "properties": {
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del cajero"
+    },
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "month": {
+      "type": "number",
+      "description": "Mes de la meta (1-12)"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o de la meta"
+    },
+    "sales_goal": {
+      "type": "number",
+      "description": "Meta de ventas"
+    },
+    "tickets_goal": {
+      "type": "number",
+      "description": "Meta de ticket promedio"
+    },
+    "transactions_goal": {
+      "type": "number",
+      "description": "Meta de transacciones"
+    },
+    "suggested_goal": {
+      "type": "number",
+      "description": "Meta de sugeridos"
+    },
+    "custom_goal_name": {
+      "type": "string",
+      "description": "Nombre de meta personalizada"
+    },
+    "custom_goal_value": {
+      "type": "number",
+      "description": "Valor de meta personalizada"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas del administrador"
+    }
+  },
+  "required": [
+    "cashier_id",
+    "store_id",
+    "month",
+    "year"
+  ]
+}

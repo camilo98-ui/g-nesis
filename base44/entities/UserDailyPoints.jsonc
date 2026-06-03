@@ -1,0 +1,68 @@
+{
+  "name": "UserDailyPoints",
+  "type": "object",
+  "properties": {
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del usuario"
+    },
+    "cashier_name": {
+      "type": "string",
+      "description": "Nombre del usuario"
+    },
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha"
+    },
+    "experience_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Puntos por experiencia del d\u00eda"
+    },
+    "suggested_sales_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Puntos por venta sugestiva del d\u00eda"
+    },
+    "total_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Puntos totales del d\u00eda"
+    },
+    "excellent_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Cantidad de excelentes"
+    },
+    "normal_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Cantidad de normales"
+    },
+    "bad_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Cantidad de malas"
+    },
+    "total_surveys": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de encuestas del d\u00eda"
+    },
+    "consecutive_days_streak": {
+      "type": "number",
+      "default": 0,
+      "description": "Racha de d\u00edas consecutivos con buen puntaje"
+    }
+  },
+  "required": [
+    "cashier_id",
+    "store_id",
+    "date"
+  ]
+}

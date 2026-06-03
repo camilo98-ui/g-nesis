@@ -1,0 +1,60 @@
+{
+  "name": "CashierBadge",
+  "type": "object",
+  "properties": {
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del cajero"
+    },
+    "badge_type": {
+      "type": "string",
+      "enum": [
+        "top_seller",
+        "streak_7",
+        "streak_30",
+        "perfect_day",
+        "team_player",
+        "rising_star",
+        "goal_crusher",
+        "consistent",
+        "ticket_master",
+        "suggested_king",
+        "speed_demon",
+        "customer_favorite",
+        "early_bird",
+        "night_owl",
+        "weekend_warrior",
+        "monthly_champion"
+      ],
+      "description": "Tipo de insignia"
+    },
+    "earned_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha en que se gan\u00f3"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descripci\u00f3n del logro"
+    },
+    "kpi_value": {
+      "type": "number",
+      "description": "Valor del KPI al momento de ganar la insignia"
+    },
+    "period": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "description": "Per\u00edodo en que se gan\u00f3"
+    }
+  },
+  "required": [
+    "cashier_id",
+    "badge_type",
+    "earned_date"
+  ]
+}

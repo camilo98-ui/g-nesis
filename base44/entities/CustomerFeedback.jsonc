@@ -1,0 +1,70 @@
+{
+  "name": "CustomerFeedback",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del cajero que atendi\u00f3"
+    },
+    "rating": {
+      "type": "string",
+      "enum": [
+        "excelente",
+        "normal",
+        "mala"
+      ],
+      "description": "Calificaci\u00f3n del cliente"
+    },
+    "nps_type": {
+      "type": "string",
+      "enum": [
+        "promotor",
+        "pasivo",
+        "detractor"
+      ],
+      "description": "Tipo NPS"
+    },
+    "points": {
+      "type": "number",
+      "description": "Puntos otorgados (+10, +3, -5)"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de la calificaci\u00f3n"
+    },
+    "time": {
+      "type": "string",
+      "description": "Hora de la calificaci\u00f3n"
+    },
+    "device": {
+      "type": "string",
+      "description": "N\u00famero de factura"
+    },
+    "has_suggested_sale": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si tiene venta sugerida"
+    },
+    "suggested_sale_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Monto de la venta sugerida"
+    },
+    "suggested_sale_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Puntos adicionales por venta sugerida"
+    }
+  },
+  "required": [
+    "store_id",
+    "cashier_id",
+    "rating",
+    "date"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "name": "CleaningChecklist",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del cajero"
+    },
+    "cashier_name": {
+      "type": "string",
+      "description": "Nombre del cajero"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "morning",
+        "closing",
+        "deep_weekly",
+        "deep_monthly"
+      ],
+      "description": "Tipo de checklist"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "tasks": {
+      "type": "string",
+      "description": "JSON con tareas y estados"
+    },
+    "photos": {
+      "type": "string",
+      "description": "URLs de fotos separadas por coma"
+    },
+    "cashier_signature": {
+      "type": "string",
+      "description": "Firma digital del cajero"
+    },
+    "supervisor_signature": {
+      "type": "string",
+      "description": "Firma del supervisor"
+    },
+    "completion_percentage": {
+      "type": "number",
+      "description": "Porcentaje completado"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "completed",
+        "approved"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "store_id",
+    "cashier_id",
+    "type",
+    "date"
+  ]
+}

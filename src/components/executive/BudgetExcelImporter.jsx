@@ -94,11 +94,15 @@ export default function BudgetExcelImporter({ onClose }) {
   const [parsedData, setParsedData] = useState(null);
   const [errors, setErrors] = useState([]);
   const [savedCount, setSavedCount] = useState(0);
+  const [isParsing, setIsParsing] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState(null);
 
   const now = new Date();
 
   // ── PARSEAR EXCEL ──────────────────────────────────────────────────────────
   const parseExcel = (file) => {
+    setSelectedFileName(file.name);
+    setIsParsing(true);
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -112,6 +116,7 @@ export default function BudgetExcelImporter({ onClose }) {
         const rowsRaw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
         analyzeSheet(rowsRaw, rowsWithHeaders);
       } catch (err) {
+        setIsParsing(false);
         toast.error('No se pudo leer el archivo: ' + err.message);
       }
     };
@@ -242,6 +247,7 @@ export default function BudgetExcelImporter({ onClose }) {
           }
           setParsedData({ month: detectedMonth, year: detectedYear, daysInMonth, stores: foundStores, hasDailyBreakdown: true, formatType: 'pdv-fecha' });
           setErrors(parseErrors);
+          setIsParsing(false);
           setStep('preview');
           return; // ✅ Salir - ya tenemos los datos
         }
@@ -546,6 +552,7 @@ export default function BudgetExcelImporter({ onClose }) {
     }
 
     if (foundStores.length === 0) {
+      setIsParsing(false);
       toast.error('No se encontraron tiendas ni valores en el archivo. Verifica el formato.');
       return;
     }
@@ -559,6 +566,7 @@ export default function BudgetExcelImporter({ onClose }) {
     const hasDailyBreakdown = foundStores.some(s => s.hasDailyBreakdown);
     setParsedData({ month: detectedMonth, year: detectedYear, daysInMonth, stores: foundStores, hasDailyBreakdown });
     setErrors(parseErrors);
+    setIsParsing(false);
     setStep('preview');
   };
 
@@ -737,9 +745,25 @@ export default function BudgetExcelImporter({ onClose }) {
                   if (file) parseExcel(file);
                 }}
               >
-                <Upload className="w-12 h-12 text-emerald-500/50 group-hover:text-emerald-400 mx-auto mb-3 transition-colors" />
-                <p className="text-white font-bold text-base mb-1">Arrastra el archivo aquí o haz clic</p>
-                <p className="text-slate-500 text-xs">Soporta .xlsx, .xls, .csv</p>
+                {isParsing ? (
+                <>
+                  <Loader2 className="w-12 h-12 text-emerald-400 mx-auto mb-3 animate-spin" />
+                  <p className="text-white font-bold text-base mb-1">Leyendo archivo...</p>
+                  <p className="text-emerald-400 text-xs font-medium">{selectedFileName}</p>
+                </>
+              ) : selectedFileName && !isParsing ? (
+                <>
+                  <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
+                  <p className="text-white font-bold text-base mb-1">{selectedFileName}</p>
+                  <p className="text-slate-500 text-xs">Haz clic para cambiar el archivo</p>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-12 h-12 text-emerald-500/50 group-hover:text-emerald-400 mx-auto mb-3 transition-colors" />
+                  <p className="text-white font-bold text-base mb-1">Arrastra el archivo aquí o haz clic</p>
+                  <p className="text-slate-500 text-xs">Soporta .xlsx, .xls, .csv</p>
+                </>
+              )}
                 <input
                   ref={fileInputRef}
                   type="file"

@@ -1,0 +1,76 @@
+{
+  "name": "FreezerSlot",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "row": {
+      "type": "number",
+      "description": "N\u00famero de bajada (1-7)"
+    },
+    "position": {
+      "type": "number",
+      "description": "Posici\u00f3n en la bajada (1-6)"
+    },
+    "slot_type": {
+      "type": "string",
+      "enum": [
+        "F",
+        "T"
+      ],
+      "default": "F",
+      "description": "Tipo de slot: F=Frontal, T=Trasero"
+    },
+    "flavor_name": {
+      "type": "string",
+      "description": "Nombre del sabor"
+    },
+    "flavor_type": {
+      "type": "string",
+      "enum": [
+        "helado",
+        "premium",
+        "light",
+        "especial",
+        "nuevo",
+        "vacio",
+        "gourmet",
+        "exclusivo"
+      ],
+      "default": "helado",
+      "description": "Tipo de sabor"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color del sabor (hex)"
+    },
+    "is_empty": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si el slot est\u00e1 vac\u00edo"
+    },
+    "stock_level": {
+      "type": "string",
+      "enum": [
+        "full",
+        "medium",
+        "low",
+        "empty"
+      ],
+      "default": "full",
+      "description": "Nivel de inventario"
+    },
+    "auto_restock": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si el slot T repone autom\u00e1ticamente al F"
+    }
+  },
+  "required": [
+    "store_id",
+    "row",
+    "position"
+  ]
+}

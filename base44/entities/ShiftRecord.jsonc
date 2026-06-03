@@ -1,0 +1,57 @@
+{
+  "name": "ShiftRecord",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del cajero"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del turno"
+    },
+    "shift": {
+      "type": "string",
+      "enum": [
+        "morning",
+        "afternoon",
+        "night"
+      ],
+      "description": "Turno: ma\u00f1ana, tarde, noche"
+    },
+    "sales": {
+      "type": "number",
+      "description": "Venta total en pesos"
+    },
+    "tickets": {
+      "type": "number",
+      "description": "Cantidad de tickets/facturas"
+    },
+    "transactions": {
+      "type": "number",
+      "description": "N\u00famero de transacciones"
+    },
+    "suggested_sales": {
+      "type": "number",
+      "description": "Cantidad de sugeridos vendidos"
+    },
+    "average_ticket": {
+      "type": "number",
+      "description": "Ticket promedio calculado"
+    }
+  },
+  "required": [
+    "store_id",
+    "cashier_id",
+    "date",
+    "shift",
+    "sales",
+    "tickets",
+    "transactions"
+  ]
+}

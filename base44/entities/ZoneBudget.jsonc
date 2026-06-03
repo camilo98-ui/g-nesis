@@ -1,0 +1,37 @@
+{
+  "name": "ZoneBudget",
+  "type": "object",
+  "properties": {
+    "zone_name": {
+      "type": "string",
+      "description": "Nombre de la zona (ej: Bogot\u00e1 Noroccidente)"
+    },
+    "month": {
+      "type": "number",
+      "description": "Mes del presupuesto (1-12)"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o del presupuesto"
+    },
+    "sales_budget": {
+      "type": "number",
+      "description": "Presupuesto de ventas mensual de la zona"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas adicionales"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si este presupuesto est\u00e1 activo para mostrar en gr\u00e1ficas"
+    }
+  },
+  "required": [
+    "zone_name",
+    "month",
+    "year",
+    "sales_budget"
+  ]
+}

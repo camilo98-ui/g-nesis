@@ -1,0 +1,56 @@
+{
+  "name": "EmployeeOfMonth",
+  "type": "object",
+  "properties": {
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del cajero seleccionado"
+    },
+    "cashier_name": {
+      "type": "string",
+      "description": "Nombre del cajero"
+    },
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "award_type": {
+      "type": "string",
+      "enum": [
+        "tienda",
+        "distrito"
+      ],
+      "description": "Tipo de premio: Popsy Star Tienda o Distrito"
+    },
+    "month": {
+      "type": "number",
+      "description": "Mes (1-12)"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si est\u00e1 activo actualmente"
+    },
+    "has_spun": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si ya gir\u00f3 la ruleta"
+    },
+    "selection_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de selecci\u00f3n"
+    }
+  },
+  "required": [
+    "cashier_id",
+    "store_id",
+    "award_type",
+    "month",
+    "year"
+  ]
+}

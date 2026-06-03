@@ -1,0 +1,79 @@
+{
+  "name": "CustomerExperience",
+  "type": "object",
+  "properties": {
+    "invoice_serial": {
+      "type": "string",
+      "description": "N\u00famero de factura"
+    },
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del anfitri\u00f3n"
+    },
+    "cashier_name": {
+      "type": "string",
+      "description": "Nombre del anfitri\u00f3n"
+    },
+    "experience_rating": {
+      "type": "string",
+      "enum": [
+        "excelente",
+        "normal",
+        "mala"
+      ],
+      "description": "Calificaci\u00f3n del cliente"
+    },
+    "experience_points": {
+      "type": "number",
+      "description": "Puntos por experiencia (8, 4 o 0)"
+    },
+    "suggested_sales_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Puntos por venta sugestiva"
+    },
+    "total_points": {
+      "type": "number",
+      "description": "Puntos totales de esta encuesta"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de la encuesta"
+    },
+    "has_suggested_products": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si tiene productos sugeridos"
+    },
+    "suggested_products_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Cantidad de productos sugeridos"
+    },
+    "customer_comment": {
+      "type": "string",
+      "description": "Comentario opcional del cliente"
+    },
+    "time_of_day": {
+      "type": "string",
+      "enum": [
+        "ma\u00f1ana",
+        "tarde",
+        "noche"
+      ],
+      "description": "Momento del d\u00eda"
+    }
+  },
+  "required": [
+    "invoice_serial",
+    "store_id",
+    "cashier_id",
+    "experience_rating",
+    "date"
+  ]
+}

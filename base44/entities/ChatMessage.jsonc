@@ -1,0 +1,36 @@
+{
+  "name": "ChatMessage",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Nombre del usuario"
+    },
+    "user_role": {
+      "type": "string",
+      "description": "Rol del usuario"
+    },
+    "message": {
+      "type": "string",
+      "description": "Contenido del mensaje"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "alert",
+        "success"
+      ],
+      "default": "text"
+    }
+  },
+  "required": [
+    "store_id",
+    "user_name",
+    "message"
+  ]
+}

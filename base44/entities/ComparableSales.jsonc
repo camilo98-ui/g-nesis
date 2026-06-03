@@ -1,0 +1,45 @@
+{
+  "name": "ComparableSales",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "period_type": {
+      "type": "string",
+      "enum": [
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "description": "Tipo de per\u00edodo: semanal, mensual o anual"
+    },
+    "period_label": {
+      "type": "string",
+      "description": "Etiqueta del per\u00edodo (ej: Semana 45 - 2024, Noviembre 2024)"
+    },
+    "total_sales": {
+      "type": "number",
+      "description": "Ventas totales del per\u00edodo"
+    },
+    "total_tickets": {
+      "type": "number",
+      "description": "Total de tickets del per\u00edodo"
+    },
+    "total_transactions": {
+      "type": "number",
+      "description": "Total de transacciones del per\u00edodo"
+    },
+    "total_suggested": {
+      "type": "number",
+      "description": "Total de sugeridos del per\u00edodo"
+    }
+  },
+  "required": [
+    "store_id",
+    "period_type",
+    "period_label",
+    "total_sales"
+  ]
+}

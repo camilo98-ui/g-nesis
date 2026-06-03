@@ -1,0 +1,43 @@
+{
+  "name": "CourseProgress",
+  "type": "object",
+  "properties": {
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del cajero"
+    },
+    "course_id": {
+      "type": "string",
+      "description": "ID del curso"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed",
+        "certified"
+      ],
+      "default": "not_started"
+    },
+    "score": {
+      "type": "number",
+      "description": "Puntaje obtenido"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "certificate_url": {
+      "type": "string"
+    },
+    "attempts": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "cashier_id",
+    "course_id"
+  ]
+}

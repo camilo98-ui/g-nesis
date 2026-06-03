@@ -1,0 +1,77 @@
+{
+  "name": "BadgeConfig",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "badge_type": {
+      "type": "string",
+      "enum": [
+        "top_seller",
+        "streak_7",
+        "streak_30",
+        "perfect_day",
+        "team_player",
+        "rising_star",
+        "goal_crusher",
+        "consistent",
+        "ticket_master",
+        "suggested_king",
+        "speed_demon",
+        "customer_favorite",
+        "early_bird",
+        "night_owl",
+        "weekend_warrior",
+        "monthly_champion"
+      ],
+      "description": "Tipo de insignia"
+    },
+    "kpi_type": {
+      "type": "string",
+      "enum": [
+        "sales",
+        "ticket_avg",
+        "transactions",
+        "suggested",
+        "days_worked",
+        "checklist_score"
+      ],
+      "description": "KPI a medir para esta insignia"
+    },
+    "goal_value": {
+      "type": "number",
+      "description": "Valor de la meta para ganar la insignia"
+    },
+    "goal_period": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly"
+      ],
+      "description": "Per\u00edodo de evaluaci\u00f3n"
+    },
+    "points_awarded": {
+      "type": "number",
+      "default": 10,
+      "description": "Puntos otorgados al ganar esta insignia"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si la insignia est\u00e1 activa"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descripci\u00f3n personalizada de la insignia"
+    }
+  },
+  "required": [
+    "store_id",
+    "badge_type",
+    "kpi_type",
+    "goal_value"
+  ]
+}

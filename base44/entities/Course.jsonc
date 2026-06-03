@@ -1,0 +1,55 @@
+{
+  "name": "Course",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo del curso"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descripci\u00f3n del curso"
+    },
+    "level": {
+      "type": "number",
+      "description": "Nivel del curso (1-5)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "ventas",
+        "ticket_promedio",
+        "servicio",
+        "producto",
+        "liderazgo"
+      ],
+      "description": "Categor\u00eda del curso"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "description": "Duraci\u00f3n en minutos"
+    },
+    "content": {
+      "type": "string",
+      "description": "Contenido del curso en markdown"
+    },
+    "quiz_questions": {
+      "type": "string",
+      "description": "Preguntas del quiz en JSON"
+    },
+    "passing_score": {
+      "type": "number",
+      "default": 70,
+      "description": "Puntaje m\u00ednimo para aprobar"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "title",
+    "level",
+    "category"
+  ]
+}

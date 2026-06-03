@@ -1,0 +1,37 @@
+{
+  "name": "DailyBudget",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del presupuesto"
+    },
+    "budget_amount": {
+      "type": "number",
+      "description": "Presupuesto del d\u00eda"
+    },
+    "actual_sales": {
+      "type": "number",
+      "description": "Ventas reales del d\u00eda"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si el d\u00eda fue completado"
+    },
+    "compliance_percentage": {
+      "type": "number",
+      "description": "Porcentaje de cumplimiento"
+    }
+  },
+  "required": [
+    "store_id",
+    "date",
+    "budget_amount"
+  ]
+}

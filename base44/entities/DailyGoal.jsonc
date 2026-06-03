@@ -1,0 +1,40 @@
+{
+  "name": "DailyGoal",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del cajero"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del objetivo"
+    },
+    "sales_goal": {
+      "type": "number",
+      "description": "Meta de ventas del d\u00eda"
+    },
+    "tickets_goal": {
+      "type": "number",
+      "description": "Meta de tickets del d\u00eda"
+    },
+    "suggested_goal": {
+      "type": "number",
+      "description": "Meta de sugeridos del d\u00eda"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si se complet\u00f3 el objetivo"
+    }
+  },
+  "required": [
+    "store_id",
+    "date"
+  ]
+}

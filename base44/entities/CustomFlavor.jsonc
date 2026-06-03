@@ -1,0 +1,40 @@
+{
+  "name": "CustomFlavor",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nombre del sabor personalizado"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color del sabor en formato hexadecimal"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "gourmet",
+        "exclusivo"
+      ],
+      "description": "Tipo de sabor"
+    },
+    "line": {
+      "type": "string",
+      "enum": [
+        "gourmet",
+        "exclusivo"
+      ],
+      "description": "L\u00ednea del sabor"
+    },
+    "dark": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si el sabor es oscuro"
+    }
+  },
+  "required": [
+    "name",
+    "color",
+    "type"
+  ]
+}

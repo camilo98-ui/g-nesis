@@ -1,0 +1,55 @@
+{
+  "name": "RouletteWinner",
+  "type": "object",
+  "properties": {
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del cajero ganador"
+    },
+    "cashier_name": {
+      "type": "string",
+      "description": "Nombre del cajero"
+    },
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "prize": {
+      "type": "string",
+      "description": "Premio ganado"
+    },
+    "prize_value": {
+      "type": "number",
+      "description": "Valor del premio en COP"
+    },
+    "spin_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del giro"
+    },
+    "month": {
+      "type": "number",
+      "description": "Mes del premio (1-12)"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o del premio"
+    },
+    "claimed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si el premio fue reclamado"
+    },
+    "claimed_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha en que se reclam\u00f3"
+    }
+  },
+  "required": [
+    "cashier_id",
+    "store_id",
+    "prize",
+    "spin_date"
+  ]
+}

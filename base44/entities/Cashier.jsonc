@@ -1,0 +1,49 @@
+{
+  "name": "Cashier",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nombre completo del cajero"
+    },
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda asignada"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email del cajero"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Tel\u00e9fono del cajero"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "URL de la foto del cajero"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "hire_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de contrataci\u00f3n"
+    },
+    "position": {
+      "type": "string",
+      "enum": [
+        "lider",
+        "embajador",
+        "cajero"
+      ],
+      "default": "cajero",
+      "description": "Cargo del colaborador"
+    }
+  },
+  "required": [
+    "name",
+    "store_id"
+  ]
+}

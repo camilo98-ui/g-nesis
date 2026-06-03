@@ -1,0 +1,31 @@
+{
+  "name": "DirectMessage",
+  "type": "object",
+  "properties": {
+    "from_user": {
+      "type": "string",
+      "description": "Usuario que env\u00eda"
+    },
+    "to_user": {
+      "type": "string",
+      "description": "Usuario que recibe"
+    },
+    "message": {
+      "type": "string",
+      "description": "Contenido del mensaje"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    },
+    "store_id": {
+      "type": "string",
+      "description": "Tienda de origen"
+    }
+  },
+  "required": [
+    "from_user",
+    "to_user",
+    "message"
+  ]
+}

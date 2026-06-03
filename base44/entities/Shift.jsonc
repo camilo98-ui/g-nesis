@@ -1,0 +1,89 @@
+{
+  "name": "Shift",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "cashier_id": {
+      "type": "string",
+      "description": "ID del colaborador"
+    },
+    "cashier_name": {
+      "type": "string",
+      "description": "Nombre del colaborador"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del turno"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Hora de inicio (HH:mm)"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "Hora de fin (HH:mm)"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "caja",
+        "coneo",
+        "bebidas",
+        "especialidades",
+        "coordinacion",
+        "cookie_jar",
+        "stocker",
+        "toma_pedidos",
+        "experiencia"
+      ],
+      "default": "caja",
+      "description": "Rol del turno"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "absent",
+        "cancelled"
+      ],
+      "default": "scheduled"
+    },
+    "check_in": {
+      "type": "string",
+      "description": "Hora de check-in real"
+    },
+    "check_out": {
+      "type": "string",
+      "description": "Hora de check-out real"
+    },
+    "reaction": {
+      "type": "string",
+      "description": "Reacci\u00f3n del colaborador al ver su turno"
+    },
+    "reaction_date": {
+      "type": "string",
+      "description": "Fecha de la reacci\u00f3n"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "tasks": {
+      "type": "string",
+      "description": "Tareas asignadas en JSON"
+    }
+  },
+  "required": [
+    "store_id",
+    "cashier_id",
+    "date",
+    "start_time",
+    "end_time"
+  ]
+}

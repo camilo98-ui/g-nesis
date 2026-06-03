@@ -1,0 +1,41 @@
+{
+  "name": "RouletteConfig",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda (o 'global' para configuraci\u00f3n general)"
+    },
+    "award_type": {
+      "type": "string",
+      "enum": [
+        "tienda",
+        "distrito"
+      ],
+      "default": "tienda",
+      "description": "Tipo de premio"
+    },
+    "prizes": {
+      "type": "string",
+      "description": "JSON con array de premios [{id, name, value, color, emoji}]"
+    },
+    "spin_duration": {
+      "type": "number",
+      "default": 6500,
+      "description": "Duraci\u00f3n del giro en milisegundos"
+    },
+    "validation_cedula": {
+      "type": "string",
+      "description": "C\u00e9dula requerida para que embajador pueda girar"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si esta configuraci\u00f3n est\u00e1 activa"
+    }
+  },
+  "required": [
+    "store_id",
+    "award_type"
+  ]
+}

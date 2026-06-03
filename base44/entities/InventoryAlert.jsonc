@@ -1,0 +1,57 @@
+{
+  "name": "InventoryAlert",
+  "type": "object",
+  "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "ID de la tienda"
+    },
+    "product_name": {
+      "type": "string",
+      "description": "Nombre del producto"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "insumos",
+        "empaque",
+        "limpieza",
+        "otros"
+      ],
+      "default": "insumos",
+      "description": "Categor\u00eda del producto"
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Cantidad actual"
+    },
+    "min_quantity": {
+      "type": "number",
+      "description": "Cantidad m\u00ednima para alerta"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de vencimiento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "low",
+        "critical",
+        "expired"
+      ],
+      "default": "ok",
+      "description": "Estado del producto"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas adicionales"
+    }
+  },
+  "required": [
+    "store_id",
+    "product_name"
+  ]
+}
