@@ -308,8 +308,9 @@ export default function RadarCompetitivo() {
   });
 
   // Filtrar solo los registros del usuario actual
+  // Si currentUserId aún no cargó, retornar array vacío para evitar mostrar datos de otros
   const records = useMemo(() => {
-    if (!currentUserId) return allRecords;
+    if (!currentUserId) return [];
     return allRecords.filter(r => r.created_by_id === currentUserId);
   }, [allRecords, currentUserId]);
 
