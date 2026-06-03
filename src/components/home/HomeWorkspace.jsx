@@ -908,6 +908,18 @@ export default function HomeWorkspace({
                   <motion.button
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
+                    onClick={() => window.location.href = '/HourlyTransactions'}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-violet-500 hover:text-violet-600 transition-all"
+                    style={{
+                      background: 'rgba(139,92,246,0.07)',
+                      border: '1px solid rgba(139,92,246,0.15)'
+                    }}>
+                    <Clock style={{ width: 12, height: 12 }} />
+                    <span className="hidden sm:inline">Txn / Hora</span>
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
                     onClick={onShowStoreSales}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-rose-500 hover:text-rose-600 transition-all"
                     style={{
