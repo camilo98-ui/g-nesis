@@ -785,6 +785,7 @@ export default function HomeWorkspace({
                 { label: 'KPIs Participación', icon: BarChart3, onClick: onShowKpisUploader, color: '#6366f1' },
                 { label: 'Agregadores', icon: FileText, onClick: onShowAggregatorsUploader, color: '#f97316' },
                 { label: 'P&G Upload', icon: TrendingUp, onClick: onShowPYGUploader, color: '#0ea5e9' },
+                { label: 'Txn por Hora', icon: Clock, onClick: () => window.location.href = '/HourlyTransactions', color: '#7c3aed' },
               ].map(({ label, icon: Icon, onClick, color }) => (
                 <motion.button
                   key={label}
