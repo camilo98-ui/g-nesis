@@ -156,11 +156,10 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
         // 1. Borrar registros anteriores del mismo mes/año para evitar duplicados
         const existing = await base44.entities.SalesReport.filter({ month: selectedMonth, year: selectedYear });
         if (existing && existing.length > 0) {
-          const delChunk = 25;
-          for (let i = 0; i < existing.length; i += delChunk) {
-            const ids = existing.slice(i, i + delChunk).map(r => r.id);
-            await Promise.all(ids.map(id => base44.entities.SalesReport.delete(id)));
-            await new Promise(r => setTimeout(r, 400));
+          setMessage(`Eliminando ${existing.length} registros anteriores...`);
+          for (let i = 0; i < existing.length; i++) {
+            await base44.entities.SalesReport.delete(existing[i].id);
+            if (i % 5 === 4) await new Promise(r => setTimeout(r, 500));
           }
         }
 
