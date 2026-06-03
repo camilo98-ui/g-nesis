@@ -96,6 +96,7 @@ export default function BudgetExcelImporter({ onClose }) {
   const [savedCount, setSavedCount] = useState(0);
   const [isParsing, setIsParsing] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState(null);
+  const [debugRows, setDebugRows] = useState(null); // primeras filas para debug
 
   const now = new Date();
 
@@ -127,6 +128,15 @@ export default function BudgetExcelImporter({ onClose }) {
     const parseErrors = [];
     let detectedMonth = now.getMonth() + 1;
     let detectedYear = now.getFullYear();
+
+    // Guardar primeras filas para debug
+    const sample = rows.slice(0, 10).map(r => (r || []).slice(0, 8).map(c => String(c ?? '').substring(0, 30)));
+    setDebugRows(sample);
+    console.log('📋 Primeras filas del Excel:', sample);
+    if (rowsWithHeaders.length > 0) {
+      console.log('📋 Headers detectados:', Object.keys(rowsWithHeaders[0]));
+      console.log('📋 Primera fila con headers:', rowsWithHeaders[0]);
+    }
 
     // ── ESTRATEGIA 0: Formato PdV+FECHA+PRESUPUESTO DIA (el Excel real)
     // Una fila por tienda por día: PdV, FECHA, PRESUPUESTO DIA, TRANSACCIONES DIA, TICKET PROMEDIO DIA
@@ -553,7 +563,7 @@ export default function BudgetExcelImporter({ onClose }) {
 
     if (foundStores.length === 0) {
       setIsParsing(false);
-      toast.error('No se encontraron tiendas ni valores en el archivo. Verifica el formato.');
+      setStep('debug');
       return;
     }
 
@@ -908,6 +918,35 @@ export default function BudgetExcelImporter({ onClose }) {
             </div>
           )}
 
+          {/* STEP: DEBUG - no se encontraron tiendas */}
+          {step === 'debug' && (
+            <div className="space-y-4">
+              <div className="rounded-xl border border-red-500/30 p-4" style={{ background: 'rgba(239,68,68,0.08)' }}>
+                <p className="text-sm font-bold text-red-400 mb-1">⚠️ No se encontraron tiendas en el archivo</p>
+                <p className="text-[11px] text-slate-400 mb-3">El sistema leyó el archivo pero no pudo identificar ninguna tienda. Revisa las primeras filas:</p>
+                <div className="overflow-x-auto rounded-lg border border-white/10">
+                  <table className="w-full text-[10px]">
+                    <tbody>
+                      {(debugRows || []).map((row, i) => (
+                        <tr key={i} className={i === 0 ? 'bg-white/8' : 'bg-white/2'}>
+                          <td className="px-2 py-1 text-slate-600 border-r border-white/5">{i}</td>
+                          {row.map((cell, j) => (
+                            <td key={j} className="px-2 py-1 text-slate-300 border-r border-white/5 whitespace-nowrap max-w-[120px] overflow-hidden text-ellipsis">
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-3">
+                  El archivo debe tener los nombres de tienda en alguna columna: BTA 62, FONTANAR, COLINA, SUBA, etc.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* STEP: SAVING */}
           {step === 'saving' && (
             <div className="py-16 text-center space-y-4">
@@ -936,8 +975,16 @@ export default function BudgetExcelImporter({ onClose }) {
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-white/8 flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.02)' }}>
-          {step === 'upload' && (
-            <p className="text-[10px] text-slate-600">Los presupuestos se guardan por tienda, mes y año</p>
+          {(step === 'upload' || step === 'debug') && (
+            <>
+              {step === 'debug' && (
+                <button onClick={() => { setStep('upload'); setDebugRows(null); setSelectedFileName(null); }}
+                  className="text-sm text-slate-400 hover:text-white transition-colors">
+                  ← Cargar otro archivo
+                </button>
+              )}
+              {step === 'upload' && <p className="text-[10px] text-slate-600">Los presupuestos se guardan por tienda, mes y año</p>}
+            </>
           )}
           {step === 'preview' && (
             <>
