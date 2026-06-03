@@ -109,11 +109,15 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
 
   const handleFileChange = (e) => {
     const f = e.target.files?.[0];
-    if (f && f.name.endsWith('.xlsx')) {
-      setFile(f);
-      setStatus('idle');
-      setMessage('');
+    if (!f) return;
+    if (!f.name.endsWith('.xlsx') && !f.name.endsWith('.xls')) {
+      setStatus('error');
+      setMessage(`Formato no válido: "${f.name}". Solo se aceptan archivos .xlsx o .xls`);
+      return;
     }
+    setFile(f);
+    setStatus('idle');
+    setMessage('');
   };
 
   const handleUpload = async () => {
@@ -198,12 +202,12 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
 
         <div className="p-6 space-y-4">
           <div
-            onClick={() => fileRef.current?.click()}
+            onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}
             className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
               file ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 hover:border-indigo-400 bg-slate-50'
             }`}
           >
-            <input ref={fileRef} type="file" accept=".xlsx" className="hidden" onChange={handleFileChange} />
+            <input ref={fileRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleFileChange} />
             {file ? (
               <div>
                 <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
