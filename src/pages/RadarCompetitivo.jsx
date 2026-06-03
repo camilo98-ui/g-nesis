@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -141,8 +141,8 @@ function NuevaTomaModa({ open, onClose, onSave, brands, records }) {
                 )}
               </div>
               <div>
-                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Serial de Factura <span className="text-rose-300 font-semibold normal-case tracking-normal">· solo los últimos 4 dígitos</span></label>
-                <input type="number" value={serial} onChange={e => setSerial(e.target.value)} placeholder="Ej: 1240" maxLength={4}
+                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Serial de Factura</label>
+                <input type="number" value={serial} onChange={e => setSerial(e.target.value)} placeholder="Ej: 001240"
                   className="w-full px-4 py-3 rounded-2xl text-lg font-bold text-slate-800 outline-none transition-all"
                   style={{ background: '#fafafa', border: '1px solid #fce7f3', letterSpacing: '0.04em' }}
                   onFocus={e => e.target.style.borderColor = '#fda4af'} onBlur={e => e.target.style.borderColor = '#fce7f3'}/>
@@ -295,22 +295,16 @@ function Section({ title, sub, tip, children, delay = 0, className = '' }) {
 export default function RadarCompetitivo() {
   const [modalOpen, setModalOpen] = useState(false);
   const [historialOpen, setHistorialOpen] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState(null);
   const qc = useQueryClient();
 
-  useEffect(() => {
-    base44.auth.me().then(u => setCurrentUserId(u?.id)).catch(() => {});
-  }, []);
-
   const { data: records = [] } = useQuery({
-    queryKey: ['competitiveRecords', currentUserId],
-    queryFn: () => base44.entities.CompetitiveRecord.filter({ created_by_id: currentUserId }, '-date', 500),
-    enabled: !!currentUserId
+    queryKey: ['competitiveRecords'],
+    queryFn: () => base44.entities.CompetitiveRecord.list('-date', 500)
   });
 
-  const remove = useMutation({ mutationFn: id => base44.entities.CompetitiveRecord.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords', currentUserId] }) });
-  const update = useMutation({ mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords', currentUserId] }) });
-  const create = useMutation({ mutationFn: data => base44.entities.CompetitiveRecord.create(data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['competitiveRecords', currentUserId] }); setModalOpen(false); } });
+  const remove = useMutation({ mutationFn: id => base44.entities.CompetitiveRecord.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
+  const update = useMutation({ mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
+  const create = useMutation({ mutationFn: data => base44.entities.CompetitiveRecord.create(data), onSuccess: () => { qc.invalidateQueries({ queryKey: ['competitiveRecords'] }); setModalOpen(false); } });
 
   const brandMap = useMemo(() => {
     const map = {};
