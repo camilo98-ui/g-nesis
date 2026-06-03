@@ -2,6 +2,10 @@
   "name": "CompetitiveRecord",
   "type": "object",
   "properties": {
+    "store_id": {
+      "type": "string",
+      "description": "C\u00f3digo de la tienda que registr\u00f3 esta toma (ej: BTA 62)"
+    },
     "competition": {
       "type": "string",
       "description": "Nombre de la competencia"
