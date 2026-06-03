@@ -141,8 +141,8 @@ function NuevaTomaModa({ open, onClose, onSave, brands, records }) {
                 )}
               </div>
               <div>
-                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Serial de Factura</label>
-                <input type="number" value={serial} onChange={e => setSerial(e.target.value)} placeholder="Ej: 001240"
+                <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Serial de Factura <span className="text-rose-300 font-semibold normal-case tracking-normal">· solo los últimos 4 dígitos</span></label>
+                <input type="number" value={serial} onChange={e => setSerial(e.target.value)} placeholder="Ej: 1240" maxLength={4}
                   className="w-full px-4 py-3 rounded-2xl text-lg font-bold text-slate-800 outline-none transition-all"
                   style={{ background: '#fafafa', border: '1px solid #fce7f3', letterSpacing: '0.04em' }}
                   onFocus={e => e.target.style.borderColor = '#fda4af'} onBlur={e => e.target.style.borderColor = '#fce7f3'}/>
