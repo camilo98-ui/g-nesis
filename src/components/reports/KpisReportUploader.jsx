@@ -153,17 +153,26 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       setProgress({ current: 0, total: records.length });
 
       try {
-        const chunkSize = 20;
+        const chunkSize = 10;
         let totalInserted = 0;
         for (let i = 0; i < records.length; i += chunkSize) {
           const chunk = records.slice(i, i + chunkSize);
-          await base44.entities.SalesReport.bulkCreate(chunk);
+          let retries = 3;
+          while (retries > 0) {
+            try {
+              await base44.entities.SalesReport.bulkCreate(chunk);
+              break;
+            } catch (e) {
+              retries--;
+              if (retries === 0) throw e;
+              // Esperar más tiempo si hay rate limit
+              await new Promise(r => setTimeout(r, 3000));
+            }
+          }
           totalInserted += chunk.length;
           setProgress({ current: totalInserted, total: records.length });
-          // Pausa entre chunks para evitar rate limit
-          if (i + chunkSize < records.length) {
-            await new Promise(r => setTimeout(r, 600));
-          }
+          setMessage(`Procesando... ${totalInserted}/${records.length} registros`);
+          await new Promise(r => setTimeout(r, 1500));
         }
         setStatus('success');
         setMessage(`✅ ${totalInserted} productos cargados correctamente.`);
