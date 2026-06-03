@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -295,12 +295,23 @@ function Section({ title, sub, tip, children, delay = 0, className = '' }) {
 export default function RadarCompetitivo() {
   const [modalOpen, setModalOpen] = useState(false);
   const [historialOpen, setHistorialOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const qc = useQueryClient();
 
-  const { data: records = [] } = useQuery({
+  useEffect(() => {
+    base44.auth.me().then(u => setCurrentUserId(u?.id)).catch(() => {});
+  }, []);
+
+  const { data: allRecords = [] } = useQuery({
     queryKey: ['competitiveRecords'],
     queryFn: () => base44.entities.CompetitiveRecord.list('-date', 500)
   });
+
+  // Filtrar solo los registros del usuario actual
+  const records = useMemo(() => {
+    if (!currentUserId) return allRecords;
+    return allRecords.filter(r => r.created_by_id === currentUserId);
+  }, [allRecords, currentUserId]);
 
   const remove = useMutation({ mutationFn: id => base44.entities.CompetitiveRecord.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
   const update = useMutation({ mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
