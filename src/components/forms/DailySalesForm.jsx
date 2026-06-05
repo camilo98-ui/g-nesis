@@ -370,7 +370,11 @@ export default function DailySalesForm({ storeId, onSuccess }) {
           className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors"
         >
           <History className="w-3.5 h-3.5" />
-          {showHistory ? 'Ocultar historial' : 'Ver historial de ventas'}
+          {showHistory
+            ? 'Ocultar historial'
+            : activeTab === 'llevar'
+            ? 'Ver historial de Para Llevar'
+            : 'Ver historial de ventas'}
         </button>
       </form>
 
@@ -383,16 +387,28 @@ export default function DailySalesForm({ storeId, onSuccess }) {
             <p className="text-gray-400 text-center py-4 text-sm">No hay registros</p>
           ) : (
             <div className="space-y-2 max-h-72 overflow-y-auto">
-              {salesHistory.map((record) => (
+              {salesHistory
+                .filter(record =>
+                  activeTab === 'llevar'
+                    ? (record.total_takeaway != null && record.total_takeaway > 0)
+                    : (record.total_sales != null && record.total_sales > 0)
+                )
+                .map((record) => (
                 <div key={record.id} className="bg-gray-50 rounded-xl p-3 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-gray-700">
                       {format(new Date(record.date + 'T12:00:00'), 'dd MMM yyyy', { locale: es })}
                     </p>
                     <div className="flex gap-3 text-xs text-gray-500 mt-0.5">
-                      <span>💰 ${record.total_sales?.toLocaleString('es-CO')}</span>
-                      <span>🎫 {record.total_transactions}</span>
-                      <span>✨ {record.total_suggested}</span>
+                      {activeTab === 'llevar' ? (
+                        <span>🛍️ ${record.total_takeaway?.toLocaleString('es-CO')}</span>
+                      ) : (
+                        <>
+                          <span>💰 ${record.total_sales?.toLocaleString('es-CO')}</span>
+                          <span>🎫 {record.total_transactions}</span>
+                          <span>✨ {record.total_suggested}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-1">
@@ -411,6 +427,15 @@ export default function DailySalesForm({ storeId, onSuccess }) {
                   </div>
                 </div>
               ))}
+              {salesHistory.filter(record =>
+                activeTab === 'llevar'
+                  ? (record.total_takeaway != null && record.total_takeaway > 0)
+                  : (record.total_sales != null && record.total_sales > 0)
+              ).length === 0 && (
+                <p className="text-gray-400 text-center py-4 text-sm">
+                  No hay registros de {activeTab === 'llevar' ? 'Para Llevar' : 'ventas'}
+                </p>
+              )}
             </div>
           )}
         </div>
