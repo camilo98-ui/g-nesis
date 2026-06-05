@@ -1135,10 +1135,19 @@ export default function SalesReportView() {
             </div>
 
             {hasData && (
-              <div className="rounded-xl px-4 py-2 text-right flex-shrink-0" style={{ background: 'rgba(194,24,117,0.08)', border: `1px solid ${EXEC.border}` }}>
-                <p className="text-base font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(summary.totalSales)}</p>
-                <p className="text-[10px]" style={{ color: EXEC.textMuted }}>Venta Total</p>
-              </div>
+              <>
+                <button
+                  onClick={() => setShowComparative(true)}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-all flex-shrink-0"
+                  style={{ background: 'rgba(99,102,241,0.08)', border: `1px solid rgba(99,102,241,0.2)`, color: '#6366f1' }}>
+                  <GitCompare className="w-3.5 h-3.5" />
+                  Comparativo
+                </button>
+                <div className="rounded-xl px-4 py-2 text-right flex-shrink-0" style={{ background: 'rgba(194,24,117,0.08)', border: `1px solid ${EXEC.border}` }}>
+                  <p className="text-base font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(summary.totalSales)}</p>
+                  <p className="text-[10px]" style={{ color: EXEC.textMuted }}>Venta Total</p>
+                </div>
+              </>
             )}
           </div>
         </div>
