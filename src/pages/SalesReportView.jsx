@@ -957,6 +957,7 @@ export default function SalesReportView() {
   const [compareMonth, setCompareMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth());
   const [compareYear, setCompareYear] = useState(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear());
   const [compareInitialized, setCompareInitialized] = useState(false);
+  const [monthInitialized, setMonthInitialized] = useState(false);
 
   const { data: allRecords = [], isLoading } = useQuery({
     queryKey: ['salesReport', storeCode],
@@ -1012,10 +1013,16 @@ export default function SalesReportView() {
 
   // Auto-inicializar al mes más reciente disponible (solo una vez)
   useEffect(() => {
-    if (!compareInitialized && availableMonths.length >= 1) {
+    if (!monthInitialized && availableMonths.length >= 1) {
       const mostRecent = availableMonths[0];
       setSelectedMonth(mostRecent.month);
       setSelectedYear(mostRecent.year);
+      setMonthInitialized(true);
+    }
+  }, [availableMonths, monthInitialized]);
+
+  useEffect(() => {
+    if (!compareInitialized && availableMonths.length >= 2) {
       setCompareInitialized(true);
     }
   }, [availableMonths, compareInitialized]);
