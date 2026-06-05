@@ -998,8 +998,13 @@ export default function SalesReportView() {
     return result.sort((a, b) => b.year - a.year || b.month - a.month);
   }, [allRecords]);
 
-  const effectiveMonth = availableMonths.length > 0 ? selectedMonth : (now.getMonth() + 1);
-  const effectiveYear = availableMonths.length > 0 ? selectedYear : now.getFullYear();
+  // Si aún no se inicializó el mes, usar el más reciente disponible directamente (evita flash de "sin datos")
+  const effectiveMonth = (!monthInitialized && availableMonths.length > 0)
+    ? availableMonths[0].month
+    : selectedMonth;
+  const effectiveYear = (!monthInitialized && availableMonths.length > 0)
+    ? availableMonths[0].year
+    : selectedYear;
 
   const currentRecords = useMemo(() => {
     if (allRecords.length === 0) return [];
