@@ -956,7 +956,6 @@ export default function SalesReportView() {
 
   const [compareMonth, setCompareMonth] = useState(now.getMonth() === 0 ? 12 : now.getMonth());
   const [compareYear, setCompareYear] = useState(now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear());
-  const [compareInitialized, setCompareInitialized] = useState(false);
   const [monthInitialized, setMonthInitialized] = useState(false);
 
   const { data: allRecords = [], isLoading } = useQuery({
@@ -998,13 +997,9 @@ export default function SalesReportView() {
     return result.sort((a, b) => b.year - a.year || b.month - a.month);
   }, [allRecords]);
 
-  // Si aún no se inicializó el mes, usar el más reciente disponible directamente (evita flash de "sin datos")
-  const effectiveMonth = (!monthInitialized && availableMonths.length > 0)
-    ? availableMonths[0].month
-    : selectedMonth;
-  const effectiveYear = (!monthInitialized && availableMonths.length > 0)
-    ? availableMonths[0].year
-    : selectedYear;
+  // Usar el mes seleccionado (ya sincronizado con availableMonths por el useEffect)
+  const effectiveMonth = selectedMonth;
+  const effectiveYear = selectedYear;
 
   const currentRecords = useMemo(() => {
     if (allRecords.length === 0) return [];
@@ -1025,12 +1020,6 @@ export default function SalesReportView() {
       setMonthInitialized(true);
     }
   }, [availableMonths, monthInitialized]);
-
-  useEffect(() => {
-    if (!compareInitialized && availableMonths.length >= 2) {
-      setCompareInitialized(true);
-    }
-  }, [availableMonths, compareInitialized]);
 
   // El comparativo es el mes disponible cronológicamente anterior al seleccionado
   const autoCompare = useMemo(() => {
@@ -1133,17 +1122,37 @@ export default function SalesReportView() {
               <p className="text-xs font-medium" style={{ color: EXEC.textMuted }}>{storeCode} · {currentMonthLabel} · vs {prevMonthLabel}</p>
             </div>
 
-            {/* Selector de mes */}
+            {/* Selector de mes — muestra solo meses con datos disponibles */}
             <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(194,24,117,0.06)', border: `1px solid ${EXEC.border}` }}>
               <Calendar className="w-3.5 h-3.5" style={{ color: EXEC.accent1 }} />
-              <select value={selectedMonth} onChange={e => { setSelectedMonth(Number(e.target.value)); setSelectedProduct(null); }}
-                className="text-xs font-bold border-none outline-none cursor-pointer" style={{ background: 'transparent', color: EXEC.textPrimary }}>
-                {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1} style={{ background: EXEC.bgCard }}>{m}</option>)}
-              </select>
-              <select value={selectedYear} onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedProduct(null); }}
-                className="text-xs font-bold border-none outline-none cursor-pointer" style={{ background: 'transparent', color: EXEC.textPrimary }}>
-                {[2024, 2025, 2026].map(y => <option key={y} value={y} style={{ background: EXEC.bgCard }}>{y}</option>)}
-              </select>
+              {availableMonths.length > 0 ? (
+                <select
+                  value={`${selectedYear}-${String(selectedMonth).padStart(2,'0')}`}
+                  onChange={e => {
+                    const [y, m] = e.target.value.split('-');
+                    setSelectedYear(Number(y));
+                    setSelectedMonth(Number(m));
+                    setSelectedProduct(null);
+                  }}
+                  className="text-xs font-bold border-none outline-none cursor-pointer" style={{ background: 'transparent', color: EXEC.textPrimary }}>
+                  {availableMonths.map(({ month, year }) => (
+                    <option key={`${year}-${month}`} value={`${year}-${String(month).padStart(2,'0')}`} style={{ background: EXEC.bgCard }}>
+                      {MONTHS_NAMES[month - 1]} {year}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <>
+                  <select value={selectedMonth} onChange={e => { setSelectedMonth(Number(e.target.value)); setSelectedProduct(null); }}
+                    className="text-xs font-bold border-none outline-none cursor-pointer" style={{ background: 'transparent', color: EXEC.textPrimary }}>
+                    {MONTHS_NAMES.map((m, i) => <option key={i+1} value={i+1} style={{ background: EXEC.bgCard }}>{m}</option>)}
+                  </select>
+                  <select value={selectedYear} onChange={e => { setSelectedYear(Number(e.target.value)); setSelectedProduct(null); }}
+                    className="text-xs font-bold border-none outline-none cursor-pointer" style={{ background: 'transparent', color: EXEC.textPrimary }}>
+                    {[2024, 2025, 2026].map(y => <option key={y} value={y} style={{ background: EXEC.bgCard }}>{y}</option>)}
+                  </select>
+                </>
+              )}
             </div>
 
             {hasData && (
