@@ -306,8 +306,10 @@ export default function RadarCompetitivo() {
     queryFn: () => base44.entities.CompetitiveRecord.list('-date', 500)
   });
 
-  // Filtrar únicamente los registros de la tienda activa
-  const records = allRecords.filter(r => !r.store_id || r.store_id === activeStore);
+  // Filtrar únicamente los registros de la tienda activa (si hay sesión activa)
+  const records = activeStore
+    ? allRecords.filter(r => !r.store_id || r.store_id === activeStore)
+    : allRecords;
 
   const remove = useMutation({ mutationFn: id => base44.entities.CompetitiveRecord.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
   const update = useMutation({ mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
