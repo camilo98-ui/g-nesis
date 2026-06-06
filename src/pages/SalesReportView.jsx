@@ -997,21 +997,21 @@ export default function SalesReportView() {
     return result.sort((a, b) => b.year - a.year || b.month - a.month);
   }, [allRecords]);
 
-  // Usar el mes seleccionado (ya sincronizado con availableMonths por el useEffect)
-  const effectiveMonth = selectedMonth;
-  const effectiveYear = selectedYear;
+  // Si aún no se inicializó, usar el mes más reciente disponible directamente
+  const effectiveMonth = (!monthInitialized && availableMonths.length > 0) ? availableMonths[0].month : selectedMonth;
+  const effectiveYear = (!monthInitialized && availableMonths.length > 0) ? availableMonths[0].year : selectedYear;
 
   const currentRecords = useMemo(() => {
     if (allRecords.length === 0) return [];
     const withMonths = allRecords.filter(r => r.month && r.year);
     if (withMonths.length > 0) {
-      return withMonths.filter(r => r.month === effectiveMonth && r.year === effectiveYear);
+      return withMonths.filter(r => Number(r.month) === effectiveMonth && Number(r.year) === effectiveYear);
     }
     const latestReportId = allRecords[0]?.report_id;
     return allRecords.filter(r => r.report_id === latestReportId);
   }, [allRecords, effectiveMonth, effectiveYear]);
 
-  // Auto-inicializar al mes más reciente disponible (solo una vez)
+  // Sincronizar selectedMonth/Year una sola vez al cargar datos
   useEffect(() => {
     if (!monthInitialized && availableMonths.length >= 1) {
       const mostRecent = availableMonths[0];
@@ -1127,7 +1127,7 @@ export default function SalesReportView() {
               <Calendar className="w-3.5 h-3.5" style={{ color: EXEC.accent1 }} />
               {availableMonths.length > 0 ? (
                 <select
-                  value={`${selectedYear}-${String(selectedMonth).padStart(2,'0')}`}
+                  value={`${effectiveYear}-${String(effectiveMonth).padStart(2,'0')}`}
                   onChange={e => {
                     const [y, m] = e.target.value.split('-');
                     setSelectedYear(Number(y));
