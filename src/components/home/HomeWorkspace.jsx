@@ -26,6 +26,7 @@ import WeeklyComparison from './WeeklyComparison';
 import TakeawayCard from './TakeawayCard';
 import NovaInsightStrip from './NovaInsightStrip';
 import GerenteDashboard from './GerenteDashboard';
+import AggregatorsModal from '@/components/reports/AggregatorsModal';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -320,6 +321,7 @@ export default function HomeWorkspace({
   const [isTyping, setIsTyping] = useState(false);
   const [kpiModal, setKpiModal] = useState(null); // 'ppt' | 'gap' | 'proj'
   const [showAIReport, setShowAIReport] = useState(false);
+  const [showAggregatorsModal, setShowAggregatorsModal] = useState(false);
   const [takeawayBudgetOverride, setTakeawayBudgetOverride] = useState(null);
   const chatEndRef = useRef(null);
   const conversationRef = useRef(null);
@@ -820,6 +822,21 @@ export default function HomeWorkspace({
                 return (
                   <NavItem key={item.label} item={item} isActive={activeNav === item.path} onClick={handleClick} />);
               })}
+              {/* Botón Agregadores para líder */}
+              <motion.button
+                whileHover={{ x: 2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowAggregatorsModal(true)}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left"
+                style={{ background: 'transparent', border: '1px solid transparent', transition: 'all 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(249,115,22,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(249,115,22,0.10)' }}>
+                  <Truck style={{ color: '#f97316', width: 14, height: 14 }} />
+                </div>
+                <span className="text-[12px] font-semibold flex-1 truncate" style={{ color: '#6b7280' }}>Agregadores</span>
+              </motion.button>
             </>
           )}
         </div>
@@ -1788,6 +1805,13 @@ export default function HomeWorkspace({
 
         
         </main>
+
+      {/* ── AGGREGATORS MODAL (líder) ── */}
+      <AnimatePresence>
+        {showAggregatorsModal && (
+          <AggregatorsModal storeId={selectedStore} onClose={() => setShowAggregatorsModal(false)} />
+        )}
+      </AnimatePresence>
 
       {/* ── AI EXECUTIVE REPORT MODAL ── */}
       <AIExecutiveReport
