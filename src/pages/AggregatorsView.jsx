@@ -132,16 +132,41 @@ export default function AggregatorsView() {
     const agg = {};
     records.forEach(r => {
       const ch = r.channel || 'Otro';
-      if (!agg[ch]) agg[ch] = { channel: ch, total_sales: 0 };
+      if (!agg[ch]) agg[ch] = { channel: ch, total_sales: 0, participation: 0, count: 0 };
       agg[ch].total_sales += r.total_sales || 0;
+      // participation puede venir como 0-1 o 0-100
+      const rawPart = r.participation || 0;
+      agg[ch].participation += rawPart > 1 ? rawPart : rawPart * 100;
+      agg[ch].count += 1;
     });
-    const arr = Object.values(agg).sort((a,b) => b.total_sales - a.total_sales);
-    const total = arr.reduce((s,d) => s + d.total_sales, 0);
-    return arr.map((d,i) => ({
-      ...d,
-      pct: total > 0 ? (d.total_sales / total * 100) : 0,
-      meta: getMeta(d.channel, i),
-    }));
+
+    const arr = Object.values(agg);
+
+    // Detectar si total_sales tiene valores reales (> 1 en promedio)
+    const totalSalesSum = arr.reduce((s,d) => s + d.total_sales, 0);
+    const hasSalesData = totalSalesSum > arr.length; // si el promedio > 1, hay ventas reales
+
+    if (hasSalesData) {
+      // Usar total_sales normalmente
+      arr.sort((a,b) => b.total_sales - a.total_sales);
+      return arr.map((d,i) => ({
+        ...d,
+        pct: totalSalesSum > 0 ? (d.total_sales / totalSalesSum * 100) : 0,
+        meta: getMeta(d.channel, i),
+      }));
+    } else {
+      // No hay ventas reales — usar participation para ordenar y calcular %
+      // Normalizar participation promedio
+      arr.forEach(d => { d.participation = d.participation / d.count; });
+      const totalPart = arr.reduce((s,d) => s + d.participation, 0);
+      arr.sort((a,b) => b.participation - a.participation);
+      return arr.map((d,i) => ({
+        ...d,
+        total_sales: 0,
+        pct: totalPart > 0 ? (d.participation / totalPart * 100) : d.participation,
+        meta: getMeta(d.channel, i),
+      }));
+    }
   }, [records]);
 
   const totalVentas = channels.reduce((s,c) => s + c.total_sales, 0);
@@ -258,7 +283,7 @@ export default function AggregatorsView() {
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/60 mb-2">Venta Total · {monthLabel}</p>
                   <p className="text-[34px] font-black text-white leading-none" style={{letterSpacing:'-0.04em'}}>
-                    {fmtCOP(totalVentas)}
+                    {totalVentas > 1 ? fmtCOP(totalVentas) : 'Ver canales ↓'}
                   </p>
                   <div className="flex items-center gap-1.5 mt-2.5">
                     <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg" style={{background:'rgba(255,255,255,0.18)'}}>
@@ -379,7 +404,9 @@ export default function AggregatorsView() {
                           <p className="text-[14px] font-black text-slate-800 leading-none truncate" style={{letterSpacing:'-0.02em'}}>{c.channel}</p>
                           <p className="text-[18px] font-black tabular-nums leading-none flex-shrink-0 ml-2" style={{color:c.meta.color,letterSpacing:'-0.03em'}}>{c.pct.toFixed(1)}%</p>
                         </div>
-                        <p className="text-[11px] font-semibold text-slate-400 mb-2">{fmtCOP(c.total_sales)}</p>
+                        <p className="text-[11px] font-semibold text-slate-400 mb-2">
+                          {c.total_sales > 1 ? fmtCOP(c.total_sales) : `Participación: ${c.pct.toFixed(1)}%`}
+                        </p>
                         {/* Progress bar */}
                         <div className="w-full h-2 rounded-full" style={{background:`${c.meta.color}12`}}>
                           <motion.div
@@ -464,7 +491,7 @@ export default function AggregatorsView() {
                     <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{background:c.meta.color}}/>
                     <span className="text-[12px] font-semibold text-slate-700 truncate">{c.channel}</span>
                   </div>
-                  <p className="text-[13px] font-bold tabular-nums text-slate-800 flex-1 text-right pr-3">{fmtCOP(c.total_sales)}</p>
+                  <p className="text-[13px] font-bold tabular-nums text-slate-800 flex-1 text-right pr-3">{c.total_sales > 1 ? fmtCOP(c.total_sales) : '—'}</p>
                   <p className="text-[13px] font-black tabular-nums w-14 text-right" style={{color:c.meta.color}}>{c.pct.toFixed(1)}%</p>
                 </motion.div>
               ))}
