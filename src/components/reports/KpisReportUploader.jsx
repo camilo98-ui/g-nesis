@@ -26,68 +26,103 @@ function parseKpisExcel(rows, monthNum, yearNum) {
 
   if (!rows || rows.length < 2) return records;
 
-  // Build header map (normalize: trim, uppercase) → column index
-  const headerRow = rows[0];
+  // Find header row (the one containing TIENDA and DEPARTAMENTO)
+  let headerRowIdx = -1;
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    const row = rows[i];
+    if (!row) continue;
+    const joined = row.map(c => String(c ?? '').toUpperCase()).join('|');
+    if (joined.includes('TIENDA') && joined.includes('DEPARTAMENTO')) {
+      headerRowIdx = i;
+      break;
+    }
+  }
+  if (headerRowIdx === -1) return records;
+
+  const headerRow = rows[headerRowIdx];
   const colMap = {};
   headerRow.forEach((h, idx) => {
     if (h != null) colMap[String(h).toUpperCase().trim()] = idx;
   });
 
-  // Accept both Spanish and possible variants
   const findCol = (...keys) => {
     for (const k of keys) {
-      // exact match first
       if (colMap[k] !== undefined) return colMap[k];
-      // partial match (trim already applied in colMap keys)
       const found = Object.keys(colMap).find(h => h.includes(k));
       if (found !== undefined) return colMap[found];
     }
     return -1;
   };
 
+  const iTienda = findCol('TIENDA', 'PUNTO');
   const iDept   = findCol('DEPARTAMENTO', 'DEPART');
   const iSec    = findCol('SECCION', 'SECCIÓN', 'SECCI');
   const iDesc   = findCol('DESCRIPCION', 'DESCRIPCIÓN', 'DESCRIP');
-  const iTienda = findCol('TIENDA', 'PUNTO');
   const iPart   = findCol('PARTICIPACION', 'PARTICIPACIÓN', 'PART');
-  const iVenta  = findCol('VENTA', 'MONTO', 'SALES');
-  const iUnits  = findCol('CANTIDAD', 'UNIDADES', 'UNIDAD', 'UNITS', 'QTY', 'CANT');
+  const iVenta  = findCol('VENTA BRUTA', 'VENTA', 'MONTO', 'SALES');
+  const iUnits  = findCol('UNDS', 'UNIDADES', 'UNIDAD', 'UNITS', 'QTY', 'CANT');
 
   if (iTienda === -1 || iDept === -1) return records;
 
-  for (let i = 1; i < rows.length; i++) {
+  // Propagate values downward (tabla dinámica leaves blanks for repeated values)
+  let currentTienda = null;
+  let currentDept   = null;
+  let currentSec    = null;
+
+  for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const row = rows[i];
     if (!row) continue;
 
-    const tienda = row[iTienda];
-    const dept   = iDept  !== -1 ? row[iDept]  : null;
-    const seccion= iSec   !== -1 ? row[iSec]   : null;
-    const desc   = iDesc  !== -1 ? row[iDesc]  : null;
-    const part   = iPart  !== -1 ? row[iPart]  : null;
-    const venta  = iVenta !== -1 ? row[iVenta] : null;
-    const units  = iUnits !== -1 ? row[iUnits] : null;
+    const rawTienda = row[iTienda];
+    const rawDept   = row[iDept];
+    const rawSec    = iSec !== -1 ? row[iSec] : null;
+    const rawDesc   = iDesc !== -1 ? row[iDesc] : null;
+    const rawVenta  = iVenta !== -1 ? row[iVenta] : null;
+    const rawPart   = iPart !== -1 ? row[iPart] : null;
+    const rawUnits  = iUnits !== -1 ? row[iUnits] : null;
 
-    if (!tienda || !dept) continue;
-    const storeCode = extractStoreCode(tienda);
-    if (!storeCode) continue;
+    // Update propagated values when non-null
+    if (rawTienda != null && String(rawTienda).trim() !== '') {
+      const extracted = extractStoreCode(String(rawTienda));
+      if (extracted) {
+        currentTienda = extracted;
+        currentDept = null;
+        currentSec = null;
+      }
+    }
+    if (rawDept != null && String(rawDept).trim() !== '') {
+      currentDept = String(rawDept).trim();
+      currentSec = null;
+    }
+    if (rawSec != null && String(rawSec).trim() !== '') {
+      currentSec = String(rawSec).trim();
+    }
 
-    const ventaNum = parseFloat(String(venta ?? 0).replace(/[^0-9.-]/g, '')) || 0;
-    let partNum    = parseFloat(String(part  ?? 0).replace(/[^0-9.-]/g, '')) || 0;
-    // Si la participación viene como fracción (0..1), convertir a porcentaje
+    // Skip total rows (no description, or description contains "Total")
+    const desc = rawDesc != null ? String(rawDesc).trim() : '';
+    if (!desc || desc.toUpperCase().startsWith('TOTAL')) continue;
+
+    // Skip if no store or department
+    if (!currentTienda || !currentDept) continue;
+
+    // Skip rows that look like subtotals (no product description but has sales)
+    const ventaNum = parseFloat(String(rawVenta ?? 0).replace(/[^0-9.-]/g, '')) || 0;
+    const unitsNum = rawUnits != null && rawUnits !== '' ? (parseFloat(String(rawUnits).replace(/[^0-9.-]/g, '')) || null) : null;
+    let partNum    = parseFloat(String(rawPart ?? 0).replace(/[^0-9.-]/g, '')) || 0;
     if (partNum > 0 && partNum <= 1) partNum = partNum * 100;
 
     records.push({
-      store_code: storeCode,
+      store_code: currentTienda,
       report_id: reportId,
       uploaded_at: uploadedAt,
-      department: String(dept).trim(),
-      section: seccion ? String(seccion).trim() : '',
-      product: desc ? String(desc).trim() : '',
+      department: currentDept,
+      section: currentSec || '',
+      product: desc,
       level: 'product',
       participation: partNum,
       total_sales: ventaNum,
       total_transactions: 0,
-      units_sold: units != null && units !== '' ? (parseFloat(String(units).replace(/[^0-9.-]/g, '')) || null) : null,
+      units_sold: unitsNum,
       month: monthNum,
       year: yearNum,
     });
