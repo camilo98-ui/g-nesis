@@ -72,7 +72,7 @@ const NAV_ITEMS = [
 { icon: LayoutDashboard, label: 'Tienda', path: 'Dashboard', color: '#C21875', roles: ['lider', 'embajador', 'gerente'] },
 { icon: TrendingUp, label: 'P&G', path: 'PYGDashboard', color: '#374151', roles: ['gerente'] },
 { icon: TrendingUp, label: 'P&G Tienda', path: null, color: '#374151', onClick: 'onShowPYGModal', roles: ['lider', 'embajador'] },
-{ icon: FileText, label: 'Informe', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
+{ icon: FileText, label: 'Informe', path: null, color: '#374151', onClick: 'onShowReport', roles: ['lider', 'embajador', 'gerente'] },
 { icon: Clock, label: 'Txn por hora', path: 'HourlyTransactions', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: BarChart3, label: 'Participación', path: 'SalesReportView', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
 { icon: Snowflake, label: 'Mapa Nevera', path: 'FreezerMap', color: '#374151', roles: ['lider', 'embajador', 'gerente'] },
@@ -811,10 +811,7 @@ export default function HomeWorkspace({
                 const handleClick = () => {
                   if (!item.path) {
                     if (item.onClick === 'onShowPYGModal') onShowPYGModal?.();
-                    return;
-                  }
-                  if (item.label === 'Informe') {
-                    setShowAIReport(true);
+                    else if (item.onClick === 'onShowReport') onShowReport?.();
                     return;
                   }
                   setActiveNav(item.path);
