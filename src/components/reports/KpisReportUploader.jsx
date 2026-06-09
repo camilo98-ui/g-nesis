@@ -204,32 +204,37 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       setProgress({ current: 0, total: records.length });
 
       try {
-        // 1. Borrar registros anteriores del mismo mes/año
-        // Traer todos y filtrar en cliente (evita problemas con floats en DB)
-        setMessage(`Buscando registros anteriores del período...`);
-        const allExisting = await base44.entities.SalesReport.list('-uploaded_at', 10000);
-        const toDelete = allExisting.filter(r => Number(r.month) === selectedMonth && Number(r.year) === selectedYear);
+        // 1. Borrar registros anteriores — paginar de 200 en 200 para no saturar
+        setMessage(`Buscando registros anteriores...`);
+        let page = 0;
+        const pageSize = 200;
+        let toDelete = [];
+        while (true) {
+          const batch = await base44.entities.SalesReport.list('-uploaded_at', pageSize, page * pageSize);
+          if (!batch || batch.length === 0) break;
+          toDelete = toDelete.concat(batch.filter(r => Number(r.month) === selectedMonth && Number(r.year) === selectedYear));
+          if (batch.length < pageSize) break;
+          page++;
+          await new Promise(r => setTimeout(r, 400));
+        }
         if (toDelete.length > 0) {
           setMessage(`Eliminando ${toDelete.length} registros anteriores...`);
-          // Borrar de a 5 en paralelo con pausa entre lotes
-          const deleteChunkSize = 5;
-          for (let i = 0; i < toDelete.length; i += deleteChunkSize) {
-            const chunk = toDelete.slice(i, i + deleteChunkSize);
-            await Promise.all(chunk.map(r => base44.entities.SalesReport.delete(r.id)));
-            await new Promise(r => setTimeout(r, 200));
+          for (const rec of toDelete) {
+            await base44.entities.SalesReport.delete(rec.id);
+            await new Promise(r => setTimeout(r, 120));
           }
         }
 
-        // 2. Insertar en chunks de 50, uno a la vez con pausa
-        const chunkSize = 50;
+        // 2. Insertar de a 1 registro por vez con pausa (más lento pero sin rate limit)
         let totalInserted = 0;
+        const chunkSize = 20;
         for (let i = 0; i < records.length; i += chunkSize) {
           const chunk = records.slice(i, i + chunkSize);
           await base44.entities.SalesReport.bulkCreate(chunk);
           totalInserted += chunk.length;
           setProgress({ current: totalInserted, total: records.length });
           setMessage(`Subiendo... ${totalInserted}/${records.length} registros`);
-          await new Promise(r => setTimeout(r, 300));
+          await new Promise(r => setTimeout(r, 600));
         }
         setStatus('success');
         setMessage(`✅ ${totalInserted} productos cargados correctamente.`);
