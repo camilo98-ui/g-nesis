@@ -62,13 +62,13 @@ function parseAggregatorsExcel(XLSX, arrayBuffer, month, year) {
     };
     const dataRows = isHeaderRow(firstRow) ? jsonRows.slice(1) : jsonRows;
 
-    // Columna de venta bruta: buscar en todas las filas la que tenga valores numéricos grandes
-    const ventaKey = keys.find(k => {
-      return dataRows.some(row => {
-        const val = parseNum(row[k]);
-        return val !== null && val > 1000;
-      });
-    }) || keys[3];
+    // Columna de venta bruta: buscar la que tenga el mayor valor numérico (descartando participaciones 0-1)
+    // El archivo tiene columnas duplicadas "May" → xlsx las renombra "May" y "May_1" o similar
+    const ventaKey = keys.slice(2).reduce((best, k) => {
+      const maxVal = dataRows.reduce((m, row) => Math.max(m, parseNum(row[k]) || 0), 0);
+      const bestVal = best ? dataRows.reduce((m, row) => Math.max(m, parseNum(row[best]) || 0), 0) : 0;
+      return maxVal > bestVal ? k : best;
+    }, null) || keys[3];
 
     // Propagación: si Mes está vacío, usar la última tienda vista
     let lastStore = null;
