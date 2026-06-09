@@ -444,11 +444,11 @@ export default function AggregatorsView() {
               }}
             >
               {/* Header */}
-              <div className="px-5 py-3.5 grid grid-cols-3 gap-2"
+              <div className="px-4 py-3 flex items-center"
                 style={{background:'linear-gradient(135deg,rgba(194,24,117,0.06),rgba(139,92,246,0.04))',borderBottom:'1px solid rgba(0,0,0,0.05)'}}>
-                {['Canal','Venta','Participación'].map((h,i) => (
-                  <p key={h} className={`text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 ${i>0?'text-right':''}`}>{h}</p>
-                ))}
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 w-1/3">Canal</p>
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 flex-1 text-right">Venta</p>
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400 w-14 text-right">Part.</p>
               </div>
               {/* Rows */}
               {channels.map((c,i) => (
@@ -457,23 +457,23 @@ export default function AggregatorsView() {
                   initial={{ opacity:0 }}
                   animate={{ opacity:1 }}
                   transition={{ delay:0.7+i*0.04 }}
-                  className="px-5 py-3.5 grid grid-cols-3 gap-2 items-center"
+                  className="px-4 py-3.5 flex items-center"
                   style={{ borderBottom: i < channels.length-1 ? '1px solid rgba(0,0,0,0.04)' : 'none' }}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-1/3 min-w-0">
                     <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{background:c.meta.color}}/>
                     <span className="text-[12px] font-semibold text-slate-700 truncate">{c.channel}</span>
                   </div>
-                  <p className="text-[12px] font-bold tabular-nums text-slate-600 text-right">{fmtCOP(c.total_sales)}</p>
-                  <p className="text-[13px] font-black tabular-nums text-right" style={{color:c.meta.color}}>{c.pct.toFixed(1)}%</p>
+                  <p className="text-[13px] font-bold tabular-nums text-slate-800 flex-1 text-right pr-3">{fmtCOP(c.total_sales)}</p>
+                  <p className="text-[13px] font-black tabular-nums w-14 text-right" style={{color:c.meta.color}}>{c.pct.toFixed(1)}%</p>
                 </motion.div>
               ))}
               {/* Total row */}
-              <div className="px-5 py-3.5 grid grid-cols-3 gap-2 items-center"
+              <div className="px-4 py-3.5 flex items-center"
                 style={{background:'linear-gradient(135deg,rgba(194,24,117,0.04),rgba(139,92,246,0.03))'}}>
-                <p className="text-[11px] font-black text-slate-700">Total</p>
-                <p className="text-[12px] font-black tabular-nums text-slate-800 text-right">{fmtCOP(totalVentas)}</p>
-                <p className="text-[13px] font-black text-right" style={{color:'#C21875'}}>100%</p>
+                <p className="text-[12px] font-black text-slate-700 w-1/3">Total</p>
+                <p className="text-[13px] font-black tabular-nums text-slate-800 flex-1 text-right pr-3">{fmtCOP(totalVentas)}</p>
+                <p className="text-[13px] font-black w-14 text-right" style={{color:'#C21875'}}>100%</p>
               </div>
             </motion.div>
 
