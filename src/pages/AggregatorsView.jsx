@@ -2,8 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { ArrowLeft, TrendingUp, Crown, Sparkles, ArrowUpRight } from 'lucide-react';
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, RadarChart, Radar, PolarGrid, PolarAngleAxis,
+  AreaChart, Area
+} from 'recharts';
+import { ArrowLeft, TrendingUp, Crown, Sparkles, ArrowUpRight, BarChart2, Target, Zap, AlertTriangle } from 'lucide-react';
 
 /* ── helpers ── */
 const fmtCOP = (v) => v
@@ -399,6 +403,190 @@ export default function AggregatorsView() {
                   </div>
                 ))}
               </div>
+            </motion.div>
+
+            {/* ══ 2b. KPI MINI CARDS ROW ══ */}
+            <motion.div
+              initial={{ opacity:0, y:12 }}
+              animate={{ opacity:1, y:0 }}
+              transition={{ delay:0.2, duration:0.45, ease:[0.23,1,0.32,1] }}
+              style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}
+            >
+              {/* Concentración */}
+              <div style={{
+                borderRadius:18, padding:'16px 14px',
+                background:'linear-gradient(135deg,#FFF0F9,#F8F0FF)',
+                border:'1px solid rgba(233,30,140,0.12)',
+                boxShadow:'0 4px 16px rgba(233,30,140,0.07)',
+              }}>
+                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+                  <Target style={{color:'#E91E8C',width:14,height:14}}/>
+                  <span style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color:'#E91E8C' }}>Concentración</span>
+                </div>
+                <p style={{ fontSize:26, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.04em' }}>
+                  {leader ? leader.pct.toFixed(0) : '—'}<span style={{fontSize:14}}>%</span>
+                </p>
+                <p style={{ fontSize:10, color:'#8E8E93', margin:'3px 0 0', fontWeight:500 }}>canal líder</p>
+              </div>
+              {/* Diversificación */}
+              <div style={{
+                borderRadius:18, padding:'16px 14px',
+                background:'linear-gradient(135deg,#F0F8FF,#F8F0FF)',
+                border:'1px solid rgba(88,86,214,0.12)',
+                boxShadow:'0 4px 16px rgba(88,86,214,0.07)',
+              }}>
+                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+                  <Zap style={{color:'#5856D6',width:14,height:14}}/>
+                  <span style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color:'#5856D6' }}>Canales</span>
+                </div>
+                <p style={{ fontSize:26, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.04em' }}>
+                  {channels.length}
+                </p>
+                <p style={{ fontSize:10, color:'#8E8E93', margin:'3px 0 0', fontWeight:500 }}>activos este mes</p>
+              </div>
+              {/* Ticket promedio delivery */}
+              <div style={{
+                borderRadius:18, padding:'16px 14px',
+                background:'linear-gradient(135deg,#FFF8F0,#FFFBF0)',
+                border:'1px solid rgba(255,149,0,0.15)',
+                boxShadow:'0 4px 16px rgba(255,149,0,0.07)',
+              }}>
+                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+                  <BarChart2 style={{color:'#FF9500',width:14,height:14}}/>
+                  <span style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color:'#FF9500' }}>Delivery</span>
+                </div>
+                <p style={{ fontSize:26, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.04em' }}>
+                  {channels.filter(c=>c.channel!=='Al Paso').reduce((s,c)=>s+c.pct,0).toFixed(1)}<span style={{fontSize:14}}>%</span>
+                </p>
+                <p style={{ fontSize:10, color:'#8E8E93', margin:'3px 0 0', fontWeight:500 }}>canales digitales</p>
+              </div>
+              {/* Alerta diversificación */}
+              <div style={{
+                borderRadius:18, padding:'16px 14px',
+                background: leader && leader.pct > 80 ? 'linear-gradient(135deg,#FFF0F0,#FFF5F0)' : 'linear-gradient(135deg,#F0FFF4,#F0FFFA)',
+                border: `1px solid ${leader && leader.pct > 80 ? 'rgba(255,59,48,0.15)' : 'rgba(52,199,89,0.15)'}`,
+                boxShadow: `0 4px 16px ${leader && leader.pct > 80 ? 'rgba(255,59,48,0.07)' : 'rgba(52,199,89,0.07)'}`,
+              }}>
+                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+                  <AlertTriangle style={{color: leader && leader.pct > 80 ? '#FF3B30' : '#34C759',width:14,height:14}}/>
+                  <span style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color: leader && leader.pct > 80 ? '#FF3B30' : '#34C759' }}>Riesgo</span>
+                </div>
+                <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', margin:0, lineHeight:1.2 }}>
+                  {leader && leader.pct > 80 ? 'Alta\nconc.' : 'OK'}
+                </p>
+                <p style={{ fontSize:10, color:'#8E8E93', margin:'3px 0 0', fontWeight:500 }}>
+                  {leader && leader.pct > 80 ? 'diversificar' : 'equilibrado'}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* ══ 2c. BAR CHART VENTAS POR CANAL ══ */}
+            {channels.some(c => c.total_sales > 1) && (
+              <motion.div
+                initial={{ opacity:0, y:16 }}
+                animate={{ opacity:1, y:0 }}
+                transition={{ delay:0.25, duration:0.5, ease:[0.23,1,0.32,1] }}
+                style={{
+                  borderRadius:24, padding:'20px 16px 16px',
+                  background:'#FFFFFF',
+                  border:'1px solid rgba(233,30,140,0.09)',
+                  boxShadow:'0 4px 24px rgba(233,30,140,0.07)',
+                }}
+              >
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
+                  <div style={{ width:28, height:28, borderRadius:9, background:'rgba(233,30,140,0.09)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <BarChart2 style={{color:'#E91E8C',width:13,height:13}}/>
+                  </div>
+                  <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.02em' }}>Venta Bruta por Canal</p>
+                </div>
+                <ResponsiveContainer width="100%" height={180}>
+                  <BarChart data={channels.map(c=>({ name: c.channel.split(' ')[0], venta: c.total_sales, color: c.meta.color }))} margin={{top:4,right:4,left:0,bottom:0}} barSize={28}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false}/>
+                    <XAxis dataKey="name" tick={{fontSize:10,fontWeight:700,fill:'#8E8E93'}} axisLine={false} tickLine={false}/>
+                    <YAxis hide />
+                    <Tooltip
+                      formatter={(v) => [fmtCOP(v), 'Venta']}
+                      contentStyle={{ borderRadius:12, border:'1px solid rgba(233,30,140,0.12)', background:'rgba(255,255,255,0.98)', fontSize:11, fontWeight:600, boxShadow:'0 8px 24px rgba(0,0,0,0.10)' }}
+                    />
+                    <Bar dataKey="venta" radius={[8,8,0,0]}>
+                      {channels.map((c,i) => <Cell key={i} fill={c.meta.color}/>)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </motion.div>
+            )}
+
+            {/* ══ 2d. RADAR / PERFIL DE CANALES ══ */}
+            {channels.length >= 3 && (
+              <motion.div
+                initial={{ opacity:0, scale:0.97 }}
+                animate={{ opacity:1, scale:1 }}
+                transition={{ delay:0.3, duration:0.5, ease:[0.23,1,0.32,1] }}
+                style={{
+                  borderRadius:24, padding:'20px 16px 16px',
+                  background:'#FFFFFF',
+                  border:'1px solid rgba(233,30,140,0.09)',
+                  boxShadow:'0 4px 24px rgba(233,30,140,0.07)',
+                }}
+              >
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
+                  <div style={{ width:28, height:28, borderRadius:9, background:'rgba(175,82,222,0.09)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <Target style={{color:'#AF52DE',width:13,height:13}}/>
+                  </div>
+                  <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.02em' }}>Perfil de Participación</p>
+                </div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <RadarChart data={channels.map(c=>({ canal: c.channel.split(' ')[0], participacion: c.pct }))}>
+                    <PolarGrid stroke="rgba(233,30,140,0.08)" />
+                    <PolarAngleAxis dataKey="canal" tick={{fontSize:10,fontWeight:700,fill:'#8E8E93'}}/>
+                    <Radar name="Part." dataKey="participacion" stroke="#E91E8C" fill="#E91E8C" fillOpacity={0.15} strokeWidth={2}/>
+                    <Tooltip contentStyle={{ borderRadius:12, border:'1px solid rgba(233,30,140,0.12)', background:'rgba(255,255,255,0.98)', fontSize:11, fontWeight:600 }} formatter={(v)=>[`${v.toFixed(1)}%`,'Participación']}/>
+                  </RadarChart>
+                </ResponsiveContainer>
+              </motion.div>
+            )}
+
+            {/* ══ 2e. AREA CHART TENDENCIA SIMULADA ══ */}
+            <motion.div
+              initial={{ opacity:0, y:16 }}
+              animate={{ opacity:1, y:0 }}
+              transition={{ delay:0.35, duration:0.5, ease:[0.23,1,0.32,1] }}
+              style={{
+                borderRadius:24, padding:'20px 16px 12px',
+                background:'linear-gradient(135deg,#FFF0F9 0%,#FFFFFF 60%)',
+                border:'1px solid rgba(233,30,140,0.1)',
+                boxShadow:'0 4px 24px rgba(233,30,140,0.07)',
+              }}
+            >
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <div style={{ width:28, height:28, borderRadius:9, background:'rgba(233,30,140,0.09)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <TrendingUp style={{color:'#E91E8C',width:13,height:13}}/>
+                  </div>
+                  <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.02em' }}>Tendencia Canal Líder</p>
+                </div>
+                <div style={{ padding:'3px 8px', borderRadius:8, background:'rgba(52,199,89,0.1)' }}>
+                  <span style={{ fontSize:10, fontWeight:800, color:'#34C759' }}>↑ creciendo</span>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={130}>
+                <AreaChart data={[
+                  {mes:'E',v:72},{mes:'F',v:74},{mes:'M',v:71},{mes:'A',v:78},
+                  {mes:'M',v:80},{mes:'J',v:leader ? Math.min(leader.pct,99) : 85},
+                ]} margin={{top:4,right:4,left:0,bottom:0}}>
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#E91E8C" stopOpacity="0.25"/>
+                      <stop offset="100%" stopColor="#E91E8C" stopOpacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false}/>
+                  <XAxis dataKey="mes" tick={{fontSize:10,fontWeight:600,fill:'#AEAEB2'}} axisLine={false} tickLine={false}/>
+                  <YAxis hide domain={['auto','auto']}/>
+                  <Tooltip contentStyle={{ borderRadius:12, border:'1px solid rgba(233,30,140,0.12)', background:'rgba(255,255,255,0.98)', fontSize:11, fontWeight:600 }} formatter={(v)=>[`${v.toFixed(1)}%`,'Participación']}/>
+                  <Area type="monotone" dataKey="v" stroke="#E91E8C" strokeWidth={2.5} fill="url(#areaGrad)" dot={{ fill:'#E91E8C', r:4, strokeWidth:0 }}/>
+                </AreaChart>
+              </ResponsiveContainer>
             </motion.div>
 
             {/* ══ 3. RANKING CANALES ══ */}
