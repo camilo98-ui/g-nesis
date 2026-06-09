@@ -188,13 +188,16 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       setProgress({ current: 0, total: records.length });
 
       try {
-        // 1. Borrar registros anteriores en paralelo (lotes de 20 deletes simultáneos)
-        const existing = await base44.entities.SalesReport.filter({ month: selectedMonth, year: selectedYear });
-        if (existing && existing.length > 0) {
-          setMessage(`Eliminando ${existing.length} registros anteriores...`);
+        // 1. Borrar registros anteriores del mismo mes/año
+        // Traer todos y filtrar en cliente (evita problemas con floats en DB)
+        setMessage(`Buscando registros anteriores del período...`);
+        const allExisting = await base44.entities.SalesReport.list('-uploaded_at', 10000);
+        const toDelete = allExisting.filter(r => Number(r.month) === selectedMonth && Number(r.year) === selectedYear);
+        if (toDelete.length > 0) {
+          setMessage(`Eliminando ${toDelete.length} registros anteriores...`);
           const deleteChunkSize = 20;
-          for (let i = 0; i < existing.length; i += deleteChunkSize) {
-            const chunk = existing.slice(i, i + deleteChunkSize);
+          for (let i = 0; i < toDelete.length; i += deleteChunkSize) {
+            const chunk = toDelete.slice(i, i + deleteChunkSize);
             await Promise.all(chunk.map(r => base44.entities.SalesReport.delete(r.id)));
           }
         }
