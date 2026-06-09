@@ -26,7 +26,9 @@ function parseKpisExcel(rows, monthNum, yearNum) {
 
   if (!rows || rows.length < 2) return records;
 
-  // Find header row (the one containing TIENDA and DEPARTAMENTO)
+  // Detectar si la fila 0 tiene headers semánticos (TIENDA, DEPARTAMENTO...)
+  // o si es un formato "Resumen de ventas / col_1 / col_2..." donde los datos empiezan en fila 1
+  // con la primera columna siendo la tienda y las siguientes departamento, sección, descripción, venta, unds, part
   let headerRowIdx = -1;
   for (let i = 0; i < Math.min(rows.length, 10); i++) {
     const row = rows[i];
@@ -37,30 +39,44 @@ function parseKpisExcel(rows, monthNum, yearNum) {
       break;
     }
   }
-  if (headerRowIdx === -1) return records;
 
-  const headerRow = rows[headerRowIdx];
-  const colMap = {};
-  headerRow.forEach((h, idx) => {
-    if (h != null) colMap[String(h).toUpperCase().trim()] = idx;
-  });
+  let iTienda, iDept, iSec, iDesc, iVenta, iUnits, iPart, dataStartRow;
 
-  const findCol = (...keys) => {
-    for (const k of keys) {
-      if (colMap[k] !== undefined) return colMap[k];
-      const found = Object.keys(colMap).find(h => h.includes(k));
-      if (found !== undefined) return colMap[found];
+  if (headerRowIdx !== -1) {
+    // Formato estándar con fila de headers
+    const headerRow = rows[headerRowIdx];
+    const colMap = {};
+    headerRow.forEach((h, idx) => {
+      if (h != null) colMap[String(h).toUpperCase().trim()] = idx;
+    });
+    const findCol = (...keys) => {
+      for (const k of keys) {
+        if (colMap[k] !== undefined) return colMap[k];
+        const found = Object.keys(colMap).find(h => h.includes(k));
+        if (found !== undefined) return colMap[found];
+      }
+      return -1;
+    };
+    iTienda = findCol('TIENDA', 'PUNTO');
+    iDept   = findCol('DEPARTAMENTO', 'DEPART');
+    iSec    = findCol('SECCION', 'SECCIÓN', 'SECCI');
+    iDesc   = findCol('DESCRIPCION', 'DESCRIPCIÓN', 'DESCRIP');
+    iPart   = findCol('PARTICIPACION', 'PARTICIPACIÓN', 'PART');
+    iVenta  = findCol('VENTA BRUTA', 'VENTA', 'MONTO', 'SALES');
+    iUnits  = findCol('UNDS', 'UNIDADES', 'UNIDAD', 'UNITS', 'QTY', 'CANT');
+    dataStartRow = headerRowIdx + 1;
+  } else {
+    // Formato alternativo: fila 0 = "Resumen de ventas | col_1 | col_2 | col_3 | col_4 | col_5 | col_6"
+    // Datos desde fila 1: TIENDA(0) | DEPARTAMENTO(1) | SECCION(2) | DESCRIPCION(3) | VENTA(4) | UNDS(5) | PART(6)
+    // Detectar por la primera fila de datos que tenga extractStoreCode válido
+    const firstDataRow = rows[1];
+    if (firstDataRow && extractStoreCode(String(firstDataRow[0] ?? ''))) {
+      iTienda = 0; iDept = 1; iSec = 2; iDesc = 3; iVenta = 4; iUnits = 5; iPart = 6;
+      dataStartRow = 1;
+    } else {
+      return records; // No se pudo detectar el formato
     }
-    return -1;
-  };
-
-  const iTienda = findCol('TIENDA', 'PUNTO');
-  const iDept   = findCol('DEPARTAMENTO', 'DEPART');
-  const iSec    = findCol('SECCION', 'SECCIÓN', 'SECCI');
-  const iDesc   = findCol('DESCRIPCION', 'DESCRIPCIÓN', 'DESCRIP');
-  const iPart   = findCol('PARTICIPACION', 'PARTICIPACIÓN', 'PART');
-  const iVenta  = findCol('VENTA BRUTA', 'VENTA', 'MONTO', 'SALES');
-  const iUnits  = findCol('UNDS', 'UNIDADES', 'UNIDAD', 'UNITS', 'QTY', 'CANT');
+  }
 
   if (iTienda === -1 || iDept === -1) return records;
 
@@ -69,7 +85,7 @@ function parseKpisExcel(rows, monthNum, yearNum) {
   let currentDept   = null;
   let currentSec    = null;
 
-  for (let i = headerRowIdx + 1; i < rows.length; i++) {
+  for (let i = dataStartRow; i < rows.length; i++) {
     const row = rows[i];
     if (!row) continue;
 
