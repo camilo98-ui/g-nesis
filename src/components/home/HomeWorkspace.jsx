@@ -9,7 +9,7 @@ import {
   Download, FileText, Lock, Receipt, Snowflake, Settings as SettingsIcon,
   CalendarDays, LogOut, Sparkles, Trophy, FileSpreadsheet, BarChart3, Clock,
   ChevronRight, Zap, BarChart2, ArrowUpRight, ArrowDownRight, Minus,
-  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown, Plus, X } from
+  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown, Plus, X, Truck } from
 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { STORES } from '@/components/StoreSelector';
@@ -783,7 +783,7 @@ export default function HomeWorkspace({
               {[
                 { label: 'PPT Excel', icon: FileSpreadsheet, onClick: onShowBudgetImporter, color: '#059669' },
                 { label: 'KPIs Participación', icon: BarChart3, onClick: onShowKpisUploader, color: '#6366f1' },
-                { label: 'Agregadores', icon: FileText, onClick: onShowAggregatorsUploader, color: '#f97316' },
+                { label: 'Agregadores', icon: Truck, onClick: onShowAggregatorsUploader, color: '#f97316' },
                 { label: 'P&G Upload', icon: TrendingUp, onClick: onShowPYGUploader, color: '#0ea5e9' },
                 { label: 'Txn por Hora', icon: Clock, onClick: () => window.location.href = '/HourlyTransactions', color: '#7c3aed' },
               ].map(({ label, icon: Icon, onClick, color }) => (

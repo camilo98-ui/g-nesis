@@ -12,6 +12,7 @@ import {
   Calendar, TrendingUp, DollarSign, Sparkles, ShoppingBag,
   CreditCard, Activity, Target, Package, ChevronDown
 } from 'lucide-react';
+import AggregatorsSection from './AggregatorsSection';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -461,6 +462,9 @@ export default function GerenteDashboard() {
           <MiniBarChart data={sugData} fmt={(v) => v.toLocaleString('es-CO')} />
         </Section>
       </div>
+
+      {/* ═══ AGREGADORES ═══ */}
+      <AggregatorsSection />
 
       {/* ═══ TAKEAWAY + PARTICIPACION ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
