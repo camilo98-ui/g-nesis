@@ -175,7 +175,7 @@ export default function AggregatorsView() {
   const monthLabel = activeMonthObj ? `${MONTHS[activeMonthObj.month-1]} ${activeMonthObj.year}` : 'Reciente';
   const displayStore = storeCode || 'Todas';
 
-  const donutData = channels.map(c => ({ name: c.channel, value: c.total_sales, color: c.meta.color }));
+  const donutData = channels.map(c => ({ name: c.channel, value: c.total_sales > 1 ? c.total_sales : c.pct, color: c.meta.color }));
 
   /* ── updatedAt ── */
   const updatedAt = (() => {
