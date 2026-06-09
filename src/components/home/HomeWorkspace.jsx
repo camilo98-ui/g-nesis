@@ -1354,11 +1354,6 @@ export default function HomeWorkspace({
 
             }
 
-            {/* ── AGGREGATORS WIDGET ── */}
-            {!isGerente && selectedStore &&
-              <AggregatorsWidget storeId={selectedStore} />
-            }
-
             {/* ── PRODUCT × TICKET ANALYSIS ── */}
             {salesReports && salesReports.length > 0 && selectedStore &&
             <motion.div
@@ -1530,13 +1525,13 @@ export default function HomeWorkspace({
             </motion.div>
           }
 
-          {/* ── CLIMA BANNER ── */}
+          {/* ── CLIMA + AGREGADORES ── */}
           {!isGerente && <motion.div
             id="climate-section"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="mb-4 lg:mb-7 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+            className="mb-4 lg:mb-7 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
 
             {/* Card 1 — Temperatura del día + impacto en ventas */}
             {(() => {
@@ -1689,9 +1684,14 @@ export default function HomeWorkspace({
                     </div>
                   </div>
                 </div>);
-            })()}
+                })()}
 
-          </motion.div>}
+                {/* Card 4 — Agregadores */}
+                {selectedStore && <AggregatorsWidget storeId={selectedStore} />}
+
+                </motion.div>}
+
+          {/* ── WEEKLY COMPARISON + AGREGADORES row ── */}
 
           <div className="flex items-center justify-center gap-2 mt-8 mb-3">
             <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, transparent, rgba(194,24,117,0.12))' }} />

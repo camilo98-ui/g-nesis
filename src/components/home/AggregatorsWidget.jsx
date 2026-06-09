@@ -87,7 +87,7 @@ export default function AggregatorsWidget({ storeId }) {
   const topChannel = channels[0];
   const avgPct = channels.length > 0 ? (channels.reduce((s,c) => s + c.pct, 0) / channels.length) : 0;
   const maxPct = Math.max(...channels.map(c => c.pct), 1);
-  const BAR_HEIGHT = 80;
+  const BAR_HEIGHT = 60;
 
   const handleOpen = () => navigate(storeCode ? `/AggregatorsView?store=${encodeURIComponent(storeCode)}` : '/AggregatorsView');
 
@@ -98,8 +98,8 @@ export default function AggregatorsWidget({ storeId }) {
       transition={{ duration:0.45 }}
       onClick={handleOpen}
       style={{
-        borderRadius: 24,
-        padding: '16px 18px 14px',
+        borderRadius: 20,
+        padding: '14px 14px 12px',
         background: 'rgba(255,255,255,0.97)',
         border: '1px solid rgba(233,30,140,0.10)',
         boxShadow: '0 4px 24px rgba(233,30,140,0.08), inset 0 1px 0 #fff',
