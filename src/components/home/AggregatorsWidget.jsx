@@ -94,46 +94,59 @@ export default function AggregatorsWidget({ storeId }) {
       transition={{ duration:0.4 }}
       onClick={handleOpen}
       style={{
-        borderRadius: 16,
-        padding: '10px 14px',
-        background: 'rgba(255,255,255,0.9)',
-        border: '1px solid rgba(233,30,140,0.12)',
-        boxShadow: '0 2px 12px rgba(233,30,140,0.07)',
+        borderRadius: 20,
+        padding: '14px 16px',
+        background: 'rgba(255,255,255,0.95)',
+        border: '1px solid rgba(233,30,140,0.13)',
+        boxShadow: '0 2px 14px rgba(233,30,140,0.08), inset 0 1px 0 rgba(255,255,255,1)',
         cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      {/* Label */}
-      <div style={{ flexShrink:0 }}>
-        <p style={{ fontSize:8, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color:'#E91E8C', margin:0, marginBottom:1 }}>Agregadores</p>
-        <p style={{ fontSize:11, fontWeight:900, color:'#1a1a2e', margin:0, letterSpacing:'-0.02em' }}>
-          {totalVentas > 1 ? fmtCOP(totalVentas) : `${channels.length} canales`}
-        </p>
+      {/* Ambient glow */}
+      <div style={{
+        position:'absolute', top:-20, right:-20, width:80, height:80, borderRadius:'50%',
+        background:'radial-gradient(circle,rgba(233,30,140,0.10) 0%,transparent 70%)',
+        filter:'blur(16px)', pointerEvents:'none',
+      }}/>
+
+      {/* Header row */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10, position:'relative', zIndex:1 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+          <div style={{ width:20, height:20, borderRadius:7, background:'rgba(233,30,140,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            <span style={{ fontSize:10 }}>🛵</span>
+          </div>
+          <div>
+            <p style={{ fontSize:8, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.15em', color:'#E91E8C', margin:0, lineHeight:1 }}>Agregadores</p>
+            <p style={{ fontSize:12, fontWeight:900, color:'#1a1a2e', margin:0, letterSpacing:'-0.02em', lineHeight:1.2 }}>
+              {totalVentas > 1 ? fmtCOP(totalVentas) : `${channels.length} canales activos`}
+            </p>
+          </div>
+        </div>
+        <ChevronRight style={{color:'#E91E8C',width:13,height:13,opacity:0.5}}/>
       </div>
 
-      {/* Dot bars */}
-      <div style={{ flex:1, display:'flex', alignItems:'center', gap:6 }}>
+      {/* Channel bars grid */}
+      <div style={{ display:'grid', gridTemplateColumns:`repeat(${Math.min(channels.length,5)}, 1fr)`, gap:6, position:'relative', zIndex:1 }}>
         {channels.slice(0,5).map((c) => (
-          <div key={c.channel} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2, flex:1 }}>
-            <div style={{ width:'100%', height:5, borderRadius:99, background:`${c.meta.color}15`, overflow:'hidden' }}>
+          <div key={c.channel} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
+            {/* Vertical bar */}
+            <div style={{ width:'100%', height:32, borderRadius:8, background:`${c.meta.color}10`, display:'flex', alignItems:'flex-end', overflow:'hidden' }}>
               <motion.div
-                initial={{ width:0 }}
-                animate={{ width:`${c.pct}%` }}
-                transition={{ duration:0.7, ease:[0.23,1,0.32,1] }}
-                style={{ height:5, borderRadius:99, background:c.meta.color }}
+                initial={{ height:0 }}
+                animate={{ height:`${Math.max(c.pct, 6)}%` }}
+                transition={{ duration:0.8, ease:[0.23,1,0.32,1] }}
+                style={{ width:'100%', borderRadius:8, background:`linear-gradient(180deg, ${c.meta.color}cc, ${c.meta.color})` }}
               />
             </div>
-            <span style={{ fontSize:8, fontWeight:700, color:c.meta.color }}>{c.pct.toFixed(0)}%</span>
-            <span style={{ fontSize:7, color:'#94a3b8', fontWeight:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'100%' }}>
+            <span style={{ fontSize:9, fontWeight:900, color:c.meta.color, lineHeight:1 }}>{c.pct.toFixed(0)}%</span>
+            <span style={{ fontSize:7, color:'#94a3b8', fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'100%', textAlign:'center' }}>
               {c.channel.split(' ')[0]}
             </span>
           </div>
         ))}
       </div>
-
-      <ChevronRight style={{color:'#E91E8C',width:12,height:12,opacity:0.5,flexShrink:0}}/>
     </motion.div>
   );
 }
