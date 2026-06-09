@@ -188,28 +188,32 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       setProgress({ current: 0, total: records.length });
 
       try {
-        // 1. Borrar registros anteriores del mismo mes/año para evitar duplicados
+        // 1. Borrar registros anteriores en paralelo (lotes de 20 deletes simultáneos)
         const existing = await base44.entities.SalesReport.filter({ month: selectedMonth, year: selectedYear });
         if (existing && existing.length > 0) {
           setMessage(`Eliminando ${existing.length} registros anteriores...`);
-          for (let i = 0; i < existing.length; i++) {
-            await base44.entities.SalesReport.delete(existing[i].id);
-            if (i % 5 === 4) await new Promise(r => setTimeout(r, 500));
+          const deleteChunkSize = 20;
+          for (let i = 0; i < existing.length; i += deleteChunkSize) {
+            const chunk = existing.slice(i, i + deleteChunkSize);
+            await Promise.all(chunk.map(r => base44.entities.SalesReport.delete(r.id)));
           }
         }
 
-        // 2. Insertar nuevos registros en chunks grandes
-        const chunkSize = 50;
-        let totalInserted = 0;
+        // 2. Insertar nuevos registros en chunks grandes simultáneos
+        const chunkSize = 100;
+        const chunks = [];
         for (let i = 0; i < records.length; i += chunkSize) {
-          const chunk = records.slice(i, i + chunkSize);
-          await base44.entities.SalesReport.bulkCreate(chunk);
-          totalInserted += chunk.length;
+          chunks.push(records.slice(i, i + chunkSize));
+        }
+        let totalInserted = 0;
+        // Enviar de 3 en 3 chunks en paralelo
+        const concurrency = 3;
+        for (let i = 0; i < chunks.length; i += concurrency) {
+          const batch = chunks.slice(i, i + concurrency);
+          await Promise.all(batch.map(chunk => base44.entities.SalesReport.bulkCreate(chunk)));
+          totalInserted += batch.reduce((s, c) => s + c.length, 0);
           setProgress({ current: totalInserted, total: records.length });
           setMessage(`Subiendo... ${totalInserted}/${records.length} registros`);
-          if (i + chunkSize < records.length) {
-            await new Promise(r => setTimeout(r, 300));
-          }
         }
         setStatus('success');
         setMessage(`✅ ${totalInserted} productos cargados correctamente.`);
