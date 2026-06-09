@@ -2,20 +2,19 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CHANNEL_META = {
-  'Al Paso':           { color: '#E91E8C', emoji: '🏠' },
-  'Rappi':             { color: '#FF3B30', emoji: '🛵' },
-  'Didi':              { color: '#FF9500', emoji: '🚗' },
-  'Domicilios Propios':{ color: '#5856D6', emoji: '📦' },
-  'iFood':             { color: '#EA1D2C', emoji: '🍔' },
+  'Al Paso':            { color: '#E91E8C' },
+  'Rappi':              { color: '#FF3B30' },
+  'Didi':               { color: '#FF6CAB' },
+  'Domicilios Propios': { color: '#AF52DE' },
+  'iFood':              { color: '#EA1D2C' },
 };
-const FALLBACK_COLORS = ['#E91E8C','#FF6CAB','#FF9500','#5856D6','#34C759','#AF52DE'];
+const FALLBACK_COLORS = ['#E91E8C','#FF6CAB','#FF9EC9','#F472B6','#FB7185','#F9A8D4'];
 
 function getMeta(channel, idx) {
-  return CHANNEL_META[channel] || { color: FALLBACK_COLORS[idx % FALLBACK_COLORS.length], emoji: '📊' };
+  return CHANNEL_META[channel] || { color: FALLBACK_COLORS[idx % FALLBACK_COLORS.length] };
 }
 
 function extractStoreCode(storeId) {
@@ -85,67 +84,111 @@ export default function AggregatorsWidget({ storeId }) {
   if (isLoading || channels.length === 0) return null;
 
   const totalVentas = channels.reduce((s,c) => s + c.total_sales, 0);
+  const topChannel = channels[0];
+  const avgPct = channels.length > 0 ? (channels.reduce((s,c) => s + c.pct, 0) / channels.length) : 0;
+  const maxPct = Math.max(...channels.map(c => c.pct), 1);
+  const BAR_HEIGHT = 80;
+
   const handleOpen = () => navigate(storeCode ? `/AggregatorsView?store=${encodeURIComponent(storeCode)}` : '/AggregatorsView');
 
   return (
     <motion.div
       initial={{ opacity:0, y:8 }}
       animate={{ opacity:1, y:0 }}
-      transition={{ duration:0.4 }}
+      transition={{ duration:0.45 }}
       onClick={handleOpen}
       style={{
-        borderRadius: 20,
-        padding: '14px 16px',
-        background: 'rgba(255,255,255,0.95)',
-        border: '1px solid rgba(233,30,140,0.13)',
-        boxShadow: '0 2px 14px rgba(233,30,140,0.08), inset 0 1px 0 rgba(255,255,255,1)',
+        borderRadius: 24,
+        padding: '16px 18px 14px',
+        background: 'rgba(255,255,255,0.97)',
+        border: '1px solid rgba(233,30,140,0.10)',
+        boxShadow: '0 4px 24px rgba(233,30,140,0.08), inset 0 1px 0 #fff',
         cursor: 'pointer',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Ambient glow */}
+      {/* Ambient top glow */}
       <div style={{
-        position:'absolute', top:-20, right:-20, width:80, height:80, borderRadius:'50%',
-        background:'radial-gradient(circle,rgba(233,30,140,0.10) 0%,transparent 70%)',
-        filter:'blur(16px)', pointerEvents:'none',
+        position:'absolute', top:-40, right:-40, width:160, height:160, borderRadius:'50%',
+        background:'radial-gradient(circle, rgba(233,30,140,0.07) 0%, transparent 70%)',
+        pointerEvents:'none',
       }}/>
 
-      {/* Header row */}
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10, position:'relative', zIndex:1 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-          <div style={{ width:20, height:20, borderRadius:7, background:'rgba(233,30,140,0.10)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-            <span style={{ fontSize:10 }}>🛵</span>
-          </div>
-          <div>
-            <p style={{ fontSize:8, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.15em', color:'#E91E8C', margin:0, lineHeight:1 }}>Agregadores</p>
-            <p style={{ fontSize:12, fontWeight:900, color:'#1a1a2e', margin:0, letterSpacing:'-0.02em', lineHeight:1.2 }}>
-              {totalVentas > 1 ? fmtCOP(totalVentas) : `${channels.length} canales activos`}
-            </p>
-          </div>
+      {/* Header */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:14, position:'relative', zIndex:1 }}>
+        <div>
+          <p style={{ fontSize:9, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.18em', color:'#94a3b8', margin:0, marginBottom:2 }}>
+            Canales de Venta
+          </p>
+          <p style={{ fontSize:10, color:'#94a3b8', margin:0, fontWeight:500 }}>Participación por canal</p>
         </div>
-        <ChevronRight style={{color:'#E91E8C',width:13,height:13,opacity:0.5}}/>
+        {totalVentas > 1 && (
+          <div style={{ textAlign:'right' }}>
+            <p style={{ fontSize:8, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color:'#E91E8C', margin:0, marginBottom:1 }}>Total</p>
+            <p style={{ fontSize:14, fontWeight:900, color:'#E91E8C', margin:0, letterSpacing:'-0.03em' }}>{fmtCOP(totalVentas)}</p>
+          </div>
+        )}
       </div>
 
-      {/* Channel bars grid */}
-      <div style={{ display:'grid', gridTemplateColumns:`repeat(${Math.min(channels.length,5)}, 1fr)`, gap:6, position:'relative', zIndex:1 }}>
-        {channels.slice(0,5).map((c) => (
-          <div key={c.channel} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
-            {/* Vertical bar */}
-            <div style={{ width:'100%', height:32, borderRadius:8, background:`${c.meta.color}10`, display:'flex', alignItems:'flex-end', overflow:'hidden' }}>
-              <motion.div
-                initial={{ height:0 }}
-                animate={{ height:`${Math.max(c.pct, 6)}%` }}
-                transition={{ duration:0.8, ease:[0.23,1,0.32,1] }}
-                style={{ width:'100%', borderRadius:8, background:`linear-gradient(180deg, ${c.meta.color}cc, ${c.meta.color})` }}
-              />
+      {/* Bar chart */}
+      <div style={{ display:'flex', alignItems:'flex-end', gap:8, height: BAR_HEIGHT + 28, marginBottom:12, position:'relative', zIndex:1 }}>
+        {channels.slice(0,6).map((c, i) => {
+          const barH = Math.max((c.pct / maxPct) * BAR_HEIGHT, 8);
+          const color = c.meta.color;
+          return (
+            <div key={c.channel} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'flex-end', height: BAR_HEIGHT + 28, gap:4 }}>
+              {/* Bar */}
+              <div style={{ width:'100%', height: BAR_HEIGHT, display:'flex', alignItems:'flex-end' }}>
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: barH }}
+                  transition={{ delay: i * 0.07, duration: 0.7, ease: [0.23,1,0.32,1] }}
+                  style={{
+                    width: '100%',
+                    borderRadius: '10px 10px 6px 6px',
+                    background: `linear-gradient(180deg, ${color}dd 0%, ${color}88 100%)`,
+                    boxShadow: `0 4px 12px ${color}30`,
+                  }}
+                />
+              </div>
+              {/* Label */}
+              <span style={{ fontSize:8, fontWeight:600, color:'#94a3b8', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'100%', textAlign:'center' }}>
+                {c.channel.split(' ')[0]}
+              </span>
             </div>
-            <span style={{ fontSize:9, fontWeight:900, color:c.meta.color, lineHeight:1 }}>{c.pct.toFixed(0)}%</span>
-            <span style={{ fontSize:7, color:'#94a3b8', fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'100%', textAlign:'center' }}>
-              {c.channel.split(' ')[0]}
-            </span>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+
+      {/* KPI pills */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:6, position:'relative', zIndex:1 }}>
+        {/* Top canal */}
+        <div style={{ borderRadius:12, padding:'8px 10px', background:'rgba(233,30,140,0.05)', border:'1px solid rgba(233,30,140,0.10)' }}>
+          <p style={{ fontSize:7, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.12em', color:'#94a3b8', margin:0, marginBottom:2 }}>Canal Top</p>
+          <p style={{ fontSize:11, fontWeight:900, color:'#E91E8C', margin:0, letterSpacing:'-0.02em', lineHeight:1.1 }}>
+            {topChannel?.pct.toFixed(1)}%
+          </p>
+          <p style={{ fontSize:8, color:'#94a3b8', margin:0, fontWeight:500, marginTop:1 }}>{topChannel?.channel.split(' ')[0]}</p>
+        </div>
+
+        {/* Promedio */}
+        <div style={{ borderRadius:12, padding:'8px 10px', background:'rgba(233,30,140,0.05)', border:'1px solid rgba(233,30,140,0.10)' }}>
+          <p style={{ fontSize:7, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.12em', color:'#94a3b8', margin:0, marginBottom:2 }}>Promedio</p>
+          <p style={{ fontSize:11, fontWeight:900, color:'#E91E8C', margin:0, letterSpacing:'-0.02em', lineHeight:1.1 }}>
+            {avgPct.toFixed(1)}%
+          </p>
+          <p style={{ fontSize:8, color:'#94a3b8', margin:0, fontWeight:500, marginTop:1 }}>por canal</p>
+        </div>
+
+        {/* Canales */}
+        <div style={{ borderRadius:12, padding:'8px 10px', background:'rgba(233,30,140,0.05)', border:'1px solid rgba(233,30,140,0.10)' }}>
+          <p style={{ fontSize:7, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.12em', color:'#94a3b8', margin:0, marginBottom:2 }}>Canales</p>
+          <p style={{ fontSize:11, fontWeight:900, color:'#E91E8C', margin:0, letterSpacing:'-0.02em', lineHeight:1.1 }}>
+            {channels.length}
+          </p>
+          <p style={{ fontSize:8, color:'#94a3b8', margin:0, fontWeight:500, marginTop:1 }}>activos</p>
+        </div>
       </div>
     </motion.div>
   );
