@@ -55,34 +55,44 @@ function parseAggregatorsExcel(XLSX, arrayBuffer, month, year) {
 
   if (isFormatB) {
     // Formato B: cada fila es { Mes: tienda, col_1: canal, col_2: subcanal, May/col: venta }
-    // Columna de venta bruta: buscar la que tenga valores numéricos grandes
+    // Saltar la primera fila si es la fila de etiquetas (ej: "Punto de Venta", "Canal", "SubCanal", "Venta Bruta")
+    const isHeaderRow = (row) => {
+      const v = String(row[firstKey] || '').toLowerCase();
+      return v.includes('punto de venta') || v.includes('tienda') || v === 'mes';
+    };
+    const dataRows = isHeaderRow(firstRow) ? jsonRows.slice(1) : jsonRows;
+
+    // Columna de venta bruta: buscar en todas las filas la que tenga valores numéricos grandes
     const ventaKey = keys.find(k => {
-      const val = parseNum(firstRow[k]);
-      return val !== null && val > 1000;
+      return dataRows.some(row => {
+        const val = parseNum(row[k]);
+        return val !== null && val > 1000;
+      });
     }) || keys[3];
 
     // Propagación: si Mes está vacío, usar la última tienda vista
     let lastStore = null;
-    for (const row of jsonRows) {
+    for (const row of dataRows) {
       const storeRaw = row[firstKey] ? String(row[firstKey]).trim() : null;
       const storeCode = storeRaw ? extractStoreCode(storeRaw) : null;
       if (storeCode) lastStore = storeCode;
       if (!lastStore) continue;
 
-      // Tomar canal: segunda o tercera columna que no sea la tienda
+      // Tomar canal y subcanal
       const canal = row[keys[1]] ? String(row[keys[1]]).trim() : null;
       const subcanal = row[keys[2]] ? String(row[keys[2]]).trim() : null;
       if (!canal || canal.toLowerCase() === 'canal') continue;
 
-      // Saltar filas de totales de tienda (subcanal vacío = total de tienda)
-      const channel = subcanal && subcanal.toLowerCase() !== 'total' ? `${canal} - ${subcanal}` : canal;
-      const isStoreTotal = !subcanal && canal.toLowerCase() === 'total';
+      // Saltar filas de totales de tienda (canal = 'Total' sin subcanal)
+      const isStoreTotal = canal.toLowerCase() === 'total' && !subcanal;
       if (isStoreTotal) continue;
+
+      // Canal: si subcanal es 'Total' o vacío, usar solo el canal; si no, combinar
+      const channel = subcanal && subcanal.toLowerCase() !== 'total' ? `${canal} - ${subcanal}` : canal;
 
       const rawVenta = parseNum(row[ventaKey]);
       if (rawVenta === null || rawVenta === 0) continue;
 
-      // Calcular participación después de tener todos los registros por tienda
       records.push({
         store_code: lastStore,
         channel,
