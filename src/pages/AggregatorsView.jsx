@@ -162,6 +162,10 @@ export default function AggregatorsView() {
     <div className="min-h-screen w-full" style={{
       background: 'linear-gradient(160deg, #FDF2F8 0%, #F5F3FF 40%, #EFF6FF 100%)',
       fontFamily: "'Inter Tight','Inter',system-ui,sans-serif",
+      position: 'fixed',
+      inset: 0,
+      overflowY: 'auto',
+      zIndex: 9999,
     }}>
 
       {/* ── STATUS BAR SPACER ── */}
@@ -172,7 +176,7 @@ export default function AggregatorsView() {
         initial={{ opacity:0, y:-16 }}
         animate={{ opacity:1, y:0 }}
         transition={{ duration:0.45, ease:[0.23,1,0.32,1] }}
-        className="sticky top-0 z-30 px-5 pt-5 pb-4"
+        className="sticky top-0 z-30 px-4 pt-5 pb-4"
         style={{
           background:'rgba(253,242,248,0.85)',
           backdropFilter:'blur(40px) saturate(160%)',
@@ -180,7 +184,7 @@ export default function AggregatorsView() {
           borderBottom:'1px solid rgba(194,24,117,0.07)',
         }}
       >
-        <div className="flex items-center justify-between max-w-md mx-auto">
+        <div className="flex items-center justify-between w-full">
           <button
             onClick={() => window.history.back()}
             className="w-9 h-9 rounded-2xl flex items-center justify-center transition-all active:scale-95"
@@ -202,7 +206,7 @@ export default function AggregatorsView() {
 
         {/* month selector */}
         {availableMonths.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto scrollbar-none mt-3 max-w-md mx-auto pb-0.5">
+          <div className="flex gap-2 overflow-x-auto scrollbar-none mt-3 w-full pb-0.5">
             {availableMonths.map(m => (
               <button key={m.key} onClick={() => setSelectedMonth(m.key)}
                 className="flex-shrink-0 px-3.5 py-1.5 rounded-xl text-[11px] font-bold transition-all"
@@ -219,7 +223,7 @@ export default function AggregatorsView() {
       </motion.div>
 
       {/* ── CONTENT ── */}
-      <div className="px-5 py-5 max-w-md mx-auto space-y-4 pb-10">
+      <div className="px-4 py-5 w-full space-y-4 pb-10">
 
         {isLoading ? (
           <div className="flex items-center justify-center py-32">
