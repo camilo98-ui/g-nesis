@@ -15,6 +15,7 @@ import BudgetNew from './pages/BudgetNew';
 import PowerBIReport from './pages/PowerBIReport';
 import ProductTicketAnalysisPage from './pages/ProductTicketAnalysisPage';
 import RadarCompetitivo from './pages/RadarCompetitivo';
+import AggregatorsView from './pages/AggregatorsView';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { NovaProvider } from '@/components/NovaContext';
 import { PYGDashboardProvider } from '@/components/PYGDashboardContext';
@@ -78,6 +79,7 @@ const AuthenticatedApp = () => {
       <Route path="/PowerBIReport" element={<LayoutWrapper currentPageName="PowerBIReport"><PowerBIReport /></LayoutWrapper>} />
       <Route path="/ProductTicketAnalysis" element={<LayoutWrapper currentPageName="ProductTicketAnalysis"><ProductTicketAnalysisPage /></LayoutWrapper>} />
       <Route path="/RadarCompetitivo" element={<LayoutWrapper currentPageName="RadarCompetitivo"><RadarCompetitivo /></LayoutWrapper>} />
+      <Route path="/AggregatorsView" element={<AggregatorsView />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

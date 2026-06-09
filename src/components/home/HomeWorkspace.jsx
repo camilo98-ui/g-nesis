@@ -826,7 +826,7 @@ export default function HomeWorkspace({
               <motion.button
                 whileHover={{ x: 2 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setShowAggregatorsModal(true)}
+                onClick={() => window.location.href = `/AggregatorsView?store=${encodeURIComponent(selectedStore || '')}`}
                 className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left"
                 style={{ background: 'transparent', border: '1px solid transparent', transition: 'all 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(249,115,22,0.05)'}
