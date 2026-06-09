@@ -183,21 +183,21 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
 
+      // Debug: loguear estructura del archivo
+      console.log('🔍 Fila 0:', rows[0]);
+      console.log('🔍 Fila 1:', rows[1]);
+      console.log('🔍 Fila 2:', rows[2]);
+
       const records = parseKpisExcel(rows, selectedMonth, selectedYear);
       if (records.length === 0) {
-        const headers = rows[0]?.filter(Boolean).join(', ') || 'ninguna';
+        const row0 = rows[0]?.map(c => String(c ?? '')).join(' | ') || 'vacía';
+        const row1 = rows[1]?.map(c => String(c ?? '')).join(' | ') || 'vacía';
         setStatus('error');
-        setMessage(`No se encontraron datos válidos. Columnas detectadas: [${headers}]. Se necesitan: TIENDA, DEPARTAMENTO, DESCRIPCION, VENTA.`);
+        setMessage(`No se encontraron datos. Fila 0: [${row0}] — Fila 1: [${row1}]`);
         return;
       }
 
-      // Debug: mostrar cuántos tienen units_sold
-      const withUnits = records.filter(r => r.units_sold != null && r.units_sold > 0).length;
-      const headers = rows[0]?.filter(Boolean).map(h => String(h).toUpperCase().trim()) || [];
-      console.log(`📊 Headers detectados:`, headers);
-      console.log(`📊 Registros: ${records.length} | Con unidades: ${withUnits} | Ejemplo:`, records[0]);
-      const unidadesCol = headers.find(h => ['CANTIDAD','UNIDADES','UNIDAD','UNITS','QTY','CANT'].some(k => h.includes(k)));
-      setMessage(`📊 ${records.length} filas · ${withUnits} con unidades (col: ${unidadesCol || 'NO ENCONTRADA'}) · procesando...`);
+      setMessage(`✅ ${records.length} filas detectadas, subiendo...`);
 
       setStatus('uploading');
       setMessage(`Eliminando datos anteriores del mismo período...`);
