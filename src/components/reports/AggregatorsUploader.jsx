@@ -23,31 +23,19 @@ function extractStoreCode(headerStr) {
 }
 
 // Parsear el Excel de agregadores
-// Estructura real del archivo:
-//   Fila 0 (header via sheet_to_json): columnas con nombre de tienda "BTA 21 (CC...)"
-//                                       la primera columna es "PdV"
-//   Fila 0 datos: { PdV: 'Canal', 'BTA 21...': '% Part. Venta Bruta...' }  ← fila de sub-header
-//   Fila 1+: { PdV: 'Al Paso', 'BTA 21...': 0.944, ... }  ← datos reales
-//
-// Como sheet_to_json usa la fila 0 como keys, los datos empiezan en row index 0
-// donde row[PdV] === 'Canal' (sub-header) y row index 1+ son los datos reales.
-function parseAggregatorsExcel(XLSX, arrayBuffer) {
+// Soporta dos formatos:
+// Formato A (clásico): primera fila = tiendas, primera columna = canal, celdas = % participación
+// Formato B (nuevo):   columnas Mes(tienda), Canal, SubCanal, VentaBruta
+//   Ejemplo: { Mes: 'BTA 18 (CC...)', col_1: 'Al Paso', col_2: 'Total', May: 159594020 }
+function parseAggregatorsExcel(XLSX, arrayBuffer, month, year) {
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const jsonRows = XLSX.utils.sheet_to_json(sheet, { defval: null });
+  if (jsonRows.length === 0) return [];
 
-  // Usar header:1 para tener control total de filas
-  const jsonRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
-  if (jsonRows.length < 2) return [];
-
-  // Fila 0 = nombres de columna (PdV, BTA 21 (CC...), BTA 21 (CC...), ...)
-  const headerRow = jsonRows[0];
-
-  // Detectar qué columnas son de participación vs venta
-  // Si hay una segunda fila con "Canal" en col 0, es el sub-header
-  let dataStartRow = 1;
-  if (jsonRows[1] && String(jsonRows[1][0] || '').toLowerCase().includes('canal')) {
-    dataStartRow = 2;
-  }
+  const reportId = `agg_${Date.now()}`;
+  const uploadedAt = new Date().toISOString();
+  const records = [];
 
   const parseNum = (val) => {
     if (val === null || val === undefined || val === '') return null;
@@ -56,69 +44,115 @@ function parseAggregatorsExcel(XLSX, arrayBuffer) {
     return isNaN(n) ? null : n;
   };
 
-  // Mapear columnas a tiendas
-  // El Excel repite el nombre de tienda para dos columnas: % y Venta Bruta
-  // Como XLSX lee celdas combinadas, la segunda aparición puede ser null
-  // Reconstruir: primera aparición de cada código = colPart, segunda = colVenta
-  const storeGroups = {}; // { storeCode: { colPart, colVenta } }
-  const storeSeen = {};   // cuántas veces se vio cada código
+  // Detectar formato B: primera fila tiene columna "Mes" (o similar) con nombre de tienda
+  const firstRow = jsonRows[0];
+  const keys = Object.keys(firstRow);
+  const firstKey = keys[0];
+  const firstVal = String(firstRow[firstKey] || '');
+  const isFormatB = firstVal.toLowerCase().includes('punto de venta') || 
+                    extractStoreCode(firstVal) !== null ||
+                    firstKey === 'Mes';
 
+  if (isFormatB) {
+    // Formato B: cada fila es { Mes: tienda, col_1: canal, col_2: subcanal, May/col: venta }
+    // Columna de venta bruta: buscar la que tenga valores numéricos grandes
+    const ventaKey = keys.find(k => {
+      const val = parseNum(firstRow[k]);
+      return val !== null && val > 1000;
+    }) || keys[3];
+
+    // Propagación: si Mes está vacío, usar la última tienda vista
+    let lastStore = null;
+    for (const row of jsonRows) {
+      const storeRaw = row[firstKey] ? String(row[firstKey]).trim() : null;
+      const storeCode = storeRaw ? extractStoreCode(storeRaw) : null;
+      if (storeCode) lastStore = storeCode;
+      if (!lastStore) continue;
+
+      // Tomar canal: segunda o tercera columna que no sea la tienda
+      const canal = row[keys[1]] ? String(row[keys[1]]).trim() : null;
+      const subcanal = row[keys[2]] ? String(row[keys[2]]).trim() : null;
+      if (!canal || canal.toLowerCase() === 'canal') continue;
+
+      // Saltar filas de totales de tienda (subcanal vacío = total de tienda)
+      const channel = subcanal && subcanal.toLowerCase() !== 'total' ? `${canal} - ${subcanal}` : canal;
+      const isStoreTotal = !subcanal && canal.toLowerCase() === 'total';
+      if (isStoreTotal) continue;
+
+      const rawVenta = parseNum(row[ventaKey]);
+      if (rawVenta === null || rawVenta === 0) continue;
+
+      // Calcular participación después de tener todos los registros por tienda
+      records.push({
+        store_code: lastStore,
+        channel,
+        participation: 0, // se calcula después
+        total_sales: rawVenta,
+        report_id: reportId,
+        uploaded_at: uploadedAt,
+        month,
+        year,
+      });
+    }
+
+    // Calcular participación por tienda
+    const storeTotal = {};
+    for (const r of records) {
+      storeTotal[r.store_code] = (storeTotal[r.store_code] || 0) + r.total_sales;
+    }
+    for (const r of records) {
+      r.participation = storeTotal[r.store_code] > 0 ? r.total_sales / storeTotal[r.store_code] : 0;
+    }
+
+    return records;
+  }
+
+  // Formato A clásico (filas = canal, columnas = tiendas)
+  const rawRows = XLSX.utils.sheet_to_json(XLSX.read(arrayBuffer, { type: 'array' }).Sheets[workbook.SheetNames[0]], { header: 1, defval: null });
+  if (rawRows.length < 2) return [];
+  const headerRow = rawRows[0];
+  let dataStartRow = 1;
+  if (rawRows[1] && String(rawRows[1][0] || '').toLowerCase().includes('canal')) dataStartRow = 2;
+
+  const storeGroups = {};
+  const storeSeen = {};
   for (let col = 1; col < headerRow.length; col++) {
     const code = extractStoreCode(headerRow[col]);
     if (!code) {
-      // Puede ser la segunda columna de la última tienda vista (col vacía)
-      // Buscar hacia atrás el último store y asignarle colVenta si no tiene
       for (let back = col - 1; back >= 1; back--) {
         const backCode = extractStoreCode(headerRow[back]);
         if (backCode && storeGroups[backCode] && storeGroups[backCode].colVenta === null) {
-          storeGroups[backCode].colVenta = col;
-          break;
+          storeGroups[backCode].colVenta = col; break;
         }
-        if (backCode) break; // ya tiene venta asignada, parar
+        if (backCode) break;
       }
       continue;
     }
-
-    if (!storeSeen[code]) {
-      storeSeen[code] = 0;
-      storeGroups[code] = { colPart: null, colVenta: null };
-    }
+    if (!storeSeen[code]) { storeSeen[code] = 0; storeGroups[code] = { colPart: null, colVenta: null }; }
     storeSeen[code]++;
-
-    if (storeSeen[code] === 1) {
-      storeGroups[code].colPart = col;
-    } else {
-      storeGroups[code].colVenta = col;
-    }
+    if (storeSeen[code] === 1) storeGroups[code].colPart = col;
+    else storeGroups[code].colVenta = col;
   }
 
-  const reportId = `agg_${Date.now()}`;
-  const uploadedAt = new Date().toISOString();
-  const records = [];
-
-  for (let row = dataStartRow; row < jsonRows.length; row++) {
-    const rowData = jsonRows[row];
+  for (let row = dataStartRow; row < rawRows.length; row++) {
+    const rowData = rawRows[row];
     if (!rowData || !rowData[0]) continue;
     const channel = String(rowData[0]).trim();
     if (!channel || channel.toLowerCase() === 'canal') continue;
-
     for (const [storeCode, { colPart, colVenta }] of Object.entries(storeGroups)) {
       if (colPart === null) continue;
-
       const rawPart = parseNum(rowData[colPart]);
       const rawVenta = colVenta !== null ? parseNum(rowData[colVenta]) : null;
       if (rawPart === null && rawVenta === null) continue;
-
-      // Normalizar: 0.944 → 0.944 (ya es decimal), 94.4 → 0.944
-      const participation = rawPart !== null ? (rawPart > 1 ? rawPart / 100 : rawPart) : 0;
-
       records.push({
         store_code: storeCode,
         channel,
-        participation,
+        participation: rawPart !== null ? (rawPart > 1 ? rawPart / 100 : rawPart) : 0,
         total_sales: rawVenta || 0,
         report_id: reportId,
         uploaded_at: uploadedAt,
+        month,
+        year,
       });
     }
   }
@@ -126,11 +160,22 @@ function parseAggregatorsExcel(XLSX, arrayBuffer) {
   return records;
 }
 
+const MONTHS = [
+  { value: 1, label: 'Enero' }, { value: 2, label: 'Febrero' },
+  { value: 3, label: 'Marzo' }, { value: 4, label: 'Abril' },
+  { value: 5, label: 'Mayo' }, { value: 6, label: 'Junio' },
+  { value: 7, label: 'Julio' }, { value: 8, label: 'Agosto' },
+  { value: 9, label: 'Septiembre' }, { value: 10, label: 'Octubre' },
+  { value: 11, label: 'Noviembre' }, { value: 12, label: 'Diciembre' },
+];
+
 export default function AggregatorsUploader({ onClose, onSuccess }) {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState({ current: 0, total: 0 });
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const fileRef = useRef();
 
   const handleFileChange = (e) => {
@@ -150,7 +195,7 @@ export default function AggregatorsUploader({ onClose, onSuccess }) {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const XLSX = await import('xlsx');
-      const records = parseAggregatorsExcel(XLSX, e.target.result);
+      const records = parseAggregatorsExcel(XLSX, e.target.result, selectedMonth, selectedYear);
 
       if (records.length === 0) {
         setStatus('error');
@@ -218,6 +263,35 @@ export default function AggregatorsUploader({ onClose, onSuccess }) {
         </div>
 
         <div className="p-6 space-y-4">
+
+          {/* Selector de mes y año */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Mes del reporte</label>
+              <select
+                value={selectedMonth}
+                onChange={e => setSelectedMonth(Number(e.target.value))}
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-orange-400 bg-white"
+              >
+                {MONTHS.map(m => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="w-28">
+              <label className="block text-xs font-semibold text-slate-600 mb-1">Año</label>
+              <select
+                value={selectedYear}
+                onChange={e => setSelectedYear(Number(e.target.value))}
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-orange-400 bg-white"
+              >
+                {[2024, 2025, 2026].map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div
             onClick={() => fileRef.current?.click()}
             className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
