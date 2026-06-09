@@ -195,28 +195,25 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
         const toDelete = allExisting.filter(r => Number(r.month) === selectedMonth && Number(r.year) === selectedYear);
         if (toDelete.length > 0) {
           setMessage(`Eliminando ${toDelete.length} registros anteriores...`);
-          const deleteChunkSize = 20;
+          // Borrar de a 5 en paralelo con pausa entre lotes
+          const deleteChunkSize = 5;
           for (let i = 0; i < toDelete.length; i += deleteChunkSize) {
             const chunk = toDelete.slice(i, i + deleteChunkSize);
             await Promise.all(chunk.map(r => base44.entities.SalesReport.delete(r.id)));
+            await new Promise(r => setTimeout(r, 200));
           }
         }
 
-        // 2. Insertar nuevos registros en chunks grandes simultáneos
-        const chunkSize = 100;
-        const chunks = [];
-        for (let i = 0; i < records.length; i += chunkSize) {
-          chunks.push(records.slice(i, i + chunkSize));
-        }
+        // 2. Insertar en chunks de 50, uno a la vez con pausa
+        const chunkSize = 50;
         let totalInserted = 0;
-        // Enviar de 3 en 3 chunks en paralelo
-        const concurrency = 3;
-        for (let i = 0; i < chunks.length; i += concurrency) {
-          const batch = chunks.slice(i, i + concurrency);
-          await Promise.all(batch.map(chunk => base44.entities.SalesReport.bulkCreate(chunk)));
-          totalInserted += batch.reduce((s, c) => s + c.length, 0);
+        for (let i = 0; i < records.length; i += chunkSize) {
+          const chunk = records.slice(i, i + chunkSize);
+          await base44.entities.SalesReport.bulkCreate(chunk);
+          totalInserted += chunk.length;
           setProgress({ current: totalInserted, total: records.length });
           setMessage(`Subiendo... ${totalInserted}/${records.length} registros`);
+          await new Promise(r => setTimeout(r, 300));
         }
         setStatus('success');
         setMessage(`✅ ${totalInserted} productos cargados correctamente.`);
