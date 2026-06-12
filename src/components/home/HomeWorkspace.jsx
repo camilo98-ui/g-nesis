@@ -980,7 +980,8 @@ export default function HomeWorkspace({
             {/* Budget Mini Cards — PPT del Día, Brecha del Mes, Proyección */}
             {budgetData && (() => {
               const fmt = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
-              const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
+              // Usar adjustedDailyBudget (excelBudgetForToday + recuperación de brecha) para que el número refleje el PPT real del día
+              const pptVal = budgetData.adjustedDailyBudget > 0 ? budgetData.adjustedDailyBudget : budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
               const gap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
               const isPos = gap >= 0;
               const projPct = budgetData.monthProjectionCompliance ?? 0;
