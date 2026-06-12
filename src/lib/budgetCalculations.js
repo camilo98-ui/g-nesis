@@ -103,7 +103,13 @@ export function calculateBudgetData(activeBudget, dailySales, dailyBudgets = [],
   const targetDayOfWeek = now.getDay();
   const todayWeight = weightByDayOfWeek[targetDayOfWeek] || (1 / 7);
   const dayMultiplier = todayWeight * 7;
-  const gapPerDay = accumulatedGap > 0 && remainingDays > 0 ? accumulatedGap / remainingDays : 0;
+
+  // Recuperación agresiva: si la brecha es negativa (vamos por debajo), no alcanza con distribuir
+  // linealmente — se necesita un esfuerzo mayor hoy para compensar los días malos.
+  // Factor de urgencia: crece exponencialmente conforme quedan menos días del mes.
+  // Con 20+ días restantes: factor ~1.0x; con 10 días: ~1.5x; con 5 días: ~2.2x; con 2 días: ~3.5x
+  const urgencyFactor = remainingDays > 0 ? Math.pow(30 / remainingDays, 0.65) : 1;
+  const gapPerDay = accumulatedGap > 0 && remainingDays > 0 ? (accumulatedGap / remainingDays) * urgencyFactor : 0;
   const recoveryToday = gapPerDay * dayMultiplier;
   const adjustedDailyBudget = excelBudgetForToday + recoveryToday;
   const gapRecoveryIncrement = recoveryToday;
