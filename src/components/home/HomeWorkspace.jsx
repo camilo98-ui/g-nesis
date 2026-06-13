@@ -1340,6 +1340,17 @@ export default function HomeWorkspace({
 
             })()}
 
+            {/* ── AGREGADORES WIDGET ── */}
+            {!isGerente && selectedStore &&
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              className="mb-4 lg:mb-5">
+              <AggregatorsWidget storeId={selectedStore} />
+            </motion.div>
+            }
+
             {/* ── TAKEAWAY CARD ── */}
             {!isGerente &&
             <TakeawayCard
@@ -1532,7 +1543,7 @@ export default function HomeWorkspace({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="mb-4 lg:mb-7 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            className="mb-4 lg:mb-7 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
 
             {/* Card 1 — Temperatura del día + impacto en ventas */}
             {(() => {
@@ -1686,9 +1697,6 @@ export default function HomeWorkspace({
                   </div>
                 </div>);
                 })()}
-
-                {/* Card 4 — Agregadores */}
-                {selectedStore && <AggregatorsWidget storeId={selectedStore} />}
 
                 </motion.div>}
 
