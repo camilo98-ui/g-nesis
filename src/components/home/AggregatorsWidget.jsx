@@ -137,96 +137,96 @@ export default function AggregatorsWidget({ storeId }) {
   const totalVentas = channels.reduce((s, c) => s + c.total_sales, 0);
   const handleOpen = () => navigate(storeCode ? `/AggregatorsView?store=${encodeURIComponent(storeCode)}` : '/AggregatorsView');
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-      onClick={handleOpen}
-      style={{
-        borderRadius: 20,
-        background: 'rgba(255,255,255,0.93)',
-        border: '1px solid rgba(233,30,140,0.10)',
-        boxShadow: '0 4px 24px rgba(233,30,140,0.08), inset 0 1px 0 #fff',
-        cursor: 'pointer',
-        overflow: 'hidden',
-        position: 'relative'
-      }} className="hidden">
-      
-      {/* Ambient glow top-right */}
-      <div style={{
-        position: 'absolute', top: -50, right: -50, width: 180, height: 180, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(233,30,140,0.06) 0%, transparent 70%)',
-        pointerEvents: 'none'
-      }} />
-      <div style={{
-        position: 'absolute', bottom: -40, left: -40, width: 140, height: 140, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(175,82,222,0.05) 0%, transparent 70%)',
-        pointerEvents: 'none'
-      }} />
+  return null;
 
-      {/* Header strip */}
-      <div style={{ padding: '14px 16px 0', position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <p style={{ fontSize: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.18em', color: '#94a3b8', margin: 0, marginBottom: 2 }}>
-              Canales de Venta
-            </p>
-            <p style={{ fontSize: 8, fontWeight: 500, color: '#cbd5e1', margin: 0 }}>Participación por canal</p>
-          </div>
-          {totalVentas > 1 &&
-          <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: 7, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E91E8C', margin: 0, marginBottom: 1 }}>Total</p>
-              <p style={{ fontSize: 12, fontWeight: 900, color: '#E91E8C', margin: 0, letterSpacing: '-0.03em', lineHeight: 1 }}>{fmtCOP(totalVentas)}</p>
-            </div>
-          }
-        </div>
-      </div>
 
-      {/* Body: donut left + channel list right */}
-      <div style={{ display: 'flex', gap: 12, padding: '12px 16px 14px', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-        
-        {/* Donut */}
-        <div style={{ flexShrink: 0 }}>
-          <DonutChart channels={channels} size={92} />
-        </div>
 
-        {/* Channel rows */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 }}>
-          {channels.slice(0, 5).map((c, i) =>
-          <motion.div
-            key={c.channel}
-            initial={{ opacity: 0, x: 8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.06 + 0.3, duration: 0.4 }}
-            style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            
-              {/* Dot */}
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: c.meta.color, flexShrink: 0, boxShadow: `0 0 6px ${c.meta.color}60` }} />
-              {/* Name */}
-              <p style={{ fontSize: 9, fontWeight: 600, color: '#64748b', margin: 0, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {c.channel}
-              </p>
-              {/* Bar track */}
-              <div style={{ width: 48, height: 4, borderRadius: 4, background: 'rgba(233,30,140,0.07)', flexShrink: 0, overflow: 'hidden' }}>
-                <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${c.pct}%` }}
-                transition={{ delay: i * 0.06 + 0.4, duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
-                style={{ height: '100%', borderRadius: 4, background: `linear-gradient(90deg, ${c.meta.color}cc, ${c.meta.color}88)` }} />
-              
-              </div>
-              {/* Pct */}
-              <p style={{ fontSize: 9, fontWeight: 800, color: c.meta.color, margin: 0, minWidth: 28, textAlign: 'right', letterSpacing: '-0.01em' }}>
-                {c.pct.toFixed(1)}%
-              </p>
-            </motion.div>
-          )}
-        </div>
-      </div>
 
-      {/* Bottom accent line */}
-      <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, rgba(233,30,140,0.20), rgba(175,82,222,0.15), transparent)' }} />
-    </motion.div>);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
