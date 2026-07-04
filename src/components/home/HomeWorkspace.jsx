@@ -19,6 +19,10 @@ import ExecutiveAnalyticsPanel from './ExecutiveAnalyticsPanel';
 import DailyMetricsPanel from './DailyMetricsPanel';
 import PremiumMainChart from './PremiumMainChart';
 import { calculateBudgetData } from '@/lib/budgetCalculations';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { es } from 'date-fns/locale';
+import { Button } from '@/components/ui/button';
 import AIExecutiveReport from './AIExecutiveReport';
 import { useNova } from '@/components/NovaContext';
 import ProductTicketAnalysis from '@/components/reports/ProductTicketAnalysis';
@@ -294,14 +298,14 @@ const LEADERS = {
   'BTA 21': 'Nai',
   'BTA 71': 'Mafe',
   'BTA 66': 'Nidia',
-  'BTA 52': 'Zai',
+  'BTA 52': 'Alejo',
   'BTA 62': 'Angie',
   'BTA 18': 'Ruth',
   'BTA 78': 'Brandon',
-  'TUNJA 2': 'Isa',
+  'TUNJA 2': 'Moni',
   'BTA 85': 'Edna',
   'BTA 56': 'Cris',
-  'BTA 27': 'Andre'
+  'BTA 27': 'Caro'
 };
 
 // ── MAIN COMPONENT ───────────────────────────────────────────────────────────
@@ -324,6 +328,8 @@ export default function HomeWorkspace({
   const [showAIReport, setShowAIReport] = useState(false);
   const [showAggregatorsModal, setShowAggregatorsModal] = useState(false);
   const [takeawayBudgetOverride, setTakeawayBudgetOverride] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const chatEndRef = useRef(null);
   const conversationRef = useRef(null);
 
@@ -387,8 +393,11 @@ export default function HomeWorkspace({
   });
 
   const sorted = [...todaySales].sort((a, b) => new Date(b.date) - new Date(a.date));
-  const latest = sorted[0];
-  const prev = sorted[1];
+  // Find the entry matching the selected date, or fall back to the most recent
+  const latest = sorted.find(d => isSameDay(parseISO(d.date), selectedDate)) || sorted[0];
+  // Previous entry relative to the selected date
+  const selectedIndex = sorted.findIndex(d => isSameDay(parseISO(d.date), selectedDate));
+  const prev = selectedIndex >= 0 && selectedIndex < sorted.length - 1 ? sorted[selectedIndex + 1] : sorted.find(d => !isSameDay(parseISO(d.date), selectedDate));
   const salesVal = latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(1)}M` : '—';
   const txnVal = latest?.total_transactions ? String(latest.total_transactions) : '—';
   const ticketVal = latest?.total_sales && latest?.total_transactions ?
@@ -909,6 +918,34 @@ export default function HomeWorkspace({
                 </div>
                 {!isGerente &&
                 <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <motion.button
+                        whileHover={{ scale: 1.04 }}
+                        whileTap={{ scale: 0.96 }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-pink-500 hover:text-pink-600 transition-all"
+                        style={{
+                          background: 'rgba(233,30,140,0.07)',
+                          border: '1px solid rgba(233,30,140,0.15)'
+                        }}>
+                        <CalendarDays style={{ width: 12, height: 12 }} />
+                        <span className="hidden sm:inline">{isSameDay(selectedDate, new Date()) ? 'Hoy' : format(selectedDate, 'dd MMM', { locale: es })}</span>
+                      </motion.button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-3" align="end">
+                      <CalendarComponent
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(d) => { if (d) { setSelectedDate(d); setDatePickerOpen(false); } }}
+                        locale={es}
+                        className="rounded-md border"
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <Button size="sm" variant="outline" className="flex-1 text-[10px]"
+                          onClick={() => { setSelectedDate(new Date()); setDatePickerOpen(false); }}>Hoy</Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                   <motion.button
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}

@@ -114,15 +114,15 @@ function EmptyState({ msg }) {
 function MiniBarChart({ data, height, fmt, accentColor }) {
   if (!data?.length) return <EmptyState />;
   return (
-    <ResponsiveContainer width="100%" height={height || 180}>
-      <BarChart data={data} margin={{ top: 14, right: 8, left: 0, bottom: 0 }} barCategoryGap="30%">
+    <ResponsiveContainer width="100%" height={height || 200}>
+      <BarChart data={data} margin={{ top: 28, right: 8, left: 0, bottom: 0 }} barCategoryGap="30%">
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(194,24,117,0.06)" vertical={false} />
         <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
         <YAxis tickFormatter={fmt || fmtM} tick={{ fontSize: 8, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={46} />
         <Tooltip content={<ChartTooltip fmt={fmt || fmtM} />} cursor={{ fill: 'rgba(194,24,117,0.04)' }} />
         <Bar dataKey="value" radius={[5, 5, 0, 0]} maxBarSize={52}>
           {data.map((e, i) => <Cell key={i} fill={e.color || PALETTE[i % PALETTE.length]} />)}
-          <LabelList dataKey="value" position="top" formatter={fmt || fmtM} style={{ fontSize: 8, fontWeight: 700, fill: '#64748b' }} />
+          <LabelList dataKey="value" position="top" formatter={fmt || fmtM} style={{ fontSize: 10, fontWeight: 800, fill: '#475569' }} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>

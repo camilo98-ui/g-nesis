@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, AreaChart, Area, PieChart, Pie, LineChart, Line, RadarChart,
-  Radar, PolarGrid, PolarAngleAxis, ReferenceLine, Legend
+  Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ReferenceLine, Legend,
+  ScatterChart, Scatter, ZAxis
 } from 'recharts';
-import { Plus, X, TrendingUp, TrendingDown, Minus, Activity, ChevronRight, Zap, ArrowLeft, History, Pencil, Trash2 } from 'lucide-react';
+import { Plus, X, TrendingUp, TrendingDown, Minus, Activity, ChevronRight, Zap, ArrowLeft, History, Pencil, Trash2, Flame } from 'lucide-react';
 import { format, parseISO, getISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
@@ -566,24 +567,102 @@ export default function RadarCompetitivo() {
               </Section>
             </div>
 
-            {/* ── ROW 3: TENDENCIA DE CRECIMIENTO (líneas) ── */}
-            {growthTimelineData.length > 0 && (
-              <Section title="Tendencia de Crecimiento %" sub="Variación % entre tomas consecutivas por marca"
-                tip="Cómo está cambiando el ritmo de crecimiento de cada marca. Línea positiva = acelerando, negativa = desacelerando."
-                delay={0.22} className="mb-4">
-                <ResponsiveContainer width="100%" height={180}>
-                  <LineChart data={growthTimelineData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" vertical={false}/>
-                    <XAxis dataKey="month" tick={{ fill: '#cbd5e1', fontSize: 9, fontWeight: 600 }} axisLine={false} tickLine={false}/>
-                    <YAxis tick={{ fill: '#e2e8f0', fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} width={32}/>
-                    <ReferenceLine y={0} stroke="#fda4af" strokeDasharray="4 3" strokeWidth={1}/>
-                    <Tooltip content={<CustomTooltip formatter={v => `${v?.toFixed(1)}%`}/>}/>
-                    {brandStats.map(b => (
-                      <Line key={b.brand} type="monotone" dataKey={b.brand} name={b.brand}
-                        stroke={b.color} strokeWidth={2} dot={{ fill: b.color, r: 4, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}/>
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
+            {/* ── ROW 3: TENDENCIA DE CRECIMIENTO + MARKET SHARE EVOLUTION ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              {growthTimelineData.length > 0 && (
+                <Section title="Tendencia de Crecimiento %" sub="Variación % entre tomas consecutivas"
+                  tip="Cómo está cambiando el ritmo de crecimiento de cada marca. Línea positiva = acelerando, negativa = desacelerando."
+                  delay={0.22}>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <LineChart data={growthTimelineData} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" vertical={false}/>
+                      <XAxis dataKey="month" tick={{ fill: '#cbd5e1', fontSize: 9, fontWeight: 600 }} axisLine={false} tickLine={false}/>
+                      <YAxis tick={{ fill: '#e2e8f0', fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} width={32}/>
+                      <ReferenceLine y={0} stroke="#fda4af" strokeDasharray="4 3" strokeWidth={1}/>
+                      <Tooltip content={<CustomTooltip formatter={v => `${v?.toFixed(1)}%`}/>}/>
+                      {brandStats.map(b => (
+                        <Line key={b.brand} type="monotone" dataKey={b.brand} name={b.brand}
+                          stroke={b.color} strokeWidth={2} dot={{ fill: b.color, r: 4, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}/>
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Section>
+              )}
+
+              {/* Market Share Evolution — stacked area % */}
+              {monthlyData.length > 1 && (
+                <Section title="Evolución Cuota de Mercado" sub="% share mensual por marca"
+                  tip="Cómo ha cambiado la participación de cada marca mes a mes. Áreas que se ensanchan = ganando share."
+                  delay={0.24}>
+                  {(() => {
+                    const shareData = monthlyData.map(m => {
+                      const total = brandStats.reduce((s, b) => s + (m[b.brand] || 0), 0) || 1;
+                      const entry = { month: m.month };
+                      brandStats.forEach(b => { entry[b.brand] = parseFloat(((m[b.brand] || 0) / total * 100).toFixed(1)); });
+                      return entry;
+                    });
+                    return (
+                      <ResponsiveContainer width="100%" height={180}>
+                        <AreaChart data={shareData} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3" vertical={false}/>
+                          <XAxis dataKey="month" tick={{ fill: '#cbd5e1', fontSize: 9, fontWeight: 600 }} axisLine={false} tickLine={false}/>
+                          <YAxis tick={{ fill: '#e2e8f0', fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} width={32}/>
+                          <Tooltip content={<CustomTooltip formatter={v => `${v?.toFixed(1)}%`}/>}/>
+                          {brandStats.map(b => (
+                            <Area key={b.brand} type="monotone" dataKey={b.brand} name={b.brand}
+                              stackId="1"
+                              stroke={b.color} strokeWidth={1.5}
+                              fill={b.color} fillOpacity={0.35}/>
+                          ))}
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    );
+                  })()}
+                </Section>
+              )}
+            </div>
+
+            {/* ── ROW 3b: MOMENTUM SCATTER ── */}
+            {brandStats.filter(b => !b.onlyOneReading).length >= 2 && (
+              <Section title="Matriz de Momentum" sub="Volumen vs. Crecimiento — tamaño = cuota de mercado"
+                tip="Posición estratégica de cada marca: eje X = volumen total, eje Y = crecimiento reciente. Esquina superior derecha = alta amenaza. Tamaño = cuota."
+                delay={0.28} className="mb-4">
+                {(() => {
+                  const scatterData = brandStats.filter(b => !b.onlyOneReading).map(b => ({
+                    name: b.brand, x: b.total, y: b.growth, z: (b.total / totalAll) * 100, color: b.color
+                  }));
+                  return (
+                    <ResponsiveContainer width="100%" height={220}>
+                      <ScatterChart margin={{ top: 12, right: 20, bottom: 8, left: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#fce7f3"/>
+                        <XAxis type="number" dataKey="x" name="Volumen" tick={{ fill: '#94a3b8', fontSize: 9 }} axisLine={false} tickLine={false}
+                          tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} label={{ value: 'Volumen transacciones', position: 'insideBottom', offset: -4, style: { fontSize: 9, fill: '#94a3b8', fontWeight: 600 } }}/>
+                        <YAxis type="number" dataKey="y" name="Crecimiento %" tick={{ fill: '#94a3b8', fontSize: 9 }} axisLine={false} tickLine={false}
+                          tickFormatter={v => `${v}%`} label={{ value: 'Crecimiento %', angle: -90, position: 'insideLeft', style: { fontSize: 9, fill: '#94a3b8', fontWeight: 600 } }}/>
+                        <ZAxis type="number" dataKey="z" range={[60, 400]}/>
+                        <ReferenceLine y={0} stroke="#fda4af" strokeDasharray="4 3"/>
+                        <Tooltip
+                          cursor={{ strokeDasharray: '3 3', stroke: '#fda4af' }}
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const d = payload[0].payload;
+                            return (
+                              <div style={{ background: '#fff', border: '1px solid #fce7f3', borderRadius: 14, padding: '10px 14px', boxShadow: '0 8px 32px rgba(194,24,117,0.12)', fontSize: 11 }}>
+                                <p style={{ color: d.color, fontWeight: 800, marginBottom: 4 }}>{d.name}</p>
+                                <p style={{ color: '#94a3b8' }}>Vol: <b style={{ color: '#475569' }}>{d.x.toLocaleString('es-CO')}</b></p>
+                                <p style={{ color: '#94a3b8' }}>Crec: <b style={{ color: d.y >= 0 ? '#10b981' : '#e11d48' }}>{d.y >= 0 ? '+' : ''}{d.y.toFixed(1)}%</b></p>
+                                <p style={{ color: '#94a3b8' }}>Share: <b style={{ color: '#475569' }}>{d.z.toFixed(1)}%</b></p>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Scatter data={scatterData} fill="#C21875">
+                          {scatterData.map((d, i) => <Cell key={i} fill={d.color}/>)}
+                        </Scatter>
+                      </ScatterChart>
+                    </ResponsiveContainer>
+                  );
+                })()}
               </Section>
             )}
 
@@ -710,6 +789,57 @@ export default function RadarCompetitivo() {
                 </div>
               </Section>
             </div>
+
+            {/* ── ROW 5b: COMPETITIVE DASHBOARD TABLE ── */}
+            <Section title="Tablero Competitivo" sub="Métricas clave por marca"
+              tip="Resumen ejecutivo: volumen, crecimiento, cuota y momentum en una sola vista."
+              delay={0.4} className="mb-4">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid #fce7f3' }}>
+                      <th className="text-left py-2.5 px-2 font-bold text-slate-400 uppercase tracking-wider text-[9px]">Marca</th>
+                      <th className="text-right py-2.5 px-2 font-bold text-slate-400 uppercase tracking-wider text-[9px]">Transacciones</th>
+                      <th className="text-right py-2.5 px-2 font-bold text-slate-400 uppercase tracking-wider text-[9px]">Cuota</th>
+                      <th className="text-right py-2.5 px-2 font-bold text-slate-400 uppercase tracking-wider text-[9px]">Crecimiento</th>
+                      <th className="text-right py-2.5 px-2 font-bold text-slate-400 uppercase tracking-wider text-[9px]">Última Toma</th>
+                      <th className="text-center py-2.5 px-2 font-bold text-slate-400 uppercase tracking-wider text-[9px]">Momentum</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {brandStats.map((b, i) => {
+                      const share = (b.total / totalAll) * 100;
+                      const isLeader = i === 0;
+                      const isAccelerating = b.growth > 5;
+                      const isDecelerating = b.growth < -5;
+                      return (
+                        <tr key={b.brand} style={{ borderBottom: '1px solid #f8fafc' }}>
+                          <td className="py-3 px-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-lg flex items-center justify-center font-black text-white text-[10px] flex-shrink-0" style={{ background: b.color }}>{getInitial(b.brand)}</div>
+                              <span className="font-bold text-slate-700">{b.brand}</span>
+                              {isLeader && <span className="text-[7px] font-black px-1.5 py-0.5 rounded-full text-white" style={{ background: '#f59e0b' }}>LÍDER</span>}
+                            </div>
+                          </td>
+                          <td className="text-right py-3 px-2 font-bold text-slate-600 tabular-nums">{b.total.toLocaleString('es-CO')}</td>
+                          <td className="text-right py-3 px-2 font-black tabular-nums" style={{ color: b.color }}>{share.toFixed(1)}%</td>
+                          <td className="text-right py-3 px-2">
+                            {b.onlyOneReading ? <span className="text-[9px] text-slate-300 italic">—</span> : <TrendBadge pct={b.growth}/>}
+                          </td>
+                          <td className="text-right py-3 px-2 font-semibold text-slate-500 tabular-nums">{b.lastTxn.toLocaleString('es-CO')}</td>
+                          <td className="text-center py-3 px-2">
+                            {b.onlyOneReading ? <span className="text-[9px] text-slate-300">—</span> :
+                              isAccelerating ? <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}><Flame className="w-2.5 h-2.5"/> Acelerando</span> :
+                              isDecelerating ? <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold" style={{ background: 'rgba(225,29,72,0.1)', color: '#e11d48' }}><TrendingDown className="w-2.5 h-2.5"/> Frenando</span> :
+                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold" style={{ background: 'rgba(148,163,184,0.1)', color: '#64748b' }}><Minus className="w-2.5 h-2.5"/> Estable</span>}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Section>
 
             {/* ── ROW 6: AI INSIGHTS ── */}
             {insights.length > 0 && (

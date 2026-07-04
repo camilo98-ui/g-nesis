@@ -4,10 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, RadarChart, Radar, PolarGrid, PolarAngleAxis,
-  AreaChart, Area
 } from 'recharts';
-import { ArrowLeft, TrendingUp, Crown, Sparkles, ArrowUpRight, BarChart2, Target, Zap, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Crown, Sparkles } from 'lucide-react';
 
 /* ── helpers ── */
 const fmtCOP = (v) => v
@@ -15,11 +13,11 @@ const fmtCOP = (v) => v
   : '$0';
 
 const CHANNEL_META = {
-  'Al Paso':           { color: '#E91E8C', emoji: '🏠', gradient: 'linear-gradient(135deg,#E91E8C,#FF6CAB)' },
-  'Rappi':             { color: '#FF3B30', emoji: '🛵', gradient: 'linear-gradient(135deg,#FF3B30,#FF6B6B)' },
-  'Didi':              { color: '#FF9500', emoji: '🚗', gradient: 'linear-gradient(135deg,#FF9500,#FFCC02)' },
-  'Domicilios Propios':{ color: '#5856D6', emoji: '📦', gradient: 'linear-gradient(135deg,#5856D6,#AF52DE)' },
-  'iFood':             { color: '#EA1D2C', emoji: '🍔', gradient: 'linear-gradient(135deg,#EA1D2C,#f87171)' },
+  'Al Paso':           { color: '#E91E8C', emoji: '🏠' },
+  'Rappi':             { color: '#FF3B30', emoji: '🛵' },
+  'Didi':              { color: '#FF9500', emoji: '🚗' },
+  'Domicilios Propios':{ color: '#5856D6', emoji: '📦' },
+  'iFood':             { color: '#EA1D2C', emoji: '🍔' },
 };
 const FALLBACK_COLORS = ['#E91E8C','#FF6CAB','#FF9500','#5856D6','#34C759','#AF52DE'];
 
@@ -27,7 +25,6 @@ function getMeta(channel, idx) {
   return CHANNEL_META[channel] || {
     color: FALLBACK_COLORS[idx % FALLBACK_COLORS.length],
     emoji: '📊',
-    gradient: `linear-gradient(135deg,${FALLBACK_COLORS[idx % FALLBACK_COLORS.length]},${FALLBACK_COLORS[(idx+1) % FALLBACK_COLORS.length]})`,
   };
 }
 
@@ -41,38 +38,6 @@ function extractStoreCode(storeId) {
 }
 
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-
-/* ── Mini sparkline ── */
-function Sparkline() {
-  const pts = [40,55,48,62,58,70,65,80,75,88,82,95];
-  const W=80, H=36, padX=2, padY=4;
-  const max=Math.max(...pts), min=Math.min(...pts), range=max-min||1;
-  const toX=(i)=>padX+i/(pts.length-1)*(W-padX*2);
-  const toY=(v)=>H-padY-(v-min)/range*(H-padY*2);
-  const coords=pts.map((v,i)=>[toX(i),toY(v)]);
-  let d=`M${coords[0][0]},${coords[0][1]}`;
-  for(let i=0;i<coords.length-1;i++){
-    const p1=coords[i],p2=coords[i+1];
-    const cpx=(p1[0]+p2[0])/2;
-    d+=` C${cpx},${p1[1]} ${cpx},${p2[1]} ${p2[0]},${p2[1]}`;
-  }
-  const [lx,ly]=coords[coords.length-1];
-  const area=`${d} L${lx},${H} L${coords[0][0]},${H} Z`;
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-20 h-9" fill="none">
-      <defs>
-        <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.5)"/>
-          <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
-        </linearGradient>
-      </defs>
-      <path d={area} fill="url(#sg)"/>
-      <path d={d} stroke="rgba(255,255,255,0.6)" strokeWidth="1.8" strokeLinecap="round"/>
-      <circle cx={lx} cy={ly} r="2.5" fill="white"/>
-      <circle cx={lx} cy={ly} r="5" fill="white" opacity="0.2"/>
-    </svg>
-  );
-}
 
 /* ════════════════════════════════════════ MAIN ════════════════════════════════════════ */
 export default function AggregatorsView() {
@@ -157,11 +122,6 @@ export default function AggregatorsView() {
   const displayStore = storeCode || 'Todas';
   const donutData = channels.map(c => ({ name: c.channel, value: c.total_sales > 1 ? c.total_sales : c.pct, color: c.meta.color }));
 
-  const updatedAt = (() => {
-    const now = new Date();
-    return now.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}) + ' · ' + now.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-  })();
-
   return (
     <div style={{
       position: 'fixed',
@@ -184,7 +144,6 @@ export default function AggregatorsView() {
         borderBottom: '1px solid rgba(233,30,140,0.08)',
       }}>
         <div className="flex items-center justify-between w-full">
-          {/* Back button */}
           <button
             onClick={() => window.history.back()}
             style={{
@@ -199,13 +158,11 @@ export default function AggregatorsView() {
             <ArrowLeft style={{ color:'#E91E8C', width:18, height:18 }} />
           </button>
 
-          {/* Title */}
           <div className="text-center">
             <p style={{ fontSize: 17, fontWeight: 900, color: '#1C1C1E', letterSpacing: '-0.03em', margin: 0 }}>Agregadores</p>
             <p style={{ fontSize: 11, fontWeight: 600, color: '#8E8E93', marginTop: 2 }}>Participación por canal · {displayStore}</p>
           </div>
 
-          {/* Trending icon */}
           <div style={{
             width: 36, height: 36,
             borderRadius: 14,
@@ -264,63 +221,11 @@ export default function AggregatorsView() {
           </div>
         ) : (
           <>
-            {/* ══ 1. HERO KPI ══ */}
-            <motion.div
-              initial={{ opacity:0, y:20 }}
-              animate={{ opacity:1, y:0 }}
-              transition={{ delay:0.05, duration:0.5, ease:[0.23,1,0.32,1] }}
-              style={{
-                borderRadius: 24,
-                padding: '24px 22px 20px',
-                background: 'radial-gradient(ellipse 120% 100% at 50% -10%, #FFD6EC 0%, #FFF0F9 45%, #F8F0FF 80%, #EEF0FF 100%)',
-                border: '1px solid rgba(233,30,140,0.18)',
-                boxShadow: '0 8px 40px rgba(233,30,140,0.12), 0 2px 8px rgba(233,30,140,0.06)',
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
-              {/* Soft glow blob top-right */}
-              <div style={{
-                position:'absolute', top:-40, right:-30, width:160, height:160,
-                borderRadius:'50%',
-                background:'radial-gradient(circle,rgba(233,30,140,0.15) 0%,transparent 70%)',
-                filter:'blur(20px)',
-                pointerEvents:'none',
-              }}/>
-
-              <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
-                <div style={{ flex:1 }}>
-                  <p style={{ fontSize:10, fontWeight:700, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(233,30,140,0.55)', margin:0, marginBottom:6 }}>
-                    Venta Total · {monthLabel}
-                  </p>
-                  <p style={{ fontSize: totalVentas > 1 ? 34 : 22, fontWeight:900, color:'#1C1C1E', lineHeight:1.1, letterSpacing:'-0.04em', margin:0 }}>
-                    {totalVentas > 1 ? fmtCOP(totalVentas) : 'Ver canales ↓'}
-                  </p>
-                  <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:10 }}>
-                    <div style={{
-                      display:'flex', alignItems:'center', gap:4,
-                      padding:'3px 8px', borderRadius:8,
-                      background:'rgba(52,199,89,0.12)',
-                    }}>
-                      <ArrowUpRight style={{color:'#34C759',width:12,height:12}}/>
-                      <span style={{ fontSize:11, fontWeight:800, color:'#34C759' }}>+8.4%</span>
-                    </div>
-                    <span style={{ fontSize:10, color:'#8E8E93', fontWeight:500 }}>vs período anterior</span>
-                  </div>
-                </div>
-                <Sparkline />
-              </div>
-
-              <div style={{ position:'relative', zIndex:1, marginTop:16, display:'flex', alignItems:'center', justifyContent:'flex-end' }}>
-                <span style={{ fontSize:10, fontWeight:600, color:'#8E8E93' }}>{channels.length} canales activos</span>
-              </div>
-            </motion.div>
-
-            {/* ══ 2. DONUT CHART ══ */}
+            {/* ══ DONUT + LEADER ══ */}
             <motion.div
               initial={{ opacity:0, scale:0.97 }}
               animate={{ opacity:1, scale:1 }}
-              transition={{ delay:0.14, duration:0.5, ease:[0.23,1,0.32,1] }}
+              transition={{ delay:0.05, duration:0.5, ease:[0.23,1,0.32,1] }}
               style={{
                 borderRadius: 24,
                 padding: '22px 20px 20px',
@@ -329,7 +234,7 @@ export default function AggregatorsView() {
                 boxShadow: '0 4px 24px rgba(233,30,140,0.08), 0 1px 4px rgba(0,0,0,0.04)',
               }}
             >
-              <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
                 <div style={{
                   width:30, height:30, borderRadius:10,
                   background:'rgba(233,30,140,0.09)',
@@ -337,16 +242,15 @@ export default function AggregatorsView() {
                 }}>
                   <Crown style={{color:'#E91E8C',width:14,height:14}}/>
                 </div>
-                <p style={{ fontSize:14, fontWeight:900, color:'#1C1C1E', letterSpacing:'-0.02em', margin:0 }}>Distribución por Canal</p>
+                <p style={{ fontSize:14, fontWeight:900, color:'#1C1C1E', letterSpacing:'-0.02em', margin:0 }}>Distribución · {monthLabel}</p>
               </div>
 
               {/* Donut */}
-              <div style={{ position:'relative', height:220 }}>
-                {/* Glow behind donut */}
+              <div style={{ position:'relative', height:200 }}>
                 <div style={{
                   position:'absolute', top:'50%', left:'50%',
                   transform:'translate(-50%,-50%)',
-                  width:200, height:200, borderRadius:'50%',
+                  width:180, height:180, borderRadius:'50%',
                   background:'radial-gradient(circle,rgba(233,30,140,0.18) 30%,transparent 70%)',
                   filter:'blur(24px)',
                   pointerEvents:'none',
@@ -356,7 +260,7 @@ export default function AggregatorsView() {
                     <Pie
                       data={donutData}
                       cx="50%" cy="50%"
-                      innerRadius={72} outerRadius={100}
+                      innerRadius={62} outerRadius={88}
                       dataKey="value"
                       paddingAngle={2}
                       stroke="none"
@@ -366,7 +270,7 @@ export default function AggregatorsView() {
                       {donutData.map((d,i) => <Cell key={i} fill={d.color}/>)}
                     </Pie>
                     <Tooltip
-                      formatter={(v,n) => [fmtCOP(v), n]}
+                      formatter={(v,n) => [totalVentas > 1 ? fmtCOP(v) : `${v.toFixed(1)}%`, n]}
                       contentStyle={{
                         borderRadius:14, border:'1px solid rgba(233,30,140,0.12)',
                         background:'rgba(255,255,255,0.98)',
@@ -386,410 +290,105 @@ export default function AggregatorsView() {
                     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2 }}>
                       <Crown style={{color:'#E91E8C',width:14,height:14}}/>
                       <p style={{ fontSize:8, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.15em', color:'#8E8E93', margin:0 }}>Canal Líder</p>
-                      <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.02em' }}>{leader.channel}</p>
-                      <p style={{ fontSize:18, fontWeight:900, color:'#E91E8C', margin:0, letterSpacing:'-0.04em' }}>{leader.pct.toFixed(1)}%</p>
+                      <p style={{ fontSize:12, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.02em' }}>{leader.channel}</p>
+                      <p style={{ fontSize:20, fontWeight:900, color:'#E91E8C', margin:0, letterSpacing:'-0.04em' }}>{leader.pct.toFixed(1)}%</p>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Legend */}
-              <div style={{ display:'flex', flexWrap:'wrap', gap:'8px 16px', marginTop:8 }}>
-                {channels.map((c) => (
-                  <div key={c.channel} style={{ display:'flex', alignItems:'center', gap:6 }}>
-                    <div style={{ width:8, height:8, borderRadius:'50%', background:c.meta.color, flexShrink:0 }}/>
-                    <span style={{ fontSize:10, fontWeight:600, color:'#636366' }}>{c.channel}</span>
-                    <span style={{ fontSize:10, fontWeight:900, color:c.meta.color, fontVariantNumeric:'tabular-nums' }}>{c.pct.toFixed(1)}%</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* ══ 2b. KPI MINI CARDS ROW ══ */}
-            <motion.div
-              initial={{ opacity:0, y:12 }}
-              animate={{ opacity:1, y:0 }}
-              transition={{ delay:0.2, duration:0.45, ease:[0.23,1,0.32,1] }}
-              style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}
-            >
-              {/* Concentración */}
-              <div style={{
-                borderRadius:18, padding:'16px 14px',
-                background:'linear-gradient(135deg,#FFF0F9,#F8F0FF)',
-                border:'1px solid rgba(233,30,140,0.12)',
-                boxShadow:'0 4px 16px rgba(233,30,140,0.07)',
-              }}>
-                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-                  <Target style={{color:'#E91E8C',width:14,height:14}}/>
-                  <span style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color:'#E91E8C' }}>Concentración</span>
-                </div>
-                <p style={{ fontSize:26, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.04em' }}>
-                  {leader ? leader.pct.toFixed(0) : '—'}<span style={{fontSize:14}}>%</span>
-                </p>
-                <p style={{ fontSize:10, color:'#8E8E93', margin:'3px 0 0', fontWeight:500 }}>canal líder</p>
-              </div>
-              {/* Diversificación */}
-              <div style={{
-                borderRadius:18, padding:'16px 14px',
-                background:'linear-gradient(135deg,#F0F8FF,#F8F0FF)',
-                border:'1px solid rgba(88,86,214,0.12)',
-                boxShadow:'0 4px 16px rgba(88,86,214,0.07)',
-              }}>
-                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-                  <Zap style={{color:'#5856D6',width:14,height:14}}/>
-                  <span style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color:'#5856D6' }}>Canales</span>
-                </div>
-                <p style={{ fontSize:26, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.04em' }}>
-                  {channels.length}
-                </p>
-                <p style={{ fontSize:10, color:'#8E8E93', margin:'3px 0 0', fontWeight:500 }}>activos este mes</p>
-              </div>
-              {/* Ticket promedio delivery */}
-              <div style={{
-                borderRadius:18, padding:'16px 14px',
-                background:'linear-gradient(135deg,#FFF8F0,#FFFBF0)',
-                border:'1px solid rgba(255,149,0,0.15)',
-                boxShadow:'0 4px 16px rgba(255,149,0,0.07)',
-              }}>
-                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-                  <BarChart2 style={{color:'#FF9500',width:14,height:14}}/>
-                  <span style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color:'#FF9500' }}>Delivery</span>
-                </div>
-                <p style={{ fontSize:26, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.04em' }}>
-                  {channels.filter(c=>c.channel!=='Al Paso').reduce((s,c)=>s+c.pct,0).toFixed(1)}<span style={{fontSize:14}}>%</span>
-                </p>
-                <p style={{ fontSize:10, color:'#8E8E93', margin:'3px 0 0', fontWeight:500 }}>canales digitales</p>
-              </div>
-              {/* Alerta diversificación */}
-              <div style={{
-                borderRadius:18, padding:'16px 14px',
-                background: leader && leader.pct > 80 ? 'linear-gradient(135deg,#FFF0F0,#FFF5F0)' : 'linear-gradient(135deg,#F0FFF4,#F0FFFA)',
-                border: `1px solid ${leader && leader.pct > 80 ? 'rgba(255,59,48,0.15)' : 'rgba(52,199,89,0.15)'}`,
-                boxShadow: `0 4px 16px ${leader && leader.pct > 80 ? 'rgba(255,59,48,0.07)' : 'rgba(52,199,89,0.07)'}`,
-              }}>
-                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
-                  <AlertTriangle style={{color: leader && leader.pct > 80 ? '#FF3B30' : '#34C759',width:14,height:14}}/>
-                  <span style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color: leader && leader.pct > 80 ? '#FF3B30' : '#34C759' }}>Riesgo</span>
-                </div>
-                <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', margin:0, lineHeight:1.2 }}>
-                  {leader && leader.pct > 80 ? 'Alta\nconc.' : 'OK'}
-                </p>
-                <p style={{ fontSize:10, color:'#8E8E93', margin:'3px 0 0', fontWeight:500 }}>
-                  {leader && leader.pct > 80 ? 'diversificar' : 'equilibrado'}
-                </p>
-              </div>
-            </motion.div>
-
-            {/* ══ 2c. BAR CHART VENTAS POR CANAL ══ */}
-            {channels.some(c => c.total_sales > 1) && (
-              <motion.div
-                initial={{ opacity:0, y:16 }}
-                animate={{ opacity:1, y:0 }}
-                transition={{ delay:0.25, duration:0.5, ease:[0.23,1,0.32,1] }}
-                style={{
-                  borderRadius:24, padding:'20px 16px 16px',
-                  background:'#FFFFFF',
-                  border:'1px solid rgba(233,30,140,0.09)',
-                  boxShadow:'0 4px 24px rgba(233,30,140,0.07)',
-                }}
-              >
-                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
-                  <div style={{ width:28, height:28, borderRadius:9, background:'rgba(233,30,140,0.09)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <BarChart2 style={{color:'#E91E8C',width:13,height:13}}/>
-                  </div>
-                  <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.02em' }}>Venta Bruta por Canal</p>
-                </div>
-                <ResponsiveContainer width="100%" height={180}>
-                  <BarChart data={channels.map(c=>({ name: c.channel.split(' ')[0], venta: c.total_sales, color: c.meta.color }))} margin={{top:4,right:4,left:0,bottom:0}} barSize={28}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false}/>
-                    <XAxis dataKey="name" tick={{fontSize:10,fontWeight:700,fill:'#8E8E93'}} axisLine={false} tickLine={false}/>
-                    <YAxis hide />
-                    <Tooltip
-                      formatter={(v) => [fmtCOP(v), 'Venta']}
-                      contentStyle={{ borderRadius:12, border:'1px solid rgba(233,30,140,0.12)', background:'rgba(255,255,255,0.98)', fontSize:11, fontWeight:600, boxShadow:'0 8px 24px rgba(0,0,0,0.10)' }}
-                    />
-                    <Bar dataKey="venta" radius={[8,8,0,0]}>
-                      {channels.map((c,i) => <Cell key={i} fill={c.meta.color}/>)}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </motion.div>
-            )}
-
-            {/* ══ 2d. RADAR / PERFIL DE CANALES ══ */}
-            {channels.length >= 3 && (
-              <motion.div
-                initial={{ opacity:0, scale:0.97 }}
-                animate={{ opacity:1, scale:1 }}
-                transition={{ delay:0.3, duration:0.5, ease:[0.23,1,0.32,1] }}
-                style={{
-                  borderRadius:24, padding:'20px 16px 16px',
-                  background:'#FFFFFF',
-                  border:'1px solid rgba(233,30,140,0.09)',
-                  boxShadow:'0 4px 24px rgba(233,30,140,0.07)',
-                }}
-              >
-                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12 }}>
-                  <div style={{ width:28, height:28, borderRadius:9, background:'rgba(175,82,222,0.09)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <Target style={{color:'#AF52DE',width:13,height:13}}/>
-                  </div>
-                  <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.02em' }}>Perfil de Participación</p>
-                </div>
-                <ResponsiveContainer width="100%" height={200}>
-                  <RadarChart data={channels.map(c=>({ canal: c.channel.split(' ')[0], participacion: c.pct }))}>
-                    <PolarGrid stroke="rgba(233,30,140,0.08)" />
-                    <PolarAngleAxis dataKey="canal" tick={{fontSize:10,fontWeight:700,fill:'#8E8E93'}}/>
-                    <Radar name="Part." dataKey="participacion" stroke="#E91E8C" fill="#E91E8C" fillOpacity={0.15} strokeWidth={2}/>
-                    <Tooltip contentStyle={{ borderRadius:12, border:'1px solid rgba(233,30,140,0.12)', background:'rgba(255,255,255,0.98)', fontSize:11, fontWeight:600 }} formatter={(v)=>[`${v.toFixed(1)}%`,'Participación']}/>
-                  </RadarChart>
-                </ResponsiveContainer>
-              </motion.div>
-            )}
-
-            {/* ══ 2e. AREA CHART TENDENCIA SIMULADA ══ */}
-            <motion.div
-              initial={{ opacity:0, y:16 }}
-              animate={{ opacity:1, y:0 }}
-              transition={{ delay:0.35, duration:0.5, ease:[0.23,1,0.32,1] }}
-              style={{
-                borderRadius:24, padding:'20px 16px 12px',
-                background:'linear-gradient(135deg,#FFF0F9 0%,#FFFFFF 60%)',
-                border:'1px solid rgba(233,30,140,0.1)',
-                boxShadow:'0 4px 24px rgba(233,30,140,0.07)',
-              }}
-            >
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                  <div style={{ width:28, height:28, borderRadius:9, background:'rgba(233,30,140,0.09)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <TrendingUp style={{color:'#E91E8C',width:13,height:13}}/>
-                  </div>
-                  <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.02em' }}>Tendencia Canal Líder</p>
-                </div>
-                <div style={{ padding:'3px 8px', borderRadius:8, background:'rgba(52,199,89,0.1)' }}>
-                  <span style={{ fontSize:10, fontWeight:800, color:'#34C759' }}>↑ creciendo</span>
-                </div>
-              </div>
-              <ResponsiveContainer width="100%" height={130}>
-                <AreaChart data={[
-                  {mes:'E',v:72},{mes:'F',v:74},{mes:'M',v:71},{mes:'A',v:78},
-                  {mes:'M',v:80},{mes:'J',v:leader ? Math.min(leader.pct,99) : 85},
-                ]} margin={{top:4,right:4,left:0,bottom:0}}>
-                  <defs>
-                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#E91E8C" stopOpacity="0.25"/>
-                      <stop offset="100%" stopColor="#E91E8C" stopOpacity="0"/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false}/>
-                  <XAxis dataKey="mes" tick={{fontSize:10,fontWeight:600,fill:'#AEAEB2'}} axisLine={false} tickLine={false}/>
-                  <YAxis hide domain={['auto','auto']}/>
-                  <Tooltip contentStyle={{ borderRadius:12, border:'1px solid rgba(233,30,140,0.12)', background:'rgba(255,255,255,0.98)', fontSize:11, fontWeight:600 }} formatter={(v)=>[`${v.toFixed(1)}%`,'Participación']}/>
-                  <Area type="monotone" dataKey="v" stroke="#E91E8C" strokeWidth={2.5} fill="url(#areaGrad)" dot={{ fill:'#E91E8C', r:4, strokeWidth:0 }}/>
-                </AreaChart>
-              </ResponsiveContainer>
-            </motion.div>
-
-            {/* ══ 3. RANKING CANALES ══ */}
-            <motion.div
-              initial={{ opacity:0, y:16 }}
-              animate={{ opacity:1, y:0 }}
-              transition={{ delay:0.22, duration:0.5, ease:[0.23,1,0.32,1] }}
-            >
-              <p style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.18em', color:'#AEAEB2', marginBottom:12, paddingLeft:4 }}>
-                Ranking por Canal
-              </p>
-              <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              {/* Channel legend with % */}
+              <div style={{ display:'flex', flexDirection:'column', gap:10, marginTop:12 }}>
                 {channels.map((c, i) => (
-                  <motion.div
-                    key={c.channel}
-                    initial={{ opacity:0, x:-16 }}
-                    animate={{ opacity:1, x:0 }}
-                    transition={{ delay: 0.28 + i*0.07, duration:0.4, ease:[0.23,1,0.32,1] }}
-                    style={{
-                      borderRadius: 20,
-                      padding: '16px 16px 14px',
-                      background: '#FFFFFF',
-                      border: `1px solid ${c.meta.color}20`,
-                      boxShadow: `0 4px 20px rgba(0,0,0,0.04), 0 1px 4px ${c.meta.color}18`,
-                      position: 'relative',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {/* Left accent */}
-                    <div style={{
-                      position:'absolute', left:0, top:12, bottom:12,
-                      width:4, borderRadius:'0 4px 4px 0',
-                      background: c.meta.gradient,
-                    }}/>
-
-                    <div style={{ paddingLeft:12, display:'flex', alignItems:'center', gap:12 }}>
-                      {/* Icon circle */}
-                      <div style={{
-                        width:44, height:44,
-                        borderRadius:16,
-                        background:`${c.meta.color}10`,
-                        border:`1.5px solid ${c.meta.color}20`,
-                        display:'flex', alignItems:'center', justifyContent:'center',
-                        flexShrink:0,
-                        fontSize:22,
-                      }}>
-                        {c.meta.emoji}
-                      </div>
-
-                      <div style={{ flex:1, minWidth:0 }}>
-                        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
-                          <p style={{ fontSize:14, fontWeight:900, color:'#1C1C1E', margin:0, letterSpacing:'-0.02em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                            {c.channel}
-                          </p>
-                          <p style={{ fontSize:18, fontWeight:900, color:c.meta.color, margin:0, letterSpacing:'-0.03em', fontVariantNumeric:'tabular-nums', flexShrink:0, marginLeft:8 }}>
-                            {c.pct.toFixed(1)}%
-                          </p>
-                        </div>
-                        <p style={{ fontSize:11, fontWeight:600, color:'#8E8E93', margin:'0 0 8px 0' }}>
-                          {c.total_sales > 1 ? fmtCOP(c.total_sales) : `Participación: ${c.pct.toFixed(1)}%`}
-                        </p>
-                        {/* Progress bar */}
-                        <div style={{ width:'100%', height:6, borderRadius:99, background:`${c.meta.color}15` }}>
-                          <motion.div
-                            initial={{ width:0 }}
-                            animate={{ width:`${c.pct}%` }}
-                            transition={{ delay:0.4+i*0.07, duration:0.9, ease:[0.23,1,0.32,1] }}
-                            style={{ height:6, borderRadius:99, background:c.meta.gradient }}
-                          />
-                        </div>
-                      </div>
+                  <div key={c.channel} style={{ display:'flex', alignItems:'center', gap:10 }}>
+                    <div style={{ width:28, height:28, borderRadius:10, background:`${c.meta.color}12`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, flexShrink:0 }}>
+                      {c.meta.emoji}
                     </div>
-                  </motion.div>
+                    <span style={{ fontSize:12, fontWeight:600, color:'#3C3C43', flex:1 }}>{c.channel}</span>
+                    {c.total_sales > 1 && (
+                      <span style={{ fontSize:10, fontWeight:600, color:'#8E8E93', fontVariantNumeric:'tabular-nums' }}>{fmtCOP(c.total_sales)}</span>
+                    )}
+                    <span style={{ fontSize:14, fontWeight:900, color:c.meta.color, fontVariantNumeric:'tabular-nums', minWidth:48, textAlign:'right' }}>{c.pct.toFixed(1)}%</span>
+                  </div>
                 ))}
               </div>
             </motion.div>
 
-            {/* ══ 4. AI INSIGHT ══ */}
+            {/* ══ TOTAL + CANALES KPI ══ */}
+            {totalVentas > 1 && (
+              <motion.div
+                initial={{ opacity:0, y:12 }}
+                animate={{ opacity:1, y:0 }}
+                transition={{ delay:0.15, duration:0.45 }}
+                style={{
+                  borderRadius: 20,
+                  padding: '18px 20px',
+                  background: 'radial-gradient(ellipse 120% 100% at 50% -10%, #FFD6EC 0%, #FFF0F9 45%, #F8F0FF 80%, #EEF0FF 100%)',
+                  border: '1px solid rgba(233,30,140,0.15)',
+                  boxShadow: '0 4px 24px rgba(233,30,140,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div>
+                  <p style={{ fontSize:9, fontWeight:700, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(233,30,140,0.55)', margin:0, marginBottom:4 }}>
+                    Venta Total
+                  </p>
+                  <p style={{ fontSize:28, fontWeight:900, color:'#1C1C1E', lineHeight:1.1, letterSpacing:'-0.04em', margin:0 }}>
+                    {fmtCOP(totalVentas)}
+                  </p>
+                  <p style={{ fontSize:11, color:'#8E8E93', fontWeight:500, margin:'4px 0 0 0' }}>{channels.length} canales activos</p>
+                </div>
+                <div style={{
+                  width:48, height:48, borderRadius:16,
+                  background:'linear-gradient(135deg,#E91E8C,#AF52DE)',
+                  boxShadow:'0 4px 16px rgba(233,30,140,0.3)',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                }}>
+                  <TrendingUp style={{color:'#fff',width:20,height:20}}/>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ══ AI INSIGHT ══ */}
             {leader && (
               <motion.div
                 initial={{ opacity:0, y:16 }}
                 animate={{ opacity:1, y:0 }}
-                transition={{ delay:0.55, duration:0.5, ease:[0.23,1,0.32,1] }}
+                transition={{ delay:0.25, duration:0.5 }}
                 style={{
                   borderRadius: 20,
-                  padding: '18px 18px',
+                  padding: '16px 18px',
                   background: 'linear-gradient(135deg,rgba(233,30,140,0.05) 0%,rgba(175,82,222,0.06) 100%)',
                   border: '1px solid rgba(233,30,140,0.12)',
                   boxShadow: '0 4px 20px rgba(233,30,140,0.06)',
-                  position: 'relative',
-                  overflow: 'hidden',
+                  display:'flex', alignItems:'flex-start', gap:12,
                 }}
               >
                 <div style={{
-                  position:'absolute', top:-20, right:-20, width:80, height:80, borderRadius:'50%',
-                  background:'rgba(233,30,140,0.08)', filter:'blur(20px)', pointerEvents:'none',
-                }}/>
-                <div style={{ position:'relative', zIndex:1, display:'flex', alignItems:'flex-start', gap:12 }}>
-                  <div style={{
-                    width:36, height:36, borderRadius:12, flexShrink:0,
-                    background:'linear-gradient(135deg,#E91E8C,#AF52DE)',
-                    boxShadow:'0 4px 14px rgba(233,30,140,0.35)',
-                    display:'flex', alignItems:'center', justifyContent:'center',
-                  }}>
-                    <Sparkles style={{color:'#fff',width:16,height:16}}/>
-                  </div>
-                  <div>
-                    <p style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.16em', color:'#E91E8C', margin:'0 0 6px 0' }}>
-                      Insight Comercial · Nova AI
-                    </p>
-                    <p style={{ fontSize:13, fontWeight:500, color:'#3C3C43', lineHeight:1.55, margin:0 }}>
-                      <span style={{ fontWeight:900, color:'#1C1C1E' }}>{leader.channel}</span> concentra el{' '}
-                      <span style={{ color:'#E91E8C', fontWeight:800 }}>{leader.pct.toFixed(1)}%</span> de las ventas del punto.
-                      {channels[1] && (
-                        <> <span style={{ fontWeight:900, color:'#1C1C1E' }}>{channels[1].channel}</span> representa una oportunidad importante con{' '}
-                        <span style={{ color:channels[1].meta.color, fontWeight:800 }}>{channels[1].pct.toFixed(1)}%</span> de participación.</>
-                      )}
-                    </p>
-                  </div>
+                  width:36, height:36, borderRadius:12, flexShrink:0,
+                  background:'linear-gradient(135deg,#E91E8C,#AF52DE)',
+                  boxShadow:'0 4px 14px rgba(233,30,140,0.35)',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                }}>
+                  <Sparkles style={{color:'#fff',width:16,height:16}}/>
+                </div>
+                <div>
+                  <p style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.16em', color:'#E91E8C', margin:'0 0 4px 0' }}>
+                    Insight · Nova AI
+                  </p>
+                  <p style={{ fontSize:13, fontWeight:500, color:'#3C3C43', lineHeight:1.55, margin:0 }}>
+                    <span style={{ fontWeight:900, color:'#1C1C1E' }}>{leader.channel}</span> concentra el{' '}
+                    <span style={{ color:'#E91E8C', fontWeight:800 }}>{leader.pct.toFixed(1)}%</span> de las ventas.
+                    {channels[1] && (
+                      <> <span style={{ fontWeight:900, color:'#1C1C1E' }}>{channels[1].channel}</span> le sigue con{' '}
+                      <span style={{ color:channels[1].meta.color, fontWeight:800 }}>{channels[1].pct.toFixed(1)}%</span>.</>
+                    )}
+                  </p>
                 </div>
               </motion.div>
             )}
-
-            {/* ══ 5. TABLA EJECUTIVA ══ */}
-            <motion.div
-              initial={{ opacity:0, y:16 }}
-              animate={{ opacity:1, y:0 }}
-              transition={{ delay:0.65, duration:0.5, ease:[0.23,1,0.32,1] }}
-              style={{
-                borderRadius: 20,
-                overflow: 'hidden',
-                background: '#FFFFFF',
-                border: '1px solid rgba(233,30,140,0.09)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-              }}
-            >
-              {/* Header row */}
-              <div style={{
-                padding:'12px 16px',
-                display:'flex', alignItems:'center',
-                background:'linear-gradient(135deg,rgba(233,30,140,0.05),rgba(175,82,222,0.03))',
-                borderBottom:'1px solid rgba(233,30,140,0.08)',
-              }}>
-                <p style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.18em', color:'#AEAEB2', flex:'1', margin:0 }}>Canal</p>
-                <p style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.18em', color:'#AEAEB2', width:100, textAlign:'right', margin:0 }}>Venta</p>
-                <p style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.18em', color:'#AEAEB2', width:48, textAlign:'right', margin:0 }}>Part.</p>
-              </div>
-              {/* Data rows */}
-              {channels.map((c,i) => (
-                <motion.div
-                  key={c.channel}
-                  initial={{ opacity:0 }}
-                  animate={{ opacity:1 }}
-                  transition={{ delay:0.7+i*0.04 }}
-                  style={{
-                    padding:'13px 16px',
-                    display:'flex', alignItems:'center',
-                    borderBottom: i < channels.length-1 ? '1px solid rgba(0,0,0,0.04)' : 'none',
-                  }}
-                >
-                  <div style={{ display:'flex', alignItems:'center', gap:8, flex:1, minWidth:0 }}>
-                    <div style={{ width:10, height:10, borderRadius:'50%', background:c.meta.color, flexShrink:0 }}/>
-                    <span style={{ fontSize:12, fontWeight:600, color:'#3C3C43', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.channel}</span>
-                  </div>
-                  <p style={{ fontSize:13, fontWeight:700, color:'#1C1C1E', width:100, textAlign:'right', margin:0, fontVariantNumeric:'tabular-nums' }}>
-                    {c.total_sales > 1 ? fmtCOP(c.total_sales) : '—'}
-                  </p>
-                  <p style={{ fontSize:13, fontWeight:900, color:c.meta.color, width:48, textAlign:'right', margin:0, fontVariantNumeric:'tabular-nums' }}>
-                    {c.pct.toFixed(1)}%
-                  </p>
-                </motion.div>
-              ))}
-              {/* Total */}
-              <div style={{
-                padding:'13px 16px',
-                display:'flex', alignItems:'center',
-                background:'linear-gradient(135deg,rgba(233,30,140,0.04),rgba(175,82,222,0.03))',
-              }}>
-                <p style={{ fontSize:12, fontWeight:900, color:'#1C1C1E', flex:1, margin:0 }}>Total</p>
-                <p style={{ fontSize:13, fontWeight:900, color:'#1C1C1E', width:100, textAlign:'right', margin:0, fontVariantNumeric:'tabular-nums' }}>
-                  {fmtCOP(totalVentas)}
-                </p>
-                <p style={{ fontSize:13, fontWeight:900, color:'#E91E8C', width:48, textAlign:'right', margin:0 }}>100%</p>
-              </div>
-            </motion.div>
-
-            {/* ══ 6. FOOTER ══ */}
-            <motion.div
-              initial={{ opacity:0 }}
-              animate={{ opacity:1 }}
-              transition={{ delay:0.8, duration:0.4 }}
-              style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'4px 4px 0' }}
-            >
-              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                <div style={{
-                  width:7, height:7, borderRadius:'50%',
-                  background:'#34C759',
-                  boxShadow:'0 0 8px rgba(52,199,89,0.7)',
-                }}/>
-                <p style={{ fontSize:10, color:'#AEAEB2', fontWeight:500, margin:0 }}>Datos en tiempo real</p>
-              </div>
-              <p style={{ fontSize:10, color:'#C7C7CC', fontWeight:500, margin:0 }}>{updatedAt}</p>
-            </motion.div>
           </>
         )}
       </div>

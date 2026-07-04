@@ -70,10 +70,10 @@ function DonutChart({ channels, size = 80 }) {
         />
       ))}
       {/* Center label */}
-      <text x={cx} y={cy - size * 0.05} textAnchor="middle" style={{ fontSize: size * 0.18, fontWeight: 900, fill: '#E91E8C', fontFamily: 'Inter Tight, Inter, system-ui' }}>
+      <text x={cx} y={cy - size * 0.02} textAnchor="middle" style={{ fontSize: size * 0.24, fontWeight: 900, fill: '#E91E8C', fontFamily: 'Inter Tight, Inter, system-ui' }}>
         {top?.pct.toFixed(0)}%
       </text>
-      <text x={cx} y={cy + size * 0.13} textAnchor="middle" style={{ fontSize: size * 0.11, fontWeight: 600, fill: '#94a3b8', fontFamily: 'Inter Tight, Inter, system-ui' }}>
+      <text x={cx} y={cy + size * 0.16} textAnchor="middle" style={{ fontSize: size * 0.10, fontWeight: 700, fill: '#94a3b8', fontFamily: 'Inter Tight, Inter, system-ui' }}>
         {top?.channel.split(' ')[0]}
       </text>
     </svg>
@@ -188,7 +188,7 @@ export default function AggregatorsWidget({ storeId }) {
         
         {/* Donut */}
         <div style={{ flexShrink:0 }}>
-          <DonutChart channels={channels} size={80} />
+          <DonutChart channels={channels} size={92} />
         </div>
 
         {/* Channel rows */}
