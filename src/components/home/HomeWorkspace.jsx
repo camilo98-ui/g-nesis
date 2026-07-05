@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, parseISO, isSameDay } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, parseISO, isSameDay, isWithinInterval } from 'date-fns';
 import {
   LayoutDashboard, Users, TrendingUp, Activity, Target, Bell,
   Download, FileText, Lock, Receipt, Snowflake, Settings as SettingsIcon,
@@ -328,7 +328,7 @@ export default function HomeWorkspace({
   const [showAIReport, setShowAIReport] = useState(false);
   const [showAggregatorsModal, setShowAggregatorsModal] = useState(false);
   const [takeawayBudgetOverride, setTakeawayBudgetOverride] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [dateRange, setDateRange] = useState({ from: new Date(), to: new Date() });
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const chatEndRef = useRef(null);
   const conversationRef = useRef(null);
@@ -392,16 +392,29 @@ export default function HomeWorkspace({
     staleTime: 10 * 60 * 1000
   });
 
-  const sorted = [...todaySales].sort((a, b) => new Date(b.date) - new Date(a.date));
-  // Find the entry matching the selected date, or fall back to the most recent
-  const latest = sorted.find(d => isSameDay(parseISO(d.date), selectedDate)) || sorted[0];
-  // Previous entry relative to the selected date
-  const selectedIndex = sorted.findIndex(d => isSameDay(parseISO(d.date), selectedDate));
-  const prev = selectedIndex >= 0 && selectedIndex < sorted.length - 1 ? sorted[selectedIndex + 1] : sorted.find(d => !isSameDay(parseISO(d.date), selectedDate));
-  const salesVal = latest?.total_sales ? `$${(latest.total_sales / 1000000).toFixed(1)}M` : '—';
-  const txnVal = latest?.total_transactions ? String(latest.total_transactions) : '—';
-  const ticketVal = latest?.total_sales && latest?.total_transactions ?
-  `$${Math.round(latest.total_sales / latest.total_transactions / 1000)}K` : '—';
+  // Filter sales to the selected date range
+  const filteredSales = useMemo(() => {
+    if (!todaySales.length) return [];
+    const { from, to } = dateRange;
+    if (!from || !to) return todaySales;
+    const endOfDay = new Date(to);
+    endOfDay.setHours(23, 59, 59, 999);
+    return todaySales.filter(d => {
+      const date = parseISO(d.date);
+      return isWithinInterval(date, { start: from, end: endOfDay });
+    });
+  }, [todaySales, dateRange]);
+
+  const sorted = [...filteredSales].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const latest = sorted[0] || null;
+  const prev = sorted[1] || null;
+  // Aggregate across all days in the selected range
+  const totalSalesRange = filteredSales.reduce((s, d) => s + (d.total_sales || 0), 0);
+  const totalTxnRange = filteredSales.reduce((s, d) => s + (d.total_transactions || 0), 0);
+  const salesVal = totalSalesRange > 0 ? `$${(totalSalesRange / 1000000).toFixed(1)}M` : '—';
+  const txnVal = totalTxnRange > 0 ? String(totalTxnRange) : '—';
+  const ticketVal = totalSalesRange > 0 && totalTxnRange > 0 ?
+  `$${Math.round(totalSalesRange / totalTxnRange / 1000)}K` : '—';
   const salesChange = latest && prev ?
   Math.round((latest.total_sales - prev.total_sales) / prev.total_sales * 100) : 0;
 
@@ -496,7 +509,7 @@ export default function HomeWorkspace({
     const pptHoy = budgetData?.excelBudgetForToday || (budgetData?.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
 
     // Análisis histórico de últimos 7 días
-    const last7Sales = todaySales.slice(-7).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const last7Sales = filteredSales.slice(-7).sort((a, b) => new Date(b.date) - new Date(a.date));
     const totalSales7d = last7Sales.reduce((sum, d) => sum + (d.total_sales || 0), 0);
     const avgDaily7d = last7Sales.length > 0 ? totalSales7d / last7Sales.length : 0;
     const totalTxn7d = last7Sales.reduce((sum, d) => sum + (d.total_transactions || 0), 0);
@@ -504,7 +517,7 @@ export default function HomeWorkspace({
     const minDay7d = Math.min(...last7Sales.filter((d) => d.total_sales).map((d) => d.total_sales), todaySalesValue || 1);
 
     // Análisis de últimos 30 días si existen
-    const last30Sales = todaySales.slice(-30).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const last30Sales = filteredSales.slice(-30).sort((a, b) => new Date(b.date) - new Date(a.date));
     const totalSales30d = last30Sales.reduce((sum, d) => sum + (d.total_sales || 0), 0);
     const avgDaily30d = last30Sales.length > 0 ? totalSales30d / last30Sales.length : 0;
 
@@ -673,7 +686,7 @@ export default function HomeWorkspace({
       kpi_proyeccion_meta: `${fmt(budgetData?.monthProjection || 0)} / ${fmt(budgetData?.monthlyBudget || 0)}`,
       kpi_proyeccion_sub: `Cumplimiento: ${projPct.toFixed(1)}%`
     });
-  }, [latest, budgetData, selectedStore, cashiers, salesChange, setPageData, storeName, activeBudget, todaySales, salesReports]);
+  }, [latest, budgetData, selectedStore, cashiers, salesChange, setPageData, storeName, activeBudget, filteredSales, salesReports]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -929,20 +942,50 @@ export default function HomeWorkspace({
                           border: '1px solid rgba(233,30,140,0.15)'
                         }}>
                         <CalendarDays style={{ width: 12, height: 12 }} />
-                        <span className="hidden sm:inline">{isSameDay(selectedDate, new Date()) ? 'Hoy' : format(selectedDate, 'dd MMM', { locale: es })}</span>
+                        <span className="hidden sm:inline">
+                          {isSameDay(dateRange.from, new Date()) && isSameDay(dateRange.to, new Date())
+                            ? 'Hoy'
+                            : isSameDay(dateRange.from, dateRange.to)
+                            ? format(dateRange.from, 'dd MMM', { locale: es })
+                            : `${format(dateRange.from, 'dd MMM', { locale: es })} - ${format(dateRange.to, 'dd MMM', { locale: es })}`}
+                        </span>
                       </motion.button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-3" align="end">
                       <CalendarComponent
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(d) => { if (d) { setSelectedDate(d); setDatePickerOpen(false); } }}
+                        mode="range"
+                        selected={dateRange}
+                        onSelect={(range) => {
+                          if (range?.from && range?.to) {
+                            setDateRange(range);
+                            setDatePickerOpen(false);
+                          } else if (range?.from) {
+                            setDateRange({ from: range.from, to: range.from });
+                          }
+                        }}
                         locale={es}
                         className="rounded-md border"
+                        numberOfMonths={1}
                       />
                       <div className="flex gap-2 mt-2">
                         <Button size="sm" variant="outline" className="flex-1 text-[10px]"
-                          onClick={() => { setSelectedDate(new Date()); setDatePickerOpen(false); }}>Hoy</Button>
+                          onClick={() => {
+                            const now = new Date();
+                            const start = new Date(now.getFullYear(), now.getMonth(), 1);
+                            setDateRange({ from: start, to: now });
+                            setDatePickerOpen(false);
+                          }}>Este Mes</Button>
+                        <Button size="sm" variant="outline" className="flex-1 text-[10px]"
+                          onClick={() => {
+                            const now = new Date();
+                            const start = new Date(now);
+                            start.setDate(start.getDate() - 6);
+                            setDateRange({ from: start, to: now });
+                            setDatePickerOpen(false);
+                          }}>7 Días</Button>
+                        <Button size="sm" className="flex-1 text-[10px]"
+                          style={{ background: '#E91E8C' }}
+                          onClick={() => { setDateRange({ from: new Date(), to: new Date() }); setDatePickerOpen(false); }}>Hoy</Button>
                       </div>
                     </PopoverContent>
                   </Popover>
@@ -1010,7 +1053,7 @@ export default function HomeWorkspace({
               }} />
 
               <div className="relative z-10 flex items-center px-6 py-5 gap-4">
-                <NovaInsightStrip dailySales={todaySales} budget={budgetData} latestWeather={latestWeather} />
+                <NovaInsightStrip dailySales={filteredSales} budget={budgetData} latestWeather={latestWeather} />
               </div>
             </motion.div>
 
@@ -1391,7 +1434,7 @@ export default function HomeWorkspace({
             {/* ── TAKEAWAY CARD ── */}
             {!isGerente &&
             <TakeawayCard
-              dailySales={todaySales}
+              dailySales={filteredSales}
               budget={takeawayBudgetOverride ?? activeBudget?.takeaway_budget ?? 0}
               storeBudget={activeBudget?.sales_budget ?? 0}
               onBudgetChange={async (val) => {
@@ -1517,13 +1560,13 @@ export default function HomeWorkspace({
 
           {/* ── WEEKLY COMPARISON ── */}
           {!isGerente &&
-          <WeeklyComparison dailySales={todaySales} />
+          <WeeklyComparison dailySales={filteredSales} />
           }
 
           {/* ── PREMIUM MAIN CHART ── */}
            {!isGerente &&
           <PremiumMainChart
-            dailySales={todaySales}
+            dailySales={filteredSales}
             activeBudget={budget.length > 0 ? budget.find((b) => {
               const now = new Date();
               return Number(b.month) === now.getMonth() + 1 && Number(b.year) === now.getFullYear();
@@ -1534,13 +1577,13 @@ export default function HomeWorkspace({
 
           {/* ── DAILY METRICS ── */}
            {!isGerente &&
-          <DailyMetricsPanel todaySales={todaySales} budget={budget} />
+          <DailyMetricsPanel todaySales={filteredSales} budget={budget} />
           }
 
           {/* ── EXECUTIVE ANALYTICS ── */}
           {!isGerente &&
           <ExecutiveAnalyticsPanel
-            todaySales={todaySales}
+            todaySales={filteredSales}
             budget={budget}
             cashiers={cashiers}
             pygReports={pygReports}
