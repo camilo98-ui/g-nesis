@@ -397,11 +397,13 @@ export default function HomeWorkspace({
     if (!todaySales.length) return [];
     const { from, to } = dateRange;
     if (!from || !to) return todaySales;
+    const startOfDay = new Date(from);
+    startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(to);
     endOfDay.setHours(23, 59, 59, 999);
     return todaySales.filter(d => {
-      const date = parseISO(d.date);
-      return isWithinInterval(date, { start: from, end: endOfDay });
+      const date = new Date(d.date + 'T00:00:00');
+      return isWithinInterval(date, { start: startOfDay, end: endOfDay });
     });
   }, [todaySales, dateRange]);
 
