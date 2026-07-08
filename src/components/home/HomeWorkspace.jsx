@@ -1436,7 +1436,7 @@ export default function HomeWorkspace({
             {/* ── TAKEAWAY CARD ── */}
             {!isGerente &&
             <TakeawayCard
-              dailySales={filteredSales}
+              dailySales={todaySales}
               budget={takeawayBudgetOverride ?? activeBudget?.takeaway_budget ?? 0}
               storeBudget={activeBudget?.sales_budget ?? 0}
               onBudgetChange={async (val) => {
