@@ -1585,7 +1585,7 @@ export default function HomeWorkspace({
           {/* ── EXECUTIVE ANALYTICS ── */}
           {!isGerente &&
           <ExecutiveAnalyticsPanel
-            todaySales={filteredSales}
+            todaySales={todaySales}
             budget={budget}
             cashiers={cashiers}
             pygReports={pygReports}
