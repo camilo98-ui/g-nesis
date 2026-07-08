@@ -28,6 +28,7 @@ import { useNova } from '@/components/NovaContext';
 import ProductTicketAnalysis from '@/components/reports/ProductTicketAnalysis';
 import WeeklyComparison from './WeeklyComparison';
 import TakeawayCard from './TakeawayCard';
+import DailyTrendChart from './DailyTrendChart';
 import NovaInsightStrip from './NovaInsightStrip';
 import GerenteDashboard from './GerenteDashboard';
 import AggregatorsModal from '@/components/reports/AggregatorsModal';
@@ -1198,6 +1199,7 @@ export default function HomeWorkspace({
               const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0;
               const chartSales14 = sorted14.map((d, i) => ({
                 day: format(parseISO(d.date), 'd/M'),
+                fullDate: d.date,
                 ventas: Math.round(d.total_sales || 0),
                 ppt: Math.round(dailyBudgetBase),
                 brecha: Math.round((d.total_sales || 0) - dailyBudgetBase),
@@ -1217,24 +1219,7 @@ export default function HomeWorkspace({
                   { label: 'Días restantes', value: `${budgetData.remainingDays ?? '—'} días`, color: '#f59e0b' },
                   { label: 'Incremento recup.', value: budgetData.incrementPct ? `+${budgetData.incrementPct}%` : 'Sin brecha', color: '#10b981' }],
 
-                  chart:
-                  <ResponsiveContainer width="100%" height={160}>
-                     <LineChart data={chartSales14}>
-                       <defs>
-                         <linearGradient id="gradPPT" x1="0" y1="0" x2="0" y2="1">
-                           <stop offset="0%" stopColor="#C21875" stopOpacity={0.15} />
-                           <stop offset="100%" stopColor="#C21875" stopOpacity={0} />
-                         </linearGradient>
-                       </defs>
-                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                       <XAxis dataKey="day" tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                       <YAxis domain={[0, 140]} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} width={32} />
-                       <Tooltip formatter={(v) => [`${v}%`, 'Cumplimiento']} contentStyle={{ fontSize: 11, borderRadius: 8, border: '1px solid #f1f5f9' }} />
-                       <ReferenceLine y={100} stroke="#C21875" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: '100%', position: 'right', fontSize: 9, fill: '#C21875' }} />
-                       <Line type="monotone" dataKey="cumplimiento" stroke="#C21875" strokeWidth={2.5} dot={{ r: 3, fill: '#C21875' }} activeDot={{ r: 5 }} />
-                     </LineChart>
-                   </ResponsiveContainer>
-
+                  chart: <DailyTrendChart data={chartSales14} />
                 },
                 gap: {
                   title: 'Brecha Acumulada del Mes',
