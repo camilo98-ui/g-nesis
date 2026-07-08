@@ -439,8 +439,11 @@ export default function HomeWorkspace({
   const { data: weatherData } = useQuery({
     queryKey: ['home-weather-real'],
     queryFn: async () => {
-      const res = await base44.functions.invoke('getWeatherDataForBogota', {});
-      return res.data;
+      const res = await fetch(
+        'https://api.open-meteo.com/v1/forecast?latitude=4.71&longitude=-74.07&daily=temperature_2m_mean,temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode,relative_humidity_2m_mean&timezone=America/Bogota&past_days=7'
+      );
+      const data = await res.json();
+      return { history: data.daily };
     },
     staleTime: 60 * 60 * 1000
   });
@@ -452,6 +455,7 @@ export default function HomeWorkspace({
   const wTempsMin = weatherHistory.temperature_2m_min || [];
   const wRain = weatherHistory.precipitation_sum || [];
   const wCodes = weatherHistory.weathercode || [];
+  const wHumidity = weatherHistory.relative_humidity_2m_mean || [];
 
   // Últimos 7 días
   const last7Start = Math.max(0, wTimes.length - 7);
@@ -461,7 +465,8 @@ export default function HomeWorkspace({
     temperature_max: wTempsMax[last7Start + i],
     temperature_min: wTempsMin[last7Start + i],
     precipitation: wRain[last7Start + i],
-    weather_code: wCodes[last7Start + i]
+    weather_code: wCodes[last7Start + i],
+    humidity: wHumidity[last7Start + i]
   }));
   const latestWeather = weatherLast7[weatherLast7.length - 1] || null;
 
