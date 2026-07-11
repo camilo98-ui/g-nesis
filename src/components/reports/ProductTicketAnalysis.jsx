@@ -416,6 +416,9 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
           </div>
         </div>
 
+        {/* ── Radar Competitivo Pulse ── */}
+        <RadarPulseCard storeId={storeId} />
+
 
 
 
