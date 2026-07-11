@@ -33,7 +33,6 @@ import NovaInsightStrip from './NovaInsightStrip';
 import GerenteDashboard from './GerenteDashboard';
 import AggregatorsModal from '@/components/reports/AggregatorsModal';
 import AggregatorsWidget from './AggregatorsWidget';
-import RadarPulseCard from './RadarPulseCard';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
