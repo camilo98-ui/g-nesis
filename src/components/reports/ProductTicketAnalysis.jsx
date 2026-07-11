@@ -17,6 +17,7 @@ import {
   ResponsiveContainer, BarChart, Bar, Cell, Legend, LabelList, AreaChart, Area, ComposedChart, Line } from
 'recharts';
 import { STORES } from '@/components/StoreSelector';
+import RadarPulseCard from '@/components/home/RadarPulseCard';
 
 const fmt = (v) => '$' + Math.round(v || 0).toLocaleString('es-CO');
 const fmtPct = (v) => (v || 0).toFixed(2) + '%';
@@ -313,7 +314,7 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
         };
 
         return <>
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_200px_1fr] gap-4">
         {/* ── Top 10 Productos — Luxury Pink AI SaaS ── */}
         <div
               style={{

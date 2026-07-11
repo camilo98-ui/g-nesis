@@ -1413,11 +1413,6 @@ export default function HomeWorkspace({
 
             })()}
 
-            {/* ── RADAR PULSE CARD ── */}
-            {!isGerente && selectedStore &&
-              <RadarPulseCard storeId={selectedStore} />
-            }
-
             {/* ── AGREGADORES WIDGET ── */}
             {!isGerente && selectedStore &&
             <motion.div
