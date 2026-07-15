@@ -10,7 +10,7 @@ export function getInitial(name) { return name ? name.trim()[0].toUpperCase() : 
 export function InfoTooltip({ text }) {
   const [show, setShow] = useState(false);
   return (
-    <div className="relative inline-flex" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+    <div className="relative inline-flex" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)} onClick={(e) => { e.stopPropagation(); setShow(s => !s); }}>
       <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black cursor-help select-none transition-all hover:scale-110"
         style={{ background: 'rgba(194,24,117,0.06)', color: '#C21875', border: '1px solid rgba(194,24,117,0.15)' }}>?</span>
       <AnimatePresence>
