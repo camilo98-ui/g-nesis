@@ -17,7 +17,7 @@ export function InfoTooltip({ text }) {
         {show && (
           <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 w-56 rounded-2xl p-3 text-xs text-slate-500 leading-relaxed"
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-[9999] w-56 rounded-2xl p-3 text-xs text-slate-600 leading-relaxed pointer-events-none"
             style={{ background: 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)', border: '1px solid rgba(194,24,117,0.12)', boxShadow: '0 12px 40px rgba(194,24,117,0.15)' }}>
             {text}
           </motion.div>
