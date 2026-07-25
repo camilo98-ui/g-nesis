@@ -6,32 +6,40 @@ import { es } from 'date-fns/locale';
 import { PremiumSection, CustomTooltip } from './RadarShared';
 
 export function MonthlyEvolution({ brandStats, monthlyData }) {
+  const Icon = Activity;
   return (
     <PremiumSection title="Evolución Mensual de Transacciones" sub={`${monthlyData.length} meses registrados`}
-      tip="Tendencia mes a mes de transacciones por marca. Línea que sube = acelerando, que baja = desacelerando."
-      delay={0.14} className="lg:col-span-3" icon={Activity}>
-      <div className="flex flex-wrap gap-2 mb-3">
+      tip="Evolución mes a mes de las transacciones por marca. Permite detectar marcas en aceleración o caída."
+      delay={0.14} className="lg:col-span-3" icon={Icon}>
+      <div className="flex flex-wrap gap-3 mb-3">
         {brandStats.map(b => (
-          <div key={b.brand} className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: `${b.color}10` }}>
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: b.color, boxShadow: `0 0 6px ${b.color}60` }}/>
-            <span className="text-[10px] font-bold text-slate-600">{b.brand}</span>
+          <div key={b.brand} className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: `${b.color}08` }}>
+            <div className="w-2 h-2 rounded-full" style={{ background: b.color }}/>
+            <span className="text-[10px] font-semibold text-slate-500">{b.brand}</span>
           </div>
         ))}
       </div>
       {monthlyData.length > 1 ? (
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={monthlyData} margin={{ top: 8, right: 12, bottom: 0, left: -8 }}>
-            <CartesianGrid strokeDasharray="3 6" stroke="rgba(194,24,117,0.05)" vertical={false}/>
-            <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }} axisLine={false} tickLine={false}/>
-            <YAxis tick={{ fill: '#cbd5e1', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} width={32}/>
+        <ResponsiveContainer width="100%" height={200}>
+          <AreaChart data={monthlyData} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
+            <defs>
+              {brandStats.map(b => (
+                <linearGradient key={b.brand} id={`ag_${b.brand.replace(/[^a-z0-9]/gi,'_')}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={b.color} stopOpacity={0.18}/>
+                  <stop offset="100%" stopColor={b.color} stopOpacity={0}/>
+                </linearGradient>
+              ))}
+            </defs>
+            <CartesianGrid strokeDasharray="3 6" stroke="rgba(194,24,117,0.06)" vertical={false}/>
+            <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 600 }} axisLine={false} tickLine={false}/>
+            <YAxis tick={{ fill: '#cbd5e1', fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} width={28}/>
             <Tooltip content={<CustomTooltip/>}/>
             {brandStats.map(b => (
-              <Line key={b.brand} type="monotone" dataKey={b.brand} name={b.brand}
-                stroke={b.color} strokeWidth={3}
-                dot={{ fill: b.color, r: 4, strokeWidth: 2, stroke: '#fff' }}
-                activeDot={{ r: 7, stroke: '#fff', strokeWidth: 2 }}/>
+              <Area key={b.brand} type="monotone" dataKey={b.brand} name={b.brand}
+                stroke={b.color} strokeWidth={2.5} fill={`url(#ag_${b.brand.replace(/[^a-z0-9]/gi,'_')})`}
+                dot={{ fill: b.color, r: 3, strokeWidth: 0 }} activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}/>
             ))}
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       ) : (
         <div className="h-48 flex flex-col items-center justify-center gap-2">
