@@ -2,11 +2,15 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Zap, Activity, ChevronRight, ArrowLeft, History } from 'lucide-react';
-import { format, parseISO, getISOWeek } from 'date-fns';
+import { Plus, Zap, Activity, ChevronRight, ArrowLeft, History, CalendarDays } from 'lucide-react';
+import { format, parseISO, startOfWeek, endOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import SidebarNav from '@/components/SidebarNav';
+import { useDateFilter } from '@/components/DateFilterContext';
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { AUTO_COLORS } from '@/components/radar/RadarShared';
 import { NuevaTomaModal, HistorialModal } from '@/components/radar/RadarModals';
 import RadarKPIs from '@/components/radar/RadarKPIs';
@@ -28,9 +32,18 @@ export default function RadarCompetitivo() {
     queryFn: () => base44.entities.CompetitiveRecord.list('-date', 500)
   });
 
-  const records = activeStore
+  const { startDate, endDate, setStartDate, setEndDate } = useDateFilter();
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+
+  const storeRecords = activeStore
     ? allRecords.filter(r => !r.store_id || r.store_id === activeStore)
     : allRecords;
+
+  const records = useMemo(() => {
+    const s = format(startDate, 'yyyy-MM-dd');
+    const e = format(endDate, 'yyyy-MM-dd');
+    return storeRecords.filter(r => r.date >= s && r.date <= e);
+  }, [storeRecords, startDate, endDate]);
 
   const remove = useMutation({ mutationFn: id => base44.entities.CompetitiveRecord.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
   const update = useMutation({ mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
@@ -125,6 +138,31 @@ export default function RadarCompetitivo() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <button className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-500 transition-all glass-card">
+                  <CalendarDays className="w-3.5 h-3.5 text-rose-500"/>
+                  <span>{format(startDate, 'dd MMM', { locale: es })} - {format(endDate, 'dd MMM', { locale: es })}</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <div className="p-4 space-y-3 max-w-[280px]">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 mb-2 block">Fecha Inicio</label>
+                    <CalendarComponent mode="single" selected={startDate} onSelect={setStartDate} locale={es} className="rounded-md border"/>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 mb-2 block">Fecha Fin</label>
+                    <CalendarComponent mode="single" selected={endDate} onSelect={setEndDate} locale={es} className="rounded-md border"/>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => { const now = new Date(); setStartDate(startOfWeek(now, { weekStartsOn: 1 })); setEndDate(endOfWeek(now, { weekStartsOn: 1 })); }} className="flex-1">Esta Semana</Button>
+                    <Button size="sm" variant="outline" onClick={() => { const now = new Date(); setStartDate(new Date(now.getFullYear(), now.getMonth(), 1)); setEndDate(new Date(now.getFullYear(), now.getMonth() + 1, 0)); }} className="flex-1">Este Mes</Button>
+                  </div>
+                  <Button size="sm" onClick={() => setDatePickerOpen(false)} className="w-full bg-rose-500 hover:bg-rose-600">Aplicar</Button>
+                </div>
+              </PopoverContent>
+            </Popover>
             <button onClick={() => setHistorialOpen(true)}
               className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all glass-card">
               <History className="w-3.5 h-3.5"/> Historial
