@@ -10,8 +10,9 @@ import SidebarNav from '@/components/SidebarNav';
 import { AUTO_COLORS } from '@/components/radar/RadarShared';
 import { NuevaTomaModal, HistorialModal } from '@/components/radar/RadarModals';
 import RadarKPIs from '@/components/radar/RadarKPIs';
-import { MonthlyEvolution, MarketShareDonut, GrowthTrendChart, ShareEvolutionChart } from '@/components/radar/RadarTrendCharts';
-import { MomentumMatrix, MonthlyBarsChart, LastReadingChart, VelocityRanking, ParticipationRanking } from '@/components/radar/RadarAnalysisCharts';
+import { MonthlyEvolution, MarketShareDonut } from '@/components/radar/RadarTrendCharts';
+import { LastReadingChart, VelocityRanking, ParticipationRanking } from '@/components/radar/RadarAnalysisCharts';
+import CompetitorCards from '@/components/radar/CompetitorCards';
 import { CompetitiveTable, RadarInsights } from '@/components/radar/RadarTableInsights';
 
 export default function RadarCompetitivo() {
@@ -78,19 +79,6 @@ export default function RadarCompetitivo() {
       });
     });
     return Object.values(months).sort((a, b) => a.key.localeCompare(b.key)).slice(-8);
-  }, [brandStats]);
-
-  const growthTimelineData = useMemo(() => {
-    const periods = {};
-    brandStats.forEach(b => {
-      b.growthSeries.forEach(g => {
-        const key = g.date.substring(0, 7);
-        const label = format(parseISO(g.date), 'MMM yy', { locale: es });
-        if (!periods[key]) periods[key] = { month: label, key };
-        periods[key][b.brand] = parseFloat(g.pct.toFixed(1));
-      });
-    });
-    return Object.values(periods).sort((a, b) => a.key.localeCompare(b.key));
   }, [brandStats]);
 
   const velocityData = brandStats.filter(b => b.growthSeries.length > 0).map(b => ({
@@ -197,20 +185,11 @@ export default function RadarCompetitivo() {
               <MarketShareDonut pieData={pieData} totalAll={totalAll} />
             </div>
 
-            {/* ── ROW 3: GROWTH TREND + SHARE EVOLUTION ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-              <GrowthTrendChart growthTimelineData={growthTimelineData} brandStats={brandStats} />
-              <ShareEvolutionChart monthlyData={monthlyData} brandStats={brandStats} />
-            </div>
+            {/* ── ROW 3: COMPETITOR SNAPSHOT CARDS ── */}
+            <CompetitorCards brandStats={brandStats} totalAll={totalAll} />
 
-            {/* ── ROW 3b: MOMENTUM MATRIX ── */}
-            <MomentumMatrix brandStats={brandStats} totalAll={totalAll} />
-
-            {/* ── ROW 4: MONTHLY BARS + LAST READING ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-              <MonthlyBarsChart monthlyData={monthlyData} brandStats={brandStats} />
-              <LastReadingChart lastReadingData={lastReadingData} />
-            </div>
+            {/* ── ROW 4: LAST READING ── */}
+            <LastReadingChart lastReadingData={lastReadingData} />
 
             {/* ── ROW 5: VELOCITY + PARTICIPATION ── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
