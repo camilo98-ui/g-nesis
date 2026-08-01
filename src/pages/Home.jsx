@@ -51,6 +51,17 @@ const MENU_ITEMS = [
   requiredRole: 'gerente'
 },
 {
+  name: 'Centro Distrito',
+  page: 'DistritoControlCenter',
+  icon: Target,
+  description: 'Control consolidado',
+  bgColor: 'bg-gradient-to-br from-rose-100/90 to-pink-100/80',
+  iconBg: 'bg-rose-200/60',
+  iconColor: 'text-rose-500',
+  textColor: 'text-rose-700',
+  requiredRole: 'gerente'
+},
+{
   name: 'Experiencia Gerencial',
   page: 'ExecutiveExperience',
   icon: Sparkles,
