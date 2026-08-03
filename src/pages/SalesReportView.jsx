@@ -962,14 +962,28 @@ export default function SalesReportView() {
     queryKey: ['salesReport', storeCode],
     queryFn: async () => {
       if (!storeCode) return [];
-      const records = await base44.entities.SalesReport.list('-uploaded_at', 5000);
       const normalizedSearch = normalizeCode(storeCode);
-      return records.filter(r => {
-        const normalizedCode = normalizeCode(r.store_code);
-        return normalizedCode === normalizedSearch ||
-               r.store_code === storeCode ||
-               normalizedCode.replace(/\s/g, '') === normalizedSearch.replace(/\s/g, '');
-      });
+      // Filter server-side by store_code so one store's bulk data doesn't
+      // push another store's records out of the fetch window.
+      const candidates = [normalizedSearch, storeCode, storeCode.toUpperCase()];
+      const unique = [...new Set(candidates.filter(Boolean))];
+      let records = [];
+      for (const code of unique) {
+        const batch = await base44.entities.SalesReport.filter({ store_code: code }, '-uploaded_at', 5000);
+        if (batch.length > 0) { records = batch; break; }
+      }
+      // Fallback: if server-side filter found nothing (format mismatch),
+      // fetch all and filter client-side as before.
+      if (records.length === 0) {
+        const all = await base44.entities.SalesReport.list('-uploaded_at', 5000);
+        records = all.filter(r => {
+          const normalizedCode = normalizeCode(r.store_code);
+          return normalizedCode === normalizedSearch ||
+                 r.store_code === storeCode ||
+                 normalizedCode.replace(/\s/g, '') === normalizedSearch.replace(/\s/g, '');
+        });
+      }
+      return records;
     },
     enabled: !!storeCode,
   });
