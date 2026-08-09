@@ -1205,7 +1205,7 @@ export default function HomeWorkspace({
 
 
               // Build rich chart data for each modal — TODOS los días del mes actual
-              // Meta diaria = presupuesto Excel del día (getDailyBudget) + incremento de recuperación
+              // Meta diaria = presupuesto Excel real del día (DailyBudget) + incremento de recuperación
               const _recoveryInc = budgetData.gapRecoveryIncrement || 0;
               const _getDayBudget = budgetData.getDailyBudget || (() => budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0);
               const _ms = startOfMonth(new Date());
@@ -1218,7 +1218,9 @@ export default function HomeWorkspace({
                 const dateStr = format(day, 'yyyy-MM-dd');
                 const s = _salesByDate[dateStr];
                 const ventas = s ? Math.round(s.total_sales || 0) : 0;
-                const dayPPT = Math.round(_getDayBudget(day) + _recoveryInc);
+                const _excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dateStr);
+                const _excelDayBudget = _excelRec?.budget_amount > 0 ? _excelRec.budget_amount : _getDayBudget(day);
+                const dayPPT = Math.round(_excelDayBudget + _recoveryInc);
                 _runVentas += ventas;
                 _runPPT += dayPPT;
                 return {
