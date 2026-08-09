@@ -1068,8 +1068,8 @@ export default function HomeWorkspace({
             {/* Budget Mini Cards — PPT del Día, Brecha del Mes, Proyección */}
             {budgetData && (() => {
               const fmt = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
-              // Usar excelBudgetForToday (PPT base del día desde Excel o mensual/30) — valor estable que no cambia con la brecha
-              const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
+              // Meta hoy = presupuesto Excel del día + incremento de recuperación
+              const pptVal = budgetData.adjustedDailyBudget > 0 ? budgetData.adjustedDailyBudget : (budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
               const gap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
               const isPos = gap >= 0;
               const projPct = budgetData.monthProjectionCompliance ?? 0;
@@ -1205,7 +1205,9 @@ export default function HomeWorkspace({
 
 
               // Build rich chart data for each modal — TODOS los días del mes actual
-              const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0;
+              // Meta diaria = presupuesto Excel del día (getDailyBudget) + incremento de recuperación
+              const _recoveryInc = budgetData.gapRecoveryIncrement || 0;
+              const _getDayBudget = budgetData.getDailyBudget || (() => budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0);
               const _ms = startOfMonth(new Date());
               const _me = endOfMonth(new Date());
               const _allDays = eachDayOfInterval({ start: _ms, end: _me });
@@ -1216,15 +1218,16 @@ export default function HomeWorkspace({
                 const dateStr = format(day, 'yyyy-MM-dd');
                 const s = _salesByDate[dateStr];
                 const ventas = s ? Math.round(s.total_sales || 0) : 0;
+                const dayPPT = Math.round(_getDayBudget(day) + _recoveryInc);
                 _runVentas += ventas;
-                _runPPT += dailyBudgetBase;
+                _runPPT += dayPPT;
                 return {
                   day: format(day, 'd/M'),
                   fullDate: dateStr,
                   ventas,
-                  ppt: Math.round(dailyBudgetBase),
-                  brecha: Math.round(ventas - dailyBudgetBase),
-                  cumplimiento: dailyBudgetBase > 0 ? Math.round(ventas / dailyBudgetBase * 100) : 0,
+                  ppt: dayPPT,
+                  brecha: Math.round(ventas - dayPPT),
+                  cumplimiento: dayPPT > 0 ? Math.round(ventas / dayPPT * 100) : 0,
                   acumVentas: Math.round(_runVentas),
                   acumPPT: Math.round(_runPPT)
                 };
