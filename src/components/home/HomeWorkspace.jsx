@@ -1068,8 +1068,8 @@ export default function HomeWorkspace({
             {/* Budget Mini Cards — PPT del Día, Brecha del Mes, Proyección */}
             {budgetData && (() => {
               const fmt = (val) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
-              // Usar adjustedDailyBudget (excelBudgetForToday + recuperación de brecha) para que el número refleje el PPT real del día
-              const pptVal = budgetData.adjustedDailyBudget > 0 ? budgetData.adjustedDailyBudget : budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
+              // Usar excelBudgetForToday (PPT base del día desde Excel o mensual/30) — valor estable que no cambia con la brecha
+              const pptVal = budgetData.excelBudgetForToday > 0 ? budgetData.excelBudgetForToday : budgetData.monthlyBudget ? budgetData.monthlyBudget / 30 : 0;
               const gap = (budgetData.salesUntilYesterday || 0) - (budgetData.budgetUntilYesterday || 0);
               const isPos = gap >= 0;
               const projPct = budgetData.monthProjectionCompliance ?? 0;
@@ -1119,8 +1119,12 @@ export default function HomeWorkspace({
 
               };
 
-              // Tendencias ÚNICAS por card
-              const sorted14 = [...todaySales].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-14);
+              // Tendencias ÚNICAS por card — solo del mes actual
+              const monthStartNow = startOfMonth(new Date());
+              const sorted14 = [...todaySales]
+                .filter(s => { try { return new Date(s.date + 'T00:00:00') >= monthStartNow; } catch { return false; } })
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(-14);
 
               // PPT: cumplimiento diario (% de ventas vs meta diaria)
               const dailyBudgetForSpark = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 1;
@@ -1146,9 +1150,7 @@ export default function HomeWorkspace({
               {
                 label: 'PPT del Día',
                 value: fmt(pptVal),
-                sub: budgetData.gapRecoveryIncrement > 0 && budgetData.excelBudgetForToday > 0 ?
-                `+${budgetData.incrementPct}% recuperación` :
-                'meta diaria',
+                sub: 'meta diaria',
                 accent: '#C21875',
                 spark: sparkPPT,
                 delay: 0.05,
@@ -1211,7 +1213,7 @@ export default function HomeWorkspace({
               const modalCharts = {
                 ppt: {
                   title: 'PPT del Día — Ventas vs Meta Diaria',
-                  subtitle: 'Últimos 14 días · COP',
+                  subtitle: 'Mes actual · COP',
                   color: '#C21875',
                   stats: [
                   { label: 'Meta hoy', value: fmt(pptVal), color: '#C21875' },
@@ -1340,7 +1342,7 @@ export default function HomeWorkspace({
 
                         {/* Chart area */}
                         <div className="p-5 pt-4">
-                          <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-300 mb-3">Tendencia · últimos 14 días</p>
+                          <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-300 mb-3">Tendencia · mes actual</p>
                           {chartSales14.length >= 2 ? activeModal.chart :
                           <div className="h-40 flex items-center justify-center text-[11px] text-slate-300">Sin suficientes datos históricos</div>
                           }
