@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from 'recharts';
 import { TrendingUp, Check, X as XIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 const fmt = (n) => {
@@ -28,7 +28,7 @@ function CustomTooltip({ active, payload }) {
 
   let label;
   try {
-    const dateObj = new Date(d.fullDate || d.day);
+    const dateObj = parseISO(d.fullDate || d.day);
     label = format(dateObj, "EEEE dd/MM", { locale: es });
   } catch {
     label = d.day;

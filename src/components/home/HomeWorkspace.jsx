@@ -1204,18 +1204,31 @@ export default function HomeWorkspace({
               }];
 
 
-              // Build rich chart data for each modal
+              // Build rich chart data for each modal — TODOS los días del mes actual
               const dailyBudgetBase = budgetData.monthlyBudget > 0 ? budgetData.monthlyBudget / 30 : 0;
-              const chartSales14 = sorted14.map((d, i) => ({
-                day: format(parseISO(d.date), 'd/M'),
-                fullDate: d.date,
-                ventas: Math.round(d.total_sales || 0),
-                ppt: Math.round(dailyBudgetBase),
-                brecha: Math.round((d.total_sales || 0) - dailyBudgetBase),
-                cumplimiento: dailyBudgetBase > 0 ? Math.round((d.total_sales || 0) / dailyBudgetBase * 100) : 0,
-                acumVentas: Math.round(sorted14.slice(0, i + 1).reduce((s, x) => s + (x.total_sales || 0), 0)),
-                acumPPT: Math.round(dailyBudgetBase * (i + 1))
-              }));
+              const _ms = startOfMonth(new Date());
+              const _me = endOfMonth(new Date());
+              const _allDays = eachDayOfInterval({ start: _ms, end: _me });
+              const _salesByDate = {};
+              sorted14.forEach(s => { _salesByDate[s.date] = s; });
+              let _runVentas = 0, _runPPT = 0;
+              const chartSales14 = _allDays.map((day) => {
+                const dateStr = format(day, 'yyyy-MM-dd');
+                const s = _salesByDate[dateStr];
+                const ventas = s ? Math.round(s.total_sales || 0) : 0;
+                _runVentas += ventas;
+                _runPPT += dailyBudgetBase;
+                return {
+                  day: format(day, 'd/M'),
+                  fullDate: dateStr,
+                  ventas,
+                  ppt: Math.round(dailyBudgetBase),
+                  brecha: Math.round(ventas - dailyBudgetBase),
+                  cumplimiento: dailyBudgetBase > 0 ? Math.round(ventas / dailyBudgetBase * 100) : 0,
+                  acumVentas: Math.round(_runVentas),
+                  acumPPT: Math.round(_runPPT)
+                };
+              });
 
               const modalCharts = {
                 ppt: {
