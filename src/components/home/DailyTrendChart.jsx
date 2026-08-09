@@ -62,8 +62,8 @@ function CustomTooltip({ active, payload }) {
 }
 
 export default function DailyTrendChart({ data = [] }) {
-  if (data.length < 2) {
-    return <div className="h-40 flex items-center justify-center text-[11px] text-slate-300">Sin suficientes datos históricos</div>;
+  if (!data || data.length < 1) {
+    return <div className="h-40 flex items-center justify-center text-[11px] text-slate-300">Sin datos del mes actual</div>;
   }
 
   const maxVal = Math.max(...data.map(d => d.brecha || 0), 0);

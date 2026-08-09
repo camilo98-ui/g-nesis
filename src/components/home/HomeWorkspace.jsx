@@ -1119,10 +1119,17 @@ export default function HomeWorkspace({
 
               };
 
-              // Tendencias ÚNICAS por card — solo del mes actual
-              const monthStartNow = startOfMonth(new Date());
+              // Tendencias ÚNICAS por card — solo del mes actual (comparando mes/año directamente)
+              const _now = new Date();
+              const _curMonth = _now.getMonth();
+              const _curYear = _now.getFullYear();
               const sorted14 = [...todaySales]
-                .filter(s => { try { return new Date(s.date + 'T00:00:00') >= monthStartNow; } catch { return false; } })
+                .filter(s => {
+                  try {
+                    const d = parseISO(s.date);
+                    return d.getMonth() === _curMonth && d.getFullYear() === _curYear;
+                  } catch { return false; }
+                })
                 .sort((a, b) => new Date(a.date) - new Date(b.date))
                 .slice(-14);
 
