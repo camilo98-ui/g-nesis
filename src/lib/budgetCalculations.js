@@ -111,9 +111,11 @@ export function calculateBudgetData(activeBudget, dailySales, dailyBudgets = [],
   const urgencyFactor = remainingDays > 0 ? Math.pow(30 / remainingDays, 0.65) : 1;
   const gapPerDay = accumulatedGap > 0 && remainingDays > 0 ? (accumulatedGap / remainingDays) * urgencyFactor : 0;
   const recoveryToday = gapPerDay * dayMultiplier;
-  const adjustedDailyBudget = excelBudgetForToday + recoveryToday;
-  const gapRecoveryIncrement = recoveryToday;
-  const incrementPct = excelBudgetForToday > 0 ? Math.round(recoveryToday / excelBudgetForToday * 100) : 0;
+  // Incremento: recuperación agresiva si voy mal (brecha negativa); incremento razonable (3%) si voy bien
+  const challengeIncrement = excelBudgetForToday * 0.03;
+  const gapRecoveryIncrement = accumulatedGap > 0 ? recoveryToday : challengeIncrement;
+  const adjustedDailyBudget = excelBudgetForToday + gapRecoveryIncrement;
+  const incrementPct = excelBudgetForToday > 0 ? Math.round(gapRecoveryIncrement / excelBudgetForToday * 100) : 0;
 
   const currentWeekNumber = weeks.findIndex((w) => {
     const weekEnd = endOfWeek(w, { weekStartsOn: 1 });
