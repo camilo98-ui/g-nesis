@@ -133,17 +133,19 @@ export function calculateBudgetData(activeBudget, dailySales, dailyBudgets = [],
   }, 0);
 
   const totalMonthSales = salesUntilYesterday + todayActualSales;
-  const daysWithSales = filteredSales.filter(s => {
-    try {
-      const sd = parseISO(s.date);
-      return sd >= monthStart && sd <= now && (s.total_sales || 0) > 0;
-    } catch { return false; }
-  }).length;
   const daysElapsedCalendar = eachDayOfInterval({ start: monthStart, end: now }).length;
-  const effectiveDays = daysWithSales > 0 ? daysWithSales : daysElapsedCalendar;
-  const monthAvgDailySales = effectiveDays > 0 ? totalMonthSales / effectiveDays : 0;
+  const monthAvgDailySales = daysElapsedCalendar > 0 ? totalMonthSales / daysElapsedCalendar : 0;
   const daysRemainingMonth = daysInMonth - daysElapsedCalendar;
-  const monthProjection = totalMonthSales + (monthAvgDailySales * Math.max(daysRemainingMonth, 0));
+  // Proyección de cierre = ventas reales hasta hoy + presupuesto Excel de los días restantes
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const remainingDaysList = daysRemainingMonth > 0 ? eachDayOfInterval({ start: tomorrow, end: monthEnd }) : [];
+  const remainingExcelBudget = remainingDaysList.reduce((sum, day) => {
+    const dayStr = format(day, 'yyyy-MM-dd');
+    const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
+    return sum + (excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day));
+  }, 0);
+  const monthProjection = totalMonthSales + remainingExcelBudget;
   const monthProjectionCompliance = adjustedMonthlyBudget > 0 ? monthProjection / adjustedMonthlyBudget * 100 : 0;
 
   return {
