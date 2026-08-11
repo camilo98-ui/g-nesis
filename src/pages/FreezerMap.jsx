@@ -1102,6 +1102,7 @@ export default function FreezerMap() {
     if (totalMisplaced.length > 0) suggestions.push(`Reorganiza ${totalMisplaced.length} sabores mal ubicados según las reglas de exhibición.`);
 
     const auditResult = {
+      storeId: selectedStore,
       byFreezer: freezerAnalysis,
       total: {
         totalSlots: totalCapacity,
