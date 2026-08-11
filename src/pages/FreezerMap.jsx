@@ -7,6 +7,7 @@ import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
 import FreezerSlotCell from '@/components/freezer/FreezerSlotCell';
 import FreezerAuditPanel from '@/components/freezer/FreezerAuditPanel';
+import FreezerInventoryModal from '@/components/freezer/FreezerInventoryModal';
 import FreezerHistoryPanel from '@/components/freezer/FreezerHistoryPanel';
 import FreezerDimensionsEditor from '@/components/freezer/FreezerDimensionsEditor';
 import SmartOrderPrediction from '@/components/freezer/SmartOrderPrediction';
@@ -15,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   ArrowLeft, Sparkles, RotateCcw, ZoomIn, ZoomOut,
-  Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus, Search, FileDown } from
+  Trash2, History, BarChart3, Undo2, Copy, Check, X, Plus, Search, FileDown, ClipboardList } from
 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays, parseISO } from 'date-fns';
@@ -249,6 +250,7 @@ export default function FreezerMap() {
   const [showHistory, setShowHistory] = useState(false);
   const [auditData, setAuditData] = useState(null);
   const [auditSlots, setAuditSlots] = useState([]);
+  const [showInventory, setShowInventory] = useState(false);
   const [undoStack, setUndoStack] = useState([]);
   const [savingSlot, setSavingSlot] = useState(null);
   const [draggedSlot, setDraggedSlot] = useState(null);
@@ -358,8 +360,8 @@ export default function FreezerMap() {
   });
 
   // Fetch todas las neveras para análisis completo
-  const { data: allFreezersSlots = [] } = useQuery({
-    queryKey: ['allFreezersSlots', selectedStore, availableFreezers],
+  const { data: allFreezersSlotsQuery = [] } = useQuery({
+    queryKey: ['allFreezersSlotsQuery', selectedStore, availableFreezers],
     queryFn: async () => {
       const allSlots = await Promise.all(
         availableFreezers.map((num) =>
@@ -521,19 +523,19 @@ export default function FreezerMap() {
 
   // Guardar en historial con usuario - GUARDAR TODAS LAS NEVERAS
   const saveToHistory = useCallback(async (changesCount = 1) => {
-    if (!selectedStore || allFreezersSlots.length === 0) return;
+    if (!selectedStore || allFreezersSlotsQuery.length === 0) return;
     try {
       const user = await base44.auth.me().catch(() => null);
       await base44.entities.FreezerHistory.create({
         store_id: selectedStore,
         date: format(new Date(), 'yyyy-MM-dd'),
-        snapshot: JSON.stringify(allFreezersSlots), // CRÍTICO: guardar TODAS las neveras
-        filled_slots: allFreezersSlots.filter((s) => !s.is_empty && s.flavor_name).length,
+        snapshot: JSON.stringify(allFreezersSlotsQuery), // CRÍTICO: guardar TODAS las neveras
+        filled_slots: allFreezersSlotsQuery.filter((s) => !s.is_empty && s.flavor_name).length,
         changes_count: changesCount,
         created_by_user: user?.full_name || user?.email || 'Usuario'
       });
     } catch (e) {console.error(e);}
-  }, [selectedStore, allFreezersSlots]);
+  }, [selectedStore, allFreezersSlotsQuery]);
 
   // Mutation para borrar sabor personalizado
   const deleteFlavorMutation = useMutation({
@@ -609,7 +611,7 @@ export default function FreezerMap() {
       });
 
       // Actualizar cache de todas las neveras
-      queryClient.invalidateQueries(['allFreezersSlots']);
+      queryClient.invalidateQueries(['allFreezersSlotsQuery']);
 
       setSavingSlot({ row: variables.slotData.row, position: variables.slotData.position, success: true });
       setTimeout(() => setSavingSlot(null), 1000);
@@ -662,7 +664,7 @@ export default function FreezerMap() {
       });
 
       await queryClient.invalidateQueries(['freezerSlots']);
-      await queryClient.invalidateQueries(['allFreezersSlots']);
+      await queryClient.invalidateQueries(['allFreezersSlotsQuery']);
       await refetch();
 
       setSavingSlot({ row: slot.row, position: slot.position, success: true });
@@ -908,7 +910,7 @@ export default function FreezerMap() {
   // Auditoría - ANÁLISIS POR NEVERA Y ACUMULADO - CORREGIDO 100%
   const runAudit = useCallback(async (freezerToShow = null) => {
     // Traer datos frescos de la BD para evitar mostrar información desactualizada
-    let freshAllSlots = allFreezersSlots;
+    let freshAllSlots = allFreezersSlotsQuery;
     try {
       const fetched = await Promise.all(
         availableFreezers.map((num) =>
@@ -917,7 +919,7 @@ export default function FreezerMap() {
       );
       freshAllSlots = fetched.flat();
       // Actualizar cache con datos frescos
-      queryClient.setQueryData(['allFreezersSlots', selectedStore, availableFreezers], freshAllSlots);
+      queryClient.setQueryData(['allFreezersSlotsQuery', selectedStore, availableFreezers], freshAllSlots);
     } catch (e) {
       console.error('Error trayendo datos frescos:', e);
     }
@@ -1122,7 +1124,7 @@ export default function FreezerMap() {
     setAuditSlots(freshAllSlots);
     setShowAudit(true);
     console.log('🧊 Slots frescos pasados al panel:', { count: freshAllSlots.length, muestra: freshAllSlots.slice(0, 3) });
-  }, [allFreezersSlots, selectedStore, availableFreezers, freezerDimensions]);
+  }, [allFreezersSlotsQuery, selectedStore, availableFreezers, freezerDimensions]);
 
   // Optimizar con IA
   const optimizeWithAI = async () => {
@@ -1222,7 +1224,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
       }
 
       await queryClient.invalidateQueries(['freezerSlots']);
-      await queryClient.invalidateQueries(['allFreezersSlots']);
+      await queryClient.invalidateQueries(['allFreezersSlotsQuery']);
       toast.success('Mapa restaurado');
       setShowHistory(false);
     } catch (e) {
@@ -1250,7 +1252,17 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               {selectedStore && <p className="text-pink-700 text-xs sm:text-sm">{selectedStore} - {selectedStoreName}</p>}
             </div>
           </div>
-          <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => setShowInventory(true)}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:shadow-lg rounded-xl"
+            >
+              <ClipboardList className="w-4 h-4 mr-1.5" />
+              Inventario
+            </Button>
+            <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
+          </div>
         </div>
 
         {selectedStore ?
@@ -1324,7 +1336,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                   });
 
                   await queryClient.invalidateQueries(['freezerSlots']);
-                  await queryClient.invalidateQueries(['allFreezersSlots']);
+                  await queryClient.invalidateQueries(['allFreezersSlotsQuery']);
                   toast.success(`Nevera #${currentFreezer} eliminada`);
                 }}
                 className="text-xs h-7 px-2 text-red-600 hover:bg-red-100"
@@ -1750,13 +1762,13 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
 
             {/* Alertas de Inventario */}
             <InventoryStatusOverview
-            allFreezersSlots={allFreezersSlots}
+            allFreezersSlotsQuery={allFreezersSlotsQuery}
             rotationAnalysis={rotationAnalysis} />
           
 
             {/* Pronóstico de Pedido - Independiente */}
             <SmartOrderPrediction
-            allFreezersSlots={allFreezersSlots}
+            allFreezersSlotsQuery={allFreezersSlotsQuery}
             currentFreezer={currentFreezer}
             storeCode={selectedStore}
             storeId={selectedStore} />
@@ -1948,6 +1960,17 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
       <AnimatePresence>
         {showAudit && <FreezerAuditPanel auditData={auditData} allSlots={auditSlots} freezerDimensions={freezerDimensions} availableFreezers={availableFreezers} onClose={() => setShowAudit(false)} onApplySuggestions={() => toast.info('Sugerencias aplicadas')} onAutoCorrect={optimizeWithAI} isLoading={isOptimizing} />}
       </AnimatePresence>
+
+      {/* Inventory Modal */}
+      <FreezerInventoryModal
+        open={showInventory}
+        onClose={() => setShowInventory(false)}
+        storeCode={selectedStore}
+        storeName={selectedStoreName}
+        allSlots={allFreezersSlotsQuery}
+        availableFreezers={availableFreezers}
+        freezerDimensions={freezerDimensions}
+      />
 
       {/* History Panel */}
       <AnimatePresence>
