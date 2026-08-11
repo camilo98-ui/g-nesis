@@ -8,13 +8,15 @@ import { Button } from "@/components/ui/button";
 import OrderPredictionPanel from './OrderPredictionPanel';
 import StockVisualization from './StockVisualization';
 
-export default function FreezerAuditPanel({ 
-  auditData, 
-  onClose, 
+export default function FreezerAuditPanel({
+  auditData,
+  onClose,
   onApplySuggestions,
   onAutoCorrect,
   isLoading,
-  allSlots = []
+  allSlots = [],
+  freezerDimensions = {},
+  availableFreezers = [1, 2, 3]
 }) {
   const [selectedFreezer, setSelectedFreezer] = React.useState(auditData.selectedFreezer || 'total');
   
@@ -35,44 +37,37 @@ export default function FreezerAuditPanel({
       });
 
   const relevantSlots = freezerFiltered.filter(s => s.slot_type === 'F' || !s.slot_type);
-  
-  // RECALCULAR conteos reales basado en los slots actuales - CONTEO PRECISO
+
+  // Contar slots frontales llenos (con sabor)
   const actualFilledSlots = relevantSlots.filter(s => {
     const isFilled = !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '';
     return isFilled;
   }).length;
-  
-  const actualEmptySlots = relevantSlots.filter(s => {
-    const isEmpty = s.is_empty || !s.flavor_name || s.flavor_name.trim() === '';
-    return isEmpty;
-  }).length;
-  
-  const actualTotalSlots = relevantSlots.length;
-  
+
+  // Capacidad real del grid = filas × columnas (según dimensiones configuradas)
+  const gridCapacity = selectedFreezer === 'total'
+    ? availableFreezers.reduce((sum, num) => {
+        const dims = freezerDimensions[num] || { rows: 7, cols: 5 };
+        return sum + (dims.rows * dims.cols);
+      }, 0)
+    : (() => {
+        const dims = freezerDimensions[selectedFreezer] || { rows: 7, cols: 5 };
+        return dims.rows * dims.cols;
+      })();
+
+  const actualTotalSlots = gridCapacity;
+  const actualEmptySlots = Math.max(0, gridCapacity - actualFilledSlots);
+
   // Usar valores recalculados en lugar de los que vienen de auditData
-  const { 
-    misplacedSlots, 
-    repeatedFlavors, 
-    efficiency 
+  const {
+    misplacedSlots,
+    repeatedFlavors,
+    efficiency
   } = currentData;
-  
+
   const filledSlots = actualFilledSlots;
   const emptySlots = actualEmptySlots;
   const totalSlots = actualTotalSlots;
-  
-  // DEBUG DETALLADO
-  console.log(`📊 Panel Auditoría (${selectedFreezer}):`, {
-    totalSlots: actualTotalSlots,
-    filledSlots: actualFilledSlots,
-    emptySlots: actualEmptySlots,
-    allSlotsLength: allSlots?.length || 0,
-    relevantSlotsLength: relevantSlots.length,
-    sampleSlots: relevantSlots.slice(0, 3).map(s => ({
-      store_id: s.store_id,
-      flavor: s.flavor_name,
-      is_empty: s.is_empty
-    }))
-  });
 
   const getEfficiencyColor = (eff) => {
     if (eff >= 80) return 'text-green-600 bg-green-100';

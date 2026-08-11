@@ -905,19 +905,34 @@ export default function FreezerMap() {
   };
 
   // Auditoría - ANÁLISIS POR NEVERA Y ACUMULADO - CORREGIDO 100%
-  const runAudit = useCallback((freezerToShow = null) => {
+  const runAudit = useCallback(async (freezerToShow = null) => {
+    // Traer datos frescos de la BD para evitar mostrar información desactualizada
+    let freshAllSlots = allFreezersSlots;
+    try {
+      const fetched = await Promise.all(
+        availableFreezers.map(num =>
+          base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${num}` })
+        )
+      );
+      freshAllSlots = fetched.flat();
+      // Actualizar cache con datos frescos
+      queryClient.setQueryData(['allFreezersSlots', selectedStore, availableFreezers], freshAllSlots);
+    } catch (e) {
+      console.error('Error trayendo datos frescos:', e);
+    }
+
     console.log('🔍 INICIO AUDITORÍA:', {
-      totalSlotsEnBD: allFreezersSlots.length,
+      totalSlotsEnBD: freshAllSlots.length,
       neveras: availableFreezers,
       tienda: selectedStore
     });
 
     // Análisis por nevera individual
     const freezerAnalysis = {};
-    
+
     availableFreezers.forEach(freezerNum => {
       // FILTRAR EXACTO por store_id completo
-      const freezerSlots = allFreezersSlots.filter(s => 
+      const freezerSlots = freshAllSlots.filter(s =>
         s.store_id === `${selectedStore}_F${freezerNum}`
       );
       
@@ -936,17 +951,14 @@ export default function FreezerMap() {
         s.slot_type === 'F' // SOLO CONTAR FRONTALES
       );
       
-      // VACÍOS REALES = slots frontales vacíos
-      const emptySlots = freezerSlots.filter(s => 
-        (s.is_empty || !s.flavor_name || s.flavor_name.trim() === '') &&
-        s.slot_type === 'F' // SOLO CONTAR FRONTALES
-      ).length;
+      // VACÍOS REALES = capacidad del grid - slots frontales llenos
+      const emptySlots = Math.max(0, totalSlotsInFreezer - filledSlots.length);
       
       // Dimensiones para referencia
       const dimensions = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
-      
-      // TOTAL DE SLOTS = solo los que existen en la BD
-      const totalSlotsInFreezer = freezerSlots.length;
+
+      // CAPACIDAD REAL del grid = filas × columnas (solo slots frontales visibles)
+      const totalSlotsInFreezer = dimensions.rows * dimensions.cols;
 
       console.log(`📊 Nevera #${freezerNum} - Conteo:`, {
         dimensiones: `${dimensions.rows}x${dimensions.cols}`,
@@ -1010,21 +1022,21 @@ export default function FreezerMap() {
     // ========== ACUMULADO TOTAL DE LAS 3 NEVERAS ==========
     
     // TODOS los slots llenos (solo frontales F)
-    const allFilled = allFreezersSlots.filter(s => 
-      !s.is_empty && 
-      s.flavor_name && 
+    const allFilled = freshAllSlots.filter(s =>
+      !s.is_empty &&
+      s.flavor_name &&
       s.flavor_name.trim() !== '' &&
       s.slot_type === 'F' // SOLO CONTAR FRONTALES
     );
-    
-    // VACÍOS TOTALES = slots frontales vacíos
-    const totalEmpty = allFreezersSlots.filter(s => 
-      (s.is_empty || !s.flavor_name || s.flavor_name.trim() === '') &&
-      s.slot_type === 'F' // SOLO CONTAR FRONTALES
-    ).length;
-    
-    // CAPACIDAD TOTAL = todos los slots que existen en BD
-    const totalCapacity = allFreezersSlots.length;
+
+    // VACÍOS TOTALES = capacidad total - slots frontales llenos
+    const totalEmpty = Math.max(0, totalCapacity - allFilled.length);
+
+    // CAPACIDAD TOTAL = suma de filas × columnas de todas las neveras
+    const totalCapacity = availableFreezers.reduce((sum, num) => {
+      const dims = freezerDimensions[num] || { rows: 7, cols: 5 };
+      return sum + (dims.rows * dims.cols);
+    }, 0);
 
     console.log('📦 TOTALES ACUMULADOS:', {
       capacidadTotal: totalCapacity,
@@ -1930,7 +1942,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
 
       {/* Audit Panel */}
       <AnimatePresence>
-        {showAudit && <FreezerAuditPanel auditData={auditData} allSlots={allFreezersSlots} onClose={() => setShowAudit(false)} onApplySuggestions={() => toast.info('Sugerencias aplicadas')} onAutoCorrect={optimizeWithAI} isLoading={isOptimizing} />}
+        {showAudit && <FreezerAuditPanel auditData={auditData} allSlots={allFreezersSlots} freezerDimensions={freezerDimensions} availableFreezers={availableFreezers} onClose={() => setShowAudit(false)} onApplySuggestions={() => toast.info('Sugerencias aplicadas')} onAutoCorrect={optimizeWithAI} isLoading={isOptimizing} />}
       </AnimatePresence>
 
       {/* History Panel */}
