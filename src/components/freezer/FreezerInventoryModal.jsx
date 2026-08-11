@@ -29,16 +29,19 @@ export default function FreezerInventoryModal({
         (s) => s.store_id === `${storeCode}_F${num}`
       );
 
-      const filledSlots = freezerSlots.filter(
+      // Solo slots frontales (F) = cubetas visibles. Los traseros (T) son respuesto.
+      const frontSlots = freezerSlots.filter((s) => (s.slot_type || 'F') === 'F');
+
+      const filledSlots = frontSlots.filter(
         (s) => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== ''
       );
 
-      // Conteo por sabor (case-insensitive)
+      // Conteo por sabor (case-insensitive) — solo frontales
       const flavorCounts = {};
       filledSlots.forEach((s) => {
         const key = s.flavor_name.toLowerCase().trim();
         if (!flavorCounts[key]) {
-          flavorCounts[key] = { name: s.flavor_name, count: 0, color: s.flavor_color };
+          flavorCounts[key] = { name: s.flavor_name, count: 0, color: s.color };
         }
         flavorCounts[key].count += 1;
       });
@@ -50,8 +53,10 @@ export default function FreezerInventoryModal({
       const repeatedCount = repeatedFlavors.length;
       const repeatedCubetas = repeatedFlavors.reduce((sum, f) => sum + f.count, 0);
 
+      // Capacidad real = slots frontales en BD; fallback a dimensiones de grid
       const dims = freezerDimensions[num] || { rows: 7, cols: 5 };
-      const capacity = dims.rows * dims.cols;
+      const gridCapacity = dims.rows * dims.cols;
+      const capacity = frontSlots.length > 0 ? frontSlots.length : gridCapacity;
       const occupancy = capacity > 0 ? Math.round((totalCubetas / capacity) * 100) : 0;
 
       return {
