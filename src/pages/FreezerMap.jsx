@@ -951,14 +951,14 @@ export default function FreezerMap() {
         s.slot_type === 'F' // SOLO CONTAR FRONTALES
       );
       
-      // VACÍOS REALES = capacidad del grid - slots frontales llenos
-      const emptySlots = Math.max(0, totalSlotsInFreezer - filledSlots.length);
-      
       // Dimensiones para referencia
       const dimensions = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
 
       // CAPACIDAD REAL del grid = filas × columnas (solo slots frontales visibles)
       const totalSlotsInFreezer = dimensions.rows * dimensions.cols;
+
+      // VACÍOS REALES = capacidad del grid - slots frontales llenos
+      const emptySlots = Math.max(0, totalSlotsInFreezer - filledSlots.length);
 
       console.log(`📊 Nevera #${freezerNum} - Conteo:`, {
         dimensiones: `${dimensions.rows}x${dimensions.cols}`,
@@ -1029,14 +1029,14 @@ export default function FreezerMap() {
       s.slot_type === 'F' // SOLO CONTAR FRONTALES
     );
 
-    // VACÍOS TOTALES = capacidad total - slots frontales llenos
-    const totalEmpty = Math.max(0, totalCapacity - allFilled.length);
-
     // CAPACIDAD TOTAL = suma de filas × columnas de todas las neveras
     const totalCapacity = availableFreezers.reduce((sum, num) => {
       const dims = freezerDimensions[num] || { rows: 7, cols: 5 };
       return sum + (dims.rows * dims.cols);
     }, 0);
+
+    // VACÍOS TOTALES = capacidad total - slots frontales llenos
+    const totalEmpty = Math.max(0, totalCapacity - allFilled.length);
 
     console.log('📦 TOTALES ACUMULADOS:', {
       capacidadTotal: totalCapacity,
