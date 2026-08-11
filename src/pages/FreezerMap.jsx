@@ -1120,6 +1120,7 @@ export default function FreezerMap() {
     setAuditData(auditResult);
     setAuditSlots(freshAllSlots);
     setShowAudit(true);
+    console.log('🧊 Slots frescos pasados al panel:', { count: freshAllSlots.length, muestra: freshAllSlots.slice(0, 3) });
   }, [allFreezersSlots, selectedStore, availableFreezers, freezerDimensions]);
 
   // Optimizar con IA
