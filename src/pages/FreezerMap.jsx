@@ -248,6 +248,7 @@ export default function FreezerMap() {
   const [showAudit, setShowAudit] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [auditData, setAuditData] = useState(null);
+  const [auditSlots, setAuditSlots] = useState([]);
   const [undoStack, setUndoStack] = useState([]);
   const [savingSlot, setSavingSlot] = useState(null);
   const [draggedSlot, setDraggedSlot] = useState(null);
@@ -1117,6 +1118,7 @@ export default function FreezerMap() {
     console.log('✅ AUDITORÍA COMPLETA:', auditResult);
     
     setAuditData(auditResult);
+    setAuditSlots(freshAllSlots);
     setShowAudit(true);
   }, [allFreezersSlots, selectedStore, availableFreezers, freezerDimensions]);
 
@@ -1942,7 +1944,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
 
       {/* Audit Panel */}
       <AnimatePresence>
-        {showAudit && <FreezerAuditPanel auditData={auditData} allSlots={allFreezersSlots} freezerDimensions={freezerDimensions} availableFreezers={availableFreezers} onClose={() => setShowAudit(false)} onApplySuggestions={() => toast.info('Sugerencias aplicadas')} onAutoCorrect={optimizeWithAI} isLoading={isOptimizing} />}
+        {showAudit && <FreezerAuditPanel auditData={auditData} allSlots={auditSlots} freezerDimensions={freezerDimensions} availableFreezers={availableFreezers} onClose={() => setShowAudit(false)} onApplySuggestions={() => toast.info('Sugerencias aplicadas')} onAutoCorrect={optimizeWithAI} isLoading={isOptimizing} />}
       </AnimatePresence>
 
       {/* History Panel */}
