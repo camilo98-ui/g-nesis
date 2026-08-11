@@ -25,62 +25,62 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 // Función para generar color dinámico basado en nombre del sabor
 const getFlavorColor = (flavorName) => {
   const name = flavorName.toLowerCase();
-  
+
   // Chocolates y oscuros
   if (name.includes('chocolate') || name.includes('belga')) return '#3D2314';
   if (name.includes('brownie')) return '#4A2511';
   if (name.includes('oreo')) return '#1A1A1A';
   if (name.includes('café') || name.includes('coffee')) return '#6F4E37';
   if (name.includes('ron') || name.includes('whisky')) return '#8B4513';
-  
+
   // Frutas rojas y rosadas
   if (name.includes('fresa') || name.includes('strawberry')) return '#FF6B9D';
   if (name.includes('cherry') || name.includes('cereza')) return '#DC143C';
   if (name.includes('frambuesa') || name.includes('raspberry')) return '#E30B5C';
   if (name.includes('frutos')) return '#C71585';
   if (name.includes('chicle') || name.includes('gum')) return '#FFB6C1';
-  
+
   // Naranjas y amarillos
   if (name.includes('maracuyá') || name.includes('passion')) return '#FFB347';
   if (name.includes('mandarina') || name.includes('orange')) return '#FFA500';
   if (name.includes('mango')) return '#FFBF00';
   if (name.includes('durazno') || name.includes('peach')) return '#FFDAB9';
   if (name.includes('naranja')) return '#FF8C00';
-  
+
   // Limones y cítricos
   if (name.includes('limón') || name.includes('lemon')) return '#FFF44F';
   if (name.includes('crema limón') || name.includes('lemon cream')) return '#FFFACD';
   if (name.includes('lima') || name.includes('lime')) return '#C7EA46';
-  
+
   // Vainillas y cremas
   if (name.includes('vainilla') || name.includes('vanilla')) return '#F3E5AB';
   if (name.includes('v. francesa')) return '#FFFDD0';
   if (name.includes('v. chips')) return '#F5DEB3';
   if (name.includes('crema')) return '#FFFACD';
-  
+
   // Caramelos y dulces
   if (name.includes('arequipe') || name.includes('dulce')) return '#D4A574';
   if (name.includes('m&m')) return '#E31837';
   if (name.includes('milky')) return '#4169E1';
   if (name.includes('snickers')) return '#7B3F00';
   if (name.includes('kit kat')) return '#D70026';
-  
+
   // Verdes y menta
   if (name.includes('menta') || name.includes('mint')) return '#98FF98';
   if (name.includes('pistacho') || name.includes('pistachio')) return '#93C572';
-  
+
   // Morados y azules
   if (name.includes('mora') || name.includes('blackberry')) return '#8B008B';
   if (name.includes('arándano') || name.includes('blueberry')) return '#4169E1';
   if (name.includes('uva') || name.includes('grape')) return '#6A0DAD';
-  
+
   // Otros
   if (name.includes('coco') || name.includes('coconut')) return '#FFFEF0';
   if (name.includes('nuez') || name.includes('nut')) return '#C19A6B';
   if (name.includes('macadamia')) return '#DEB887';
   if (name.includes('arroz') || name.includes('rice')) return '#F5F5DC';
   if (name.includes('yogurt')) return '#FFF5EE';
-  
+
   // Default rosado
   return '#FFB5C5';
 };
@@ -111,7 +111,7 @@ const POPSY_FLAVORS = [
 { name: 'Oreo', type: 'exclusivo', line: 'exclusivo' },
 { name: 'Macadamia', type: 'exclusivo', line: 'exclusivo' },
 { name: 'Café', type: 'exclusivo', line: 'exclusivo' },
-{ name: 'Yogurt C.', type: 'exclusivo', line: 'exclusivo' }].map(f => ({
+{ name: 'Yogurt C.', type: 'exclusivo', line: 'exclusivo' }].map((f) => ({
   ...f,
   color: getFlavorColor(f.name),
   dark: ['#3D2314', '#4A2511', '#1A1A1A', '#6F4E37', '#8B4513', '#DC143C', '#E30B5C', '#C71585', '#E31837', '#4169E1', '#7B3F00', '#D70026', '#8B008B', '#6A0DAD'].includes(getFlavorColor(f.name))
@@ -142,15 +142,15 @@ function FlavorSelectorModal({ selectedSlot, onClose, onSelect, customFlavors, o
 
   // Combinar y deduplicar sabores por nombre (prioridad a predefinidos)
   const allFlavors = [...POPSY_FLAVORS, ...customFlavors].reduce((unique, flavor) => {
-    const exists = unique.some(f => f.name.toLowerCase().trim() === flavor.name.toLowerCase().trim());
+    const exists = unique.some((f) => f.name.toLowerCase().trim() === flavor.name.toLowerCase().trim());
     if (!exists) {
       unique.push(flavor);
     }
     return unique;
   }, []);
-  
+
   const filteredFlavors = allFlavors.filter((f) =>
-    f.name.toLowerCase().includes(search.toLowerCase())
+  f.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -178,8 +178,8 @@ function FlavorSelectorModal({ selectedSlot, onClose, onSelect, customFlavors, o
             placeholder="Buscar sabor..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-gray-50"
-          />
+            className="pl-9 bg-gray-50" />
+          
         </div>
         
         {/* Flavors Grid */}
@@ -187,54 +187,54 @@ function FlavorSelectorModal({ selectedSlot, onClose, onSelect, customFlavors, o
           {/* Vacío */}
           <button
             onClick={() => onSelect({ name: '', color: '', type: 'vacio', is_empty: true })}
-            className="flex flex-col items-center p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-400 transition-colors"
-          >
+            className="flex flex-col items-center p-2 rounded-lg border-2 border-dashed border-gray-300 hover:border-pink-400 transition-colors">
+            
             <div className="w-10 h-10 rounded-full bg-gray-200 mb-1" />
             <span className="text-[10px] text-gray-500">Vacío</span>
           </button>
           
           {filteredFlavors.map((flavor) => {
-            const isCustom = customFlavors.some(cf => cf.name === flavor.name);
+            const isCustom = customFlavors.some((cf) => cf.name === flavor.name);
             return (
               <div key={flavor.name} className="relative group">
                 <button
                   onClick={() => onSelect(flavor)}
-                  className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors w-full"
-                >
+                  className="flex flex-col items-center p-2 rounded-lg border border-gray-200 hover:border-pink-400 hover:bg-pink-50 transition-colors w-full">
+                  
                   <div
                     className="w-10 h-10 rounded-full shadow-md mb-1"
-                    style={{ 
+                    style={{
                       background: `radial-gradient(circle at 35% 35%, ${flavor.color}ff, ${flavor.color}cc, ${flavor.color}99)`,
                       boxShadow: `0 4px 12px ${flavor.color}40`
-                    }}
-                  />
+                    }} />
+                  
                   <span className="text-[9px] font-medium text-center leading-tight line-clamp-2">{flavor.name}</span>
                 </button>
-                {isCustom && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm(`¿Eliminar "${flavor.name}"?`)) {
-                        onDeleteFlavor(flavor.id);
-                      }
-                    }}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs hover:bg-red-600"
-                    title="Eliminar sabor"
-                  >
+                {isCustom &&
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm(`¿Eliminar "${flavor.name}"?`)) {
+                      onDeleteFlavor(flavor.id);
+                    }
+                  }}
+                  className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs hover:bg-red-600"
+                  title="Eliminar sabor">
+                  
                     ×
                   </button>
-                )}
-              </div>
-            );
+                }
+              </div>);
+
           })}
         </div>
         
-        {filteredFlavors.length === 0 && search && (
-          <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
-        )}
+        {filteredFlavors.length === 0 && search &&
+        <p className="text-center text-gray-400 text-sm py-4">No se encontró "{search}"</p>
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export default function FreezerMap() {
@@ -304,13 +304,13 @@ export default function FreezerMap() {
           const parsed = JSON.parse(savedFlavors);
           if (parsed.length > 0) {
             console.log(`Migrando ${parsed.length} sabores de localStorage a BD...`);
-            
+
             for (const flavor of parsed) {
               // Verificar si ya existe
-              const exists = customFlavorsFromDB.some(f => 
-                f.name.toLowerCase().trim() === flavor.name.toLowerCase().trim()
+              const exists = customFlavorsFromDB.some((f) =>
+              f.name.toLowerCase().trim() === flavor.name.toLowerCase().trim()
               );
-              
+
               if (!exists) {
                 await base44.entities.CustomFlavor.create({
                   name: flavor.name,
@@ -321,7 +321,7 @@ export default function FreezerMap() {
                 });
               }
             }
-            
+
             await queryClient.invalidateQueries(['customFlavors']);
             localStorage.setItem('flavorsMigrated', 'true');
             toast.success(`✓ ${parsed.length} sabores recuperados de localStorage`);
@@ -362,8 +362,8 @@ export default function FreezerMap() {
     queryKey: ['allFreezersSlots', selectedStore, availableFreezers],
     queryFn: async () => {
       const allSlots = await Promise.all(
-        availableFreezers.map(num => 
-          base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${num}` })
+        availableFreezers.map((num) =>
+        base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${num}` })
         )
       );
       return allSlots.flat();
@@ -386,8 +386,8 @@ export default function FreezerMap() {
     if (!freezerHistoryData || freezerHistoryData.length < 2) return {};
 
     const flavorRotations = {};
-    const sortedHistory = [...freezerHistoryData].sort((a, b) => 
-      new Date(a.date) - new Date(b.date)
+    const sortedHistory = [...freezerHistoryData].sort((a, b) =>
+    new Date(a.date) - new Date(b.date)
     );
 
     // Analizar cambios entre snapshots consecutivos
@@ -398,19 +398,19 @@ export default function FreezerMap() {
 
       // Crear mapa de slots previos
       const prevMap = {};
-      prevSnapshot.forEach(slot => {
+      prevSnapshot.forEach((slot) => {
         const key = `${slot.row}-${slot.position}-${slot.slot_type}`;
         prevMap[key] = slot;
       });
 
       // Detectar cambios
-      currSnapshot.forEach(slot => {
+      currSnapshot.forEach((slot) => {
         const key = `${slot.row}-${slot.position}-${slot.slot_type}`;
         const prevSlot = prevMap[key];
 
         if (prevSlot && prevSlot.flavor_name && !prevSlot.is_empty) {
           const flavorKey = prevSlot.flavor_name.toLowerCase().trim();
-          
+
           if (!flavorRotations[flavorKey]) {
             flavorRotations[flavorKey] = {
               name: prevSlot.flavor_name,
@@ -454,10 +454,10 @@ export default function FreezerMap() {
     }
 
     // Calcular promedio de días por rotación
-    Object.values(flavorRotations).forEach(flavor => {
+    Object.values(flavorRotations).forEach((flavor) => {
       if (flavor.timesRemoved > 0) {
         flavor.avgDaysPerRotation = flavor.totalDays / flavor.timesRemoved;
-        flavor.rotationVelocity = flavor.avgDaysPerRotation > 0 ? (7 / flavor.avgDaysPerRotation) * 100 : 0;
+        flavor.rotationVelocity = flavor.avgDaysPerRotation > 0 ? 7 / flavor.avgDaysPerRotation * 100 : 0;
       } else {
         flavor.avgDaysPerRotation = 99;
         flavor.rotationVelocity = 0;
@@ -573,7 +573,7 @@ export default function FreezerMap() {
         console.log('Creando nuevo slot:', finalSlotData);
         return await base44.entities.FreezerSlot.create(finalSlotData);
       }
-      
+
       // Para update: NO enviar store_id pero SÍ todos los demás campos editables
       const updateData = {
         row: slotData.row,
@@ -590,15 +590,15 @@ export default function FreezerMap() {
     },
     onSuccess: async (data, variables) => {
       console.log('✓ Slot guardado exitosamente:', data);
-      
+
       // Actualización optimista - actualizar cache directamente SIN refetch
       queryClient.setQueryData(['freezerSlots', selectedStore, currentFreezer], (old) => {
         if (!old) return old;
         const updated = [...old];
-        const index = updated.findIndex(s => 
-          s.row === variables.slotData.row && 
-          s.position === variables.slotData.position && 
-          s.slot_type === variables.slotData.slot_type
+        const index = updated.findIndex((s) =>
+        s.row === variables.slotData.row &&
+        s.position === variables.slotData.position &&
+        s.slot_type === variables.slotData.slot_type
         );
         if (index >= 0) {
           updated[index] = { ...updated[index], ...variables.slotData };
@@ -607,10 +607,10 @@ export default function FreezerMap() {
         }
         return updated;
       });
-      
+
       // Actualizar cache de todas las neveras
       queryClient.invalidateQueries(['allFreezersSlots']);
-      
+
       setSavingSlot({ row: variables.slotData.row, position: variables.slotData.position, success: true });
       setTimeout(() => setSavingSlot(null), 1000);
       toast.success('✓ Sabor guardado');
@@ -636,10 +636,10 @@ export default function FreezerMap() {
 
     // Buscar el slot EXACTO - MUY IMPORTANTE
     const existing = slots.find((s) =>
-      s.store_id === `${selectedStore}_F${currentFreezer}` &&
-      s.row === slot.row &&
-      s.position === slot.position &&
-      s.slot_type === slot.slot_type
+    s.store_id === `${selectedStore}_F${currentFreezer}` &&
+    s.row === slot.row &&
+    s.position === slot.position &&
+    s.slot_type === slot.slot_type
     );
 
     if (!existing?.id) {
@@ -650,7 +650,7 @@ export default function FreezerMap() {
 
     console.log('Vaciando slot ID:', existing.id);
     setSavingSlot({ row: slot.row, position: slot.position, saving: true });
-    
+
     try {
       // SOLO vaciar los campos, NO tocar store_id, row, position, slot_type
       await base44.entities.FreezerSlot.update(existing.id, {
@@ -660,11 +660,11 @@ export default function FreezerMap() {
         is_empty: true,
         stock_level: 'full'
       });
-      
+
       await queryClient.invalidateQueries(['freezerSlots']);
       await queryClient.invalidateQueries(['allFreezersSlots']);
       await refetch();
-      
+
       setSavingSlot({ row: slot.row, position: slot.position, success: true });
       setTimeout(() => setSavingSlot(null), 800);
       toast.success(`✓ Slot ${slot.slot_type} vaciado`);
@@ -701,10 +701,10 @@ export default function FreezerMap() {
 
     // Buscar el slot existente EXACTO
     const existing = slots.find((s) =>
-      s.store_id === `${selectedStore}_F${currentFreezer}` &&
-      s.row === selectedSlot.row &&
-      s.position === selectedSlot.position &&
-      s.slot_type === slotType
+    s.store_id === `${selectedStore}_F${currentFreezer}` &&
+    s.row === selectedSlot.row &&
+    s.position === selectedSlot.position &&
+    s.slot_type === slotType
     );
 
     // Preparar datos COMPLETOS del sabor
@@ -749,9 +749,9 @@ export default function FreezerMap() {
 
     await Promise.all(filledSlots.map((s) =>
     base44.entities.FreezerSlot.update(s.id, {
-      flavor_name: '', 
-      flavor_type: 'vacio', 
-      color: '', 
+      flavor_name: '',
+      flavor_type: 'vacio',
+      color: '',
       is_empty: true,
       stock_level: 'full'
     })
@@ -911,8 +911,8 @@ export default function FreezerMap() {
     let freshAllSlots = allFreezersSlots;
     try {
       const fetched = await Promise.all(
-        availableFreezers.map(num =>
-          base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${num}` })
+        availableFreezers.map((num) =>
+        base44.entities.FreezerSlot.filter({ store_id: `${selectedStore}_F${num}` })
         )
       );
       freshAllSlots = fetched.flat();
@@ -931,27 +931,27 @@ export default function FreezerMap() {
     // Análisis por nevera individual
     const freezerAnalysis = {};
 
-    availableFreezers.forEach(freezerNum => {
+    availableFreezers.forEach((freezerNum) => {
       // FILTRAR EXACTO por store_id completo
-      const freezerSlots = freshAllSlots.filter(s =>
-        s.store_id === `${selectedStore}_F${freezerNum}`
+      const freezerSlots = freshAllSlots.filter((s) =>
+      s.store_id === `${selectedStore}_F${freezerNum}`
       );
-      
+
       console.log(`📦 Nevera #${freezerNum}:`, {
         totalSlotsEnBD: freezerSlots.length,
         storeIdEsperado: `${selectedStore}_F${freezerNum}`
       });
-      
+
       // CONTEO REAL de slots llenos (solo F=frontal, ya que cada bajada tiene F+T)
       // Una nevera de 7x5 tiene 35 BAJADAS, cada bajada tiene 2 slots (F y T) = 70 slots totales
       // Pero para el usuario solo contamos los slots frontales (F) que es lo que ve
-      const filledSlots = freezerSlots.filter(s => 
-        !s.is_empty && 
-        s.flavor_name && 
-        s.flavor_name.trim() !== '' &&
-        s.slot_type === 'F' // SOLO CONTAR FRONTALES
+      const filledSlots = freezerSlots.filter((s) =>
+      !s.is_empty &&
+      s.flavor_name &&
+      s.flavor_name.trim() !== '' &&
+      s.slot_type === 'F' // SOLO CONTAR FRONTALES
       );
-      
+
       // Dimensiones para referencia
       const dimensions = freezerDimensions[freezerNum] || { rows: 7, cols: 5 };
 
@@ -980,15 +980,15 @@ export default function FreezerMap() {
         flavorCounts[key]++;
         flavorDetails[key].positions.push(`${s.row}-${s.position}${s.slot_type || 'F'}`);
       });
-      
+
       // REPETIDOS = sabores con más de 2 cubetas
-      const repeatedFlavors = Object.entries(flavorCounts)
-        .filter(([_, count]) => count > 2)
-        .map(([key, count]) => ({
-          name: flavorDetails[key].name,
-          count,
-          positions: flavorDetails[key].positions.join(', ')
-        }));
+      const repeatedFlavors = Object.entries(flavorCounts).
+      filter(([_, count]) => count > 2).
+      map(([key, count]) => ({
+        name: flavorDetails[key].name,
+        count,
+        positions: flavorDetails[key].positions.join(', ')
+      }));
 
       console.log(`🔁 Nevera #${freezerNum} - Repetidos:`, repeatedFlavors);
 
@@ -1002,7 +1002,7 @@ export default function FreezerMap() {
       }));
 
       // EFICIENCIA: % de ocupación - penalizaciones
-      const occupancyPercentage = (filledSlots.length / totalSlotsInFreezer) * 100;
+      const occupancyPercentage = filledSlots.length / totalSlotsInFreezer * 100;
       const penaltyMisplaced = misplacedSlots.length * 2;
       const penaltyRepeated = repeatedFlavors.length * 3;
       const efficiency = Math.max(0, Math.min(100, Math.round(occupancyPercentage - penaltyMisplaced - penaltyRepeated)));
@@ -1021,19 +1021,19 @@ export default function FreezerMap() {
     });
 
     // ========== ACUMULADO TOTAL DE LAS 3 NEVERAS ==========
-    
+
     // TODOS los slots llenos (solo frontales F)
-    const allFilled = freshAllSlots.filter(s =>
-      !s.is_empty &&
-      s.flavor_name &&
-      s.flavor_name.trim() !== '' &&
-      s.slot_type === 'F' // SOLO CONTAR FRONTALES
+    const allFilled = freshAllSlots.filter((s) =>
+    !s.is_empty &&
+    s.flavor_name &&
+    s.flavor_name.trim() !== '' &&
+    s.slot_type === 'F' // SOLO CONTAR FRONTALES
     );
 
     // CAPACIDAD TOTAL = suma de filas × columnas de todas las neveras
     const totalCapacity = availableFreezers.reduce((sum, num) => {
       const dims = freezerDimensions[num] || { rows: 7, cols: 5 };
-      return sum + (dims.rows * dims.cols);
+      return sum + dims.rows * dims.cols;
     }, 0);
 
     // VACÍOS TOTALES = capacidad total - slots frontales llenos
@@ -1058,14 +1058,14 @@ export default function FreezerMap() {
       const freezerNum = s.store_id?.split('_F')[1] || '?';
       totalFlavorDetails[key].positions.push(`N${freezerNum}:${s.row}-${s.position}${s.slot_type || 'F'}`);
     });
-    
-    const totalRepeated = Object.entries(totalFlavorCounts)
-      .filter(([_, count]) => count > 2)
-      .map(([key, count]) => ({
-        name: totalFlavorDetails[key].name,
-        count,
-        positions: totalFlavorDetails[key].positions.join(', ')
-      }));
+
+    const totalRepeated = Object.entries(totalFlavorCounts).
+    filter(([_, count]) => count > 2).
+    map(([key, count]) => ({
+      name: totalFlavorDetails[key].name,
+      count,
+      positions: totalFlavorDetails[key].positions.join(', ')
+    }));
 
     console.log('🔁 REPETIDOS TOTALES:', totalRepeated);
 
@@ -1083,10 +1083,10 @@ export default function FreezerMap() {
     });
 
     // EFICIENCIA TOTAL
-    const totalOccupancy = (allFilled.length / totalCapacity) * 100;
+    const totalOccupancy = allFilled.length / totalCapacity * 100;
     const totalEfficiency = Math.max(0, Math.min(100, Math.round(
-      totalOccupancy - 
-      totalMisplaced.length * 2 - 
+      totalOccupancy -
+      totalMisplaced.length * 2 -
       totalRepeated.length * 3
     )));
 
@@ -1117,7 +1117,7 @@ export default function FreezerMap() {
     };
 
     console.log('✅ AUDITORÍA COMPLETA:', auditResult);
-    
+
     setAuditData(auditResult);
     setAuditSlots(freshAllSlots);
     setShowAudit(true);
@@ -1210,13 +1210,13 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
       for (const s of snapshot) {
         await base44.entities.FreezerSlot.create({
           store_id: s.store_id, // CRÍTICO: mantener el store_id original que incluye la nevera
-          row: s.row, 
+          row: s.row,
           position: s.position,
           slot_type: s.slot_type,
-          flavor_name: s.flavor_name, 
+          flavor_name: s.flavor_name,
           flavor_type: s.flavor_type,
-          color: s.color, 
-          is_empty: s.is_empty, 
+          color: s.color,
+          is_empty: s.is_empty,
           stock_level: s.stock_level
         });
       }
@@ -1277,61 +1277,61 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               )}
                 {/* Botón Agregar Nevera */}
                 <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    if (availableFreezers.length >= 10) {
-                      toast.error('Máximo 10 neveras');
-                      return;
-                    }
-                    const newNum = Math.max(...availableFreezers) + 1;
-                    setAvailableFreezers([...availableFreezers, newNum]);
-                    setFreezerDimensions(prev => ({
-                      ...prev,
-                      [newNum]: { rows: 7, cols: 5 }
-                    }));
-                    setCurrentFreezer(newNum);
-                    toast.success(`Nevera #${newNum} creada`);
-                  }}
-                  className="text-xs h-7 px-2 text-cyan-600 hover:bg-cyan-200"
-                  title="Agregar nevera">
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  if (availableFreezers.length >= 10) {
+                    toast.error('Máximo 10 neveras');
+                    return;
+                  }
+                  const newNum = Math.max(...availableFreezers) + 1;
+                  setAvailableFreezers([...availableFreezers, newNum]);
+                  setFreezerDimensions((prev) => ({
+                    ...prev,
+                    [newNum]: { rows: 7, cols: 5 }
+                  }));
+                  setCurrentFreezer(newNum);
+                  toast.success(`Nevera #${newNum} creada`);
+                }}
+                className="text-xs h-7 px-2 text-cyan-600 hover:bg-cyan-200"
+                title="Agregar nevera">
                   <Plus className="w-4 h-4" />
                 </Button>
                 {/* Botón Eliminar Nevera Actual */}
-                {availableFreezers.length > 1 && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={async () => {
-                      if (!confirm(`¿Eliminar Nevera #${currentFreezer}? Se borrarán todos sus datos.`)) return;
-                      
-                      // Eliminar todos los slots de esta nevera
-                      const slotsToDelete = slots.filter(s => s.store_id === `${selectedStore}_F${currentFreezer}`);
-                      await Promise.all(slotsToDelete.map(s => base44.entities.FreezerSlot.delete(s.id)));
-                      
-                      // Actualizar estado
-                      const newFreezers = availableFreezers.filter(n => n !== currentFreezer);
-                      setAvailableFreezers(newFreezers);
-                      
-                      // Cambiar a la primera nevera disponible
-                      setCurrentFreezer(newFreezers[0]);
-                      
-                      // Limpiar dimensiones
-                      setFreezerDimensions(prev => {
-                        const updated = { ...prev };
-                        delete updated[currentFreezer];
-                        return updated;
-                      });
-                      
-                      await queryClient.invalidateQueries(['freezerSlots']);
-                      await queryClient.invalidateQueries(['allFreezersSlots']);
-                      toast.success(`Nevera #${currentFreezer} eliminada`);
-                    }}
-                    className="text-xs h-7 px-2 text-red-600 hover:bg-red-100"
-                    title="Eliminar nevera actual">
+                {availableFreezers.length > 1 &&
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={async () => {
+                  if (!confirm(`¿Eliminar Nevera #${currentFreezer}? Se borrarán todos sus datos.`)) return;
+
+                  // Eliminar todos los slots de esta nevera
+                  const slotsToDelete = slots.filter((s) => s.store_id === `${selectedStore}_F${currentFreezer}`);
+                  await Promise.all(slotsToDelete.map((s) => base44.entities.FreezerSlot.delete(s.id)));
+
+                  // Actualizar estado
+                  const newFreezers = availableFreezers.filter((n) => n !== currentFreezer);
+                  setAvailableFreezers(newFreezers);
+
+                  // Cambiar a la primera nevera disponible
+                  setCurrentFreezer(newFreezers[0]);
+
+                  // Limpiar dimensiones
+                  setFreezerDimensions((prev) => {
+                    const updated = { ...prev };
+                    delete updated[currentFreezer];
+                    return updated;
+                  });
+
+                  await queryClient.invalidateQueries(['freezerSlots']);
+                  await queryClient.invalidateQueries(['allFreezersSlots']);
+                  toast.success(`Nevera #${currentFreezer} eliminada`);
+                }}
+                className="text-xs h-7 px-2 text-red-600 hover:bg-red-100"
+                title="Eliminar nevera actual">
                     <Trash2 className="w-4 h-4" />
                   </Button>
-                )}
+              }
               </div>
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
@@ -1394,7 +1394,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
               
-              <Button size="sm" variant="outline" onClick={runAudit} title="Auditoría">
+              <Button size="sm" variant="outline" onClick={runAudit} title="Auditoría" className="hidden">
                 <BarChart3 className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Auditoría</span>
               </Button>
@@ -1750,17 +1750,17 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
 
             {/* Alertas de Inventario */}
             <InventoryStatusOverview
-              allFreezersSlots={allFreezersSlots}
-              rotationAnalysis={rotationAnalysis}
-            />
+            allFreezersSlots={allFreezersSlots}
+            rotationAnalysis={rotationAnalysis} />
+          
 
             {/* Pronóstico de Pedido - Independiente */}
             <SmartOrderPrediction
-              allFreezersSlots={allFreezersSlots}
-              currentFreezer={currentFreezer}
-              storeCode={selectedStore}
-              storeId={selectedStore}
-            />
+            allFreezersSlots={allFreezersSlots}
+            currentFreezer={currentFreezer}
+            storeCode={selectedStore}
+            storeId={selectedStore} />
+          
 
 
             {/* Info Panel */}
@@ -1773,85 +1773,85 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                     Crear Nuevo Sabor
                   </button>
                   <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={async () => {
-                      if (!confirm('¿Llenar la nevera con los sabores predefinidos? Se sobrescribirán los cambios actuales.')) return;
-                      
-                      toast.info('Cargando sabores...');
-                      
-                      // Separar sabores por tipo
-                      const gourmetFlavors = POPSY_FLAVORS.filter(f => f.type === 'gourmet');
-                      const exclusivoFlavors = POPSY_FLAVORS.filter(f => f.type === 'exclusivo');
-                      
-                      let flavorIndex = 0;
-                      const allFlavors = [...gourmetFlavors, ...exclusivoFlavors];
-                      
-                      // Llenar la nevera
-                      for (let row = 1; row <= numRows; row++) {
-                        for (let pos = 1; pos <= numCols; pos++) {
-                          // Slot Frontal
-                          const flavorF = allFlavors[flavorIndex % allFlavors.length];
-                          const existingF = slots.find(s => 
-                            s.store_id === `${selectedStore}_F${currentFreezer}` &&
-                            s.row === row && s.position === pos && s.slot_type === 'F'
-                          );
-                          
-                          const slotDataF = {
-                            row, position: pos, slot_type: 'F',
-                            flavor_name: flavorF.name,
-                            flavor_type: flavorF.type,
-                            color: flavorF.color,
-                            is_empty: false,
-                            stock_level: 'full'
-                          };
-                          
-                          if (existingF?.id) {
-                            await base44.entities.FreezerSlot.update(existingF.id, slotDataF);
-                          } else {
-                            await base44.entities.FreezerSlot.create({
-                              ...slotDataF,
-                              store_id: `${selectedStore}_F${currentFreezer}`
-                            });
-                          }
-                          
-                          flavorIndex++;
-                          
-                          // Slot Trasero
-                          const flavorT = allFlavors[flavorIndex % allFlavors.length];
-                          const existingT = slots.find(s => 
-                            s.store_id === `${selectedStore}_F${currentFreezer}` &&
-                            s.row === row && s.position === pos && s.slot_type === 'T'
-                          );
-                          
-                          const slotDataT = {
-                            row, position: pos, slot_type: 'T',
-                            flavor_name: flavorT.name,
-                            flavor_type: flavorT.type,
-                            color: flavorT.color,
-                            is_empty: false,
-                            stock_level: 'full'
-                          };
-                          
-                          if (existingT?.id) {
-                            await base44.entities.FreezerSlot.update(existingT.id, slotDataT);
-                          } else {
-                            await base44.entities.FreezerSlot.create({
-                              ...slotDataT,
-                              store_id: `${selectedStore}_F${currentFreezer}`
-                            });
-                          }
-                          
-                          flavorIndex++;
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    if (!confirm('¿Llenar la nevera con los sabores predefinidos? Se sobrescribirán los cambios actuales.')) return;
+
+                    toast.info('Cargando sabores...');
+
+                    // Separar sabores por tipo
+                    const gourmetFlavors = POPSY_FLAVORS.filter((f) => f.type === 'gourmet');
+                    const exclusivoFlavors = POPSY_FLAVORS.filter((f) => f.type === 'exclusivo');
+
+                    let flavorIndex = 0;
+                    const allFlavors = [...gourmetFlavors, ...exclusivoFlavors];
+
+                    // Llenar la nevera
+                    for (let row = 1; row <= numRows; row++) {
+                      for (let pos = 1; pos <= numCols; pos++) {
+                        // Slot Frontal
+                        const flavorF = allFlavors[flavorIndex % allFlavors.length];
+                        const existingF = slots.find((s) =>
+                        s.store_id === `${selectedStore}_F${currentFreezer}` &&
+                        s.row === row && s.position === pos && s.slot_type === 'F'
+                        );
+
+                        const slotDataF = {
+                          row, position: pos, slot_type: 'F',
+                          flavor_name: flavorF.name,
+                          flavor_type: flavorF.type,
+                          color: flavorF.color,
+                          is_empty: false,
+                          stock_level: 'full'
+                        };
+
+                        if (existingF?.id) {
+                          await base44.entities.FreezerSlot.update(existingF.id, slotDataF);
+                        } else {
+                          await base44.entities.FreezerSlot.create({
+                            ...slotDataF,
+                            store_id: `${selectedStore}_F${currentFreezer}`
+                          });
                         }
+
+                        flavorIndex++;
+
+                        // Slot Trasero
+                        const flavorT = allFlavors[flavorIndex % allFlavors.length];
+                        const existingT = slots.find((s) =>
+                        s.store_id === `${selectedStore}_F${currentFreezer}` &&
+                        s.row === row && s.position === pos && s.slot_type === 'T'
+                        );
+
+                        const slotDataT = {
+                          row, position: pos, slot_type: 'T',
+                          flavor_name: flavorT.name,
+                          flavor_type: flavorT.type,
+                          color: flavorT.color,
+                          is_empty: false,
+                          stock_level: 'full'
+                        };
+
+                        if (existingT?.id) {
+                          await base44.entities.FreezerSlot.update(existingT.id, slotDataT);
+                        } else {
+                          await base44.entities.FreezerSlot.create({
+                            ...slotDataT,
+                            store_id: `${selectedStore}_F${currentFreezer}`
+                          });
+                        }
+
+                        flavorIndex++;
                       }
-                      
-                      await queryClient.invalidateQueries(['freezerSlots']);
-                      await refetch();
-                      toast.success('✓ Nevera cargada con sabores predefinidos');
-                    }}
-                    className="h-7 text-xs text-purple-600 hover:bg-purple-50"
-                  >
+                    }
+
+                    await queryClient.invalidateQueries(['freezerSlots']);
+                    await refetch();
+                    toast.success('✓ Nevera cargada con sabores predefinidos');
+                  }}
+                  className="h-7 text-xs text-purple-600 hover:bg-purple-50">
+                  
                     <RotateCcw className="w-3 h-3 mr-1" />
                     Regenerar
                   </Button>
@@ -1869,15 +1869,15 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                         <Button size="sm" className="bg-pink-500 text-white" onClick={async () => {
                       if (newFlavor.name.trim()) {
                         // Verificar si ya existe
-                        const exists = customFlavors.some(f => 
-                          f.name.toLowerCase().trim() === newFlavor.name.toLowerCase().trim()
+                        const exists = customFlavors.some((f) =>
+                        f.name.toLowerCase().trim() === newFlavor.name.toLowerCase().trim()
                         );
-                        
+
                         if (exists) {
                           toast.error('Este sabor ya existe');
                           return;
                         }
-                        
+
                         try {
                           // Crear el nuevo sabor con todas sus propiedades
                           const flavorToAdd = {
@@ -1887,15 +1887,15 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                             line: newFlavor.line,
                             dark: ['#3D2314', '#4A2511', '#1A1A1A', '#6F4E37', '#8B4513', '#DC143C', '#E30B5C', '#C71585', '#E31837', '#4169E1', '#7B3F00', '#D70026', '#8B008B', '#6A0DAD'].includes(newFlavor.color)
                           };
-                          
+
                           // GUARDAR EN BASE DE DATOS (disponible para todas las tiendas)
                           await base44.entities.CustomFlavor.create(flavorToAdd);
-                          
+
                           // Actualizar lista local
                           await queryClient.invalidateQueries(['customFlavors']);
-                          
+
                           toast.success(`✓ Sabor "${newFlavor.name}" guardado permanentemente para todas las tiendas`);
-                          
+
                           setNewFlavor({ name: '', color: '#FFB5C5', line: 'gourmet' });
                           setShowAddFlavor(false);
                         } catch (error) {
@@ -1934,14 +1934,14 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
       {/* Flavor Selector Modal with Search */}
       <AnimatePresence>
         {showFlavorSelector &&
-          <FlavorSelectorModal
-            selectedSlot={selectedSlot}
-            onClose={() => {setShowFlavorSelector(false);setSelectedSlot(null);}}
-            onSelect={handleFlavorSelect}
-            customFlavors={customFlavors}
-            onDeleteFlavor={(flavorId) => deleteFlavorMutation.mutate(flavorId)} />
+        <FlavorSelectorModal
+          selectedSlot={selectedSlot}
+          onClose={() => {setShowFlavorSelector(false);setSelectedSlot(null);}}
+          onSelect={handleFlavorSelect}
+          customFlavors={customFlavors}
+          onDeleteFlavor={(flavorId) => deleteFlavorMutation.mutate(flavorId)} />
 
-          }
+        }
       </AnimatePresence>
 
       {/* Audit Panel */}
