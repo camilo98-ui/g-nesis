@@ -1394,10 +1394,10 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
               
               <div className="h-6 w-px bg-gray-200 mx-1" />
               
-              <Button size="sm" variant="outline" onClick={runAudit} title="Auditoría" className="hidden">
-                <BarChart3 className="w-4 h-4 mr-1" />
-                <span className="hidden sm:inline">Auditoría</span>
-              </Button>
+              
+
+
+            
               <Button size="sm" variant="outline" onClick={() => setShowHistory(true)} title="Historial">
                 <History className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Historial</span>
