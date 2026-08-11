@@ -24,14 +24,17 @@ export default function FreezerAuditPanel({
   const currentData = selectedFreezer === 'total' ? total : byFreezer?.[selectedFreezer] || total;
   
   // Filtrar slots según la nevera seleccionada - FILTRO PRECISO
-  const relevantSlots = selectedFreezer === 'total' 
-    ? allSlots 
+  // Solo contar slots frontales (F) - coincidente con la auditoría y lo que el usuario ve
+  const freezerFiltered = selectedFreezer === 'total'
+    ? allSlots
     : allSlots.filter(s => {
         const storeIdParts = s.store_id?.split('_F');
         if (!storeIdParts || storeIdParts.length < 2) return false;
         const freezerNum = storeIdParts[storeIdParts.length - 1];
         return freezerNum === String(selectedFreezer);
       });
+
+  const relevantSlots = freezerFiltered.filter(s => s.slot_type === 'F' || !s.slot_type);
   
   // RECALCULAR conteos reales basado en los slots actuales - CONTEO PRECISO
   const actualFilledSlots = relevantSlots.filter(s => {
