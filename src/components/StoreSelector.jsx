@@ -158,9 +158,9 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
       if (user?.store_config) setStoreConfig(user.store_config);
     }).catch(() => {});
     // Leer tiendas custom desde entidad compartida (excluir las que ya están en BASE_STORES)
-    base44.entities.Store.list().then((stores) => {
+    base44.entities.Store.list('-created_date', 1000).then((stores) => {
       const baseCodes = new Set(STORES.map((s) => s.code));
-      setCustomStores(stores.filter((s) => !baseCodes.has(s.code)).map((s) => ({ code: s.code, name: s.name, displayName: s.name, district: s.district })));
+      setCustomStores(stores.filter((s) => !baseCodes.has(s.code)).map((s) => ({ code: s.code, name: s.name, displayName: s.name, district: s.district || 'BOGOTA NOROCCIDENTE' })));
     }).catch(() => {});
   }, []);
 

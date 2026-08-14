@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import StoreSelector, { STORES } from '@/components/StoreSelector';
+import DistrictPicker from '@/components/DistrictPicker';
 import PopsyRainingIcons from '@/components/PopsyRainingIcons';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -742,10 +743,17 @@ export default function Home() {
               }
 
               {selectedRole &&
+                <DistrictPicker selectedDistrict={selectedDistrict} onDistrictChange={(d) => { setSelectedDistrict(d); setPendingStore(''); }} />
+              }
+
+              {selectedRole && selectedDistrict && selectedRole !== 'gerente' &&
               <div className="mb-3">
-                  <label className="block text-xs font-semibold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
+                  <label className="block text-xs font-bold text-slate-900 mb-2 text-center flex items-center justify-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center text-[10px] font-bold">2</span>
+                    Selecciona tu tienda
+                  </label>
                   <div className="max-w-sm mx-auto">
-                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} selectedDistrict={selectedDistrict} onDistrictChange={(d) => { setSelectedDistrict(d); setPendingStore(''); }} />
+                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} selectedDistrict={selectedDistrict} />
                   </div>
                 </div>
               }
@@ -908,11 +916,19 @@ export default function Home() {
                   </div>
                 }
 
-                {/* Store Selector */}
+                {/* Distrito */}
                 {selectedRole &&
+                  <DistrictPicker selectedDistrict={selectedDistrict} onDistrictChange={(d) => { setSelectedDistrict(d); setPendingStore(''); }} />
+                }
+
+                {/* Store Selector */}
+                {selectedRole && selectedDistrict && selectedRole !== 'gerente' &&
                 <div className="space-y-1.5">
-                    <label className="block text-sm font-semibold text-slate-700">Selecciona tu tienda</label>
-                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} selectedDistrict={selectedDistrict} onDistrictChange={(d) => { setSelectedDistrict(d); setPendingStore(''); }} />
+                    <label className="block text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+                      <span className="w-5 h-5 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center text-[10px] font-bold">2</span>
+                      Selecciona tu tienda
+                    </label>
+                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} selectedDistrict={selectedDistrict} />
                   </div>
                 }
 
