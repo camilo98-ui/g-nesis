@@ -216,6 +216,7 @@ const MENU_ITEMS = [
 
 export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStory, setShowStory] = useState(false);
   const [showDirectory, setShowDirectory] = useState(false);
@@ -400,6 +401,7 @@ export default function Home() {
       const session = JSON.parse(savedSession);
       setSelectedStore(session.store);
       setSelectedRole(session.role || 'lider');
+      setSelectedDistrict(session.district || '');
       setIsLoggedIn(true);
     }
 
@@ -432,6 +434,10 @@ export default function Home() {
       setLoginError('Selecciona un rol');
       return;
     }
+    if (!selectedDistrict) {
+      setLoginError('Selecciona un distrito');
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -447,7 +453,7 @@ export default function Home() {
 
       // Si no hay tienda seleccionada y es gerente, entrar al Home (panel blanco)
       if (!pendingStore && selectedRole === 'gerente') {
-        localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, time: Date.now() }));
+        localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, district: selectedDistrict, time: Date.now() }));
         localStorage.setItem('userRole', selectedRole);
         setLoginSuccess(true);
         setTimeout(() => {
@@ -464,7 +470,7 @@ export default function Home() {
           setSelectedStore(pendingStore);
           setIsLoggedIn(true);
           localStorage.setItem('selectedStore', pendingStore);
-          localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
+          localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, district: selectedDistrict, time: Date.now() }));
           setShowWelcome(true);
           setPendingStore('');
           setLoginPassword('');
@@ -508,7 +514,7 @@ export default function Home() {
         setIsLoggedIn(true);
         localStorage.setItem('selectedStore', pendingStore);
         localStorage.setItem('userRole', selectedRole);
-        localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, time: Date.now() }));
+        localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, district: selectedDistrict, time: Date.now() }));
         setShowWelcome(true);
         setPendingStore('');
         setLoginPassword('');
@@ -730,7 +736,7 @@ export default function Home() {
               <div className="mb-3 p-2.5 bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-lg">
                   <p className="text-[10px] text-blue-700 flex items-center gap-1.5 font-medium">
                     <Info className="w-3 h-3 flex-shrink-0" />
-                    Acceso a panel ejecutivo global
+                    Acceso a panel ejecutivo del distrito
                   </p>
                 </div>
               }
@@ -739,7 +745,7 @@ export default function Home() {
               <div className="mb-3">
                   <label className="block text-xs font-semibold text-slate-900 mb-2 text-center">Selecciona tu tienda</label>
                   <div className="max-w-sm mx-auto">
-                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
+                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} selectedDistrict={selectedDistrict} onDistrictChange={(d) => { setSelectedDistrict(d); setPendingStore(''); }} />
                   </div>
                 </div>
               }
@@ -785,7 +791,7 @@ export default function Home() {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button
                   onClick={handleLogin}
-                  disabled={selectedRole !== 'gerente' && !pendingStore || !selectedRole || isSubmitting}
+                  disabled={selectedRole !== 'gerente' && !pendingStore || !selectedRole || !selectedDistrict || isSubmitting}
                   className="w-full h-12 bg-gradient-to-r from-rose-300 to-pink-300 hover:from-rose-400 hover:to-pink-400 text-white rounded-xl font-bold text-sm disabled:opacity-40 mt-4 shadow-xl shadow-rose-200/30">
                   
                 {isSubmitting ?
@@ -897,7 +903,7 @@ export default function Home() {
                 <div className="px-3 py-2.5 bg-blue-50/80 border border-blue-200/60 rounded-xl">
                     <p className="text-xs text-blue-600 flex items-center gap-2 font-medium">
                       <Info className="w-3.5 h-3.5 flex-shrink-0" />
-                      Acceso a panel ejecutivo global
+                      Acceso a panel ejecutivo del distrito
                     </p>
                   </div>
                 }
@@ -906,7 +912,7 @@ export default function Home() {
                 {selectedRole &&
                 <div className="space-y-1.5">
                     <label className="block text-sm font-semibold text-slate-700">Selecciona tu tienda</label>
-                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} />
+                    <StoreSelector selectedStore={pendingStore} onStoreChange={handleStoreSelect} selectedDistrict={selectedDistrict} onDistrictChange={(d) => { setSelectedDistrict(d); setPendingStore(''); }} />
                   </div>
                 }
 
@@ -956,7 +962,7 @@ export default function Home() {
                 <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.98 }}>
                   <Button
                     onClick={handleLogin}
-                    disabled={selectedRole !== 'gerente' && !pendingStore || !selectedRole || isSubmitting}
+                    disabled={selectedRole !== 'gerente' && !pendingStore || !selectedRole || !selectedDistrict || isSubmitting}
                     className="w-full bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 text-white py-3.5 rounded-2xl font-bold text-base shadow-lg shadow-rose-200/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 border-0">
                     
                     {isSubmitting ?
@@ -1004,6 +1010,7 @@ export default function Home() {
     <HomeWorkspace
       selectedStore={selectedStore}
       selectedRole={selectedRole}
+      selectedDistrict={selectedDistrict}
       selectedStoreName={selectedStoreName}
       onLogout={handleLogout}
       onStoreChange={handleStoreChange}

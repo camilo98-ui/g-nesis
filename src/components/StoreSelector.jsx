@@ -137,7 +137,7 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
 
 }
 
-export default function StoreSelector({ selectedStore, onStoreChange }) {
+export default function StoreSelector({ selectedStore, onStoreChange, selectedDistrict, onDistrictChange }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [passwordDialog, setPasswordDialog] = useState({ open: false, store: null });
@@ -160,7 +160,7 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     // Leer tiendas custom desde entidad compartida (excluir las que ya están en BASE_STORES)
     base44.entities.Store.list().then((stores) => {
       const baseCodes = new Set(STORES.map((s) => s.code));
-      setCustomStores(stores.filter((s) => !baseCodes.has(s.code)).map((s) => ({ code: s.code, name: s.name, displayName: s.name })));
+      setCustomStores(stores.filter((s) => !baseCodes.has(s.code)).map((s) => ({ code: s.code, name: s.name, displayName: s.name, district: s.district })));
     }).catch(() => {});
   }, []);
 
@@ -193,20 +193,34 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
     }
   });
 
-  // Calcular lista de tiendas activas según storeConfig
+  // Calcular lista de tiendas activas según storeConfig y distrito seleccionado
+  const baseWithDistrict = (arr) => arr.map((s) => ({ ...s, district: s.district || 'BOGOTA NOROCCIDENTE' }));
+
+  const availableDistricts = useMemo(() => {
+    const allStores = [...baseWithDistrict(STORES), ...customStores];
+    const districts = new Set();
+    allStores.forEach((s) => { if (s.district) districts.add(s.district); });
+    return Array.from(districts).sort();
+  }, [customStores]);
+
   const activeStores = useMemo(() => {
-    const allStores = [...STORES, ...customStores];
-    if (!storeConfig?.activeStoreCodes) return allStores;
-    // Las tiendas de BASE_STORES que no están en activeStoreCodes se consideran "nuevas"
-    // y se incluyen automáticamente para que no queden ocultas al agregar tiendas al sistema
-    const configured = new Set(storeConfig.activeStoreCodes);
-    const customCodes = new Set(customStores.map((s) => s.code));
-    return allStores.filter((s) => {
-      if (configured.has(s.code)) return true; // activa explícitamente
-      if (customCodes.has(s.code)) return false; // custom no activada = oculta
-      return true; // BASE_STORES nueva (no estaba cuando se configuró) = mostrar siempre
-    });
-  }, [storeConfig, customStores]);
+    const allStores = [...baseWithDistrict(STORES), ...customStores];
+    let result = allStores;
+    if (storeConfig?.activeStoreCodes) {
+      const configured = new Set(storeConfig.activeStoreCodes);
+      const customCodes = new Set(customStores.map((s) => s.code));
+      result = result.filter((s) => {
+        if (configured.has(s.code)) return true; // activa explícitamente
+        if (customCodes.has(s.code)) return false; // custom no activada = oculta
+        return true; // BASE_STORES nueva = mostrar siempre
+      });
+    }
+    // Filtrar por distrito seleccionado cuando se proporcione (selector de login)
+    if (selectedDistrict) {
+      result = result.filter((s) => s.district === selectedDistrict);
+    }
+    return result;
+  }, [storeConfig, customStores, selectedDistrict]);
 
   const filteredStores = useMemo(() => {
     if (!search.trim()) return activeStores;
@@ -271,6 +285,22 @@ export default function StoreSelector({ selectedStore, onStoreChange }) {
   return (
     <>
       <div className="relative">
+        {onDistrictChange && availableDistricts.length > 0 &&
+        <div className="mb-2">
+          <label className="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wide">Distrito</label>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-400 pointer-events-none" />
+            <select
+              value={selectedDistrict || ''}
+              onChange={(e) => onDistrictChange(e.target.value)}
+              className="w-full h-11 pl-10 pr-3 rounded-xl border-2 border-rose-200/60 bg-white/80 text-sm font-medium text-slate-700 focus:border-rose-400 outline-none appearance-none cursor-pointer"
+            >
+              <option value="">Selecciona un distrito</option>
+              {availableDistricts.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+        </div>
+        }
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <button
             onClick={() => setOpen(!open)}

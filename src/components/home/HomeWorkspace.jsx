@@ -311,7 +311,7 @@ const LEADERS = {
 
 // ── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function HomeWorkspace({
-  selectedStore, selectedRole, selectedStoreName,
+  selectedStore, selectedRole, selectedDistrict, selectedStoreName,
   onLogout, onStoreChange,
   onShowReport, onShowStoreSales, onShowBudgetDashboard,
   onShowBudgetImporter, onShowKpisUploader, onShowAggregatorsUploader,
@@ -935,7 +935,7 @@ export default function HomeWorkspace({
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <div className="flex-1 sm:flex-none sm:max-w-xs">
-                  <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} />
+                  <StoreSelector selectedStore={selectedStore} onStoreChange={onStoreChange} selectedDistrict={selectedDistrict} />
                 </div>
                 {!isGerente &&
                 <div className="flex items-center gap-1.5 flex-shrink-0">
