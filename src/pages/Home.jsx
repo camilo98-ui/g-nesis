@@ -236,6 +236,12 @@ export default function Home() {
   const [backupLoading, setBackupLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
+  // Red de seguridad: el overlay verde de éxito se auto-oculta siempre, nunca se queda congelado.
+  useEffect(() => {
+    if (!loginSuccess) return;
+    const t = setTimeout(() => setLoginSuccess(false), 1200);
+    return () => clearTimeout(t);
+  }, [loginSuccess]);
   const [showExperienciaPopsy, setShowExperienciaPopsy] = useState(false);
   const [showCustomerExperience, setShowCustomerExperience] = useState(false);
   const [showBudgetImporter, setShowBudgetImporter] = useState(false);
