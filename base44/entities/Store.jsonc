@@ -18,6 +18,10 @@
       "type": "string",
       "description": "Distrito al que pertenece la tienda (ej: BOGOTA NOROCCIDENTE)"
     },
+    "lider_name": {
+      "type": "string",
+      "description": "Nombre del l\u00edder de la tienda (usado en el saludo del Home)"
+    },
     "is_active": {
       "type": "boolean",
       "default": true

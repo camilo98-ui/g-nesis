@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Search, Lock, Eye, EyeOff, Settings, Save, X } from 'lucide-react';
+import { MapPin, Search, Lock, Eye, EyeOff, Settings, Save, X, UserRound } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -148,10 +148,12 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
   const [newPassword, setNewPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [storeConfig, setStoreConfig] = useState(null); // { activeStoreCodes, customStores }
+  const [leaderName, setLeaderName] = useState('');
 
   const queryClient = useQueryClient();
 
   const [customStores, setCustomStores] = useState([]);
+  const [storeRecords, setStoreRecords] = useState([]);
 
   useEffect(() => {
     base44.auth.me().then((user) => {
@@ -159,8 +161,9 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
     }).catch(() => {});
     // Leer tiendas custom desde entidad compartida (excluir las que ya están en BASE_STORES)
     base44.entities.Store.list('-created_date', 1000).then((stores) => {
+      setStoreRecords(stores);
       const baseCodes = new Set(STORES.map((s) => s.code));
-      setCustomStores(stores.filter((s) => !baseCodes.has(s.code)).map((s) => ({ code: s.code, name: s.name, displayName: s.name, district: s.district || 'BOGOTA NOROCCIDENTE' })));
+      setCustomStores(stores.filter((s) => !baseCodes.has(s.code)).map((s) => ({ code: s.code, name: s.name, displayName: s.name, district: s.district || 'BOGOTA NOROCCIDENTE', lider_name: s.lider_name })));
     }).catch(() => {});
   }, []);
 
@@ -192,6 +195,23 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
       setNewPassword('');
     }
   });
+
+  // Mutation para guardar el nombre del líder en la entidad Store
+  const saveLeaderMutation = useMutation({
+    mutationFn: async ({ storeId, name }) => base44.entities.Store.update(storeId, { lider_name: name }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-stores'] });
+      // Refrescar registros locales para reflejar el cambio de inmediato
+      base44.entities.Store.list('-created_date', 1000).then(setStoreRecords).catch(() => {});
+    }
+  });
+
+  const handleSaveLeader = () => {
+    const store = editPasswordDialog.store;
+    if (!store) return;
+    const rec = storeRecords.find((s) => s.code === store.code);
+    if (rec) saveLeaderMutation.mutate({ storeId: rec.id, name: leaderName.trim() });
+  };
 
   // Calcular lista de tiendas activas según storeConfig y distrito seleccionado
   const baseWithDistrict = (arr) => arr.map((s) => ({ ...s, district: s.district || 'BOGOTA NOROCCIDENTE' }));
@@ -308,8 +328,29 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
           <button
             onClick={() => { if (!disabled) setOpen(!open); }}
             className={`w-full px-4 py-3 h-11 text-left rounded-xl border-2 transition-all flex items-center justify-between ${disabled ? 'border-slate-200 bg-slate-50/80 cursor-not-allowed' : 'border-rose-200/60 bg-white/80 backdrop-blur-sm hover:border-rose-400'}`}>
-            <span className={`text-sm font-medium ${disabled ? 'text-slate-400' : 'text-slate-700'}`}>{selectedStoreName || placeholder || 'Selecciona una tienda'}</span>
-            <MapPin className={`w-4 h-4 flex-shrink-0 ${disabled ? 'text-slate-300' : 'text-pink-400'}`} />
+            <span className={`text-sm font-medium flex-1 truncate ${disabled ? 'text-slate-400' : 'text-slate-700'}`}>{selectedStoreName || placeholder || 'Selecciona una tienda'}</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {selectedStore && !disabled &&
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const store = filteredStores.find((s) => s.code === selectedStore) ||
+                                  [...baseWithDistrict(STORES), ...customStores].find((s) => s.code === selectedStore);
+                    if (store) {
+                      setEditPasswordDialog({ open: true, store });
+                      setNewPassword(storePasswords.find((p) => p.store_code === store.code)?.password || '');
+                      setLeaderName(storeRecords.find((r) => r.code === store.code)?.lider_name || '');
+                    }
+                  }}
+                  className="p-1 rounded-lg hover:bg-pink-100 transition-colors"
+                  title="Configurar tienda">
+                  <Settings className="w-4 h-4 text-pink-500" />
+                </span>
+              }
+              <MapPin className={`w-4 h-4 ${disabled ? 'text-slate-300' : 'text-pink-400'}`} />
+            </div>
           </button>
 
 
@@ -369,6 +410,7 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
                     e.stopPropagation();
                     setEditPasswordDialog({ open: true, store });
                     setNewPassword(storePasswords.find((p) => p.store_code === store.code)?.password || '');
+                    setLeaderName(storeRecords.find((r) => r.code === store.code)?.lider_name || '');
                   }}
                   className={`p-1.5 rounded-lg transition-colors ${
                   selectedStore === store.code ? 'hover:bg-white/20' : 'hover:bg-pink-200/50'}`
@@ -407,7 +449,7 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Settings className="w-5 h-5 text-gray-600" />
-              Configurar contraseñas
+              Configurar tienda
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
@@ -435,6 +477,29 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
                   {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+            </div>
+
+            {/* Nombre del líder (saludo del Home) */}
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center gap-2">
+                <Badge className="bg-rose-100 text-rose-700 border-rose-200"><UserRound className="w-3 h-3 mr-1" />Líder</Badge>
+                <p className="text-xs text-gray-500">Nombre que aparece en el saludo superior del Home</p>
+              </div>
+              <div className="relative">
+                <Input
+                  placeholder="Ej: Andrea, Ruth, Camilo..."
+                  value={leaderName}
+                  onChange={(e) => setLeaderName(e.target.value)}
+                  className="pr-10" />
+                <UserRound className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+              </div>
+              <Button
+                onClick={handleSaveLeader}
+                disabled={saveLeaderMutation.isPending || !leaderName.trim()}
+                className="w-full bg-rose-500 hover:bg-rose-600">
+                <Save className="w-4 h-4 mr-1" />
+                {saveLeaderMutation.isPending ? 'Guardando...' : 'Guardar nombre del líder'}
+              </Button>
             </div>
 
             {/* Contraseñas por Rol */}

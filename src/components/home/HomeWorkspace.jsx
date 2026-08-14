@@ -925,7 +925,7 @@ export default function HomeWorkspace({
                     </p>
                     <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-none"
                     style={{ letterSpacing: '-0.04em', color: '#64748b' }}>
-                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{isGerente ? 'Camilo' : (LEADERS[selectedStore] || 'Tienda')}</span>
+                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{isGerente ? 'Camilo' : (storeEntities.find((s) => s.code === selectedStore)?.lider_name || LEADERS[selectedStore] || 'Tienda')}</span>
                     </h1>
                   </div>
                 </div>
