@@ -206,7 +206,10 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
   const activeStores = useMemo(() => {
     const allStores = [...baseWithDistrict(STORES), ...customStores];
     let result = allStores;
-    if (storeConfig?.activeStoreCodes) {
+    // El filtro de storeConfig (tiendas activadas personalmente) solo aplica
+    // fuera del flujo de login. En login (con selectedDistrict) mostramos
+    // todas las tiendas del distrito para que el usuario pueda ingresar.
+    if (!selectedDistrict && storeConfig?.activeStoreCodes) {
       const configured = new Set(storeConfig.activeStoreCodes);
       const customCodes = new Set(customStores.map((s) => s.code));
       result = result.filter((s) => {
@@ -380,6 +383,14 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
                 {filteredStores.length === 0 && search.trim() &&
               <div className="text-center py-8">
                     <p className="text-gray-400 text-sm">No se encontró "{search}"</p>
+                  </div>
+              }
+
+                {filteredStores.length === 0 && !search.trim() &&
+              <div className="text-center py-8">
+                    <p className="text-gray-400 text-sm">
+                      {selectedDistrict ? 'Cargando tiendas del distrito...' : 'Selecciona un distrito primero'}
+                    </p>
                   </div>
               }
               </div>
