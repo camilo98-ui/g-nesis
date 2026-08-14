@@ -1253,14 +1253,14 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              onClick={() => setShowInventory(true)}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:shadow-lg rounded-xl hidden">
-              
-              <ClipboardList className="w-4 h-4 mr-1.5" />
-              Inventario
-            </Button>
+            
+
+
+
+
+
+
+            
             <StoreSelector selectedStore={selectedStore} onStoreChange={handleStoreChange} />
           </div>
         </div>
