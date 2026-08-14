@@ -28,14 +28,6 @@ function pick(row, keys) {
   return null;
 }
 
-function normName(v) {
-  if (v == null) return '';
-  return String(v).toLowerCase().trim()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9 ]/g, '')
-    .replace(/\s+/g, ' ').trim();
-}
-
 function normalizeCode(v) {
   if (v == null) return '';
   return String(v).toUpperCase().replace(/\s+/g, ' ').trim();
@@ -77,12 +69,6 @@ export default function NPSUploadModal({ open, onClose }) {
     return m;
   }, [districtStores]);
 
-  const storeByName = useMemo(() => {
-    const m = {};
-    districtStores.forEach((s) => { m[normName(s.name)] = s; });
-    return m;
-  }, [districtStores]);
-
   // Existing NPS for the selected month/year, keyed by store_code
   const existingByCode = useMemo(() => {
     const m = {};
@@ -106,23 +92,18 @@ export default function NPSUploadModal({ open, onClose }) {
       if (!rows.length) { setParseError('El archivo está vacío.'); return; }
 
       const result = rows.map((row) => {
-        const tiendaRaw = pick(row, ['tienda', 'store_code', 'codigo', 'cod', 'cod_tienda', 'nombre']) || pick(row, ['bta']);
+        const codeRaw = pick(row, ['tienda', 'store_code', 'codigo', 'cod', 'cod_tienda']) || pick(row, ['bta']);
         const scoreRaw = pick(row, ['nps', 'score', 'puntaje', 'calificacion']);
-        const encRaw = pick(row, ['encuestas', 'realizadas', 'surveys']);
-        const code = normalizeCode(tiendaRaw);
+        const code = normalizeCode(codeRaw);
         const score = Math.max(0, Math.min(10, Number(String(scoreRaw).replace(',', '.')) || 0));
-        const encuestas = Math.max(0, parseInt(encRaw, 10) || 0);
-        // Match by code first, then by normalized name
-        let store = storeByCode[code];
-        if (!store) store = storeByName[normName(tiendaRaw)];
+        const store = storeByCode[code];
         return {
-          store_code: store ? normalizeCode(store.code) : code,
+          store_code: code,
           score,
-          encuestas,
-          name: store?.name || tiendaRaw,
+          name: store?.name || code,
           matched: !!store,
         };
-      }).filter((r) => r.store_code || r.name);
+      }).filter((r) => r.store_code);
 
       if (!result.length) {
         setParseError('No se encontraron columnas de tienda y NPS. Usa columnas: Tienda, NPS.');
@@ -253,31 +234,21 @@ export default function NPSUploadModal({ open, onClose }) {
                     </p>
                     <span className="text-[11px] text-slate-400">{MONTHS[selMonth - 1]} {selYear}</span>
                   </div>
-                  <div className="grid grid-cols-12 px-3 pb-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                    <span className="col-span-7">Tienda</span>
-                    <span className="col-span-3 text-center">Encuestas</span>
-                    <span className="col-span-2 text-right">NPS</span>
-                  </div>
                   <div className="space-y-1 max-h-60 overflow-y-auto">
                     {parsed.map((row, i) => {
                       const status = getNPSStatus(row.score);
                       return (
-                        <div key={i} className={`px-3 py-2 rounded-xl grid grid-cols-12 items-center gap-1 ${row.matched ? 'bg-white' : 'bg-rose-50/60'}`}>
-                          <div className="col-span-7 flex items-center gap-2 min-w-0">
-                            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0" style={{ background: `${status.color}15` }}>
-                              {row.score > 0 ? status.face : '➖'}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-[12px] font-semibold text-slate-800 truncate">{row.name}</p>
-                              <p className="text-[10px] text-slate-400">
-                                {row.matched ? row.store_code : 'No coincide con ninguna tienda'}
-                              </p>
-                            </div>
+                        <div key={i} className={`px-3 py-2 rounded-xl flex items-center gap-2.5 ${row.matched ? 'bg-white' : 'bg-rose-50/60'}`}>
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0" style={{ background: `${status.color}15` }}>
+                            {row.score > 0 ? status.face : '➖'}
                           </div>
-                          <span className="col-span-3 text-center text-[12px] font-bold tabular-nums text-slate-600">
-                            {row.encuestas > 0 ? row.encuestas : '—'}
-                          </span>
-                          <span className="col-span-2 text-right text-[13px] font-black tabular-nums text-slate-800">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[12px] font-semibold text-slate-800 truncate">{row.store_code} · {row.name}</p>
+                            <p className="text-[10px] text-slate-400">
+                              {row.matched ? 'Tienda del distrito' : 'No coincide con ninguna tienda'}
+                            </p>
+                          </div>
+                          <span className="text-[13px] font-black tabular-nums text-slate-800">
                             {row.score.toFixed(1).replace('.', ',')}
                           </span>
                         </div>
