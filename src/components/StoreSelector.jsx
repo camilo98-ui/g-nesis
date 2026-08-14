@@ -137,7 +137,7 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
 
 }
 
-export default function StoreSelector({ selectedStore, onStoreChange, selectedDistrict, onDistrictChange }) {
+export default function StoreSelector({ selectedStore, onStoreChange, selectedDistrict, onDistrictChange, disabled, placeholder }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [passwordDialog, setPasswordDialog] = useState({ open: false, store: null });
@@ -303,10 +303,10 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
         }
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <button
-            onClick={() => setOpen(!open)}
-            className="w-full px-4 py-3 h-11 text-left rounded-xl border-2 border-rose-200/60 bg-white/80 backdrop-blur-sm text-sm font-medium text-slate-700 hover:border-rose-400 transition-all flex items-center justify-between">
-            <span>{selectedStoreName || 'Selecciona una tienda'}</span>
-            <MapPin className="w-4 h-4 text-pink-400 flex-shrink-0" />
+            onClick={() => { if (!disabled) setOpen(!open); }}
+            className={`w-full px-4 py-3 h-11 text-left rounded-xl border-2 transition-all flex items-center justify-between ${disabled ? 'border-slate-200 bg-slate-50/80 cursor-not-allowed' : 'border-rose-200/60 bg-white/80 backdrop-blur-sm hover:border-rose-400'}`}>
+            <span className={`text-sm font-medium ${disabled ? 'text-slate-400' : 'text-slate-700'}`}>{selectedStoreName || placeholder || 'Selecciona una tienda'}</span>
+            <MapPin className={`w-4 h-4 flex-shrink-0 ${disabled ? 'text-slate-300' : 'text-pink-400'}`} />
           </button>
 
 
