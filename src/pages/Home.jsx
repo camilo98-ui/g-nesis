@@ -533,6 +533,9 @@ export default function Home() {
     setIsLoggedIn(false);
     setPendingStore('');
     setSelectedRole('');
+    setLoginSuccess(false);
+    setIsSubmitting(false);
+    setLoginError('');
     localStorage.removeItem('selectedStore');
     localStorage.removeItem('popsySession');
     localStorage.removeItem('userRole');
