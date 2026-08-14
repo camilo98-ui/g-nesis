@@ -68,7 +68,7 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
 
   return (
     <div className="space-y-4 border-t pt-4">
-      <p className="text-sm font-semibold text-gray-700">Contraseñas por Rol</p>
+      <p className="text-sm font-semibold text-gray-700">Contraseña del Líder</p>
       
       {/* Líder */}
       <div className="space-y-2">
@@ -102,37 +102,6 @@ function RolePasswordsEditor({ storeCode, rolePasswords, onUpdate }) {
         </div>
       </div>
 
-      {/* Embajador */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Badge className="bg-pink-100 text-pink-700 border-pink-200">💫 Embajador</Badge>
-        </div>
-        <div className="relative">
-          <Input
-            type={showEmbajador ? "text" : "password"}
-            placeholder="Contraseña para embajadores"
-            value={embajadorPassword}
-            onChange={(e) => setEmbajadorPassword(e.target.value)}
-            className="pr-20" />
-          
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowEmbajador(!showEmbajador)}
-              className="text-gray-400 hover:text-gray-600">
-              {showEmbajador ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-            <Button
-              size="sm"
-              onClick={() => saveMutation.mutate({ role: 'embajador', password: embajadorPassword })}
-              disabled={saveMutation.isPending}
-              className="h-7 px-2 text-xs">
-              
-              {saveMutation.isPending ? '...' : 'Guardar'}
-            </Button>
-          </div>
-        </div>
-      </div>
     </div>);
 
 }
@@ -452,35 +421,13 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
               Configurar tienda
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-6">
+          <div className="space-y-5">
             <p className="text-sm text-gray-600">
-              Configura las contraseñas para <strong>{editPasswordDialog.store?.code} - {editPasswordDialog.store?.name}</strong>
+              Configura <strong>{editPasswordDialog.store?.code} - {editPasswordDialog.store?.name}</strong>
             </p>
 
-            {/* Contraseña General */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">General</Badge>
-                <p className="text-xs text-gray-500">Para todos los roles si no tienen contraseña específica</p>
-              </div>
-              <div className="relative">
-                <Input
-                  type={showNewPassword ? "text" : "password"}
-                  placeholder="Contraseña general (opcional)"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="pr-10" />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
             {/* Nombre del líder (saludo del Home) */}
-            <div className="space-y-3 border-t pt-4">
+            <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Badge className="bg-rose-100 text-rose-700 border-rose-200"><UserRound className="w-3 h-3 mr-1" />Líder</Badge>
                 <p className="text-xs text-gray-500">Nombre que aparece en el saludo superior del Home</p>
@@ -502,27 +449,16 @@ export default function StoreSelector({ selectedStore, onStoreChange, selectedDi
               </Button>
             </div>
 
-            {/* Contraseñas por Rol */}
+            {/* Contraseña del líder */}
             <RolePasswordsEditor
               storeCode={editPasswordDialog.store?.code}
               rolePasswords={rolePasswords}
               onUpdate={() => queryClient.invalidateQueries({ queryKey: ['rolePasswords'] })} />
-            
 
-            <p className="text-xs text-gray-400">
-              💡 Las contraseñas por rol tienen prioridad sobre la contraseña general
-            </p>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setEditPasswordDialog({ open: false, store: null })} className="flex-1">
+            <div className="flex justify-end pt-1">
+              <Button variant="outline" onClick={() => setEditPasswordDialog({ open: false, store: null })}>
                 <X className="w-4 h-4 mr-1" />
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleSavePassword}
-                className="flex-1 bg-emerald-500 hover:bg-emerald-600"
-                disabled={savePasswordMutation.isPending}>
-                <Save className="w-4 h-4 mr-1" />
-                {savePasswordMutation.isPending ? 'Guardando...' : 'Guardar General'}
+                Cerrar
               </Button>
             </div>
           </div>

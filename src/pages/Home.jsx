@@ -449,8 +449,8 @@ export default function Home() {
     // Guardar último rol usado
     localStorage.setItem('lastSelectedRole', selectedRole);
 
-    // Contraseña maestra 1998 - permite acceso a todo
-    if (loginPassword === '1998') {
+    // Contraseña maestra — permite acceso a cualquier tienda/distrito
+    if (loginPassword === '1998' || loginPassword.trim().toLowerCase() === 'popsy') {
       localStorage.setItem('userRole', selectedRole);
 
       // Si no hay tienda seleccionada y es gerente, entrar al Home (panel blanco)
@@ -656,7 +656,7 @@ export default function Home() {
                 <motion.img
                   src={LOGO_URL}
                   alt="Popsy"
-                  className="h-20 object-contain mx-auto mb-3"
+                  className="h-24 object-contain mx-auto mb-3"
                   initial={{ opacity: 0, scale: 0.8, y: -20 }}
                   animate={{
                     opacity: 1,
@@ -773,23 +773,23 @@ export default function Home() {
           <div className="flex items-center justify-center p-8 xl:p-10 w-full max-w-2xl">
             <div className="w-full max-w-lg">
               {/* Logo flotante desktop */}
-              <div className="text-center mb-6">
+              <div className="text-center mb-5">
                 <motion.img
                   src={LOGO_URL}
                   alt="Popsy"
-                  className="h-28 xl:h-32 object-contain mx-auto drop-shadow-xl cursor-pointer"
+                  className="h-36 xl:h-44 object-contain mx-auto drop-shadow-2xl cursor-pointer"
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                   onClick={() => setShowStory(true)} />
                 
-                <p className="text-slate-400 text-sm mt-2">Sistema de Gestión</p>
+                <p className="text-slate-400 text-sm mt-3 font-medium tracking-wide">Sistema de Gestión</p>
               </div>
 
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 xl:p-10 space-y-6"
+                className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 xl:p-8 space-y-5"
                 style={{
                   boxShadow: '0 0 0 1.5px rgba(251,113,133,0.25), 0 8px 40px rgba(236,72,153,0.12), 0 32px 80px rgba(168,85,247,0.10), inset 0 1px 0 rgba(255,255,255,0.8)'
                 }}>
