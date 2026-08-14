@@ -2,6 +2,20 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Snowflake } from 'lucide-react';
 
+// Agrupa slots con sabor por nombre (case-insensitive) y devuelve lista ordenada
+function groupByFlavor(slots) {
+  const counts = {};
+  slots.forEach((s) => {
+    if (!s.flavor_name || s.flavor_name.trim() === '' || s.is_empty) return;
+    const key = s.flavor_name.toLowerCase().trim();
+    if (!counts[key]) counts[key] = { name: s.flavor_name.trim(), count: 0 };
+    counts[key].count += 1;
+  });
+  return Object.values(counts).sort(
+    (a, b) => b.count - a.count || a.name.localeCompare(b.name)
+  );
+}
+
 export default function FreezerInventoryModal({
   open,
   onClose,
@@ -10,7 +24,7 @@ export default function FreezerInventoryModal({
   allSlots = [],
   availableFreezers = [1, 2, 3],
 }) {
-  // Conteo exacto por nevera: todos los slots con sabor (frontales + traseros) agrupados por nombre
+  // Conteo por nevera dividido en sección Frontales (F) y Traseros (T)
   const freezerSummaries = useMemo(() => {
     if (!allSlots || allSlots.length === 0) return [];
 
@@ -19,47 +33,51 @@ export default function FreezerInventoryModal({
         (s) => s.store_id === `${storeCode}_F${num}`
       );
 
-      // Solo slots frontales (F) = lo que se muestra en el mapa. Los traseros (T) son respuesto.
-      const filled = freezerSlots
-        .filter((s) => (s.slot_type || 'F') === 'F')
-        .filter((s) => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '');
+      const frontSlots = freezerSlots.filter((s) => (s.slot_type || 'F') === 'F');
+      const backSlots = freezerSlots.filter((s) => s.slot_type === 'T');
 
-      // Agrupar por nombre (case-insensitive)
-      const counts = {};
-      filled.forEach((s) => {
-        const key = s.flavor_name.toLowerCase().trim();
-        if (!counts[key]) counts[key] = { name: s.flavor_name.trim(), count: 0 };
-        counts[key].count += 1;
-      });
-
-      const flavorList = Object.values(counts).sort(
-        (a, b) => b.count - a.count || a.name.localeCompare(b.name)
-      );
+      const frontList = groupByFlavor(frontSlots);
+      const backList = groupByFlavor(backSlots);
+      const frontTotal = frontList.reduce((s, f) => s + f.count, 0);
+      const backTotal = backList.reduce((s, f) => s + f.count, 0);
 
       return {
         num,
-        total: filled.length,
-        uniqueFlavors: flavorList.length,
-        flavorList,
+        frontList,
+        backList,
+        frontTotal,
+        backTotal,
+        total: frontTotal + backTotal,
       };
     });
   }, [allSlots, availableFreezers, storeCode]);
 
   // Totales globales
   const totals = useMemo(() => {
-    const totalCubetas = freezerSummaries.reduce((s, f) => s + f.total, 0);
+    let frontTotal = 0, backTotal = 0;
     const allFlavors = {};
-    freezerSummaries.forEach((f) =>
-      f.flavorList.forEach((fl) => {
+    freezerSummaries.forEach((f) => {
+      frontTotal += f.frontTotal;
+      backTotal += f.backTotal;
+      [...f.frontList, ...f.backList].forEach((fl) => {
         const k = fl.name.toLowerCase();
         allFlavors[k] = (allFlavors[k] || 0) + fl.count;
-      })
-    );
+      });
+    });
     return {
-      totalCubetas,
+      frontTotal,
+      backTotal,
+      total: frontTotal + backTotal,
       uniqueFlavors: Object.keys(allFlavors).length,
     };
   }, [freezerSummaries]);
+
+  const renderFlavorRow = (fl, i) => (
+    <div key={i} className="flex items-center justify-between px-4 py-2">
+      <span className="text-sm text-slate-700 font-medium truncate">{fl.name}</span>
+      <span className="text-sm font-bold text-slate-900 tabular-nums">{fl.count}</span>
+    </div>
+  );
 
   return (
     <AnimatePresence>
@@ -79,7 +97,7 @@ export default function FreezerInventoryModal({
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[88vh] overflow-hidden flex flex-col"
           >
-            {/* Header minimalista */}
+            {/* Header */}
             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
@@ -102,11 +120,21 @@ export default function FreezerInventoryModal({
               </button>
             </div>
 
-            {/* Resumen global sobrio */}
+            {/* Resumen global */}
             <div className="px-6 py-3 flex items-center gap-6 bg-slate-50/50 border-b border-slate-100">
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 tabular-nums">{totals.totalCubetas}</span>
-                <span className="text-xs text-slate-400 font-medium">cubetas</span>
+                <span className="text-2xl font-bold text-slate-900 tabular-nums">{totals.total}</span>
+                <span className="text-xs text-slate-400 font-medium">total</span>
+              </div>
+              <div className="w-px h-6 bg-slate-200" />
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-slate-900 tabular-nums">{totals.frontTotal}</span>
+                <span className="text-xs text-slate-400 font-medium">frontales</span>
+              </div>
+              <div className="w-px h-6 bg-slate-200" />
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-slate-900 tabular-nums">{totals.backTotal}</span>
+                <span className="text-xs text-slate-400 font-medium">traseros</span>
               </div>
               <div className="w-px h-6 bg-slate-200" />
               <div className="flex items-baseline gap-2">
@@ -125,39 +153,42 @@ export default function FreezerInventoryModal({
               ) : (
                 freezerSummaries.map((fz) => (
                   <div key={fz.num} className="border border-slate-100 rounded-xl overflow-hidden">
-                    {/* Cabecera de nevera */}
+                    {/* Cabecera de nevera con total */}
                     <div className="px-4 py-3 flex items-center justify-between bg-slate-50/70">
                       <div className="flex items-center gap-2.5">
                         <Snowflake className="w-4 h-4 text-slate-400" />
                         <h3 className="text-slate-800 font-semibold text-sm">Nevera #{fz.num}</h3>
                       </div>
-                      <span className="text-xs text-slate-400 font-medium tabular-nums">
-                        {fz.total} cubetas · {fz.uniqueFlavors} sabores
+                      <span className="text-xs font-semibold text-slate-600 tabular-nums">
+                        Total: {fz.total}
                       </span>
                     </div>
 
-                    {/* Lista exacta de sabores */}
-                    {fz.flavorList.length > 0 ? (
-                      <div className="divide-y divide-slate-50">
-                        {fz.flavorList.map((fl, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center justify-between px-4 py-2.5"
-                          >
-                            <span className="text-sm text-slate-700 font-medium truncate">
-                              {fl.name}
-                            </span>
-                            <span className="text-sm font-bold text-slate-900 tabular-nums">
-                              {fl.count}
-                            </span>
-                          </div>
-                        ))}
+                    {/* Sección Frontales */}
+                    <div className="border-t border-slate-100">
+                      <div className="px-4 py-2 flex items-center justify-between bg-slate-50/40">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Frontales</span>
+                        <span className="text-xs font-semibold text-slate-500 tabular-nums">{fz.frontTotal}</span>
                       </div>
-                    ) : (
-                      <div className="px-4 py-6 text-center">
-                        <p className="text-xs text-slate-400">Nevera vacía</p>
+                      {fz.frontList.length > 0 ? (
+                        <div className="divide-y divide-slate-50">{fz.frontList.map(renderFlavorRow)}</div>
+                      ) : (
+                        <p className="px-4 py-3 text-xs text-slate-400">Sin cubetas frontales</p>
+                      )}
+                    </div>
+
+                    {/* Sección Traseros */}
+                    <div className="border-t border-slate-100">
+                      <div className="px-4 py-2 flex items-center justify-between bg-slate-50/40">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Traseros</span>
+                        <span className="text-xs font-semibold text-slate-500 tabular-nums">{fz.backTotal}</span>
                       </div>
-                    )}
+                      {fz.backList.length > 0 ? (
+                        <div className="divide-y divide-slate-50">{fz.backList.map(renderFlavorRow)}</div>
+                      ) : (
+                        <p className="px-4 py-3 text-xs text-slate-400">Sin cubetas traseras</p>
+                      )}
+                    </div>
                   </div>
                 ))
               )}
