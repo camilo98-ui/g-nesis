@@ -1,0 +1,30 @@
+{
+  "name": "StoreNPS",
+  "type": "object",
+  "properties": {
+    "store_code": {
+      "type": "string",
+      "description": "C\u00f3digo de la tienda (ej: BTA 11)"
+    },
+    "score": {
+      "type": "number",
+      "description": "Puntaje NPS de la tienda (0-10)"
+    },
+    "month": {
+      "type": "number",
+      "description": "Mes del registro (1-12)"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o del registro"
+    },
+    "uploaded_by": {
+      "type": "string",
+      "description": "Usuario que subi\u00f3 el NPS"
+    }
+  },
+  "required": [
+    "store_code",
+    "score"
+  ]
+}

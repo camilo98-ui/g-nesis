@@ -25,7 +25,7 @@ import HomeWorkspace from '@/components/home/HomeWorkspace.jsx';
 import {
   LayoutDashboard, Users, TrendingUp, Activity,
   Award, Target, Bell, Phone, Download, FileText,
-  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles, Palette, Trophy, FileSpreadsheet, BarChart3, Clock } from
+  Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles, Palette, Trophy, FileSpreadsheet, BarChart3, Clock, Smile } from
 'lucide-react';
 import BudgetExcelImporter from '@/components/executive/BudgetExcelImporter.jsx';
 import SalesReportUploader from '@/components/reports/SalesReportUploader.jsx';
@@ -211,6 +211,17 @@ const MENU_ITEMS = [
   iconBg: 'bg-indigo-200/60',
   iconColor: 'text-indigo-600',
   textColor: 'text-indigo-700',
+},
+{
+  name: 'NPS',
+  page: 'NPS',
+  icon: Smile,
+  description: 'Salud NPS del distrito',
+  bgColor: 'bg-gradient-to-br from-emerald-100/90 to-teal-100/80',
+  iconBg: 'bg-emerald-200/60',
+  iconColor: 'text-emerald-600',
+  textColor: 'text-emerald-700',
+  requiredRole: 'gerente'
 }];
 
 
