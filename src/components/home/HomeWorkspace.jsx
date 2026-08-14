@@ -9,7 +9,7 @@ import {
   Download, FileText, Lock, Receipt, Snowflake, Settings as SettingsIcon,
   CalendarDays, LogOut, Sparkles, Trophy, FileSpreadsheet, BarChart3, Clock,
   ChevronRight, Zap, BarChart2, ArrowUpRight, ArrowDownRight, Minus,
-  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown, Plus, X, Truck } from
+  Brain, Sun, Moon, Coffee, Send, Cpu, TrendingDown, Plus, X, Truck, Smile } from
 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { STORES } from '@/components/StoreSelector';
@@ -35,6 +35,7 @@ import AggregatorsModal from '@/components/reports/AggregatorsModal';
 import AggregatorsWidget from './AggregatorsWidget';
 import StoreNPSStatusCard from '@/components/nps/StoreNPSStatusCard';
 import StoreNPSAverageCard from '@/components/nps/StoreNPSAverageCard';
+import NPSUploadModal from '@/components/nps/NPSUploadModal';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -68,6 +69,17 @@ function MascotCanvas({ width = 48, height = 48, style = {} }) {
     img.src = MASCOT_IMG;
   }, []);
   return <canvas ref={canvasRef} style={{ width, height, display: 'block', objectFit: 'contain', ...style }} />;
+}
+
+function getSessionDistrict() {
+  try {
+    const raw = localStorage.getItem('popsySession');
+    if (!raw) return '';
+    const s = JSON.parse(raw);
+    return s.district || '';
+  } catch {
+    return '';
+  }
 }
 
 function getGreeting() {
@@ -330,6 +342,7 @@ export default function HomeWorkspace({
   const [kpiModal, setKpiModal] = useState(null); // 'ppt' | 'gap' | 'proj'
   const [showAIReport, setShowAIReport] = useState(false);
   const [showAggregatorsModal, setShowAggregatorsModal] = useState(false);
+  const [showNpsUpload, setShowNpsUpload] = useState(false);
   const [takeawayBudgetOverride, setTakeawayBudgetOverride] = useState(null);
   const [dateRange, setDateRange] = useState({ from: new Date(), to: new Date() });
   const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -820,6 +833,7 @@ export default function HomeWorkspace({
                 { label: 'KPIs Participación', icon: BarChart3, onClick: onShowKpisUploader, color: '#6366f1' },
                 { label: 'Agregadores', icon: Truck, onClick: onShowAggregatorsUploader, color: '#f97316' },
                 { label: 'P&G Upload', icon: TrendingUp, onClick: onShowPYGUploader, color: '#0ea5e9' },
+                { label: 'NPS Distrito', icon: Smile, onClick: () => setShowNpsUpload(true), color: '#00B894' },
                 { label: 'Txn por Hora', icon: Clock, onClick: () => window.location.href = '/HourlyTransactions', color: '#7c3aed' },
               ].map(({ label, icon: Icon, onClick, color }) => (
                 <motion.button
@@ -1824,6 +1838,9 @@ export default function HomeWorkspace({
           <AggregatorsModal storeId={selectedStore} onClose={() => setShowAggregatorsModal(false)} />
         )}
       </AnimatePresence>
+
+      {/* ── NPS UPLOAD MODAL (gerente) ── */}
+      <NPSUploadModal open={showNpsUpload} onClose={() => setShowNpsUpload(false)} />
 
       {/* ── AI EXECUTIVE REPORT MODAL ── */}
       <AIExecutiveReport
