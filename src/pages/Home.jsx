@@ -447,22 +447,20 @@ export default function Home() {
       return;
     }
 
-    setIsSubmitting(true);
+    // Contraseña maestra "Popsy" — abre cualquier tienda sin importar su contraseña asignada.
+    // Se verifica primero, normalizando espacios y mayúsculas para evitar falsos negativos.
+    const enteredPassword = (loginPassword || '').trim().toLowerCase().replace(/\s+/g, '');
+    const isMasterPassword = enteredPassword === 'popsy' || loginPassword === '1998';
 
-    // Simular delay mínimo para mostrar loading
-    await new Promise((resolve) => setTimeout(resolve, 400));
-
-    // Guardar último rol usado
-    localStorage.setItem('lastSelectedRole', selectedRole);
-
-    // Contraseña maestra — permite acceso a cualquier tienda/distrito
-    if (loginPassword === '1998' || loginPassword.trim().toLowerCase() === 'popsy') {
+    if (isMasterPassword) {
+      setIsSubmitting(true);
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      localStorage.setItem('lastSelectedRole', selectedRole);
       localStorage.setItem('userRole', selectedRole);
 
-      // Si no hay tienda seleccionada y es gerente, entrar al Home (panel blanco)
+      // Gerente sin tienda seleccionada → entra al panel ejecutivo del distrito
       if (!pendingStore && selectedRole === 'gerente') {
         localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, district: selectedDistrict, time: Date.now() }));
-        localStorage.setItem('userRole', selectedRole);
         setLoginSuccess(true);
         setTimeout(() => {
           setIsLoggedIn(true);
@@ -471,27 +469,32 @@ export default function Home() {
         return;
       }
 
-      // Si hay tienda seleccionada, entrar a esa tienda
-      if (pendingStore) {
-        setLoginSuccess(true);
-        setTimeout(() => {
-          setSelectedStore(pendingStore);
-          setIsLoggedIn(true);
-          localStorage.setItem('selectedStore', pendingStore);
-          localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, district: selectedDistrict, time: Date.now() }));
-          setShowWelcome(true);
-          setPendingStore('');
-          setLoginPassword('');
-          setIsSubmitting(false);
-        }, 800);
+      // No hay tienda y no es gerente → pedir seleccionar tienda
+      if (!pendingStore) {
+        setLoginError('Selecciona una tienda');
+        setIsSubmitting(false);
         return;
       }
 
-      // Si no hay tienda y no es gerente, pedir seleccionar tienda
-      setLoginError('Selecciona una tienda');
-      setIsSubmitting(false);
+      // Tienda seleccionada → entra a esa tienda (la maestra ignora la contraseña propia)
+      setLoginSuccess(true);
+      setTimeout(() => {
+        setSelectedStore(pendingStore);
+        setIsLoggedIn(true);
+        localStorage.setItem('selectedStore', pendingStore);
+        localStorage.setItem('popsySession', JSON.stringify({ store: pendingStore, role: selectedRole, district: selectedDistrict, time: Date.now() }));
+        setShowWelcome(true);
+        setPendingStore('');
+        setLoginPassword('');
+        setIsSubmitting(false);
+      }, 800);
       return;
     }
+
+    // A partir de aquí, validación normal (no es contraseña maestra)
+    setIsSubmitting(true);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    localStorage.setItem('lastSelectedRole', selectedRole);
 
     // Gerente sin contraseña maestra
     if (selectedRole === 'gerente') {
