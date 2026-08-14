@@ -1256,8 +1256,8 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
             <Button
               size="sm"
               onClick={() => setShowInventory(true)}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:shadow-lg rounded-xl"
-            >
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:shadow-lg rounded-xl hidden">
+              
               <ClipboardList className="w-4 h-4 mr-1.5" />
               Inventario
             </Button>
@@ -1969,8 +1969,8 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
         storeName={selectedStoreName}
         allSlots={allFreezersSlotsQuery}
         availableFreezers={availableFreezers}
-        freezerDimensions={freezerDimensions}
-      />
+        freezerDimensions={freezerDimensions} />
+      
 
       {/* History Panel */}
       <AnimatePresence>
