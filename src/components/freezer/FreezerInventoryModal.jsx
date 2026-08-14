@@ -19,10 +19,10 @@ export default function FreezerInventoryModal({
         (s) => s.store_id === `${storeCode}_F${num}`
       );
 
-      // Todos los slots que tengan un sabor asignado (exacto a lo que hay en la nevera)
-      const filled = freezerSlots.filter(
-        (s) => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== ''
-      );
+      // Solo slots frontales (F) = lo que se muestra en el mapa. Los traseros (T) son respuesto.
+      const filled = freezerSlots
+        .filter((s) => (s.slot_type || 'F') === 'F')
+        .filter((s) => !s.is_empty && s.flavor_name && s.flavor_name.trim() !== '');
 
       // Agrupar por nombre (case-insensitive)
       const counts = {};
