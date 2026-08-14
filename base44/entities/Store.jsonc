@@ -14,6 +14,10 @@
       "type": "string",
       "description": "Ubicaci\u00f3n/Centro comercial"
     },
+    "district": {
+      "type": "string",
+      "description": "Distrito al que pertenece la tienda (ej: BOGOTA NOROCCIDENTE)"
+    },
     "is_active": {
       "type": "boolean",
       "default": true
