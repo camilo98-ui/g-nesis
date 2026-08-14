@@ -878,7 +878,7 @@ export default function Home() {
                   onLogin={handleLogin}
                 />
 
-<div className="text-center">
+                <div className="text-center">
                   <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-rose-400 transition-colors">
                     Acceso administrativo
                   </Link>
