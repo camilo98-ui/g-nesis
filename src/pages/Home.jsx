@@ -28,6 +28,7 @@ import {
   Lock, Eye, EyeOff, Receipt, Snowflake, Settings as SettingsIcon, AlertTriangle, CheckCircle, Info, CalendarDays, LogOut, Sparkles, Palette, Trophy, FileSpreadsheet, BarChart3, Clock, Smile } from
 'lucide-react';
 import BudgetExcelImporter from '@/components/executive/BudgetExcelImporter.jsx';
+import GerenteConfigModal, { getGerenteConfig } from '@/components/GerenteConfigModal.jsx';
 import SalesReportUploader from '@/components/reports/SalesReportUploader.jsx';
 import KpisReportUploader from '@/components/reports/KpisReportUploader.jsx';
 import ParticipacionModal from '@/components/reports/ParticipacionModal.jsx';
@@ -262,6 +263,7 @@ export default function Home() {
   const [showAggregatorsUploader, setShowAggregatorsUploader] = useState(false);
   const [showPYGUploader, setShowPYGUploader] = useState(false);
   const [showPYGModal, setShowPYGModal] = useState(false);
+  const [showGerenteConfig, setShowGerenteConfig] = useState(false);
 
 
   const ROLES = [
@@ -471,7 +473,8 @@ export default function Home() {
 
       // Gerente sin tienda seleccionada → entra al panel ejecutivo del distrito
       if (!pendingStore && selectedRole === 'gerente') {
-        localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, district: selectedDistrict, time: Date.now() }));
+        const gCfg = getGerenteConfig(selectedDistrict);
+        localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, district: selectedDistrict, gerente_name: gCfg?.name || '', time: Date.now() }));
         setLoginSuccess(true);
         setTimeout(() => {
           setIsLoggedIn(true);
@@ -507,10 +510,27 @@ export default function Home() {
     await new Promise((resolve) => setTimeout(resolve, 400));
     localStorage.setItem('lastSelectedRole', selectedRole);
 
-    // Gerente sin contraseña maestra
+    // Gerente sin contraseña maestra: validar contraseña configurada del distrito
     if (selectedRole === 'gerente') {
-      setLoginError('Contraseña de gerente incorrecta');
-      setIsSubmitting(false);
+      const cfg = getGerenteConfig(selectedDistrict);
+      if (!cfg || !cfg.password) {
+        setLoginError('No hay contraseña configurada para este distrito. Usa "Popsy" o configura el acceso.');
+        setIsSubmitting(false);
+        return;
+      }
+      if (loginPassword !== cfg.password) {
+        setLoginError('Contraseña de gerente incorrecta');
+        setIsSubmitting(false);
+        return;
+      }
+      // Contraseña válida → entrar al panel ejecutivo del distrito
+      localStorage.setItem('userRole', selectedRole);
+      localStorage.setItem('popsySession', JSON.stringify({ role: selectedRole, district: selectedDistrict, gerente_name: cfg.name, time: Date.now() }));
+      setLoginSuccess(true);
+      setTimeout(() => {
+        setIsLoggedIn(true);
+        setIsSubmitting(false);
+      }, 800);
       return;
     }
 
@@ -782,6 +802,17 @@ export default function Home() {
                 onLogin={handleLogin}
               />
 
+              {selectedRole === 'gerente' && selectedDistrict &&
+              <div className="text-center mt-2">
+                <button
+                  onClick={() => setShowGerenteConfig(true)}
+                  className="text-[10px] font-semibold text-slate-400 hover:text-slate-700 inline-flex items-center gap-1">
+                  <SettingsIcon className="w-3 h-3" />
+                  Configurar acceso de gerente
+                </button>
+              </div>
+              }
+
               <div className="text-center mt-3">
                 <Link to={createPageUrl('ExecutiveDashboard')} className="text-[10px] text-slate-500">
                   ¿Eres administrador?
@@ -901,6 +932,17 @@ export default function Home() {
                   onLogin={handleLogin}
                 />
 
+                {selectedRole === 'gerente' && selectedDistrict &&
+                <div className="text-center">
+                  <button
+                    onClick={() => setShowGerenteConfig(true)}
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-800 inline-flex items-center gap-1.5">
+                    <SettingsIcon className="w-3.5 h-3.5" />
+                    Configurar acceso de gerente
+                  </button>
+                </div>
+                }
+
                 <div className="text-center">
                   <Link to={createPageUrl('ExecutiveDashboard')} className="text-xs text-slate-400 hover:text-rose-400 transition-colors">
                     Acceso administrativo
@@ -924,6 +966,9 @@ export default function Home() {
         <Suspense fallback={null}>
           {showStory && <PopsyStoryModal onClose={() => setShowStory(false)} />}
         </Suspense>
+
+        {/* Configuración de Gerente */}
+        <GerenteConfigModal open={showGerenteConfig} onClose={() => setShowGerenteConfig(false)} district={selectedDistrict} />
       </div>);
 
   }

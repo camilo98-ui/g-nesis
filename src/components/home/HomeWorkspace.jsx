@@ -351,6 +351,14 @@ export default function HomeWorkspace({
 
   const storeName = selectedStoreName || STORES.find((s) => s.code === selectedStore)?.name || 'Tu Tienda';
   const isGerente = selectedRole === 'gerente';
+  const gerenteName = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('popsySession');
+      if (!raw) return '';
+      const s = JSON.parse(raw);
+      return s.role === 'gerente' ? (s.gerente_name || '') : '';
+    } catch { return ''; }
+  }, [selectedRole]);
 
   const { data: todaySales = [] } = useQuery({
     queryKey: ['home-today-sales', selectedStore],
@@ -941,7 +949,7 @@ export default function HomeWorkspace({
                     </p>
                     <h1 className="text-lg sm:text-2xl lg:text-3xl font-black leading-none"
                     style={{ letterSpacing: '-0.04em', color: '#64748b' }}>
-                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{isGerente ? 'Camilo' : (storeEntities.find((s) => s.code === selectedStore)?.lider_name || LEADERS[selectedStore] || 'Tienda')}</span>
+                      {greeting.text}, <span style={{ color: '#C21875', textShadow: '0 0 30px rgba(194,24,117,0.18)' }}>{isGerente ? (gerenteName || 'Gerente') : (storeEntities.find((s) => s.code === selectedStore)?.lider_name || LEADERS[selectedStore] || 'Tienda')}</span>
                     </h1>
                   </div>
                 </div>
