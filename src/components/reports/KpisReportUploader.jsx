@@ -204,25 +204,21 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
       setProgress({ current: 0, total: records.length });
 
       try {
-        // 1. Borrar registros anteriores — paginar de 200 en 200 para no saturar
-        setMessage(`Buscando registros anteriores...`);
-        let page = 0;
-        const pageSize = 200;
-        let toDelete = [];
-        while (true) {
-          const batch = await base44.entities.SalesReport.list('-uploaded_at', pageSize, page * pageSize);
-          if (!batch || batch.length === 0) break;
-          toDelete = toDelete.concat(batch.filter(r => Number(r.month) === selectedMonth && Number(r.year) === selectedYear));
-          if (batch.length < pageSize) break;
-          page++;
-          await new Promise(r => setTimeout(r, 400));
+        // 1. Borrar registros anteriores del mismo mes/año usando deleteMany
+        //    (más rápido y no falla si algún registro ya no existe)
+        setMessage(`Eliminando registros anteriores del período...`);
+        let deletedCount = 0;
+        let hasMore = true;
+        while (hasMore) {
+          const result = await base44.entities.SalesReport.deleteMany({
+            month: selectedMonth, year: selectedYear
+          });
+          deletedCount += (result?.deleted_count || 0);
+          hasMore = result?.has_more === true;
+          if (hasMore) await new Promise(r => setTimeout(r, 300));
         }
-        if (toDelete.length > 0) {
-          setMessage(`Eliminando ${toDelete.length} registros anteriores...`);
-          for (const rec of toDelete) {
-            await base44.entities.SalesReport.delete(rec.id);
-            await new Promise(r => setTimeout(r, 120));
-          }
+        if (deletedCount > 0) {
+          setMessage(`Eliminados ${deletedCount} registros anteriores. Subiendo nuevos...`);
         }
 
         // 2. Insertar de a 1 registro por vez con pausa (más lento pero sin rate limit)
