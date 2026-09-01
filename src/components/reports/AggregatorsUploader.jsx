@@ -256,8 +256,8 @@ export default function AggregatorsUploader({ onClose, onSuccess }) {
       setMessage(`Guardando ${records.length} registros...`);
 
       try {
-        // Borrar registros anteriores de forma masiva
-        await base44.entities.AggregatorsData.deleteMany({});
+        // Borrar solo los registros del mismo mes/año que se está cargando
+        await base44.entities.AggregatorsData.deleteMany({ month: selectedMonth, year: selectedYear });
 
         const chunkSize = 50;
         let inserted = 0;

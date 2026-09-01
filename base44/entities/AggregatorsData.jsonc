@@ -26,6 +26,14 @@
       "type": "string",
       "format": "date-time",
       "description": "Fecha de carga"
+    },
+    "month": {
+      "type": "number",
+      "description": "Mes del reporte (1-12)"
+    },
+    "year": {
+      "type": "number",
+      "description": "A\u00f1o del reporte"
     }
   },
   "required": [
