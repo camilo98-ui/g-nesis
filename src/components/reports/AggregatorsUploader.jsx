@@ -50,13 +50,13 @@ function parseAggregatorsExcel(XLSX, arrayBuffer, month, year) {
   // Detectar Formato C: Canal | Punto de Venta | % Part | Venta Bruta
   // (cada fila = un canal para una tienda específica)
   const headerVals = keys.map(k => String(firstRow[k] || '').toUpperCase().trim());
-  const colCanal = keys.find((k, i) => headerVals[i] === 'CANAL' || headerVals[i].includes('CANAL'));
+  const colCanal = keys.find((k, i) => headerVals[i] === 'CANAL' || headerVals[i].startsWith('CANAL'));
   const colTienda = keys.find((k, i) => headerVals[i].includes('PUNTO'));
   const isFormatC = !!colCanal && !!colTienda;
 
   if (isFormatC) {
-    const colPart = keys.find((k, i) => headerVals[i].includes('PART'));
-    const colVenta = keys.find((k, i) => headerVals[i].includes('VENTA'));
+    const colPart = keys.find((k, i) => headerVals[i].includes('PART') && k !== colTienda && k !== colCanal);
+    const colVenta = keys.find((k, i) => headerVals[i].includes('VENTA') && k !== colTienda && k !== colPart && k !== colCanal);
     const dataRows = jsonRows.slice(1); // saltar fila de headers
 
     for (const row of dataRows) {
