@@ -1,142 +1,10 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Lightbulb } from 'lucide-react';
+import { computeInsight } from './computeInsight';
 
 export default function ChartInsight({ data, metric, formatCurrency, comparisonData = null }) {
-  // Si la métrica es transacciones o sugeridos → número simple, si no → pesos COP
-  const isCurrency = !['transactions', 'suggested', 'tickets'].includes(metric);
-  const fmt = (val) => {
-    if (!val && val !== 0) return isCurrency ? '$0' : '0';
-    if (isCurrency) {
-      return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(val));
-    }
-    return Math.round(val).toLocaleString('es-CO') + ' tcs';
-  };
-
-  const insight = useMemo(() => {
-    if (!data || data.length === 0) {
-      return {
-        keyData: 'Sin datos disponibles',
-        behavior: 'No hay información para analizar en el período seleccionado.',
-        status: 'critical'
-      };
-    }
-
-    // Filtrar datos válidos (mayores a 0)
-    const validData = data.filter(d => {
-      const value = d[metric] || d.ventas || d.sales || 0;
-      return value > 0;
-    });
-
-    if (validData.length === 0) {
-      return {
-        keyData: 'No hay ventas registradas',
-        behavior: 'Todos los días del período muestran $0 en ventas.',
-        status: 'critical'
-      };
-    }
-
-    // Calcular métricas detalladas
-    const values = validData.map(d => d[metric] || d.ventas || d.sales || 0);
-    const average = values.reduce((a, b) => a + b, 0) / values.length;
-    const total = values.reduce((a, b) => a + b, 0);
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    const maxDay = validData.find(d => (d[metric] || d.ventas || d.sales) === max);
-    const minDay = validData.find(d => (d[metric] || d.ventas || d.sales) === min);
-    
-    // Desviación estándar
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - average, 2), 0) / values.length;
-    const stdDev = Math.sqrt(variance);
-    const coefficientOfVariation = (stdDev / average * 100);
-
-    // Último valor
-    const lastValue = values[values.length - 1];
-    const lastDay = validData[validData.length - 1];
-    const lastVsPrev = values.length > 1 ? lastValue - values[values.length - 2] : 0;
-    const lastVsAvg = lastValue - average;
-    const lastVsAvgPct = average > 0 ? (lastVsAvg / average * 100) : 0;
-
-    // Identificar días problemáticos (bajo rendimiento < 85% del promedio)
-    const underperformingDays = validData
-      .map((d, i) => {
-        const value = d[metric] || d.ventas || d.sales || 0;
-        const pct = average > 0 ? (value / average * 100) : 0;
-        return { ...d, value, pct, index: i };
-      })
-      .filter(d => d.pct < 85)
-      .sort((a, b) => a.value - b.value);
-
-    // Identificar días top (> 115% del promedio)
-    const topDays = validData
-      .map((d, i) => {
-        const value = d[metric] || d.ventas || d.sales || 0;
-        const pct = average > 0 ? (value / average * 100) : 0;
-        return { ...d, value, pct, index: i };
-      })
-      .filter(d => d.pct > 115)
-      .sort((a, b) => b.value - a.value);
-
-    // Detectar tendencia (últimos 40% vs primeros 40%)
-    const splitPoint = Math.floor(values.length * 0.4);
-    const firstSegment = values.slice(0, splitPoint);
-    const lastSegment = values.slice(-splitPoint);
-    const firstAvg = firstSegment.reduce((a, b) => a + b, 0) / firstSegment.length;
-    const lastAvg = lastSegment.reduce((a, b) => a + b, 0) / lastSegment.length;
-    const trendPct = firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg * 100) : 0;
-    const trendDiff = lastAvg - firstAvg;
-
-    // Calcular pérdida por días bajos
-    const lostRevenue = underperformingDays.reduce((sum, d) => sum + (average - d.value), 0);
-
-    // Generar el insight numérico profundo
-    let keyData = '';
-    let behavior = '';
-    let status = 'neutral';
-
-    const allDataPoints = data.length;
-    const validDataPoints = validData.length;
-    const missingPct = allDataPoints > 0 ? ((allDataPoints - validDataPoints) / allDataPoints * 100) : 0;
-
-    if (missingPct > 50) {
-      status = 'warning';
-      keyData = `${validDataPoints}/${allDataPoints} días registrados (${(100-missingPct).toFixed(0)}% de cobertura)`;
-      behavior = `Promedio: ${fmt(average)} • Total: ${fmt(total)} • Rango: ${fmt(min)} - ${fmt(max)} (amplitud: ${fmt(max - min)})`;
-    } else if (trendPct > 10) {
-      status = 'positive';
-      keyData = `Crecimiento: +${trendPct.toFixed(1)}% (${fmt(trendDiff)} adicionales)`;
-      behavior = `Promedio período: ${fmt(average)} • Total: ${fmt(total)} • Último día: ${fmt(lastValue)} (${lastVsAvgPct > 0 ? '+' : ''}${lastVsAvgPct.toFixed(1)}% vs promedio) • ${topDays.length} días destacados generaron ${fmt(topDays.reduce((s, d) => s + d.value, 0))} (${(topDays.reduce((s, d) => s + d.value, 0) / total * 100).toFixed(0)}% del total)`;
-    } else if (trendPct < -10) {
-      status = 'warning';
-      keyData = `Caída: ${trendPct.toFixed(1)}% (${fmt(Math.abs(trendDiff))} menos)`;
-      const worstDaysInfo = underperformingDays.slice(0, 3)
-        .map(d => `${d.fullDate || d.date || `día ${d.index+1}`}: ${fmt(d.value)} (${(d.pct).toFixed(0)}%)`)
-        .join(' • ');
-      behavior = `Promedio: ${fmt(average)} vs máximo: ${fmt(max)} • ${underperformingDays.length} días bajo rendimiento (< 85%) generaron pérdida estimada de ${fmt(lostRevenue)} • Peores días: ${worstDaysInfo || 'N/A'} • Variabilidad: ${coefficientOfVariation.toFixed(0)}% CV`;
-    } else if (Math.abs(lastVsAvgPct) > 15) {
-      status = lastVsAvgPct > 0 ? 'positive' : 'warning';
-      keyData = `Último día: ${fmt(lastValue)} (${lastVsAvgPct > 0 ? '+' : ''}${lastVsAvgPct.toFixed(1)}% vs promedio)`;
-      behavior = `Promedio período: ${fmt(average)} • Total acumulado: ${fmt(total)} • Día máximo: ${fmt(max)} (${maxDay?.fullDate || maxDay?.date || 'N/A'}) • Día mínimo: ${fmt(min)} (${minDay?.fullDate || minDay?.date || 'N/A'}) • Variación estándar: ±${fmt(stdDev)}`;
-    } else {
-      status = 'neutral';
-      keyData = `Promedio: ${fmt(average)} • Desviación: ±${fmt(stdDev)} (${coefficientOfVariation.toFixed(0)}% CV)`;
-      const performanceDetails = underperformingDays.length > 0 
-        ? `${underperformingDays.length} días débiles dejaron de generar ${fmt(lostRevenue)} • ` 
-        : '';
-      behavior = `Total período: ${fmt(total)} en ${validDataPoints} días • Rango: ${fmt(min)} - ${fmt(max)} • ${performanceDetails}Último registro: ${fmt(lastValue)} (${lastDay?.fullDate || lastDay?.date || 'N/A'})`;
-    }
-
-    return {
-      keyData,
-      behavior,
-      status,
-      average,
-      lastValue,
-      trendPct,
-      underperformingDays,
-      topDays
-    };
-  }, [data, metric, formatCurrency, comparisonData]);
+  const insight = useMemo(() => computeInsight(data, metric), [data, metric, formatCurrency, comparisonData]);
 
   if (!insight) return null;
 
@@ -171,7 +39,7 @@ export default function ChartInsight({ data, metric, formatCurrency, comparisonD
     }
   };
 
-  const config = statusConfig[insight.status];
+  const config = statusConfig[insight.status] || statusConfig.neutral;
   const Icon = config.icon;
 
   return (
