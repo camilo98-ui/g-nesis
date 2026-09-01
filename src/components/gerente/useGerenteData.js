@@ -17,19 +17,24 @@ export function useGerenteData(district, startDate, endDate) {
   const [selectedHourlyStore, setSelectedHourlyStore] = useState('');
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
-  /* ── Date constants ── */
+  /* ── Date constants — derived from selected startDate so month filtering follows the dropdown ── */
   const dc = useMemo(() => {
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
+    const realNow = new Date();
+    const currentMonth = startDate.getMonth() + 1;
+    const currentYear = startDate.getFullYear();
     const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
     const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+    const isCurrentMonth = currentMonth === realNow.getMonth() + 1 && currentYear === realNow.getFullYear();
+    const monthStart = startOfMonth(startDate);
+    const monthEnd = isCurrentMonth ? realNow : endOfMonth(startDate);
+    const daysInMonth = endOfMonth(startDate).getDate();
     return {
-      now, currentMonth, currentYear, prevMonth, prevYear,
-      monthStart: startOfMonth(now), monthEnd: endOfMonth(now),
-      daysElapsed: now.getDate(), daysInMonth: endOfMonth(now).getDate(),
+      now: monthEnd, currentMonth, currentYear, prevMonth, prevYear,
+      monthStart, monthEnd,
+      daysElapsed: isCurrentMonth ? realNow.getDate() : daysInMonth,
+      daysInMonth,
     };
-  }, []);
+  }, [startDate]);
 
   const daysInRange = Math.max(1, differenceInCalendarDays(endDate, startDate) + 1);
 

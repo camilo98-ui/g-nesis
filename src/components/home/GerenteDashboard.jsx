@@ -7,7 +7,7 @@ import {
 } from 'date-fns';
 import {
   Calendar, RefreshCw, Activity, Zap, Truck, BarChart3, Receipt,
-  Store, Globe,
+  Store, Globe, ChevronDown, CalendarDays,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -34,6 +34,31 @@ export default function GerenteDashboard() {
   const [pickingEnd, setPickingEnd] = useState(false);
   const [mode, setMode] = useState('tiendas'); // 'tiendas' | 'global'
   const [activeTab, setActiveTab] = useState('pyg');
+  const [monthOpen, setMonthOpen] = useState(false);
+
+  const monthOptions = useMemo(() => {
+    const opts = [];
+    for (let i = 0; i < 12; i++) {
+      const d = subMonths(now0, i);
+      opts.push({ year: d.getFullYear(), month: d.getMonth() + 1, label: format(d, 'MMMM yyyy', { locale: es }) });
+    }
+    return opts;
+  }, []);
+
+  const activeMonthMatch = monthOptions.find(m =>
+    startOfMonth(new Date(m.year, m.month - 1, 1)).getTime() === startOfMonth(startDate).getTime() &&
+    (endOfMonth(new Date(m.year, m.month - 1, 1)).getTime() === endOfMonth(endDate).getTime() ||
+      (m.year === now0.getFullYear() && m.month === now0.getMonth() + 1 && endDate.getTime() === now0.getTime()))
+  );
+  const activeMonthLabel = activeMonthMatch ? activeMonthMatch.label : 'Rango personalizado';
+
+  const selectMonth = (opt) => {
+    const s = startOfMonth(new Date(opt.year, opt.month - 1, 1));
+    const e = (opt.year === now0.getFullYear() && opt.month === now0.getMonth() + 1) ? now0 : endOfMonth(new Date(opt.year, opt.month - 1, 1));
+    setStartDate(s);
+    setEndDate(e);
+    setMonthOpen(false);
+  };
 
   const session = useMemo(() => {
     try { return JSON.parse(localStorage.getItem('popsySession') || '{}'); } catch { return {}; }
@@ -145,8 +170,8 @@ export default function GerenteDashboard() {
         </div>
       </motion.div>
 
-      {/* ═══ TOGGLE: Tiendas | Global ═══ */}
-      <div className="flex items-center justify-center">
+      {/* ═══ TOGGLE: Tiendas | Global + Mes ═══ */}
+      <div className="flex items-center justify-center gap-3 flex-wrap">
         <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100">
           <button onClick={() => setMode('tiendas')}
             className="flex items-center gap-1.5 px-5 py-2 rounded-lg text-[12px] font-bold transition-all"
@@ -169,6 +194,42 @@ export default function GerenteDashboard() {
             Global
           </button>
         </div>
+
+        {/* Month dropdown */}
+        <Popover open={monthOpen} onOpenChange={setMonthOpen}>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all hover:opacity-90"
+              style={{
+                background: 'rgba(255,255,255,0.9)',
+                color: '#C21875',
+                border: '1px solid rgba(194,24,117,0.2)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+              }}>
+              <CalendarDays style={{ width: 14, height: 14 }} />
+              {activeMonthLabel}
+              <ChevronDown style={{ width: 12, height: 12 }} className={monthOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-52 p-1" align="center">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 py-2">Seleccionar mes</p>
+            <div className="max-h-64 overflow-y-auto">
+              {monthOptions.map(opt => {
+                const isActive = activeMonthMatch && activeMonthMatch.year === opt.year && activeMonthMatch.month === opt.month;
+                return (
+                  <button key={`${opt.year}-${opt.month}`} onClick={() => selectMonth(opt)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[12px] font-semibold transition-all"
+                    style={{
+                      background: isActive ? 'rgba(194,24,117,0.08)' : 'transparent',
+                      color: isActive ? '#C21875' : '#64748b',
+                    }}>
+                    <span className="capitalize">{opt.label}</span>
+                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-pink-500" />}
+                  </button>
+                );
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* ═══ TAB NAVIGATION ═══ */}
