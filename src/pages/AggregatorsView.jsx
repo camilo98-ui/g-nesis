@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
-import { ArrowLeft, TrendingUp, Crown, Sparkles, TrendingDown } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Crown, Sparkles, ChevronDown } from 'lucide-react';
 
 /* ── helpers ── */
 const fmtCOP = (v) => v
@@ -39,6 +39,12 @@ function extractStoreCode(storeId) {
 }
 
 const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MONTHS_FULL = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function getMonthKey(r) {
+  if (!r.month || !r.year) return null;
+  return `${r.year}-${String(r.month).padStart(2,'0')}`;
+}
 
 /* ════════════════════════════════════════ MAIN ════════════════════════════════════════ */
 export default function AggregatorsView() {
@@ -47,6 +53,16 @@ export default function AggregatorsView() {
   const storeCode = storeParam ? extractStoreCode(storeParam) : null;
 
   const [selectedMonth, setSelectedMonth] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const { data: allRecords = [], isLoading } = useQuery({
     queryKey: ['aggregators-view', storeCode],
@@ -58,13 +74,13 @@ export default function AggregatorsView() {
     staleTime: 5 * 60 * 1000,
   });
 
+  /* Solo meses con month/year explícitos (ignora registros viejos sin mes) */
   const availableMonths = useMemo(() => {
     const seen = new Set(), list = [];
     allRecords.forEach(r => {
-      const key = r.month && r.year
-        ? `${r.year}-${String(r.month).padStart(2,'0')}`
-        : r.uploaded_at ? (() => { const d=new Date(r.uploaded_at); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })() : '';
-      if (key && !seen.has(key)) { seen.add(key); list.push({ key, month: r.month || new Date(r.uploaded_at||Date.now()).getMonth()+1, year: r.year || new Date(r.uploaded_at||Date.now()).getFullYear() }); }
+      const key = getMonthKey(r);
+      if (!key) return;
+      if (!seen.has(key)) { seen.add(key); list.push({ key, month: r.month, year: r.year }); }
     });
     return list.sort((a,b)=>b.key.localeCompare(a.key));
   }, [allRecords]);
@@ -73,15 +89,11 @@ export default function AggregatorsView() {
   const activeMonthObj = availableMonths.find(m=>m.key===activeKey);
 
   const records = useMemo(() => {
-    if (!activeKey) return allRecords;
-    return allRecords.filter(r => {
-      const key = r.month && r.year
-        ? `${r.year}-${String(r.month).padStart(2,'0')}`
-        : r.uploaded_at ? (() => { const d=new Date(r.uploaded_at); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })() : '';
-      return key === activeKey;
-    });
+    if (!activeKey) return [];
+    return allRecords.filter(r => getMonthKey(r) === activeKey);
   }, [allRecords, activeKey]);
 
+  /* Participación: usa el % del archivo, promediado si hay múltiples tiendas */
   const channels = useMemo(() => {
     const agg = {};
     records.forEach(r => {
@@ -94,38 +106,19 @@ export default function AggregatorsView() {
     });
 
     const arr = Object.values(agg);
-    const totalSalesSum = arr.reduce((s,d) => s + d.total_sales, 0);
-    const hasSalesData = totalSalesSum > arr.length;
-
-    if (hasSalesData) {
-      arr.sort((a,b) => b.total_sales - a.total_sales);
-      return arr.map((d,i) => ({
-        ...d,
-        pct: totalSalesSum > 0 ? (d.total_sales / totalSalesSum * 100) : 0,
-        meta: getMeta(d.channel, i),
-      }));
-    } else {
-      arr.forEach(d => { d.participation = d.participation / d.count; });
-      const totalPart = arr.reduce((s,d) => s + d.participation, 0);
-      arr.sort((a,b) => b.participation - a.participation);
-      return arr.map((d,i) => ({
-        ...d,
-        total_sales: 0,
-        pct: totalPart > 0 ? (d.participation / totalPart * 100) : d.participation,
-        meta: getMeta(d.channel, i),
-      }));
-    }
+    arr.forEach(d => { d.participation = d.count > 0 ? d.participation / d.count : 0; });
+    arr.sort((a,b) => b.participation - a.participation);
+    return arr.map((d,i) => ({
+      ...d,
+      pct: d.participation,
+      meta: getMeta(d.channel, i),
+    }));
   }, [records]);
 
   /* ── Trend data: total sales per channel per month (oldest → newest) ── */
   const trendData = useMemo(() => {
     return [...availableMonths].reverse().map(m => {
-      const monthRecs = allRecords.filter(r => {
-        const key = r.month && r.year
-          ? `${r.year}-${String(r.month).padStart(2,'0')}`
-          : r.uploaded_at ? (() => { const d=new Date(r.uploaded_at); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })() : '';
-        return key === m.key;
-      });
+      const monthRecs = allRecords.filter(r => getMonthKey(r) === m.key);
       const channelMap = {};
       monthRecs.forEach(r => {
         const ch = r.channel || 'Otro';
@@ -147,17 +140,12 @@ export default function AggregatorsView() {
     if (!activeKey) return null;
     const idx = availableMonths.findIndex(m => m.key === activeKey);
     if (idx < 0 || idx + 1 >= availableMonths.length) return null;
-    return availableMonths[idx + 1].key; // sorted desc, so next is older
+    return availableMonths[idx + 1].key;
   }, [activeKey, availableMonths]);
 
   const prevMonthSales = useMemo(() => {
     if (!prevMonthKey) return {};
-    const prevRecs = allRecords.filter(r => {
-      const key = r.month && r.year
-        ? `${r.year}-${String(r.month).padStart(2,'0')}`
-        : r.uploaded_at ? (() => { const d=new Date(r.uploaded_at); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })() : '';
-      return key === prevMonthKey;
-    });
+    const prevRecs = allRecords.filter(r => getMonthKey(r) === prevMonthKey);
     const agg = {};
     prevRecs.forEach(r => {
       const ch = r.channel || 'Otro';
@@ -169,9 +157,9 @@ export default function AggregatorsView() {
 
   const totalVentas = channels.reduce((s,c) => s + c.total_sales, 0);
   const leader = channels[0];
-  const monthLabel = activeMonthObj ? `${MONTHS[activeMonthObj.month-1]} ${activeMonthObj.year}` : 'Reciente';
+  const monthLabel = activeMonthObj ? `${MONTHS_FULL[activeMonthObj.month-1]} ${activeMonthObj.year}` : 'Reciente';
   const displayStore = storeCode || 'Todas';
-  const donutData = channels.map(c => ({ name: c.channel, value: c.total_sales > 1 ? c.total_sales : c.pct, color: c.meta.color }));
+  const donutData = channels.map(c => ({ name: c.channel, value: c.pct, color: c.meta.color }));
 
   return (
     <div style={{
@@ -225,27 +213,89 @@ export default function AggregatorsView() {
           </div>
         </div>
 
-        {/* Month selector */}
-        {availableMonths.length > 1 && (
-          <div style={{ display:'flex', gap:8, overflowX:'auto', marginTop:12, paddingBottom:2 }}>
-            {availableMonths.map(m => (
-              <button key={m.key} onClick={() => setSelectedMonth(m.key)}
-                style={{
-                  flexShrink: 0,
-                  padding: '6px 14px',
-                  borderRadius: 10,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: m.key === activeKey ? 'linear-gradient(135deg,#E91E8C,#AF52DE)' : 'rgba(233,30,140,0.07)',
-                  color: m.key === activeKey ? '#fff' : '#E91E8C',
-                  boxShadow: m.key === activeKey ? '0 4px 12px rgba(233,30,140,0.3)' : 'none',
+        {/* Month selector — dropdown */}
+        {availableMonths.length > 0 && (
+          <div ref={dropdownRef} style={{ position: 'relative', marginTop: 12 }}>
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              style={{
+                width: '100%',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 16px',
+                borderRadius: 14,
+                background: dropdownOpen ? 'rgba(233,30,140,0.1)' : 'rgba(233,30,140,0.06)',
+                border: '1px solid rgba(233,30,140,0.12)',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{
+                  width: 24, height: 24, borderRadius: 8,
+                  background: 'linear-gradient(135deg,rgba(233,30,140,0.15),rgba(175,82,222,0.15))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                {MONTHS[m.month-1]} {m.year}
-              </button>
-            ))}
+                  <TrendingUp style={{ color:'#E91E8C', width:12, height:12 }} />
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 800, color: '#1C1C1E', letterSpacing: '-0.02em' }}>
+                  {activeMonthObj ? `${MONTHS_FULL[activeMonthObj.month-1]} ${activeMonthObj.year}` : 'Seleccionar mes'}
+                </span>
+              </div>
+              <ChevronDown style={{
+                color:'#E91E8C', width:16, height:16,
+                transform: dropdownOpen ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.2s',
+              }} />
+            </button>
+            <AnimatePresence>
+              {dropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.18 }}
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 6px)',
+                    left: 0, right: 0,
+                    borderRadius: 14,
+                    background: '#FFFFFF',
+                    border: '1px solid rgba(233,30,140,0.12)',
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(233,30,140,0.08)',
+                    overflow: 'hidden',
+                    zIndex: 50,
+                    maxHeight: 280,
+                    overflowY: 'auto',
+                  }}
+                >
+                  {availableMonths.map(m => (
+                    <button
+                      key={m.key}
+                      onClick={() => { setSelectedMonth(m.key); setDropdownOpen(false); }}
+                      style={{
+                        width: '100%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '11px 16px',
+                        border: 'none',
+                        background: m.key === activeKey ? 'rgba(233,30,140,0.06)' : 'transparent',
+                        cursor: 'pointer',
+                        transition: 'background 0.15s',
+                      }}
+                    >
+                      <span style={{
+                        fontSize: 13, fontWeight: m.key === activeKey ? 800 : 600,
+                        color: m.key === activeKey ? '#E91E8C' : '#3C3C43',
+                      }}>
+                        {MONTHS_FULL[m.month-1]} {m.year}
+                      </span>
+                      {m.key === activeKey && (
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#E91E8C' }} />
+                      )}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
@@ -321,7 +371,7 @@ export default function AggregatorsView() {
                       {donutData.map((d,i) => <Cell key={i} fill={d.color}/>)}
                     </Pie>
                     <Tooltip
-                      formatter={(v,n) => [totalVentas > 1 ? fmtCOP(v) : `${v.toFixed(1)}%`, n]}
+                      formatter={(v,n) => [`${v.toFixed(1)}%`, n]}
                       contentStyle={{
                         borderRadius:14, border:'1px solid rgba(233,30,140,0.12)',
                         background:'rgba(255,255,255,0.98)',
@@ -384,8 +434,8 @@ export default function AggregatorsView() {
               </div>
             </motion.div>
 
-            {/* ══ TREND CHART ══ */}
-            {trendData.length >= 2 && totalVentas > 1 && (
+            {/* ══ TREND CHART (Line Chart) ══ */}
+            {trendData.length >= 2 && (
               <motion.div
                 initial={{ opacity:0, y:12 }}
                 animate={{ opacity:1, y:0 }}
@@ -406,27 +456,54 @@ export default function AggregatorsView() {
                   }}>
                     <TrendingUp style={{color:'#E91E8C',width:14,height:14}}/>
                   </div>
-                  <p style={{ fontSize:14, fontWeight:900, color:'#1C1C1E', letterSpacing:'-0.02em', margin:0 }}>Tendencia Mensual</p>
+                  <div>
+                    <p style={{ fontSize:14, fontWeight:900, color:'#1C1C1E', letterSpacing:'-0.02em', margin:0 }}>Tendencia por Canal</p>
+                    <p style={{ fontSize:10, fontWeight:600, color:'#8E8E93', margin:'2px 0 0 0' }}>Venta bruta mensual por agregador</p>
+                  </div>
                 </div>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={trendData} barCategoryGap="20%">
+                <ResponsiveContainer width="100%" height={240}>
+                  <LineChart data={trendData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                    <defs>
+                      {trendChannels.map((ch, i) => {
+                        const meta = getMeta(ch, i);
+                        return (
+                          <linearGradient key={ch} id={`grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={meta.color} stopOpacity={0.15} />
+                            <stop offset="100%" stopColor={meta.color} stopOpacity={0} />
+                          </linearGradient>
+                        );
+                      })}
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
-                    <XAxis dataKey="monthLabel" tick={{ fontSize:10, fontWeight:700, fill:'#8E8E93' }} axisLine={false} tickLine={false} />
+                    <XAxis dataKey="monthLabel" tick={{ fontSize:10, fontWeight:700, fill:'#8E8E93' }} axisLine={false} tickLine={false} dy={8} />
                     <YAxis tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(0)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} tick={{ fontSize:10, fill:'#8E8E93' }} axisLine={false} tickLine={false} width={42} />
                     <Tooltip
-                      formatter={(v) => fmtCOP(v)}
+                      formatter={(v, name) => [fmtCOP(v), name]}
                       contentStyle={{
                         borderRadius:14, border:'1px solid rgba(233,30,140,0.12)',
                         background:'rgba(255,255,255,0.98)',
                         boxShadow:'0 8px 32px rgba(0,0,0,0.12)',
                         fontSize:11, fontWeight:600,
                       }}
+                      cursor={{ stroke: 'rgba(233,30,140,0.2)', strokeWidth: 1, strokeDasharray: '4 4' }}
                     />
                     {trendChannels.map((ch, i) => {
                       const meta = getMeta(ch, i);
-                      return <Bar key={ch} dataKey={ch} stackId="a" fill={meta.color} radius={i === trendChannels.length - 1 ? [6,6,0,0] : [0,0,0,0]} />;
+                      return (
+                        <Line
+                          key={ch}
+                          type="monotone"
+                          dataKey={ch}
+                          stroke={meta.color}
+                          strokeWidth={2.5}
+                          dot={{ r: 4, fill: '#fff', stroke: meta.color, strokeWidth: 2 }}
+                          activeDot={{ r: 6, fill: meta.color, stroke: '#fff', strokeWidth: 2 }}
+                          animationDuration={800}
+                          animationBegin={100 * i}
+                        />
+                      );
                     })}
-                  </BarChart>
+                  </LineChart>
                 </ResponsiveContainer>
               </motion.div>
             )}
