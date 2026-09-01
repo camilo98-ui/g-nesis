@@ -47,9 +47,9 @@ function parseAggregatorsExcel(XLSX, arrayBuffer, month, year) {
   const firstRow = jsonRows[0];
   const keys = Object.keys(firstRow);
 
-  // Detectar Formato C: Canal | Punto de Venta | % Part | Venta Bruta
-  // (cada fila = un canal para una tienda específica)
-  const headerVals = keys.map(k => String(firstRow[k] || '').toUpperCase().trim());
+  // Detectar Formato C: columnas llamadas Canal | Punto de Venta | % Part | Venta Bruta
+  // (sheet_to_json ya usa la fila 1 como headers, así que keys = nombres de columna)
+  const headerVals = keys.map(k => k.toUpperCase().trim());
   const colCanal = keys.find((k, i) => headerVals[i] === 'CANAL' || headerVals[i].startsWith('CANAL'));
   const colTienda = keys.find((k, i) => headerVals[i].includes('PUNTO'));
   const isFormatC = !!colCanal && !!colTienda;
@@ -57,9 +57,8 @@ function parseAggregatorsExcel(XLSX, arrayBuffer, month, year) {
   if (isFormatC) {
     const colPart = keys.find((k, i) => headerVals[i].includes('PART') && k !== colTienda && k !== colCanal);
     const colVenta = keys.find((k, i) => headerVals[i].includes('VENTA') && k !== colTienda && k !== colPart && k !== colCanal);
-    const dataRows = jsonRows.slice(1); // saltar fila de headers
 
-    for (const row of dataRows) {
+    for (const row of jsonRows) {
       const channel = colCanal && row[colCanal] ? String(row[colCanal]).trim() : null;
       if (!channel || channel.toLowerCase() === 'canal') continue;
 
