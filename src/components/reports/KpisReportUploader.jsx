@@ -34,7 +34,7 @@ function parseKpisExcel(rows, monthNum, yearNum) {
     const row = rows[i];
     if (!row) continue;
     const joined = row.map(c => String(c ?? '').toUpperCase()).join('|');
-    if (joined.includes('TIENDA') && joined.includes('DEPARTAMENTO')) {
+    if ((joined.includes('TIENDA') || joined.includes('PUNTO')) && joined.includes('DEPARTAMENTO')) {
       headerRowIdx = i;
       break;
     }
