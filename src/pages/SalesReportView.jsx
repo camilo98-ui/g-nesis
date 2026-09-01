@@ -1123,9 +1123,9 @@ export default function SalesReportView() {
   return (
     <div className="flex h-screen overflow-hidden">
       <SidebarNav />
-      <div className="flex-1 min-h-0 overflow-y-auto" style={{ background: EXEC.bg }}>
+      <div className="flex-1 min-h-0 overflow-y-auto" style={{ background: 'linear-gradient(180deg, #fff5fa 0%, #ffffff 30%, #fdf2f8 100%)' }}>
       <div className="sticky top-0 z-30" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${EXEC.border}`, boxShadow: '0 2px 16px rgba(194,24,117,0.08)' }}>
-        <div className="max-w-6xl mx-auto px-4 py-4">
+        <div className="max-w-[1500px] mx-auto px-6 py-4">
           <div className="flex items-center gap-3 flex-wrap">
             <button onClick={handleBack} className="p-2 rounded-xl transition-all flex-shrink-0"
               style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${EXEC.borderLight}` }}>
@@ -1188,7 +1188,7 @@ export default function SalesReportView() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-[1500px] mx-auto px-6 py-6 space-y-6">
         {!hasData ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             className="rounded-2xl shadow-lg p-12 text-center" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.border}` }}>
