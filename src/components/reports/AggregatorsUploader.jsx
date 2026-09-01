@@ -44,9 +44,48 @@ function parseAggregatorsExcel(XLSX, arrayBuffer, month, year) {
     return isNaN(n) ? null : n;
   };
 
-  // Detectar formato B: primera fila tiene columna "Mes" (o similar) con nombre de tienda
   const firstRow = jsonRows[0];
   const keys = Object.keys(firstRow);
+
+  // Detectar Formato C: Canal | Punto de Venta | % Part | Venta Bruta
+  // (cada fila = un canal para una tienda específica)
+  const headerVals = keys.map(k => String(firstRow[k] || '').toUpperCase().trim());
+  const colCanal = keys.find((k, i) => headerVals[i] === 'CANAL' || headerVals[i].includes('CANAL'));
+  const colTienda = keys.find((k, i) => headerVals[i].includes('PUNTO'));
+  const isFormatC = !!colCanal && !!colTienda;
+
+  if (isFormatC) {
+    const colPart = keys.find((k, i) => headerVals[i].includes('PART'));
+    const colVenta = keys.find((k, i) => headerVals[i].includes('VENTA'));
+    const dataRows = jsonRows.slice(1); // saltar fila de headers
+
+    for (const row of dataRows) {
+      const channel = colCanal && row[colCanal] ? String(row[colCanal]).trim() : null;
+      if (!channel || channel.toLowerCase() === 'canal') continue;
+
+      const storeRaw = colTienda && row[colTienda] ? String(row[colTienda]).trim() : null;
+      const storeCode = storeRaw ? extractStoreCode(storeRaw) : null;
+      if (!storeCode) continue;
+
+      const rawPart = colPart ? parseNum(row[colPart]) : null;
+      const rawVenta = colVenta ? parseNum(row[colVenta]) : null;
+      if (rawPart === null && rawVenta === null) continue;
+
+      records.push({
+        store_code: storeCode,
+        channel,
+        participation: rawPart !== null ? (rawPart > 1 ? rawPart / 100 : rawPart) : 0,
+        total_sales: rawVenta || 0,
+        report_id: reportId,
+        uploaded_at: uploadedAt,
+        month,
+        year,
+      });
+    }
+    return records;
+  }
+
+  // Detectar formato B: primera fila tiene columna "Mes" (o similar) con nombre de tienda
   const firstKey = keys[0];
   const firstVal = String(firstRow[firstKey] || '');
   const isFormatB = firstVal.toLowerCase().includes('punto de venta') || 
