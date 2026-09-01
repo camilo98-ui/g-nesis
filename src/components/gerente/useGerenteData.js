@@ -457,6 +457,7 @@ export function useGerenteData(district, startDate, endDate) {
     allAggregators.forEach(a => {
       const code = (a.store_code || '').trim();
       if (!storeCodes.has(code)) return;
+      if (!Number.isFinite(a.year) || !Number.isFinite(a.month)) return;
       const key = `${a.year}-${String(a.month).padStart(2, '0')}`;
       if (!byMonth[key]) byMonth[key] = { key, year: a.year, month: a.month, channels: {} };
       const ch = (a.channel || '').trim();
@@ -468,7 +469,8 @@ export function useGerenteData(district, startDate, endDate) {
     return Object.values(byMonth)
       .sort((a, b) => a.key.localeCompare(b.key))
       .map(m => {
-        const result = { label: format(new Date(m.year, m.month - 1, 1), 'MMM yy', { locale: es }) };
+        const label = format(new Date(m.year, m.month - 1, 1), 'MMM yy', { locale: es });
+        const result = { label };
         Object.keys(m.channels).forEach(ch => {
           result[ch] = m.channels[ch].count > 0 ? (m.channels[ch].participation / m.channels[ch].count) * 100 : 0;
         });
