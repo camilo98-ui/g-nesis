@@ -3,13 +3,13 @@
  * ────────────────────────────────────────────────────────────────────────────
  * Live Nova message area — shows ONLY the 4 "Insight Operativo" messages
  * from the 4 analysis sections (Ventas, Tickets, Transacciones, Sugeridos).
- * Nothing else. Rotates through the 4 sections automatically.
+ * Keeps the original aesthetic: flowing text, avatar, typewriter — no boxes.
  * ────────────────────────────────────────────────────────────────────────────
  */
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, X, AlertTriangle, CheckCircle2, Lightbulb } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { buildChartData, computeInsight, SECTION_DEFS } from '@/components/dashboard/computeInsight';
 
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -61,64 +61,78 @@ function NovaAvatar({ size = 44 }) {
   );
 }
 
-// ─── Insight message card matching the "Insight Operativo" style ──────────────
-const STATUS_STYLES = {
-  positive: { bg: 'rgba(236,253,245,0.8)', border: 'rgba(16,185,129,0.25)', icon: CheckCircle2, iconColor: '#059669', label: '#047857' },
-  warning: { bg: 'rgba(255,251,235,0.85)', border: 'rgba(245,158,11,0.25)', icon: AlertTriangle, iconColor: '#d97706', label: '#92400e' },
-  critical: { bg: 'rgba(255,241,242,0.9)', border: 'rgba(244,63,94,0.25)', icon: AlertTriangle, iconColor: '#e11d48', label: '#9f1239' },
-  neutral: { bg: 'rgba(248,250,252,0.85)', border: 'rgba(100,116,139,0.2)', icon: Lightbulb, iconColor: '#64748b', label: '#475569' },
-};
+// ─── Typing cursor effect ─────────────────────────────────────────────────────
+function TypewriterText({ text, speed = 24, delay = 0, onDone }) {
+  const [chars, setChars] = useState('');
+  const [done, setDone] = useState(false);
+  const timerRef = React.useRef(null);
 
-function InsightMessage({ section, insight }) {
-  const config = STATUS_STYLES[insight.status] || STATUS_STYLES.neutral;
-  const Icon = config.icon;
+  useEffect(() => {
+    setChars('');
+    setDone(false);
+    if (!text) return;
+    let i = 0;
+    const start = setTimeout(() => {
+      timerRef.current = setInterval(() => {
+        i++;
+        setChars(text.slice(0, i));
+        if (i >= text.length) {
+          clearInterval(timerRef.current);
+          setDone(true);
+          onDone?.();
+        }
+      }, speed);
+    }, delay);
+    return () => { clearTimeout(start); clearInterval(timerRef.current); };
+  }, [text, speed, delay]);
 
   return (
-    <div style={{
-      background: config.bg,
-      border: `1px solid ${config.border}`,
-      borderRadius: 14,
-      padding: '12px 16px',
-      display: 'flex',
-      gap: 12,
-      alignItems: 'flex-start',
-      flex: 1,
-      minWidth: 0,
-    }}>
-      <div style={{
-        width: 28, height: 28, borderRadius: 8,
-        background: 'rgba(255,255,255,0.6)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0,
-      }}>
-        <Icon style={{ width: 15, height: 15, color: config.iconColor }} />
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{
-          fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em',
-          textTransform: 'uppercase', color: config.label,
-          marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4,
-        }}>
-          <span>📊</span> Insight Operativo
-        </p>
-        <p style={{
-          fontSize: 12.5, fontWeight: 700, color: '#1a202c',
-          lineHeight: 1.35, marginBottom: 3,
-        }}>
-          {insight.keyData}
-        </p>
-        <p style={{
-          fontSize: 11, fontWeight: 400, color: '#4a5568',
-          lineHeight: 1.4,
-        }}>
-          {insight.behavior}
-        </p>
-      </div>
-    </div>
+    <span>
+      {chars}
+      {!done && (
+        <motion.span
+          animate={{ opacity: [1, 0] }}
+          transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
+          style={{
+            display: 'inline-block', width: 1.5, height: '0.85em',
+            background: 'currentColor', verticalAlign: 'middle',
+            marginLeft: 1.5, borderRadius: 1,
+          }}
+        />
+      )}
+    </span>
   );
 }
 
-// ─── Full panel showing all 4 sections ────────────────────────────────────────
+// ─── Mood mapping per insight status ──────────────────────────────────────────
+const MOOD = {
+  critical: {
+    dot: 'rgba(239,68,68,0.75)',
+    ring: 'rgba(239,68,68,0.15)',
+    label: 'atención',
+    labelColor: 'rgba(220,38,38,0.55)',
+  },
+  warning: {
+    dot: '#f59e0b',
+    ring: 'rgba(245,158,11,0.15)',
+    label: 'observando',
+    labelColor: 'rgba(180,83,9,0.55)',
+  },
+  positive: {
+    dot: 'rgba(16,185,129,0.8)',
+    ring: 'rgba(16,185,129,0.15)',
+    label: 'positivo',
+    labelColor: 'rgba(5,150,105,0.55)',
+  },
+  neutral: {
+    dot: '#C21875',
+    ring: 'rgba(194,24,117,0.15)',
+    label: 'analizando',
+    labelColor: 'rgba(194,24,117,0.6)',
+  },
+};
+
+// ─── Full panel showing all 4 sections as flowing text ────────────────────────
 function NovaSectionPanel({ onClose, sections }) {
   return (
     <motion.div
@@ -143,7 +157,7 @@ function NovaSectionPanel({ onClose, sections }) {
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: 640,
+          width: '100%', maxWidth: 620,
           maxHeight: '90vh',
           display: 'flex', flexDirection: 'column',
           borderRadius: 32,
@@ -192,31 +206,58 @@ function NovaSectionPanel({ onClose, sections }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            <X style={{ width: 14, height: 14, color: '#64748b' }} />
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M1 1l9 9M10 1L1 10" stroke="#64748b" strokeWidth="1.7" strokeLinecap="round" />
+            </svg>
           </button>
         </div>
 
-        {/* Scrollable sections */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 28px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {sections.map((s, i) => (
-            <motion.div
-              key={s.metric}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, duration: 0.4 }}
-            >
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 7,
-                marginBottom: 8,
-              }}>
-                <span style={{ fontSize: 16 }}>{s.emoji}</span>
-                <p style={{ fontSize: 13, fontWeight: 700, color: '#2d3748', letterSpacing: '-0.01em' }}>
-                  {s.title}
-                </p>
-              </div>
-              <InsightMessage section={s} insight={s.insight} />
-            </motion.div>
-          ))}
+        {/* Scrollable sections — flowing text, no boxes */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '22px 28px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {sections.map((s, i) => {
+            const m = MOOD[s.insight.status] || MOOD.neutral;
+            return (
+              <motion.div
+                key={s.metric}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.07, duration: 0.4 }}
+                style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}
+              >
+                <div style={{ paddingTop: 4, flexShrink: 0 }}>
+                  <motion.div
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{ duration: 2.8, repeat: Infinity, delay: i * 0.4 }}
+                    style={{
+                      width: 6, height: 6, borderRadius: '50%',
+                      background: m.dot, boxShadow: `0 0 8px ${m.dot}`,
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{
+                    fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+                    textTransform: 'uppercase', color: m.labelColor,
+                    marginBottom: 4,
+                  }}>
+                    {s.emoji} {s.title}
+                  </p>
+                  <p style={{
+                    fontSize: 13, fontWeight: 600, color: '#1e293b',
+                    lineHeight: 1.45, marginBottom: 2, letterSpacing: '-0.01em',
+                  }}>
+                    {s.insight.keyData}
+                  </p>
+                  <p style={{
+                    fontSize: 11.5, fontWeight: 400, color: '#64748b',
+                    lineHeight: 1.45, letterSpacing: '-0.005em',
+                  }}>
+                    {s.insight.behavior}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Footer */}
@@ -261,20 +302,28 @@ export default function NovaInsightStrip({ dailySales = [] }) {
 
   // Rotate through the 4 sections
   const [idx, setIdx] = useState(0);
-  useEffect(() => { setIdx(0); }, [sections]);
+  const [line1Done, setLine1Done] = useState(false);
+  useEffect(() => { setIdx(0); setLine1Done(false); }, [sections]);
+
   useEffect(() => {
     const t = setInterval(() => {
       setIdx((prev) => (prev + 1) % sections.length);
-    }, 7000);
+      setLine1Done(false);
+    }, 8000);
     return () => clearInterval(t);
   }, [sections.length]);
+
+  useEffect(() => { setLine1Done(false); }, [idx]);
 
   const current = sections[idx];
   if (!current) return null;
 
+  const mood = MOOD[current.insight.status] || MOOD.neutral;
+  const dotCount = sections.length;
+
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, width: '100%', minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 18, width: '100%', minWidth: 0 }}>
 
         {/* ── AVATAR ── */}
         <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -283,8 +332,16 @@ export default function NovaInsightStrip({ dailySales = [] }) {
             transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
             style={{
               position: 'absolute', inset: -12, borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(194,24,117,0.15) 0%, transparent 72%)',
+              background: `radial-gradient(circle, ${mood.ring} 0%, transparent 72%)`,
               filter: 'blur(12px)', pointerEvents: 'none',
+            }}
+          />
+          <motion.div
+            animate={{ opacity: [0, 0.5, 0], scale: [0.75, 1.4, 0.75] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeOut', delay: 0.8 }}
+            style={{
+              position: 'absolute', inset: -4, borderRadius: '50%',
+              border: `1.5px solid ${mood.dot}`, pointerEvents: 'none',
             }}
           />
           <motion.div
@@ -292,77 +349,110 @@ export default function NovaInsightStrip({ dailySales = [] }) {
             transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
             style={{
               position: 'relative', zIndex: 1,
-              width: 46, height: 46, borderRadius: '50%',
+              width: 48, height: 48, borderRadius: '50%',
               background: 'linear-gradient(145deg, #fff6fb, #fce7f3)',
               border: '1.5px solid rgba(244,114,182,0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 20px rgba(194,24,117,0.12), inset 0 1px 0 rgba(255,255,255,0.95)',
+              boxShadow: `0 4px 20px rgba(194,24,117,0.12), 0 0 0 3px ${mood.ring}, inset 0 1px 0 rgba(255,255,255,0.95)`,
             }}
           >
-            <NovaAvatar size={36} />
+            <NovaAvatar size={38} />
           </motion.div>
         </div>
 
-        {/* ── SECTION + INSIGHT ── */}
+        {/* ── TEXT ── */}
         <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-          {/* Section header */}
+          {/* Section micro-label */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={`header-${idx}`}
+              key={`label-${idx}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}
+              transition={{ duration: 0.35 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}
             >
               <motion.div
                 animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ duration: 2.2, repeat: Infinity }}
                 style={{
                   width: 5, height: 5, borderRadius: '50%',
-                  background: '#C21875', flexShrink: 0,
-                  boxShadow: '0 0 6px rgba(194,24,117,0.5)',
+                  background: mood.dot, flexShrink: 0,
+                  boxShadow: `0 0 6px ${mood.dot}80`,
                 }}
               />
-              <span style={{ fontSize: 9, fontWeight: 650, letterSpacing: '0.11em', textTransform: 'uppercase', color: 'rgba(194,24,117,0.6)' }}>
-                Nova · en vivo
+              <span style={{
+                fontSize: 9, fontWeight: 650,
+                letterSpacing: '0.11em', textTransform: 'uppercase',
+                color: mood.labelColor,
+              }}>
+                {current.emoji} {current.title} · Nova {mood.label}
               </span>
             </motion.div>
           </AnimatePresence>
 
-          {/* Insight card */}
+          {/* Insight text — keyData + behavior */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={`insight-${idx}`}
+              key={`text-${idx}`}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
             >
-              <InsightMessage section={current} insight={current.insight} />
+              <p style={{
+                fontSize: 13, fontWeight: 570,
+                color: '#1a1a2e', lineHeight: 1.42,
+                letterSpacing: '-0.014em', marginBottom: 2,
+                whiteSpace: 'pre-wrap',
+              }}>
+                <TypewriterText
+                  text={current.insight.keyData}
+                  speed={21}
+                  onDone={() => setLine1Done(true)}
+                />
+              </p>
+              <AnimatePresence>
+                {line1Done && (
+                  <motion.p
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.38, delay: 0.08 }}
+                    style={{
+                      fontSize: 11.5, fontWeight: 400,
+                      color: '#94a3b8', lineHeight: 1.45,
+                      letterSpacing: '-0.008em',
+                    }}
+                  >
+                    {current.insight.behavior}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* ── DOT NAV + CTA ── */}
+        {/* ── ACTIONS ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
           {/* Dot navigation — 4 dots */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 3.5 }} className="hidden sm:flex">
-            {sections.map((_, i) => (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3.5 }}
+            className="hidden sm:flex">
+            {Array.from({ length: dotCount }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => setIdx(i)}
+                onClick={() => { setIdx(i); setLine1Done(false); }}
                 style={{
                   height: 4, borderRadius: 99, border: 'none',
                   cursor: 'pointer', padding: 0,
-                  width: i === idx ? 18 : 4,
-                  background: i === idx ? '#C21875' : 'rgba(0,0,0,0.09)',
+                  width: i === idx % dotCount ? 18 : 4,
+                  background: i === idx % dotCount ? mood.dot : 'rgba(0,0,0,0.09)',
                   transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)',
                 }}
               />
             ))}
           </div>
 
+          {/* CTA Button */}
           <motion.button
             onClick={() => setShowPanel(true)}
             whileHover={{ scale: 1.03 }}
@@ -373,6 +463,7 @@ export default function NovaInsightStrip({ dailySales = [] }) {
               padding: '7px 13px', borderRadius: 12,
               border: 'none', cursor: 'pointer',
               whiteSpace: 'nowrap',
+              letterSpacing: '-0.008em',
               color: '#64748b',
               background: 'rgba(0,0,0,0.045)',
               outline: '1px solid transparent',
@@ -389,7 +480,7 @@ export default function NovaInsightStrip({ dailySales = [] }) {
               e.currentTarget.style.outline = '1px solid transparent';
             }}
           >
-            Ver todo
+            Ver análisis
             <ArrowRight style={{ width: 9.5, height: 9.5 }} />
           </motion.button>
         </div>
