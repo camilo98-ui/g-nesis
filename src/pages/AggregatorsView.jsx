@@ -4,8 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
-import { ArrowLeft, TrendingUp, Crown, Sparkles } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Crown, Sparkles, TrendingDown } from 'lucide-react';
 
 /* ── helpers ── */
 const fmtCOP = (v) => v
@@ -115,6 +116,56 @@ export default function AggregatorsView() {
       }));
     }
   }, [records]);
+
+  /* ── Trend data: total sales per channel per month (oldest → newest) ── */
+  const trendData = useMemo(() => {
+    return [...availableMonths].reverse().map(m => {
+      const monthRecs = allRecords.filter(r => {
+        const key = r.month && r.year
+          ? `${r.year}-${String(r.month).padStart(2,'0')}`
+          : r.uploaded_at ? (() => { const d=new Date(r.uploaded_at); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })() : '';
+        return key === m.key;
+      });
+      const channelMap = {};
+      monthRecs.forEach(r => {
+        const ch = r.channel || 'Otro';
+        if (!channelMap[ch]) channelMap[ch] = 0;
+        channelMap[ch] += r.total_sales || 0;
+      });
+      return { monthLabel: `${MONTHS[m.month-1]} ${String(m.year).slice(2)}`, ...channelMap };
+    });
+  }, [allRecords, availableMonths]);
+
+  const trendChannels = useMemo(() => {
+    const chSet = new Set();
+    trendData.forEach(d => Object.keys(d).forEach(k => { if (k !== 'monthLabel') chSet.add(k); }));
+    return [...chSet];
+  }, [trendData]);
+
+  /* ── Previous month sales for growth comparison ── */
+  const prevMonthKey = useMemo(() => {
+    if (!activeKey) return null;
+    const idx = availableMonths.findIndex(m => m.key === activeKey);
+    if (idx < 0 || idx + 1 >= availableMonths.length) return null;
+    return availableMonths[idx + 1].key; // sorted desc, so next is older
+  }, [activeKey, availableMonths]);
+
+  const prevMonthSales = useMemo(() => {
+    if (!prevMonthKey) return {};
+    const prevRecs = allRecords.filter(r => {
+      const key = r.month && r.year
+        ? `${r.year}-${String(r.month).padStart(2,'0')}`
+        : r.uploaded_at ? (() => { const d=new Date(r.uploaded_at); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; })() : '';
+      return key === prevMonthKey;
+    });
+    const agg = {};
+    prevRecs.forEach(r => {
+      const ch = r.channel || 'Otro';
+      if (!agg[ch]) agg[ch] = 0;
+      agg[ch] += r.total_sales || 0;
+    });
+    return agg;
+  }, [allRecords, prevMonthKey]);
 
   const totalVentas = channels.reduce((s,c) => s + c.total_sales, 0);
   const leader = channels[0];
@@ -308,11 +359,77 @@ export default function AggregatorsView() {
                     {c.total_sales > 1 && (
                       <span style={{ fontSize:10, fontWeight:600, color:'#8E8E93', fontVariantNumeric:'tabular-nums' }}>{fmtCOP(c.total_sales)}</span>
                     )}
+                    {(() => {
+                      const prevVal = prevMonthSales[c.channel] || 0;
+                      if (prevVal <= 0 || c.total_sales <= 1) return null;
+                      const growth = ((c.total_sales - prevVal) / prevVal) * 100;
+                      const isUp = growth > 0.5;
+                      const isDown = growth < -0.5;
+                      if (!isUp && !isDown) return <span style={{ fontSize:9, fontWeight:700, color:'#8E8E93', padding:'2px 6px' }}>≈</span>;
+                      return (
+                        <span style={{
+                          fontSize:9, fontWeight:800,
+                          color: isUp ? '#34C759' : '#FF3B30',
+                          display:'inline-flex', alignItems:'center', gap:1,
+                          background: isUp ? 'rgba(52,199,89,0.1)' : 'rgba(255,59,48,0.1)',
+                          padding: '2px 6px', borderRadius: 6,
+                        }}>
+                          {isUp ? '↑' : '↓'} {Math.abs(growth).toFixed(0)}%
+                        </span>
+                      );
+                    })()}
                     <span style={{ fontSize:14, fontWeight:900, color:c.meta.color, fontVariantNumeric:'tabular-nums', minWidth:48, textAlign:'right' }}>{c.pct.toFixed(1)}%</span>
                   </div>
                 ))}
               </div>
             </motion.div>
+
+            {/* ══ TREND CHART ══ */}
+            {trendData.length >= 2 && totalVentas > 1 && (
+              <motion.div
+                initial={{ opacity:0, y:12 }}
+                animate={{ opacity:1, y:0 }}
+                transition={{ delay:0.2, duration:0.45 }}
+                style={{
+                  borderRadius: 24,
+                  padding: '20px',
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(233,30,140,0.1)',
+                  boxShadow: '0 4px 24px rgba(233,30,140,0.08), 0 1px 4px rgba(0,0,0,0.04)',
+                }}
+              >
+                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:16 }}>
+                  <div style={{
+                    width:30, height:30, borderRadius:10,
+                    background:'rgba(233,30,140,0.09)',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                  }}>
+                    <TrendingUp style={{color:'#E91E8C',width:14,height:14}}/>
+                  </div>
+                  <p style={{ fontSize:14, fontWeight:900, color:'#1C1C1E', letterSpacing:'-0.02em', margin:0 }}>Tendencia Mensual</p>
+                </div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={trendData} barCategoryGap="20%">
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
+                    <XAxis dataKey="monthLabel" tick={{ fontSize:10, fontWeight:700, fill:'#8E8E93' }} axisLine={false} tickLine={false} />
+                    <YAxis tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(0)}M` : v >= 1000 ? `${(v/1000).toFixed(0)}K` : v} tick={{ fontSize:10, fill:'#8E8E93' }} axisLine={false} tickLine={false} width={42} />
+                    <Tooltip
+                      formatter={(v) => fmtCOP(v)}
+                      contentStyle={{
+                        borderRadius:14, border:'1px solid rgba(233,30,140,0.12)',
+                        background:'rgba(255,255,255,0.98)',
+                        boxShadow:'0 8px 32px rgba(0,0,0,0.12)',
+                        fontSize:11, fontWeight:600,
+                      }}
+                    />
+                    {trendChannels.map((ch, i) => {
+                      const meta = getMeta(ch, i);
+                      return <Bar key={ch} dataKey={ch} stackId="a" fill={meta.color} radius={i === trendChannels.length - 1 ? [6,6,0,0] : [0,0,0,0]} />;
+                    })}
+                  </BarChart>
+                </ResponsiveContainer>
+              </motion.div>
+            )}
 
             {/* ══ TOTAL + CANALES KPI ══ */}
             {totalVentas > 1 && (
