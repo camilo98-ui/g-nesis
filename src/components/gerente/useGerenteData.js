@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   parseISO, isWithinInterval, startOfMonth, endOfMonth,
-  subDays, differenceInCalendarDays
+  subDays, differenceInCalendarDays, format
 } from 'date-fns';
+import { es } from 'date-fns/locale';
 import {
   fmtM, fmtCOP, TARGETS, getStoreStatus, calcPerformanceScore
 } from './gerenteUtils';
@@ -39,7 +40,7 @@ export function useGerenteData(district, startDate, endDate) {
   const q4 = useQuery({ queryKey: ['all-stores'], queryFn: () => base44.entities.Store.list('-created_date', 1000), staleTime: 60 * 60 * 1000 });
   const q5 = useQuery({ queryKey: ['gerente-nps'], queryFn: () => base44.entities.StoreNPS.list('-created_date', 500), staleTime: 10 * 60 * 1000 });
   const q6 = useQuery({ queryKey: ['gerente-hourly-tx', dc.currentMonth, dc.currentYear], queryFn: () => base44.entities.StoreTransactions.filter({ month: dc.currentMonth, year: dc.currentYear }), staleTime: 10 * 60 * 1000 });
-  const q7 = useQuery({ queryKey: ['gerente-aggregators', dc.currentMonth, dc.currentYear], queryFn: () => base44.entities.AggregatorsData.filter({ month: dc.currentMonth, year: dc.currentYear }), staleTime: 10 * 60 * 1000 });
+  const q7 = useQuery({ queryKey: ['gerente-aggregators-all'], queryFn: () => base44.entities.AggregatorsData.list('-created_date', 2000), staleTime: 10 * 60 * 1000 });
   const q8 = useQuery({ queryKey: ['gerente-sales-reports', dc.currentMonth, dc.currentYear], queryFn: () => base44.entities.SalesReport.filter({ month: dc.currentMonth, year: dc.currentYear }), staleTime: 10 * 60 * 1000 });
 
   const allDailySales = q1.data || [];
@@ -430,6 +431,74 @@ export function useGerenteData(district, startDate, endDate) {
     return opportunities[0] || null;
   }, [districtTotals, daysInRange, dc.daysInMonth]);
 
+  /* ── Aggregators data ── */
+  const aggregatorsByStore = useMemo(() => {
+    const map = {};
+    const storeCodes = new Set(stores.map(s => (s.code || '').trim()));
+    allAggregators.forEach(a => {
+      if (a.month !== dc.currentMonth || a.year !== dc.currentYear) return;
+      const code = (a.store_code || '').trim();
+      if (!storeCodes.has(code)) return;
+      if (!map[code]) map[code] = [];
+      map[code].push({ channel: (a.channel || '').trim(), participation: a.participation || 0, total_sales: a.total_sales || 0 });
+    });
+    return map;
+  }, [allAggregators, stores, dc.currentMonth, dc.currentYear]);
+
+  const aggregatorsChannels = useMemo(() => {
+    const set = new Set();
+    Object.values(aggregatorsByStore).forEach(arr => arr.forEach(a => set.add(a.channel)));
+    return Array.from(set).sort();
+  }, [aggregatorsByStore]);
+
+  const aggregatorsTrend = useMemo(() => {
+    const byMonth = {};
+    const storeCodes = new Set(stores.map(s => (s.code || '').trim()));
+    allAggregators.forEach(a => {
+      const code = (a.store_code || '').trim();
+      if (!storeCodes.has(code)) return;
+      const key = `${a.year}-${String(a.month).padStart(2, '0')}`;
+      if (!byMonth[key]) byMonth[key] = { key, year: a.year, month: a.month, channels: {} };
+      const ch = (a.channel || '').trim();
+      if (!byMonth[key].channels[ch]) byMonth[key].channels[ch] = { participation: 0, total_sales: 0, count: 0 };
+      byMonth[key].channels[ch].participation += a.participation || 0;
+      byMonth[key].channels[ch].total_sales += a.total_sales || 0;
+      byMonth[key].channels[ch].count++;
+    });
+    return Object.values(byMonth)
+      .sort((a, b) => a.key.localeCompare(b.key))
+      .map(m => {
+        const result = { label: format(new Date(m.year, m.month - 1, 1), 'MMM yy', { locale: es }) };
+        Object.keys(m.channels).forEach(ch => {
+          result[ch] = m.channels[ch].count > 0 ? (m.channels[ch].participation / m.channels[ch].count) * 100 : 0;
+        });
+        return result;
+      });
+  }, [allAggregators, stores]);
+
+  /* ── Daily trend for district ── */
+  const dailyTrend = useMemo(() => {
+    const rangeInterval = { start: startDate, end: endDate };
+    const byDate = {};
+    const storeCodes = new Set(stores.map(s => (s.code || '').trim()));
+    allDailySales.forEach(d => {
+      try { if (!isWithinInterval(parseISO(d.date), rangeInterval)) return; } catch { return; }
+      const code = (d.store_id || '').trim();
+      if (!storeCodes.has(code)) return;
+      const dt = d.date;
+      if (!byDate[dt]) byDate[dt] = { date: dt, sales: 0, tx: 0 };
+      byDate[dt].sales += d.total_sales || 0;
+      byDate[dt].tx += d.total_transactions || 0;
+    });
+    return Object.values(byDate)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map(d => ({
+        ...d,
+        label: format(parseISO(d.date), 'dd MMM', { locale: es }),
+        avgTicket: d.tx > 0 ? d.sales / d.tx : 0,
+      }));
+  }, [allDailySales, stores, startDate, endDate]);
+
   /* ── KPIs array ── */
   const kpis = useMemo(() => {
     if (!districtTotals.hasData && storeData.length === 0) return [];
@@ -449,5 +518,6 @@ export function useGerenteData(district, startDate, endDate) {
     storeData, districtTotals, variations, hourlyData,
     infoSources, infoIndex, attentionItems, drivers, ranking, insight, kpis,
     selectedHourlyStore, setSelectedHourlyStore,
+    aggregatorsByStore, aggregatorsChannels, aggregatorsTrend, dailyTrend,
   };
 }

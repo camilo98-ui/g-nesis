@@ -1,36 +1,39 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, subWeeks, subMonths,
 } from 'date-fns';
 import {
-  Calendar, RefreshCw, DollarSign, TrendingUp, Target,
-  Zap, Receipt, Smile, Activity,
+  Calendar, RefreshCw, Activity, Zap, Truck, BarChart3, Receipt,
+  Store, Globe,
 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { useGerenteData } from '@/components/gerente/useGerenteData';
-import ExecutiveKPIs from '@/components/gerente/ExecutiveKPIs';
-import AttentionSection from '@/components/gerente/AttentionSection';
-import InfoStatusCard from '@/components/gerente/InfoStatusCard';
-import StoresTable from '@/components/gerente/StoresTable';
-import DriversSection from '@/components/gerente/DriversSection';
-import HourlyTransactions from '@/components/gerente/HourlyTransactions';
-import IntegralRanking from '@/components/gerente/IntegralRanking';
-import InsightOfTheDay from '@/components/gerente/InsightOfTheDay';
-
-const ICON_MAP = { DollarSign, TrendingUp, Target, Zap, Receipt, Smile };
+import PYGView from '@/components/gerente/views/PYGView';
+import AggregatorsView from '@/components/gerente/views/AggregatorsView';
+import SalesView from '@/components/gerente/views/SalesView';
+import TicketTable from '@/components/gerente/views/TicketTable';
 
 const now0 = new Date();
+
+const TABS = [
+  { key: 'pyg', label: 'P&G / Rentabilidad', icon: Zap, color: '#10b981' },
+  { key: 'aggregators', label: 'Agregadores', icon: Truck, color: '#f97316' },
+  { key: 'sales', label: 'Ventas & Ticket', icon: BarChart3, color: '#C21875' },
+  { key: 'ticket', label: 'Tabla Ticket', icon: Receipt, color: '#f59e0b' },
+];
 
 export default function GerenteDashboard() {
   const [startDate, setStartDate] = useState(startOfMonth(now0));
   const [endDate, setEndDate] = useState(now0);
   const [calOpen, setCalOpen] = useState(false);
   const [pickingEnd, setPickingEnd] = useState(false);
+  const [mode, setMode] = useState('tiendas'); // 'tiendas' | 'global'
+  const [activeTab, setActiveTab] = useState('pyg');
 
   const session = useMemo(() => {
     try { return JSON.parse(localStorage.getItem('popsySession') || '{}'); } catch { return {}; }
@@ -48,8 +51,6 @@ export default function GerenteDashboard() {
 
   const isPresetActive = (p) => format(startDate, 'ddMMyyyy') === format(p.start, 'ddMMyyyy') && format(endDate, 'ddMMyyyy') === format(p.end, 'ddMMyyyy');
 
-  const kpisWithIcons = data.kpis.map(k => ({ ...k, icon: ICON_MAP[k.icon] || Activity }));
-
   if (data.isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -57,6 +58,21 @@ export default function GerenteDashboard() {
       </div>
     );
   }
+
+  const renderView = () => {
+    switch (activeTab) {
+      case 'pyg':
+        return <PYGView storeData={data.storeData} districtTotals={data.districtTotals} mode={mode} />;
+      case 'aggregators':
+        return <AggregatorsView aggregatorsByStore={data.aggregatorsByStore} aggregatorsChannels={data.aggregatorsChannels} aggregatorsTrend={data.aggregatorsTrend} stores={data.stores} mode={mode} />;
+      case 'sales':
+        return <SalesView storeData={data.storeData} districtTotals={data.districtTotals} dailyTrend={data.dailyTrend} mode={mode} />;
+      case 'ticket':
+        return <TicketTable storeData={data.storeData} districtTotals={data.districtTotals} mode={mode} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-4 lg:space-y-5 pb-8" style={{ maxWidth: 1500, margin: '0 auto' }}>
@@ -88,9 +104,7 @@ export default function GerenteDashboard() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Presets */}
-          <div className="flex items-center gap-1 p-1 rounded-xl"
-            style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(194,24,117,0.1)' }}>
+          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(194,24,117,0.1)' }}>
             {presets.map(p => (
               <button key={p.label} onClick={() => { setStartDate(p.start); setEndDate(p.end); }}
                 className="px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all"
@@ -100,7 +114,6 @@ export default function GerenteDashboard() {
             ))}
           </div>
 
-          {/* Calendar */}
           <Popover open={calOpen} onOpenChange={setCalOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1.5 text-[11px] font-semibold rounded-xl h-8"
@@ -117,7 +130,6 @@ export default function GerenteDashboard() {
             </PopoverContent>
           </Popover>
 
-          {/* Refresh */}
           <button onClick={data.refresh}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all hover:opacity-80"
             style={{ background: 'linear-gradient(135deg, #C21875, #e91e8c)', color: '#fff', border: '1px solid rgba(194,24,117,0.3)' }}>
@@ -125,7 +137,6 @@ export default function GerenteDashboard() {
             Actualizar
           </button>
 
-          {/* Updated indicator */}
           <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
             style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.15)' }}>
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -134,38 +145,64 @@ export default function GerenteDashboard() {
         </div>
       </motion.div>
 
-      {/* ═══ EXECUTIVE KPIs ═══ */}
-      <ExecutiveKPIs kpis={kpisWithIcons} />
-
-      {/* ═══ ATTENTION + INFO STATUS ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <AttentionSection items={data.attentionItems} />
+      {/* ═══ TOGGLE: Tiendas | Global ═══ */}
+      <div className="flex items-center justify-center">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100">
+          <button onClick={() => setMode('tiendas')}
+            className="flex items-center gap-1.5 px-5 py-2 rounded-lg text-[12px] font-bold transition-all"
+            style={{
+              background: mode === 'tiendas' ? '#fff' : 'transparent',
+              color: mode === 'tiendas' ? '#C21875' : '#94a3b8',
+              boxShadow: mode === 'tiendas' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+            }}>
+            <Store style={{ width: 14, height: 14 }} />
+            Tiendas
+          </button>
+          <button onClick={() => setMode('global')}
+            className="flex items-center gap-1.5 px-5 py-2 rounded-lg text-[12px] font-bold transition-all"
+            style={{
+              background: mode === 'global' ? '#fff' : 'transparent',
+              color: mode === 'global' ? '#C21875' : '#94a3b8',
+              boxShadow: mode === 'global' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+            }}>
+            <Globe style={{ width: 14, height: 14 }} />
+            Global
+          </button>
         </div>
-        <InfoStatusCard sources={data.infoSources} infoIndex={data.infoIndex} />
       </div>
 
-      {/* ═══ STORES TABLE ═══ */}
-      <StoresTable stores={data.storeData} onStoreClick={() => {}} />
-
-      {/* ═══ DRIVERS ═══ */}
-      <DriversSection drivers={data.drivers} />
-
-      {/* ═══ HOURLY + RANKING ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <HourlyTransactions
-            hourlyData={data.hourlyData}
-            stores={data.stores}
-            selectedStore={data.selectedHourlyStore}
-            onSelectStore={data.setSelectedHourlyStore}
-          />
-        </div>
-        <IntegralRanking ranking={data.ranking} />
+      {/* ═══ TAB NAVIGATION ═══ */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {TABS.map(tab => {
+          const Icon = tab.icon;
+          return (
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold transition-all"
+              style={{
+                background: activeTab === tab.key ? `${tab.color}0f` : 'rgba(255,255,255,0.8)',
+                color: activeTab === tab.key ? tab.color : '#64748b',
+                border: activeTab === tab.key ? `1px solid ${tab.color}20` : '1px solid rgba(226,232,240,0.8)',
+                boxShadow: activeTab === tab.key ? `0 2px 8px ${tab.color}08` : 'none',
+              }}>
+              <Icon style={{ width: 14, height: 14 }} />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* ═══ INSIGHT OF THE DAY ═══ */}
-      <InsightOfTheDay insight={data.insight} />
+      {/* ═══ ACTIVE VIEW ═══ */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${activeTab}-${mode}`}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        >
+          {renderView()}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
