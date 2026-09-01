@@ -1,5 +1,3 @@
-import React from 'react';
-
 /* ── Formatters ── */
 export const fmtM = (n) => {
   if (n == null || isNaN(n)) return '—';

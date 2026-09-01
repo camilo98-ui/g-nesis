@@ -1,9 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import SectionCard from './SectionCard';
 import { fmtInt } from './gerenteUtils';
 

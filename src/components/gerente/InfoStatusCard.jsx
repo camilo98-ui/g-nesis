@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, XCircle, Database } from 'lucide-react';
 import SectionCard from './SectionCard';
 
 function StatusBadge({ status }) {

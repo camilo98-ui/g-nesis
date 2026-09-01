@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, ChevronRight, Database } from 'lucide-react';
+import { AlertTriangle, ChevronRight } from 'lucide-react';
 import SectionCard from './SectionCard';
 
 function AlertCard({ item, delay }) {
