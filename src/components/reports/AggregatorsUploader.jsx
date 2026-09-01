@@ -256,11 +256,8 @@ export default function AggregatorsUploader({ onClose, onSuccess }) {
       setMessage(`Guardando ${records.length} registros...`);
 
       try {
-        // Borrar registros anteriores
-        const existing = await base44.entities.AggregatorsData.list();
-        for (const rec of existing) {
-          await base44.entities.AggregatorsData.delete(rec.id);
-        }
+        // Borrar registros anteriores de forma masiva
+        await base44.entities.AggregatorsData.deleteMany({});
 
         const chunkSize = 50;
         let inserted = 0;
