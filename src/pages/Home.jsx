@@ -693,13 +693,13 @@ export default function Home() {
 
         {/* Mobile/Tablet View */}
         <div className="lg:hidden min-h-screen flex flex-col justify-center relative z-10">
-          <div className="flex-1 flex flex-col justify-center px-4 py-4 overflow-y-auto">
-            <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-rose-200/40 p-5" style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15)' }}>
-              <div className="mb-5 text-center">
+          <div className="flex-1 flex flex-col justify-center px-4 py-2">
+            <div className="max-w-md mx-auto w-full bg-white/0 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-rose-200/40 p-3.5" style={{ boxShadow: '0 0 12px rgba(251, 113, 133, 0.25), 0 0 20px rgba(251, 113, 133, 0.15)' }}>
+              <div className="mb-3 text-center">
                 <motion.img
                   src={LOGO_URL}
                   alt="Popsy"
-                  className="h-24 object-contain mx-auto mb-3"
+                  className="h-16 object-contain mx-auto mb-1.5"
                   initial={{ opacity: 0, scale: 0.8, y: -20 }}
                   animate={{
                     opacity: 1,
@@ -712,11 +712,11 @@ export default function Home() {
                     y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                   }} />
                 
-                <h1 className="text-xl font-black text-rose-300 mb-1">Iniciar sesión</h1>
-                <p className="text-slate-600 text-xs font-medium">Selecciona tu rol y comienza</p>
+                <h1 className="text-lg font-black text-rose-300 mb-0.5">Iniciar sesión</h1>
+                <p className="text-slate-600 text-[11px] font-medium">Selecciona tu rol y comienza</p>
               </div>
 
-              <div className="space-y-2 mb-4">
+              <div className="space-y-1.5 mb-2.5">
                 {ROLES.map((role) => {
                   const isSelected = selectedRole === role.id;
                   const lastUsedRole = localStorage.getItem('lastSelectedRole');
@@ -730,7 +730,7 @@ export default function Home() {
                         setLoginError('');
                         localStorage.setItem('lastSelectedRole', role.id);
                       }}
-                      className={`relative w-full min-h-[60px] p-3 rounded-xl border-2 transition-all duration-300 text-left ${
+                      className={`relative w-full min-h-[50px] p-2.5 rounded-xl border-2 transition-all duration-300 text-left ${
                       isSelected ?
                       'border-rose-300 bg-gradient-to-r from-rose-100/30 via-pink-100/20 to-purple-100/30 shadow-xl shadow-rose-200/40 scale-[1.02]' :
                       'border-slate-300/60 bg-white/8 backdrop-blur-md active:border-rose-200 hover:scale-[1.01] hover:shadow-lg'}`
@@ -749,18 +749,18 @@ export default function Home() {
                         <motion.div
                           animate={isSelected ? { rotate: [0, 5, -5, 0] } : {}}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md ${
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md ${
                           isSelected ?
                           'bg-white/60 backdrop-blur-sm' :
                           'bg-gradient-to-br from-rose-50 to-purple-50'}`
                           }>
-                          <div className="w-4 h-4">
+                          <div className="w-3.5 h-3.5">
                             <RoleIcon roleId={role.id} isSelected={isSelected} />
                           </div>
                         </motion.div>
                         <div className="flex-1 min-w-0">
-                          <p className={`font-bold text-sm leading-tight ${isSelected ? 'text-slate-800' : 'text-slate-900'}`}>{role.name}</p>
-                          <p className={`text-[10px] leading-tight mt-0.5 ${isSelected ? 'text-slate-600' : 'text-slate-600'}`}>{role.description}</p>
+                          <p className={`font-bold text-[13px] leading-tight ${isSelected ? 'text-slate-800' : 'text-slate-900'}`}>{role.name}</p>
+                          <p className={`text-[9px] leading-tight mt-0.5 ${isSelected ? 'text-slate-600' : 'text-slate-600'}`}>{role.description}</p>
                         </div>
                         {isSelected &&
                         <motion.div
@@ -778,7 +778,7 @@ export default function Home() {
               </div>
 
               {selectedRole === 'gerente' &&
-              <div className="mb-3 p-2.5 bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-lg">
+              <div className="mb-2 p-2 bg-blue-50/60 backdrop-blur-sm border border-blue-200/40 rounded-lg">
                   <p className="text-[10px] text-blue-700 flex items-center gap-1.5 font-medium">
                     <Info className="w-3 h-3 flex-shrink-0" />
                     Acceso a panel ejecutivo del distrito
@@ -803,7 +803,7 @@ export default function Home() {
               />
 
               {selectedRole === 'gerente' && selectedDistrict &&
-              <div className="text-center mt-2">
+              <div className="text-center mt-1.5">
                 <button
                   onClick={() => setShowGerenteConfig(true)}
                   className="text-[10px] font-semibold text-slate-400 hover:text-slate-700 inline-flex items-center gap-1">
@@ -813,7 +813,7 @@ export default function Home() {
               </div>
               }
 
-              <div className="text-center mt-3">
+              <div className="text-center mt-2">
                 <Link to={createPageUrl('ExecutiveDashboard')} className="text-[10px] text-slate-500">
                   ¿Eres administrador?
                 </Link>
