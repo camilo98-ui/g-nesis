@@ -237,7 +237,7 @@ function NovaSectionPanel({ onClose, sections }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
                     fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
-                    textTransform: 'uppercase', color: m.labelColor,
+                    textTransform: 'uppercase', color: '#C21875',
                     marginBottom: 4,
                   }}>
                     {s.emoji} {s.title}
@@ -384,7 +384,7 @@ export default function NovaInsightStrip({ dailySales = [] }) {
               <span style={{
                 fontSize: 9, fontWeight: 650,
                 letterSpacing: '0.11em', textTransform: 'uppercase',
-                color: mood.labelColor,
+                color: '#C21875',
               }}>
                 {current.emoji} {current.title} · Nova {mood.label}
               </span>
