@@ -7,7 +7,7 @@ import { useNova } from '@/components/NovaContext';
 import {
   ArrowLeft, BarChart3, DollarSign, TrendingUp, FileText,
   Filter, Search, X, Package, Layers, Star, Award,
-  ChevronDown, Calendar, ArrowUpRight, ArrowDownRight,
+  ChevronDown, ChevronUp, Calendar, ArrowUpRight, ArrowDownRight,
   AlertTriangle, CheckCircle, TrendingDown, Zap, Shield, GitCompare,
   Download, Printer, Target, Activity, Crown, Trophy, Tag
 } from 'lucide-react';
@@ -967,9 +967,11 @@ function buildHierarchy(records) {
   };
 }
 
-// ─── Mix de Categorías (tabla expandible) ────────────────────────────────────
+// ─── Mix de Categorías (tabla expandible con productos) ───────────────────────
 function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
   const [expanded, setExpanded] = useState({});
+  const [catSort, setCatSort] = useState({ key: 'totalSales', dir: 'desc' });
+  const [prodSort, setProdSort] = useState({ key: 'sales', dir: 'desc' });
   const toggle = (key) => setExpanded(p => ({ ...p, [key]: !p[key] }));
 
   const CATEGORY_DEFS = [
@@ -984,6 +986,8 @@ function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
   hierarchy.forEach(h => h.sections.forEach(s => allSections.push({ ...s, dept: h.dept })));
   const allPrevSections = [];
   prevHierarchy?.forEach(h => h.sections.forEach(s => allPrevSections.push({ ...s, dept: h.dept })));
+  const prevProductMap = {};
+  prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevProductMap[p.product] = p; })));
 
   const categories = CATEGORY_DEFS.map(cat => {
     const matched = allSections.filter(s => cat.match(s.name) || cat.match(s.dept));
@@ -993,16 +997,40 @@ function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
     const prevUnits = matchedPrev.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
     const participation = grandTotal > 0 ? (totalSales / grandTotal) * 100 : 0;
     const delta = prevUnits > 0 ? ((units - prevUnits) / prevUnits) * 100 : null;
-    const sections = matched.map(s => {
-      const prev = matchedPrev.find(ps => ps.name === s.name && ps.dept === s.dept);
-      const sUnits = s.products.reduce((u, p) => u + (p.units_sold || 0), 0);
-      const sPrevUnits = prev ? prev.products.reduce((u, p) => u + (p.units_sold || 0), 0) : 0;
-      const sPart = grandTotal > 0 ? ((s.sectionSales || 0) / grandTotal) * 100 : 0;
-      const sDelta = sPrevUnits > 0 ? ((sUnits - sPrevUnits) / sPrevUnits) * 100 : null;
-      return { name: s.name, dept: s.dept, sales: s.sectionSales || 0, units: sUnits, participation: sPart, delta: sDelta, hasPrev: sPrevUnits > 0 };
-    }).filter(s => s.sales > 0 || s.units > 0);
-    return { ...cat, totalSales, units, participation, delta, hasPrev: prevUnits > 0, sections };
+    const products = [];
+    matched.forEach(s => {
+      s.products.forEach(p => {
+        if (!p.product || p.total_sales <= 0) return;
+        const prev = prevProductMap[p.product];
+        const pUnits = p.units_sold || 0;
+        const prevPUnits = prev ? (prev.units_sold || 0) : 0;
+        const pPart = grandTotal > 0 ? ((p.total_sales || 0) / grandTotal) * 100 : 0;
+        const pDelta = prevPUnits > 0 ? ((pUnits - prevPUnits) / prevPUnits) * 100 : null;
+        products.push({ name: p.product, dept: s.dept, sales: p.total_sales || 0, units: pUnits, participation: pPart, delta: pDelta, hasPrev: prevPUnits > 0 });
+      });
+    });
+    return { ...cat, totalSales, units, participation, delta, hasPrev: prevUnits > 0, products };
   }).filter(c => c.totalSales > 0 || c.units > 0);
+
+  const sortRows = (rows, key, dir) => {
+    const sorted = [...rows];
+    sorted.sort((a, b) => {
+      let va = a[key], vb = b[key];
+      if (typeof va === 'string') return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+      if (va === null) return 1;
+      if (vb === null) return -1;
+      return dir === 'asc' ? va - vb : vb - va;
+    });
+    return sorted;
+  };
+
+  const sortedCategories = sortRows(categories, catSort.key, catSort.dir);
+  const handleCatSort = (key) => {
+    setCatSort(prev => prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' });
+  };
+  const handleProdSort = (key) => {
+    setProdSort(prev => prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' });
+  };
 
   const deltaCell = (delta, hasPrev) => hasPrev && delta !== null ? (
     <span className={`inline-flex items-center gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
@@ -1010,6 +1038,26 @@ function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
       {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
     </span>
   ) : <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
+
+  const SortIcon = ({ activeKey, currentKey, dir }) => (
+    <span className="inline-flex flex-col -space-y-2.5 opacity-40">
+      <ChevronUp className="w-2.5 h-2.5" style={{ color: activeKey === currentKey && dir === 'asc' ? EXEC.accent1 : EXEC.textMuted, opacity: activeKey === currentKey && dir === 'asc' ? 1 : 0.4 }} />
+      <ChevronDown className="w-2.5 h-2.5" style={{ color: activeKey === currentKey && dir === 'desc' ? EXEC.accent1 : EXEC.textMuted, opacity: activeKey === currentKey && dir === 'desc' ? 1 : 0.4 }} />
+    </span>
+  );
+
+  const SortableTh = ({ label, sKey, align = 'right' }) => (
+    <th
+      onClick={() => handleCatSort(sKey)}
+      className={`py-2.5 px-3 text-[10px] font-bold uppercase tracking-wider cursor-pointer select-none hover:bg-rose-50/60 transition-colors ${align === 'left' ? 'pl-6 pr-2 text-left' : 'text-right'} ${catSort.key === sKey ? 'text-rose-600' : ''}`}
+      style={{ color: catSort.key === sKey ? EXEC.accent1 : EXEC.textMuted }}
+    >
+      <span className={`inline-flex items-center gap-1 ${align === 'right' ? 'flex-row-reverse' : ''}`}>
+        {label}
+        <SortIcon activeKey={catSort.key} currentKey={sKey} dir={catSort.dir} />
+      </span>
+    </th>
+  );
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
@@ -1019,6 +1067,7 @@ function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-0.5" style={{ color: EXEC.textMuted }}>Distribución</p>
             <h3 className="font-black text-lg leading-tight" style={{ color: EXEC.textPrimary }}>Mix de Categorías</h3>
+            <p className="text-xs mt-0.5" style={{ color: EXEC.textMuted }}>Clic en una categoría para ver sus productos · ordena las columnas</p>
           </div>
           <div className="text-right rounded-xl px-3 py-2" style={{ background: `${EXEC.accent1}15` }}>
             <p className="text-xl font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(grandTotal)}</p>
@@ -1030,49 +1079,113 @@ function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: 'rgba(194,24,117,0.05)' }}>
-              <th className="py-2.5 pl-6 pr-2 text-left text-[10px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>Categoría</th>
-              <th className="py-2.5 px-3 text-right text-[10px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>Venta</th>
-              <th className="py-2.5 px-3 text-right text-[10px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>Participación</th>
+              <SortableTh label="Categoría" sKey="label" align="left" />
+              <SortableTh label="Venta" sKey="totalSales" />
+              <SortableTh label="Participación" sKey="participation" />
               <th className="py-2.5 pl-3 pr-6 text-right text-[10px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>Crecimiento</th>
             </tr>
           </thead>
           <tbody>
-            {categories.map((cat) => (
-              <React.Fragment key={cat.key}>
-                <tr style={{ borderBottom: `1px solid ${EXEC.borderLight}` }} className="transition-colors hover:bg-rose-50/40">
-                  <td className="py-3 pl-6 pr-2">
-                    <button onClick={() => toggle(cat.key)} className="flex items-center gap-2 group min-w-0">
-                      <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${expanded[cat.key] ? '' : '-rotate-90'}`} style={{ color: EXEC.accent1 }} />
-                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: cat.color }} />
-                      <span className="text-sm font-bold truncate transition-colors group-hover:text-rose-600" style={{ color: EXEC.textPrimary }}>{cat.label}</span>
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: `${cat.color}12`, color: cat.color }}>{cat.units.toLocaleString('es-CO')} unds</span>
-                    </button>
-                  </td>
-                  <td className="py-3 px-3 text-right font-bold whitespace-nowrap" style={{ color: EXEC.accent2 }}>{formatCurrency(cat.totalSales)}</td>
-                  <td className="py-3 px-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(194,24,117,0.08)' }}>
-                        <div className="h-full rounded-full" style={{ width: `${Math.min(cat.participation, 100)}%`, background: cat.color }} />
+            {sortedCategories.map((cat) => {
+              const isOpen = expanded[cat.key];
+              const sortedProducts = isOpen ? sortRows(cat.products, prodSort.key, prodSort.dir) : [];
+              return (
+                <React.Fragment key={cat.key}>
+                  <tr style={{ borderBottom: `1px solid ${EXEC.borderLight}` }} className="transition-colors hover:bg-rose-50/40">
+                    <td className="py-3 pl-6 pr-2">
+                      <button onClick={() => toggle(cat.key)} className="flex items-center gap-2 group min-w-0">
+                        <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`} style={{ color: EXEC.accent1 }} />
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: cat.color }} />
+                        <span className="text-sm font-bold truncate transition-colors group-hover:text-rose-600" style={{ color: EXEC.textPrimary }}>{cat.label}</span>
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: `${cat.color}12`, color: cat.color }}>{cat.units.toLocaleString('es-CO')} unds</span>
+                      </button>
+                    </td>
+                    <td className="py-3 px-3 text-right font-bold whitespace-nowrap" style={{ color: EXEC.accent2 }}>{formatCurrency(cat.totalSales)}</td>
+                    <td className="py-3 px-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <div className="w-20 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(194,24,117,0.08)' }}>
+                          <div className="h-full rounded-full" style={{ width: `${Math.min(cat.participation, 100)}%`, background: cat.color }} />
+                        </div>
+                        <span className="font-black text-sm min-w-[3rem] text-right" style={{ color: cat.color }}>{cat.participation.toFixed(1)}%</span>
                       </div>
-                      <span className="font-black text-sm min-w-[3rem] text-right" style={{ color: cat.color }}>{cat.participation.toFixed(1)}%</span>
-                    </div>
-                  </td>
-                  <td className="py-3 pl-3 pr-6 text-right">{deltaCell(cat.delta, cat.hasPrev)}</td>
-                </tr>
-                {expanded[cat.key] && cat.sections.length > 0 && cat.sections.map((s, si) => (
-                  <tr key={`${cat.key}-${si}`} style={{ background: EXEC.bgCardAlt, borderBottom: `1px solid ${EXEC.borderLight}` }}>
-                    <td className="py-2.5 pl-12 pr-2">
-                      <span className="text-xs font-medium truncate" style={{ color: EXEC.textSecondary }}>{s.name}</span>
                     </td>
-                    <td className="py-2.5 px-3 text-right text-xs font-semibold whitespace-nowrap" style={{ color: EXEC.textSecondary }}>{formatCurrency(s.sales)}</td>
-                    <td className="py-2.5 px-3 text-right">
-                      <span className="text-xs font-bold" style={{ color: EXEC.textSecondary }}>{s.participation.toFixed(2)}%</span>
-                    </td>
-                    <td className="py-2.5 pl-3 pr-6 text-right">{deltaCell(s.delta, s.hasPrev)}</td>
+                    <td className="py-3 pl-3 pr-6 text-right">{deltaCell(cat.delta, cat.hasPrev)}</td>
                   </tr>
-                ))}
-              </React.Fragment>
-            ))}
+                  {isOpen && sortedProducts.length > 0 && (
+                    <tr style={{ background: EXEC.bgCardAlt, borderBottom: `1px solid ${EXEC.borderLight}` }}>
+                      <td colSpan={4} className="p-0">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr style={{ background: 'rgba(194,24,117,0.03)' }}>
+                              <th
+                                onClick={() => handleProdSort('name')}
+                                className="py-2 pl-10 pr-2 text-left text-[9px] font-bold uppercase tracking-wider cursor-pointer select-none hover:bg-rose-50/60 transition-colors"
+                                style={{ color: prodSort.key === 'name' ? EXEC.accent1 : EXEC.textMuted }}
+                              >
+                                <span className="inline-flex items-center gap-1">Producto <SortIcon activeKey={prodSort.key} currentKey="name" dir={prodSort.dir} /></span>
+                              </th>
+                              <th
+                                onClick={() => handleProdSort('dept')}
+                                className="py-2 px-2 text-left text-[9px] font-bold uppercase tracking-wider cursor-pointer select-none hover:bg-rose-50/60 transition-colors"
+                                style={{ color: prodSort.key === 'dept' ? EXEC.accent1 : EXEC.textMuted }}
+                              >
+                                <span className="inline-flex items-center gap-1">Depto. <SortIcon activeKey={prodSort.key} currentKey="dept" dir={prodSort.dir} /></span>
+                              </th>
+                              <th
+                                onClick={() => handleProdSort('sales')}
+                                className="py-2 px-3 text-right text-[9px] font-bold uppercase tracking-wider cursor-pointer select-none hover:bg-rose-50/60 transition-colors"
+                                style={{ color: prodSort.key === 'sales' ? EXEC.accent1 : EXEC.textMuted }}
+                              >
+                                <span className="inline-flex items-center gap-1 flex-row-reverse">Venta <SortIcon activeKey={prodSort.key} currentKey="sales" dir={prodSort.dir} /></span>
+                              </th>
+                              <th
+                                onClick={() => handleProdSort('units')}
+                                className="py-2 px-3 text-right text-[9px] font-bold uppercase tracking-wider cursor-pointer select-none hover:bg-rose-50/60 transition-colors"
+                                style={{ color: prodSort.key === 'units' ? EXEC.accent1 : EXEC.textMuted }}
+                              >
+                                <span className="inline-flex items-center gap-1 flex-row-reverse">Unds. <SortIcon activeKey={prodSort.key} currentKey="units" dir={prodSort.dir} /></span>
+                              </th>
+                              <th
+                                onClick={() => handleProdSort('participation')}
+                                className="py-2 px-3 text-right text-[9px] font-bold uppercase tracking-wider cursor-pointer select-none hover:bg-rose-50/60 transition-colors"
+                                style={{ color: prodSort.key === 'participation' ? EXEC.accent1 : EXEC.textMuted }}
+                              >
+                                <span className="inline-flex items-center gap-1 flex-row-reverse">Part. <SortIcon activeKey={prodSort.key} currentKey="participation" dir={prodSort.dir} /></span>
+                              </th>
+                              <th className="py-2 pl-3 pr-6 text-right text-[9px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>Crec.</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sortedProducts.map((p, pi) => (
+                              <tr key={`${cat.key}-p-${pi}`} style={{ borderTop: `1px solid ${EXEC.borderLight}` }} className="hover:bg-white/60 transition-colors">
+                                <td className="py-2 pl-10 pr-2">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: cat.color, opacity: 0.5 }} />
+                                    <span className="text-xs font-medium truncate" style={{ color: EXEC.textPrimary }}>{p.name}</span>
+                                  </div>
+                                </td>
+                                <td className="py-2 px-2 text-[10px] font-semibold whitespace-nowrap" style={{ color: EXEC.textMuted }}>{p.dept}</td>
+                                <td className="py-2 px-3 text-right font-bold whitespace-nowrap text-[11px]" style={{ color: EXEC.accent2 }}>{formatCurrency(p.sales)}</td>
+                                <td className="py-2 px-3 text-right text-[11px] font-semibold" style={{ color: EXEC.textSecondary }}>{p.units.toLocaleString('es-CO')}</td>
+                                <td className="py-2 px-3 text-right">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <div className="w-12 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(194,24,117,0.06)' }}>
+                                      <div className="h-full rounded-full" style={{ width: `${Math.min(p.participation, 100)}%`, background: cat.color, opacity: 0.7 }} />
+                                    </div>
+                                    <span className="text-[10px] font-bold min-w-[2.5rem] text-right" style={{ color: EXEC.textSecondary }}>{p.participation.toFixed(2)}%</span>
+                                  </div>
+                                </td>
+                                <td className="py-2 pl-3 pr-6 text-right">{deltaCell(p.delta, p.hasPrev)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -1467,9 +1580,9 @@ export default function SalesReportView() {
               );
               })()}
 
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Mix de Categorías */}
+            {/* Charts Stack — Mix de Categorías a ancho completo, Top 10 debajo */}
+            <div className="space-y-5">
+              {/* Mix de Categorías — ancho completo */}
               <CategoryMixTable
                 hierarchy={hierarchy}
                 prevHierarchy={prevHierarchy}
