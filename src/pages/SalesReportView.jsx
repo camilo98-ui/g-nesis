@@ -967,6 +967,119 @@ function buildHierarchy(records) {
   };
 }
 
+// ─── Mix de Categorías (tabla expandible) ────────────────────────────────────
+function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
+  const [expanded, setExpanded] = useState({});
+  const toggle = (key) => setExpanded(p => ({ ...p, [key]: !p[key] }));
+
+  const CATEGORY_DEFS = [
+    { key: 'conos', label: 'Conos', match: (n) => /cono/i.test(n), color: COLORS[0] },
+    { key: 'malteadas', label: 'Malteadas', match: (n) => /malteada/i.test(n) && !/granizado/i.test(n), color: COLORS[1] },
+    { key: 'llevar', label: 'Producto para Llevar', match: (n) => /llevar|takeaway/i.test(n), color: COLORS[2] },
+    { key: 'especialidades', label: 'Especialidades', match: (n) => /especial/i.test(n), color: COLORS[3] },
+    { key: 'cookie', label: 'Cookie Jar', match: (n) => /cookie/i.test(n), color: COLORS[4] },
+  ];
+
+  const allSections = [];
+  hierarchy.forEach(h => h.sections.forEach(s => allSections.push({ ...s, dept: h.dept })));
+  const allPrevSections = [];
+  prevHierarchy?.forEach(h => h.sections.forEach(s => allPrevSections.push({ ...s, dept: h.dept })));
+
+  const categories = CATEGORY_DEFS.map(cat => {
+    const matched = allSections.filter(s => cat.match(s.name) || cat.match(s.dept));
+    const matchedPrev = allPrevSections.filter(s => cat.match(s.name) || cat.match(s.dept));
+    const totalSales = matched.reduce((sum, s) => sum + (s.sectionSales || 0), 0);
+    const units = matched.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
+    const prevUnits = matchedPrev.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
+    const participation = grandTotal > 0 ? (totalSales / grandTotal) * 100 : 0;
+    const delta = prevUnits > 0 ? ((units - prevUnits) / prevUnits) * 100 : null;
+    const sections = matched.map(s => {
+      const prev = matchedPrev.find(ps => ps.name === s.name && ps.dept === s.dept);
+      const sUnits = s.products.reduce((u, p) => u + (p.units_sold || 0), 0);
+      const sPrevUnits = prev ? prev.products.reduce((u, p) => u + (p.units_sold || 0), 0) : 0;
+      const sPart = grandTotal > 0 ? ((s.sectionSales || 0) / grandTotal) * 100 : 0;
+      const sDelta = sPrevUnits > 0 ? ((sUnits - sPrevUnits) / sPrevUnits) * 100 : null;
+      return { name: s.name, dept: s.dept, sales: s.sectionSales || 0, units: sUnits, participation: sPart, delta: sDelta, hasPrev: sPrevUnits > 0 };
+    }).filter(s => s.sales > 0 || s.units > 0);
+    return { ...cat, totalSales, units, participation, delta, hasPrev: prevUnits > 0, sections };
+  }).filter(c => c.totalSales > 0 || c.units > 0);
+
+  const deltaCell = (delta, hasPrev) => hasPrev && delta !== null ? (
+    <span className={`inline-flex items-center gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+      {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+      {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
+    </span>
+  ) : <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+      className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
+      <div className="px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${EXEC.borderLight}` }}>
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-0.5" style={{ color: EXEC.textMuted }}>Distribución</p>
+            <h3 className="font-black text-lg leading-tight" style={{ color: EXEC.textPrimary }}>Mix de Categorías</h3>
+          </div>
+          <div className="text-right rounded-xl px-3 py-2" style={{ background: `${EXEC.accent1}15` }}>
+            <p className="text-xl font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(grandTotal)}</p>
+            <p className="text-[10px]" style={{ color: EXEC.textMuted }}>venta total</p>
+          </div>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr style={{ background: 'rgba(194,24,117,0.05)' }}>
+              <th className="py-2.5 pl-6 pr-2 text-left text-[10px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>Categoría</th>
+              <th className="py-2.5 px-3 text-right text-[10px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>Venta</th>
+              <th className="py-2.5 px-3 text-right text-[10px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>Participación</th>
+              <th className="py-2.5 pl-3 pr-6 text-right text-[10px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>Crecimiento</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories.map((cat) => (
+              <React.Fragment key={cat.key}>
+                <tr style={{ borderBottom: `1px solid ${EXEC.borderLight}` }} className="transition-colors hover:bg-rose-50/40">
+                  <td className="py-3 pl-6 pr-2">
+                    <button onClick={() => toggle(cat.key)} className="flex items-center gap-2 group min-w-0">
+                      <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${expanded[cat.key] ? '' : '-rotate-90'}`} style={{ color: EXEC.accent1 }} />
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: cat.color }} />
+                      <span className="text-sm font-bold truncate transition-colors group-hover:text-rose-600" style={{ color: EXEC.textPrimary }}>{cat.label}</span>
+                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: `${cat.color}12`, color: cat.color }}>{cat.units.toLocaleString('es-CO')} unds</span>
+                    </button>
+                  </td>
+                  <td className="py-3 px-3 text-right font-bold whitespace-nowrap" style={{ color: EXEC.accent2 }}>{formatCurrency(cat.totalSales)}</td>
+                  <td className="py-3 px-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(194,24,117,0.08)' }}>
+                        <div className="h-full rounded-full" style={{ width: `${Math.min(cat.participation, 100)}%`, background: cat.color }} />
+                      </div>
+                      <span className="font-black text-sm min-w-[3rem] text-right" style={{ color: cat.color }}>{cat.participation.toFixed(1)}%</span>
+                    </div>
+                  </td>
+                  <td className="py-3 pl-3 pr-6 text-right">{deltaCell(cat.delta, cat.hasPrev)}</td>
+                </tr>
+                {expanded[cat.key] && cat.sections.length > 0 && cat.sections.map((s, si) => (
+                  <tr key={`${cat.key}-${si}`} style={{ background: EXEC.bgCardAlt, borderBottom: `1px solid ${EXEC.borderLight}` }}>
+                    <td className="py-2.5 pl-12 pr-2">
+                      <span className="text-xs font-medium truncate" style={{ color: EXEC.textSecondary }}>{s.name}</span>
+                    </td>
+                    <td className="py-2.5 px-3 text-right text-xs font-semibold whitespace-nowrap" style={{ color: EXEC.textSecondary }}>{formatCurrency(s.sales)}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <span className="text-xs font-bold" style={{ color: EXEC.textSecondary }}>{s.participation.toFixed(2)}%</span>
+                    </td>
+                    <td className="py-2.5 pl-3 pr-6 text-right">{deltaCell(s.delta, s.hasPrev)}</td>
+                  </tr>
+                ))}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </motion.div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function SalesReportView() {
   const { setPageData, extractSectionData } = useNova() || {};
@@ -1357,85 +1470,11 @@ export default function SalesReportView() {
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {/* Mix de Categorías */}
-              {(() => {
-                const CATEGORY_DEFS = [
-                  { label: 'Conos', match: (n) => /cono/i.test(n), color: COLORS[0] },
-                  { label: 'Malteadas', match: (n) => /malteada/i.test(n) && !/granizado/i.test(n), color: COLORS[1] },
-                  { label: 'Producto para Llevar', match: (n) => /llevar|takeaway/i.test(n), color: COLORS[2] },
-                  { label: 'Especialidades', match: (n) => /especial/i.test(n), color: COLORS[3] },
-                  { label: 'Cookie Jar', match: (n) => /cookie/i.test(n), color: COLORS[4] },
-                ];
-                const allSections = [];
-                hierarchy.forEach(h => h.sections.forEach(s => allSections.push({ ...s, dept: h.dept })));
-                const allPrevSections = [];
-                prevHierarchy?.forEach(h => h.sections.forEach(s => allPrevSections.push({ ...s, dept: h.dept })));
-                const grandTotal = summary.totalSales || 0;
-                const categories = CATEGORY_DEFS.map(cat => {
-                  const matched = allSections.filter(s => cat.match(s.name) || cat.match(s.dept));
-                  const matchedPrev = allPrevSections.filter(s => cat.match(s.name) || cat.match(s.dept));
-                  const totalSales = matched.reduce((sum, s) => sum + (s.sectionSales || 0), 0);
-                  const units = matched.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
-                  const prevUnits = matchedPrev.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
-                  const participation = grandTotal > 0 ? (totalSales / grandTotal) * 100 : 0;
-                  const delta = prevUnits > 0 ? ((units - prevUnits) / prevUnits) * 100 : null;
-                  return { ...cat, totalSales, units, participation, delta, hasPrev: prevUnits > 0 };
-                }).filter(c => c.totalSales > 0 || c.units > 0);
-                return (
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
-                <div className="px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${EXEC.borderLight}` }}>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-0.5" style={{ color: EXEC.textMuted }}>Distribución</p>
-                      <h3 className="font-black text-lg leading-tight" style={{ color: EXEC.textPrimary }}>Mix de Categorías</h3>
-                      <p className="text-xs mt-0.5" style={{ color: EXEC.textMuted }}>{currentMonthLabel} · {categories.length} categorías</p>
-                    </div>
-                    <div className="text-right rounded-xl px-3 py-2" style={{ background: `${EXEC.accent1}15` }}>
-                      <p className="text-xl font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(grandTotal)}</p>
-                      <p className="text-[10px]" style={{ color: EXEC.textMuted }}>venta total</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="px-6 py-4 space-y-3 max-h-80 overflow-y-auto">
-                  {categories.map((h, i) => {
-                    const color = h.color;
-                    return (
-                      <div key={i}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
-                            <span className="text-sm font-semibold truncate" style={{ color: i === 0 ? EXEC.textPrimary : EXEC.textSecondary }}>{h.label}</span>
-                          </div>
-                          <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-                            <span className="text-xs" style={{ color: EXEC.textMuted }}>{h.units.toLocaleString('es-CO')} unds</span>
-                            <span className="text-xs" style={{ color: EXEC.textMuted }}>{formatCurrency(h.totalSales)}</span>
-                            <span className="text-sm font-black min-w-[3rem] text-right" style={{ color }}>{h.participation.toFixed(1)}%</span>
-                          </div>
-                        </div>
-                        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(194,24,117,0.08)' }}>
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(h.participation, 100)}%` }}
-                            transition={{ duration: 0.9, delay: i * 0.07 }}
-                            className="h-full rounded-full"
-                            style={{ background: color }}
-                          />
-                        </div>
-                        {h.hasPrev && h.delta !== null && (
-                          <div className="flex justify-end mt-1">
-                            <span className={`text-[10px] font-bold flex items-center gap-0.5 ${h.delta >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                              {h.delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                              Δ Uds. {h.delta >= 0 ? '+' : ''}{h.delta.toFixed(1)}% vs {prevMonthLabel}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-                );
-              })()}
+              <CategoryMixTable
+                hierarchy={hierarchy}
+                prevHierarchy={prevHierarchy}
+                grandTotal={summary.totalSales}
+              />
 
               {/* Top 10 Productos */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
