@@ -75,6 +75,19 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
   const [expandedDepts, setExpandedDepts] = useState({});
   const [expandedSections, setExpandedSections] = useState({});
   const [search, setSearch] = useState('');
+  const [sortConfig, setSortConfig] = useState({ column: null, direction: 'desc' });
+
+  const toggleSort = (column) => {
+    setSortConfig(prev => prev.column === column
+      ? { column, direction: prev.direction === 'desc' ? 'asc' : 'desc' }
+      : { column, direction: 'desc' }
+    );
+  };
+
+  const renderSortIndicator = (column) => {
+    if (sortConfig.column !== column) return <span className="opacity-25 ml-0.5">↕</span>;
+    return <span className="ml-0.5">{sortConfig.direction === 'desc' ? '↓' : '↑'}</span>;
+  };
 
   const toggleDept = (dept) => setExpandedDepts(p => ({ ...p, [dept]: !p[dept] }));
   const toggleSection = (key) => setExpandedSections(p => ({ ...p, [key]: !p[key] }));
@@ -199,11 +212,29 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
 
       if (!sectionExpanded || !hasProducts) return;
 
-      section.products.forEach((p, idx) => {
+      const productsToShow = [...section.products].map(p => {
+        const prevP = prevProductMap[p.product];
+        const d = prevP != null && (prevP.participation ?? 0) > 0 ? ((p.participation - prevP.participation) / prevP.participation) * 100 : null;
+        return { ...p, _delta: d };
+      });
+
+      if (sortConfig.column) {
+        const getVal = (p) => {
+          switch (sortConfig.column) {
+            case 'part':  return p.participation ?? 0;
+            case 'sales': return p.total_sales ?? 0;
+            case 'units': return p.units_sold ?? 0;
+            case 'delta': return p._delta ?? -Infinity;
+            default: return 0;
+          }
+        };
+        productsToShow.sort((a, b) => sortConfig.direction === 'desc' ? getVal(b) - getVal(a) : getVal(a) - getVal(b));
+      }
+
+      productsToShow.forEach((p, idx) => {
         const isSelected = selectedProduct?.product === p.product && selectedProduct?.section === p.section;
         const matchSearch = searchActive && p.product?.toLowerCase().includes(searchLower);
-        const prev = prevProductMap[p.product];
-        const delta = prev != null && (prev.participation ?? 0) > 0 ? ((p.participation - prev.participation) / prev.participation) * 100 : null;
+        const delta = p._delta;
 
         rows.push(
           <tr
@@ -270,10 +301,10 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
               <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider" style={{ color: EXEC.textSecondary }}>Departamento</th>
               <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider" style={{ color: EXEC.textSecondary }}>Sección</th>
               <th className="py-3 px-3 text-left font-bold text-xs uppercase tracking-wider" style={{ color: EXEC.textSecondary }}>Producto</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.accent1 }}>% Part.</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>Venta Bruta</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>Uds.</th>
-              <th className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap" style={{ color: EXEC.textSecondary }}>Δ Part. %</th>
+              <th onClick={() => toggleSort('part')} className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-pink-50/50 transition-colors" style={{ color: EXEC.accent1 }}>% Part. {renderSortIndicator('part')}</th>
+              <th onClick={() => toggleSort('sales')} className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-pink-50/50 transition-colors" style={{ color: EXEC.textSecondary }}>Venta Bruta {renderSortIndicator('sales')}</th>
+              <th onClick={() => toggleSort('units')} className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-pink-50/50 transition-colors" style={{ color: EXEC.textSecondary }}>Uds. {renderSortIndicator('units')}</th>
+              <th onClick={() => toggleSort('delta')} className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-pink-50/50 transition-colors" style={{ color: EXEC.textSecondary }}>Δ Part. % {renderSortIndicator('delta')}</th>
             </tr>
           </thead>
           <tbody>
