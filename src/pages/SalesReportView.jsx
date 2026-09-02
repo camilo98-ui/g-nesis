@@ -1272,7 +1272,7 @@ export default function SalesReportView() {
     <div className="flex h-screen overflow-hidden">
       <SidebarNav />
       <div className="flex-1 min-h-0 overflow-y-auto" style={{ background: 'linear-gradient(180deg, #fff5fa 0%, #ffffff 30%, #fdf2f8 100%)' }}>
-      <div className="sticky top-0 z-30" style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${EXEC.border}`, boxShadow: '0 2px 16px rgba(194,24,117,0.08)' }}>
+      <div className="z-30" style={{ background: 'rgba(255,255,255,0.95)', borderBottom: `1px solid ${EXEC.border}`, boxShadow: '0 2px 16px rgba(194,24,117,0.08)' }}>
         <div className="max-w-[1500px] mx-auto px-6 py-4">
           <div className="flex items-center gap-3 flex-wrap">
             <button onClick={handleBack} className="p-2 rounded-xl transition-all flex-shrink-0"
