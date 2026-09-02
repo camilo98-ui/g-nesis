@@ -975,11 +975,18 @@ function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
   const [prodSort, setProdSort] = useState({ key: 'sales', dir: 'desc' });
   const toggle = (key) => setExpanded(p => ({ ...p, [key]: !p[key] }));
 
+  const ESPECIALIDADES_PRODUCTS = [
+    'BANANA SPLIT', 'BROWNIE CON HLDO', 'CHARLIE BROWNIE',
+    'COPA GELARTI POPSY', 'SUNDAE 1 SABOR', 'SUNDAE 2 SABORES'
+  ];
   const CATEGORY_DEFS = [
     { key: 'conos', label: 'Conos', match: (n) => /cono/i.test(n), color: COLORS[0] },
     { key: 'malteadas', label: 'Malteadas', match: (n) => /malt/i.test(n) && !/cookie/i.test(n) && !/gallet/i.test(n) && !/cj/i.test(n) && !/granizado/i.test(n), color: COLORS[1] },
     { key: 'llevar', label: 'Producto para Llevar', match: (n) => /llevar|takeaway/i.test(n), color: COLORS[2] },
-    { key: 'especialidades', label: 'Especialidades', match: (n) => /especial/i.test(n), color: COLORS[3] },
+    { key: 'especialidades', label: 'Especialidades', match: (n) => {
+      const upper = (n || '').toUpperCase();
+      return ESPECIALIDADES_PRODUCTS.some(p => upper.includes(p));
+    }, color: COLORS[3] },
     { key: 'cookie', label: 'Cookie Jar', match: (n) => /cookie|gallet/i.test(n), color: COLORS[4] },
   ];
 
