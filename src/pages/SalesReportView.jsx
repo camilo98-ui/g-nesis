@@ -976,7 +976,7 @@ function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
 
   const CATEGORY_DEFS = [
     { key: 'conos', label: 'Conos', match: (n) => /cono/i.test(n), color: COLORS[0] },
-    { key: 'malteadas', label: 'Malteadas', match: (n) => /malteada/i.test(n) && !/granizado/i.test(n), color: COLORS[1] },
+    { key: 'malteadas', label: 'Malteadas', match: (n) => /malteada/i.test(n) && !/granizado/i.test(n) && !/cookie/i.test(n), color: COLORS[1] },
     { key: 'llevar', label: 'Producto para Llevar', match: (n) => /llevar|takeaway/i.test(n), color: COLORS[2] },
     { key: 'especialidades', label: 'Especialidades', match: (n) => /especial/i.test(n), color: COLORS[3] },
     { key: 'cookie', label: 'Cookie Jar', match: (n) => /cookie/i.test(n), color: COLORS[4] },
@@ -990,8 +990,8 @@ function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
   prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevProductMap[p.product] = p; })));
 
   const categories = CATEGORY_DEFS.map(cat => {
-    const matched = allSections.filter(s => cat.match(s.name) || cat.match(s.dept));
-    const matchedPrev = allPrevSections.filter(s => cat.match(s.name) || cat.match(s.dept));
+    const matched = allSections.filter(s => cat.match(`${s.name} ${s.dept}`));
+    const matchedPrev = allPrevSections.filter(s => cat.match(`${s.name} ${s.dept}`));
     const totalSales = matched.reduce((sum, s) => sum + (s.sectionSales || 0), 0);
     const units = matched.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
     const prevUnits = matchedPrev.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
