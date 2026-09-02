@@ -31,6 +31,7 @@ import TakeawayCard from './TakeawayCard';
 import DailyTrendChart from './DailyTrendChart';
 import NovaInsightStrip from './NovaInsightStrip';
 import GerenteDashboard from './GerenteDashboard';
+import DistrictParticipationView from './DistrictParticipationView';
 import AggregatorsModal from '@/components/reports/AggregatorsModal';
 import AggregatorsWidget from './AggregatorsWidget';
 import StoreNPSStatusCard from '@/components/nps/StoreNPSStatusCard';
@@ -1053,6 +1054,11 @@ export default function HomeWorkspace({
 
           {/* ── GERENTE DASHBOARD ── */}
           {isGerente && <GerenteDashboard />}
+
+          {/* ── PARTICIPACIÓN DEL DISTRITO (solo gerente) ── */}
+          {isGerente && selectedDistrict && (
+            <DistrictParticipationView district={selectedDistrict} storeEntities={storeEntities} />
+          )}
 
           {/* ── HERO SECTION: Premium KPI Cards + Nova AI Strip ── */}
           {!isGerente &&
