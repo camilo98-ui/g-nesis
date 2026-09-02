@@ -976,38 +976,36 @@ function CategoryMixTable({ hierarchy, prevHierarchy, grandTotal }) {
 
   const CATEGORY_DEFS = [
     { key: 'conos', label: 'Conos', match: (n) => /cono/i.test(n), color: COLORS[0] },
-    { key: 'malteadas', label: 'Malteadas', match: (n) => /malteada/i.test(n) && !/granizado/i.test(n) && !/cookie/i.test(n), color: COLORS[1] },
+    { key: 'malteadas', label: 'Malteadas', match: (n) => /malt/i.test(n) && !/cookie/i.test(n) && !/gallet/i.test(n) && !/cj/i.test(n) && !/granizado/i.test(n), color: COLORS[1] },
     { key: 'llevar', label: 'Producto para Llevar', match: (n) => /llevar|takeaway/i.test(n), color: COLORS[2] },
     { key: 'especialidades', label: 'Especialidades', match: (n) => /especial/i.test(n), color: COLORS[3] },
-    { key: 'cookie', label: 'Cookie Jar', match: (n) => /cookie/i.test(n), color: COLORS[4] },
+    { key: 'cookie', label: 'Cookie Jar', match: (n) => /cookie|gallet/i.test(n), color: COLORS[4] },
   ];
 
-  const allSections = [];
-  hierarchy.forEach(h => h.sections.forEach(s => allSections.push({ ...s, dept: h.dept })));
-  const allPrevSections = [];
-  prevHierarchy?.forEach(h => h.sections.forEach(s => allPrevSections.push({ ...s, dept: h.dept })));
+  // Match a nivel de PRODUCTO (nombre + sección + depto) para detectar
+  // malteadas que están dentro de secciones genéricas como "BEBIDAS".
+  const allProductsFlat = [];
+  hierarchy.forEach(h => h.sections.forEach(s => s.products.forEach(p => allProductsFlat.push({ ...p, dept: h.dept, sectionName: s.name }))));
+  const allPrevProductsFlat = [];
+  prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => allPrevProductsFlat.push({ ...p, dept: h.dept, sectionName: s.name }))));
   const prevProductMap = {};
   prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevProductMap[p.product] = p; })));
 
   const categories = CATEGORY_DEFS.map(cat => {
-    const matched = allSections.filter(s => cat.match(`${s.name} ${s.dept}`));
-    const matchedPrev = allPrevSections.filter(s => cat.match(`${s.name} ${s.dept}`));
-    const totalSales = matched.reduce((sum, s) => sum + (s.sectionSales || 0), 0);
-    const units = matched.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
-    const prevUnits = matchedPrev.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
+    const matched = allProductsFlat.filter(p => cat.match(`${p.product || ''} ${p.sectionName || ''} ${p.dept || ''}`));
+    const matchedPrev = allPrevProductsFlat.filter(p => cat.match(`${p.product || ''} ${p.sectionName || ''} ${p.dept || ''}`));
+    const totalSales = matched.reduce((sum, p) => sum + (p.total_sales || 0), 0);
+    const units = matched.reduce((sum, p) => sum + (p.units_sold || 0), 0);
+    const prevUnits = matchedPrev.reduce((sum, p) => sum + (p.units_sold || 0), 0);
     const participation = grandTotal > 0 ? (totalSales / grandTotal) * 100 : 0;
     const delta = prevUnits > 0 ? ((units - prevUnits) / prevUnits) * 100 : null;
-    const products = [];
-    matched.forEach(s => {
-      s.products.forEach(p => {
-        if (!p.product || p.total_sales <= 0) return;
-        const prev = prevProductMap[p.product];
-        const pUnits = p.units_sold || 0;
-        const prevPUnits = prev ? (prev.units_sold || 0) : 0;
-        const pPart = grandTotal > 0 ? ((p.total_sales || 0) / grandTotal) * 100 : 0;
-        const pDelta = prevPUnits > 0 ? ((pUnits - prevPUnits) / prevPUnits) * 100 : null;
-        products.push({ name: p.product, dept: s.dept, sales: p.total_sales || 0, units: pUnits, participation: pPart, delta: pDelta, hasPrev: prevPUnits > 0 });
-      });
+    const products = matched.filter(p => p.product && (p.total_sales || 0) > 0).map(p => {
+      const prev = prevProductMap[p.product];
+      const pUnits = p.units_sold || 0;
+      const prevPUnits = prev ? (prev.units_sold || 0) : 0;
+      const pPart = grandTotal > 0 ? ((p.total_sales || 0) / grandTotal) * 100 : 0;
+      const pDelta = prevPUnits > 0 ? ((pUnits - prevPUnits) / prevPUnits) * 100 : null;
+      return { name: p.product, dept: p.dept, sales: p.total_sales || 0, units: pUnits, participation: pPart, delta: pDelta, hasPrev: prevPUnits > 0 };
     });
     return { ...cat, totalSales, units, participation, delta, hasPrev: prevUnits > 0, products };
   }).filter(c => c.totalSales > 0 || c.units > 0);
