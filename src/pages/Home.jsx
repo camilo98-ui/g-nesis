@@ -463,7 +463,7 @@ export default function Home() {
     // Contraseña maestra "Popsy" — abre cualquier tienda sin importar su contraseña asignada.
     // Se verifica primero, normalizando espacios y mayúsculas para evitar falsos negativos.
     const enteredPassword = (loginPassword || '').trim().toLowerCase().replace(/\s+/g, '');
-    const isMasterPassword = enteredPassword === 'popsy' || loginPassword === '1998';
+    const isMasterPassword = enteredPassword === 'popsy' || enteredPassword === '1998';
 
     if (isMasterPassword) {
       setIsSubmitting(true);
