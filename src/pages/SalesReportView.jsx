@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PYGModal from '@/components/reports/PYGModal';
+import ProductComparisonView from '@/components/reports/ProductComparisonView';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Cell, RadialBarChart, RadialBar, LineChart, Line, PieChart, Pie
@@ -1209,6 +1210,7 @@ export default function SalesReportView() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showPYG, setShowPYG] = useState(false);
   const [showComparative, setShowComparative] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
 
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -1436,6 +1438,13 @@ export default function SalesReportView() {
                   style={{ background: 'rgba(99,102,241,0.08)', border: `1px solid rgba(99,102,241,0.2)`, color: '#6366f1' }}>
                   <GitCompare className="w-3.5 h-3.5" />
                   Comparativo
+                </button>
+                <button
+                  onClick={() => setShowComparison(true)}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold transition-all flex-shrink-0"
+                  style={{ background: EXEC.grad1, color: '#fff', boxShadow: '0 4px 14px rgba(194,24,117,0.25)' }}>
+                  <BarChart3 className="w-3.5 h-3.5" />
+                  Análisis Comparativo
                 </button>
                 <div className="rounded-xl px-4 py-2 text-right flex-shrink-0" style={{ background: 'rgba(194,24,117,0.08)', border: `1px solid ${EXEC.border}` }}>
                   <p className="text-base font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(summary.totalSales)}</p>
@@ -1767,6 +1776,21 @@ export default function SalesReportView() {
 
       <AnimatePresence>
         {showPYG && <PYGModal storeId={storeCode} onClose={() => setShowPYG(false)} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showComparison && hasData && (
+          <ProductComparisonView
+            allRecords={allRecords}
+            hierarchy={hierarchy}
+            availableMonths={availableMonths}
+            grandTotal={summary.totalSales}
+            currentMonthLabel={currentMonthLabel}
+            effectiveMonth={effectiveMonth}
+            effectiveYear={effectiveYear}
+            onClose={() => setShowComparison(false)}
+          />
+        )}
       </AnimatePresence>
       </div>
     </div>
