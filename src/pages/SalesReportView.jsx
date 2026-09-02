@@ -219,7 +219,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
       const productsToShow = [...section.products].map(p => {
         const prevP = prevProductMap[p.product];
         const d = prevP != null && (prevP.units_sold ?? 0) > 0 ? ((p.units_sold - prevP.units_sold) / prevP.units_sold) * 100 : null;
-        return { ...p, _delta: d };
+        return { ...p, _delta: d, _hasPrev: prevP != null && (prevP.units_sold ?? 0) > 0 };
       });
 
       if (sortConfig.column) {
@@ -264,7 +264,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
               {p.units_sold != null && p.units_sold > 0 ? p.units_sold.toLocaleString('es-CO') : '—'}
             </td>
             <td className="py-1.5 px-3 text-right text-xs whitespace-nowrap">
-              {fixDeltaDisplay(delta)}
+              {p._hasPrev ? fixDeltaDisplay(delta) : '—'}
             </td>
           </tr>
         );
