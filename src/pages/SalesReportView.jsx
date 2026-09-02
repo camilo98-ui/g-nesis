@@ -146,8 +146,10 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
         <td className="py-2.5 px-3 text-right" style={{ background: 'rgba(194,24,117,0.06)' }}>
           {(() => {
             const prevDept = prevHierarchy?.find(h => h.dept === dept);
-            if (!prevDept || prevDept.deptPart === 0) return <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
-            const delta = ((deptPart - prevDept.deptPart) / prevDept.deptPart) * 100;
+            const prevDeptUnits = prevDept ? prevDept.sections.flatMap(s => s.products).reduce((sum, p) => sum + (p.units_sold || 0), 0) : 0;
+            const currDeptUnits = sections.flatMap(s => s.products).reduce((sum, p) => sum + (p.units_sold || 0), 0);
+            if (!prevDept || prevDeptUnits === 0) return <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>;
+            const delta = ((currDeptUnits - prevDeptUnits) / prevDeptUnits) * 100;
             return (
               <span className={`flex items-center justify-end gap-0.5 font-bold text-xs ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
@@ -197,8 +199,10 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
             {(() => {
               const prevDept = prevHierarchy?.find(h => h.dept === dept);
               const prevSection = prevDept?.sections.find(s => s.name === section.name);
-              if (!prevSection || prevSection.sectionPart === 0) return <span style={{ color: EXEC.textMuted }}>—</span>;
-              const delta = ((section.sectionPart - prevSection.sectionPart) / prevSection.sectionPart) * 100;
+              const prevSecUnits = prevSection ? prevSection.products.reduce((sum, p) => sum + (p.units_sold || 0), 0) : 0;
+              const currSecUnits = section.products.reduce((sum, p) => sum + (p.units_sold || 0), 0);
+              if (!prevSection || prevSecUnits === 0) return <span style={{ color: EXEC.textMuted }}>—</span>;
+              const delta = ((currSecUnits - prevSecUnits) / prevSecUnits) * 100;
               return (
                 <span className={`flex items-center justify-end gap-0.5 font-bold ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
@@ -214,7 +218,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
 
       const productsToShow = [...section.products].map(p => {
         const prevP = prevProductMap[p.product];
-        const d = prevP != null && (prevP.participation ?? 0) > 0 ? ((p.participation - prevP.participation) / prevP.participation) * 100 : null;
+        const d = prevP != null && (prevP.units_sold ?? 0) > 0 ? ((p.units_sold - prevP.units_sold) / prevP.units_sold) * 100 : null;
         return { ...p, _delta: d };
       });
 
@@ -304,7 +308,7 @@ function HierarchyTable({ hierarchy, filterDept, filterSection, onSelectProduct,
               <th onClick={() => toggleSort('part')} className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-pink-50/50 transition-colors" style={{ color: EXEC.accent1 }}>% Part. {renderSortIndicator('part')}</th>
               <th onClick={() => toggleSort('sales')} className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-pink-50/50 transition-colors" style={{ color: EXEC.textSecondary }}>Venta Bruta {renderSortIndicator('sales')}</th>
               <th onClick={() => toggleSort('units')} className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-pink-50/50 transition-colors" style={{ color: EXEC.textSecondary }}>Uds. {renderSortIndicator('units')}</th>
-              <th onClick={() => toggleSort('delta')} className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-pink-50/50 transition-colors" style={{ color: EXEC.textSecondary }}>Δ Part. % {renderSortIndicator('delta')}</th>
+              <th onClick={() => toggleSort('delta')} className="py-3 px-3 text-right font-bold text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:bg-pink-50/50 transition-colors" style={{ color: EXEC.textSecondary }}>Δ Uds. % {renderSortIndicator('delta')}</th>
             </tr>
           </thead>
           <tbody>
@@ -1538,7 +1542,7 @@ export default function SalesReportView() {
                     </div>
                   </div>
                   <p className="text-xs mt-1" style={{ color: EXEC.textMuted }}>
-                    "Δ Part. %" muestra la variación porcentual relativa de participación vs <strong style={{ color: EXEC.textSecondary }}>{prevMonthLabel}</strong> · Clic en producto para análisis completo
+                    "Δ Uds. %" muestra la variación porcentual de unidades vendidas vs <strong style={{ color: EXEC.textSecondary }}>{prevMonthLabel}</strong> · Clic en producto para análisis completo
                     {prevRecords.length === 0 && (
                       <span className="ml-2 font-semibold" style={{ color: EXEC.accent5 }}>⚠ Sin datos comparativos aún</span>
                     )}
