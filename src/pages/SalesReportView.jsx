@@ -1354,123 +1354,116 @@ export default function SalesReportView() {
               );
               })()}
 
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              {/* Mix de Departamentos */}
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
-                <div className="px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${EXEC.borderLight}` }}>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-0.5" style={{ color: EXEC.textMuted }}>Distribución</p>
-                      <h3 className="font-black text-lg leading-tight" style={{ color: EXEC.textPrimary }}>Mix de Departamentos</h3>
-                      <p className="text-xs mt-0.5" style={{ color: EXEC.textMuted }}>{currentMonthLabel} · {hierarchy.length} categorías</p>
-                    </div>
-                    <div className="text-right rounded-xl px-3 py-2" style={{ background: `${EXEC.accent1}15` }}>
-                      <p className="text-xl font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(summary.totalSales)}</p>
-                      <p className="text-[10px]" style={{ color: EXEC.textMuted }}>venta total</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="px-6 py-4 space-y-3 max-h-80 overflow-y-auto">
-                  {hierarchy.filter(h => h.deptSales > 0).map((h, i) => {
-                    const color = COLORS[i % COLORS.length];
-                    return (
-                      <div key={i}>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
-                            <span className="text-sm font-semibold truncate" style={{ color: i === 0 ? EXEC.textPrimary : EXEC.textSecondary }}>{h.dept}</span>
-                          </div>
-                          <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-                            <span className="text-xs" style={{ color: EXEC.textMuted }}>{formatCurrency(h.deptSales)}</span>
-                            <span className="text-sm font-black min-w-[3rem] text-right" style={{ color }}>{h.deptPart.toFixed(1)}%</span>
-                          </div>
-                        </div>
-                        <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(194,24,117,0.08)' }}>
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(h.deptPart, 100)}%` }}
-                            transition={{ duration: 0.9, delay: i * 0.07 }}
-                            className="h-full rounded-full"
-                            style={{ background: color }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </motion.div>
+            {/* Categorías Clave */}
+            {(() => {
+              const CATEGORY_DEFS = [
+                { key: 'conos', label: 'Conos', match: (n) => /cono/i.test(n), color: COLORS[0] },
+                { key: 'malteadas', label: 'Malteadas', match: (n) => /malteada/i.test(n) && !/granizado/i.test(n), color: COLORS[1] },
+                { key: 'llevar', label: 'Producto para Llevar', match: (n) => /llevar|takeaway/i.test(n), color: COLORS[2] },
+                { key: 'especialidades', label: 'Especialidades', match: (n) => /especial/i.test(n), color: COLORS[3] },
+                { key: 'cookie', label: 'Cookie Jar', match: (n) => /cookie/i.test(n), color: COLORS[4] },
+              ];
 
-              {/* Top 10 Productos */}
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-                className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
-                <div className="px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${EXEC.borderLight}` }}>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-0.5" style={{ color: EXEC.textMuted }}>Ranking</p>
-                      <h3 className="font-black text-lg leading-tight" style={{ color: EXEC.textPrimary }}>Top 10 Productos</h3>
-                      <p className="text-xs mt-0.5" style={{ color: EXEC.textMuted }}>{currentMonthLabel} · clic para análisis</p>
-                    </div>
-                    <div className="text-right rounded-xl px-3 py-2" style={{ background: 'rgba(194,24,117,0.06)' }}>
-                      <p className="text-xl font-black" style={{ color: EXEC.textPrimary }}>{allProducts.length}</p>
-                      <p className="text-[10px]" style={{ color: EXEC.textMuted }}>productos</p>
+              const allSections = [];
+              hierarchy.forEach(h => h.sections.forEach(s => allSections.push({ ...s, dept: h.dept })));
+              const allPrevSections = [];
+              prevHierarchy?.forEach(h => h.sections.forEach(s => allPrevSections.push({ ...s, dept: h.dept })));
+
+              const grandTotal = summary.totalSales || 0;
+
+              const categories = CATEGORY_DEFS.map(cat => {
+                const matched = allSections.filter(s => cat.match(s.name) || cat.match(s.dept));
+                const matchedPrev = allPrevSections.filter(s => cat.match(s.name) || cat.match(s.dept));
+                const totalSales = matched.reduce((sum, s) => sum + (s.sectionSales || 0), 0);
+                const units = matched.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
+                const prevUnits = matchedPrev.reduce((sum, s) => sum + s.products.reduce((u, p) => u + (p.units_sold || 0), 0), 0);
+                const participation = grandTotal > 0 ? (totalSales / grandTotal) * 100 : 0;
+                const delta = prevUnits > 0 ? ((units - prevUnits) / prevUnits) * 100 : null;
+                return { ...cat, totalSales, units, participation, delta, hasPrev: prevUnits > 0, count: matched.length };
+              }).filter(c => c.totalSales > 0 || c.units > 0);
+
+              return (
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                  className="rounded-2xl overflow-hidden" style={{ background: EXEC.bgCard, border: `1px solid ${EXEC.borderLight}` }}>
+                  <div className="px-6 pt-5 pb-4" style={{ borderBottom: `1px solid ${EXEC.borderLight}` }}>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.15em] mb-0.5" style={{ color: EXEC.textMuted }}>Categorías Clave</p>
+                        <h3 className="font-black text-lg leading-tight" style={{ color: EXEC.textPrimary }}>Participación por Categoría</h3>
+                        <p className="text-xs mt-0.5" style={{ color: EXEC.textMuted }}>{currentMonthLabel} · vs {prevMonthLabel}</p>
+                      </div>
+                      <div className="text-right rounded-xl px-3 py-2" style={{ background: `${EXEC.accent1}15` }}>
+                        <p className="text-xl font-black" style={{ color: EXEC.accent1 }}>{formatCurrency(grandTotal)}</p>
+                        <p className="text-[10px]" style={{ color: EXEC.textMuted }}>venta total</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="px-6 py-4 space-y-2 max-h-80 overflow-y-auto">
-                  {(() => {
-                    const prevMap = {};
-                    prevHierarchy?.forEach(h => h.sections.forEach(s => s.products.forEach(p => { prevMap[p.product] = p; })));
-                    const top10 = [...allProducts].filter(p => p.total_sales > 0).sort((a, b) => b.total_sales - a.total_sales).slice(0, 10);
-                    const maxVal = top10[0]?.total_sales || 1;
-                    return top10.map((p, i) => {
-                      const pct = (p.total_sales / maxVal) * 100;
-                      const prev = prevMap[p.product];
-                      const delta = prev && prev.total_sales > 0 ? ((p.total_sales - prev.total_sales) / prev.total_sales) * 100 : null;
-                      const isSelected = selectedProduct?.product === p.product;
-                      const isTop3 = i < 3;
-                      return (
-                        <motion.div key={i}
-                          whileTap={{ scale: 0.99 }}
-                          onClick={() => setSelectedProduct(isSelected ? null : p)}
-                          className="cursor-pointer rounded-xl px-3 py-2.5 transition-all"
-                          style={{ background: isSelected ? 'rgba(194,24,117,0.08)' : 'transparent', border: isSelected ? `1px solid rgba(194,24,117,0.35)` : '1px solid transparent' }}>
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-black"
-                              style={{
-                                background: isTop3 ? (isSelected ? EXEC.accent1 : 'rgba(194,24,117,0.10)') : 'rgba(0,0,0,0.05)',
-                                color: isTop3 ? (isSelected ? '#fff' : EXEC.accent1) : EXEC.textMuted
-                              }}>
-                              {i + 1}
+                  <div className="px-6 py-5">
+                    {categories.length === 0 ? (
+                      <p className="text-sm text-center py-8" style={{ color: EXEC.textMuted }}>No se encontraron categorías para mostrar.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {categories.map((cat, i) => (
+                          <motion.div key={cat.key} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
+                            className="rounded-xl p-4" style={{ background: EXEC.bgCardAlt, border: `1px solid ${EXEC.borderLight}` }}>
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: cat.color }} />
+                                <span className="text-sm font-black truncate" style={{ color: EXEC.textPrimary }}>{cat.label}</span>
+                                {cat.count > 1 && (
+                                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: `${cat.color}15`, color: cat.color }}>
+                                    {cat.count} ítems
+                                  </span>
+                                )}
+                              </div>
+                              {/* Participación destacada */}
+                              <div className="text-right flex-shrink-0 ml-3">
+                                <p className="text-lg font-black" style={{ color: cat.color }}>{cat.participation.toFixed(2)}%</p>
+                                <p className="text-[9px] font-bold uppercase tracking-wider" style={{ color: EXEC.textMuted }}>participación</p>
+                              </div>
                             </div>
-                            <span className="text-xs font-semibold truncate flex-1" style={{ color: EXEC.textPrimary }}>{p.product}</span>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              {delta !== null && (
-                                <span className={`text-[10px] font-bold flex items-center gap-0.5 ${delta >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                  {delta >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                  {delta >= 0 ? '+' : ''}{delta.toFixed(1)}%
-                                </span>
-                              )}
-                              <span className="text-xs font-black" style={{ color: EXEC.textPrimary }}>{formatCurrency(p.total_sales)}</span>
+
+                            {/* Barra de participación */}
+                            <div className="h-2 rounded-full overflow-hidden mb-3" style={{ background: 'rgba(194,24,117,0.08)' }}>
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(cat.participation, 100)}%` }}
+                                transition={{ duration: 0.9, delay: i * 0.07 }}
+                                className="h-full rounded-full"
+                                style={{ background: cat.color }}
+                              />
                             </div>
-                          </div>
-                          <div className="h-1.5 rounded-full overflow-hidden ml-8" style={{ background: 'rgba(194,24,117,0.08)' }}>
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${pct}%` }}
-                              transition={{ duration: 0.8, delay: i * 0.05 }}
-                              className="h-full rounded-full"
-                              style={{ background: isSelected ? EXEC.accent1 : isTop3 ? EXEC.grad1 : 'rgba(194,24,117,0.25)' }}
-                            />
-                          </div>
-                        </motion.div>
-                      );
-                    });
-                  })()}
-                </div>
-              </motion.div>
-            </div>
+
+                            {/* Métricas: Venta · Unds. · Δ Uds. % */}
+                            <div className="grid grid-cols-3 gap-2">
+                              <div>
+                                <p className="text-[9px] font-bold uppercase tracking-wider mb-0.5" style={{ color: EXEC.textMuted }}>Venta</p>
+                                <p className="text-xs font-bold" style={{ color: EXEC.textPrimary }}>{formatCurrency(cat.totalSales)}</p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] font-bold uppercase tracking-wider mb-0.5" style={{ color: EXEC.textMuted }}>Unds.</p>
+                                <p className="text-xs font-bold" style={{ color: EXEC.textSecondary }}>{cat.units.toLocaleString('es-CO')}</p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] font-bold uppercase tracking-wider mb-0.5" style={{ color: EXEC.textMuted }}>Δ Uds. %</p>
+                                {cat.hasPrev && cat.delta !== null ? (
+                                  <span className={`flex items-center gap-0.5 text-xs font-bold ${cat.delta >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                    {cat.delta >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+                                    {cat.delta >= 0 ? '+' : ''}{cat.delta.toFixed(1)}%
+                                  </span>
+                                ) : (
+                                  <span className="text-xs" style={{ color: EXEC.textMuted }}>—</span>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })()}
 
             {/* Modal Comparativo */}
             <ComparativeModal
