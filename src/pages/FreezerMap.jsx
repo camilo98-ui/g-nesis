@@ -1988,7 +1988,7 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
       <StockSummaryModal
         open={showStock}
         onClose={() => setShowStock(false)}
-        allSlots={allFreezersSlotsQuery}
+        allSlots={slots}
         storeName={selectedStoreName} />
     </div>);
 
