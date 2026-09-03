@@ -37,6 +37,7 @@ import AggregatorsWidget from './AggregatorsWidget';
 import StoreNPSStatusCard from '@/components/nps/StoreNPSStatusCard';
 import StoreNPSAverageCard from '@/components/nps/StoreNPSAverageCard';
 import NPSUploadModal from '@/components/nps/NPSUploadModal';
+import TopDeclineProducts from './TopDeclineProducts';
 
 const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
@@ -1666,64 +1667,8 @@ export default function HomeWorkspace({
             </motion.div>
           }
 
-          {/* ── CLIMA + NPS ── */}
-          {!isGerente && <motion.div
-            id="climate-section"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            className="mb-4 lg:mb-7 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-
-            {/* Card 1 — Temperatura del día + impacto en ventas */}
-            {(() => {
-              const tempData = weatherLast7.map((d) => d.temperature_mean || d.temperature_max || 0);
-              const temp = latestWeather?.temperature_mean ?? latestWeather?.temperature_max;
-              const tempMax = latestWeather?.temperature_max;
-              const tempMin = latestWeather?.temperature_min;
-              const isHot = temp > 26;
-              const isCold = temp < 18;
-              const accentColor = isHot ? '#f97316' : isCold ? '#6366f1' : '#38bdf8';
-              const impactLabel = isHot ? '🔥 +15–25% ventas est.' : isCold ? '❄️ −10–15% ventas est.' : '✅ Condición ideal';
-              const impactColor = isHot ? '#f97316' : isCold ? '#6366f1' : '#10b981';
-              const avgTemp7 = tempData.length > 0 ? tempData.reduce((a, b) => a + b, 0) / tempData.length : 0;
-              const tempTrend = temp != null && avgTemp7 > 0 ? temp - avgTemp7 : 0;
-              return (
-                <div className="rounded-2xl p-4 hover-lift flex flex-col gap-0"
-                style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(32px)', border: '1px solid rgba(255,255,255,0.65)', boxShadow: '0 2px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
-                 <div className="flex items-center justify-between mb-0.5">
-                   <p className="label-premium">Temperatura · 7 días</p>
-                    <span className="text-[8px] sm:text-[9px] font-semibold" style={{ color: accentColor }}>{isHot ? '☀️ Calor' : isCold ? '❄️ Frío' : '🌤 Fresco'}</span>
-                  </div>
-                  <div className="flex items-baseline gap-1 mb-1">
-                    <p className="text-lg sm:text-[22px] font-black text-slate-800 leading-none">{temp != null ? `${Math.round(temp)}°` : '—'}</p>
-                    {tempMax != null && tempMin != null &&
-                    <p className="text-[10px] text-slate-400 font-medium">↑{Math.round(tempMax)}° ↓{Math.round(tempMin)}°</p>
-                    }
-                    {tempTrend !== 0 && <span className="text-[9px] font-bold ml-1" style={{ color: tempTrend > 0 ? '#f97316' : '#38bdf8' }}>{tempTrend > 0 ? '▲' : '▼'}{Math.abs(tempTrend).toFixed(1)}°</span>}
-                  </div>
-                  <div className="flex items-end gap-1 h-10 mt-1 mb-2">
-                    {(tempData.length > 0 ? tempData : [20, 22, 21, 24, 23, 25, 24]).map((v, i, arr) => {
-                      const pct = Math.max(v / Math.max(...arr, 1) * 100, 8);
-                      const isLast = i === arr.length - 1;
-                      return (
-                        <div key={i} className="flex-1 rounded-t-md"
-                        style={{ height: `${pct}%`, background: isLast ? accentColor : `${accentColor}28` }} />);
-                    })}
-                  </div>
-                  <div className="rounded-lg px-2 py-1.5 flex items-center gap-1.5" style={{ background: `${impactColor}10`, border: `1px solid ${impactColor}20` }}>
-                    <span className="text-[8.5px] font-bold flex-1" style={{ color: impactColor }}>{impactLabel}</span>
-                  </div>
-                  <p className="text-[8px] text-slate-300 mt-1.5 font-medium">vs prom. semana: {avgTemp7 > 0 ? `${Math.round(avgTemp7)}°C` : '—'}</p>
-                </div>);
-            })()}
-
-            {/* Card 2 — NPS de la tienda (status con carita) */}
-            <StoreNPSStatusCard storeCode={selectedStore} district={selectedDistrict} />
-
-            {/* Card 3 — NPS promedio del distrito */}
-            <StoreNPSAverageCard district={selectedDistrict} storeCode={selectedStore} />
-
-                </motion.div>}
+          {/* ── TOP PRODUCTOS EN DECLIVE ── */}
+          {!isGerente && <TopDeclineProducts salesReports={salesReports} />}
 
           {/* ── WEEKLY COMPARISON + AGREGADORES row ── */}
 
