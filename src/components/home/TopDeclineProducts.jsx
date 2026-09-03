@@ -59,7 +59,7 @@ export default function TopDeclineProducts({ salesReports = [] }) {
     });
 
     declines.sort((a, b) => a.growth - b.growth);
-    return { topDecline: declines.slice(0, 3) };
+    return { topDecline: declines.slice(0, 5) };
   }, [salesReports]);
 
   const CARD_STYLE = {
@@ -72,7 +72,7 @@ export default function TopDeclineProducts({ salesReports = [] }) {
 
   if (!topDecline.length) return null;
 
-  const colors = ['#C21875', '#E91E63', '#D81B60'];
+  const colors = ['#C21875', '#E91E63', '#D81B60', '#EC4899', '#F06292'];
 
   const severityLabel = (g) => {
     const a = Math.abs(g);
@@ -97,7 +97,7 @@ export default function TopDeclineProducts({ salesReports = [] }) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-        className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+        className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
         {topDecline.map((item, i) => {
           const color = colors[i] || '#94a3b8';
           const severity = severityLabel(item.growth);
