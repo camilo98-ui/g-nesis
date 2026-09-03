@@ -6,11 +6,12 @@
  * Keeps the original aesthetic: flowing text, avatar, typewriter — no boxes.
  * ────────────────────────────────────────────────────────────────────────────
  */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { buildChartData, computeInsight, SECTION_DEFS } from '@/components/dashboard/computeInsight';
+import { useAIInsights } from '@/hooks/useAIInsights';
 
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
 
@@ -133,7 +134,7 @@ const MOOD = {
 };
 
 // ─── Full panel showing all 4 sections as flowing text ────────────────────────
-function NovaSectionPanel({ onClose, sections }) {
+function NovaSectionPanel({ onClose, sections, isAI }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -194,7 +195,7 @@ function NovaSectionPanel({ onClose, sections }) {
               Insights en vivo
             </p>
             <p style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
-              Nova · 4 secciones de análisis operativo
+              Nova · {isAI ? 'análisis estratégico con IA' : '4 secciones de análisis operativo'}
             </p>
           </div>
           <button
@@ -254,6 +255,28 @@ function NovaSectionPanel({ onClose, sections }) {
                   }}>
                     {s.insight.behavior}
                   </p>
+                  {s.insight.strategicAction && (
+                    <div style={{
+                      marginTop: 6, padding: '8px 10px',
+                      borderRadius: 10,
+                      background: 'rgba(194,24,117,0.06)',
+                      border: '1px solid rgba(194,24,117,0.12)',
+                    }}>
+                      <p style={{
+                        fontSize: 9, fontWeight: 700,
+                        letterSpacing: '0.08em', textTransform: 'uppercase',
+                        color: '#C21875', marginBottom: 3,
+                      }}>
+                        🎯 Acción estratégica
+                      </p>
+                      <p style={{
+                        fontSize: 11.5, fontWeight: 500, color: '#1e293b',
+                        lineHeight: 1.4,
+                      }}>
+                        {s.insight.strategicAction}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );
@@ -267,7 +290,7 @@ function NovaSectionPanel({ onClose, sections }) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <p style={{ fontSize: 9.5, color: '#d1d5db', fontWeight: 450 }}>
-            Nova · análisis generado con datos reales de la operación
+            Nova · {isAI ? 'análisis estratégico generado con IA' : 'análisis con datos reales'}
           </p>
           <motion.div
             animate={{ opacity: [0.4, 0.9, 0.4] }}
@@ -291,14 +314,8 @@ function NovaSectionPanel({ onClose, sections }) {
 export default function NovaInsightStrip({ dailySales = [] }) {
   const [showPanel, setShowPanel] = useState(false);
 
-  // Build the 4 section insights from dailySales
-  const sections = useMemo(() => {
-    const chartData = buildChartData(dailySales);
-    return SECTION_DEFS.map((def) => ({
-      ...def,
-      insight: computeInsight(chartData, def.metric),
-    }));
-  }, [dailySales]);
+  // AI-powered deep insights (instant local fallback while AI loads)
+  const { sections, isAI } = useAIInsights(dailySales);
 
   // Rotate through the 4 sections
   const [idx, setIdx] = useState(0);
@@ -388,6 +405,17 @@ export default function NovaInsightStrip({ dailySales = [] }) {
               }}>
                 {current.emoji} {current.title} · Nova {mood.label}
               </span>
+              {isAI && (
+                <span style={{
+                  fontSize: 7.5, fontWeight: 700,
+                  padding: '1.5px 5px', borderRadius: 4,
+                  background: 'linear-gradient(135deg, #C21875, #8A0F54)',
+                  color: '#fff', letterSpacing: '0.05em',
+                  lineHeight: 1, display: 'inline-flex', alignItems: 'center',
+                }}>
+                  IA
+                </span>
+              )}
             </motion.div>
           </AnimatePresence>
 
@@ -425,6 +453,20 @@ export default function NovaInsightStrip({ dailySales = [] }) {
                     }}
                   >
                     {current.insight.behavior}
+                  </motion.p>
+                )}
+                {line1Done && current.insight.strategicAction && (
+                  <motion.p
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.38, delay: 0.16 }}
+                    style={{
+                      fontSize: 10.5, fontWeight: 600,
+                      color: '#C21875', lineHeight: 1.4,
+                      marginTop: 3, letterSpacing: '-0.008em',
+                    }}
+                  >
+                    🎯 {current.insight.strategicAction}
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -493,6 +535,7 @@ export default function NovaInsightStrip({ dailySales = [] }) {
             key="nova-panel"
             onClose={() => setShowPanel(false)}
             sections={sections}
+            isAI={isAI}
           />
         </AnimatePresence>,
         document.body
