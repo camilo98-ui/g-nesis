@@ -7,7 +7,7 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
-export default function StockSummaryModal({ open, onClose, allSlots = [], storeName }) {
+export default function StockSummaryModal({ open, onClose, allSlots = [], storeName, totalCapacity = 0 }) {
   const { flavorCounts, totalFilled } = useMemo(() => {
     if (!allSlots || allSlots.length === 0) return { flavorCounts: [], totalFilled: 0 };
 
@@ -37,8 +37,7 @@ export default function StockSummaryModal({ open, onClose, allSlots = [], storeN
     return { flavorCounts: sorted, totalFilled: filled };
   }, [allSlots]);
 
-  const totalSlots = allSlots.length;
-  const totalEmpty = allSlots.filter((s) => s.is_empty || !s.flavor_name).length;
+  const totalEmpty = totalCapacity > 0 ? Math.max(0, totalCapacity - totalFilled) : allSlots.filter((s) => s.is_empty || !s.flavor_name).length;
 
   if (!open) return null;
 
@@ -85,7 +84,7 @@ export default function StockSummaryModal({ open, onClose, allSlots = [], storeN
                 📦 Stock de Sabores
               </h2>
               <p style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500, marginTop: 2 }}>
-                {storeName ? `${storeName} · ` : ''}{flavorCounts.length} sabores distintos · {totalFilled} posiciones ocupadas
+                {storeName ? `${storeName} · ` : ''}{flavorCounts.length} sabores distintos · {totalFilled}/{totalCapacity || totalFilled} posiciones
               </p>
             </div>
             <button

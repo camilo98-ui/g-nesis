@@ -1989,7 +1989,8 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
         open={showStock}
         onClose={() => setShowStock(false)}
         allSlots={slots}
-        storeName={selectedStoreName} />
+        storeName={selectedStoreName}
+        totalCapacity={numRows * numCols * 2} />
     </div>);
 
 }
