@@ -72,7 +72,7 @@ export default function TopDeclineProducts({ salesReports = [] }) {
 
   if (!topDecline.length) return null;
 
-  const colors = ['#dc2626', '#ea580c', '#d97706'];
+  const colors = ['#C21875', '#E91E63', '#D81B60'];
 
   const severityLabel = (g) => {
     const a = Math.abs(g);
