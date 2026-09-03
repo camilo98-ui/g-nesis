@@ -7,11 +7,11 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 327 78% 25%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 327 78% 25%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+    --popover-foreground: 327 78% 25%;
     --primary: 327 78% 43%;
     --primary-foreground: 0 0% 98%;
     --secondary: 327 15% 95%;
@@ -53,11 +53,11 @@
   }
   .dark {
     --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
+    --foreground: 327 30% 92%;
     --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 327 30% 92%;
     --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover-foreground: 327 30% 92%;
     --primary: 327 78% 53%;
     --primary-foreground: 0 0% 98%;
     --secondary: 327 15% 18%;
@@ -302,7 +302,7 @@
 .text-premium {
   font-weight: 800;
   letter-spacing: -0.025em;
-  background: linear-gradient(135deg, #1a1a2e 0%, #2d1b35 100%);
+  background: linear-gradient(135deg, #C21875 0%, #8A0F54 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
