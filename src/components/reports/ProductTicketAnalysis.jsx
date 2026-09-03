@@ -131,8 +131,10 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
       const growthMap = {};
       Object.keys(currSalesMap).forEach((key) => {
         const prev = prevSalesMap[key];
-        if (prev && prev > 0) {
-          growthMap[key] = ((currSalesMap[key] - prev) / prev) * 100;
+        const curr = currSalesMap[key];
+        // Solo mostrar crecimiento si hubo ventas significativas en el período anterior
+        if (prev && prev > 0 && curr > 0 && prev >= curr * 0.1) {
+          growthMap[key] = ((curr - prev) / prev) * 100;
         }
       });
       return { reports: current, growthMap };
