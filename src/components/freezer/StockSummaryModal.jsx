@@ -165,7 +165,7 @@ export default function StockSummaryModal({ open, onClose, allSlots = [], storeN
                         {flavor.count}
                       </span>
                       <span style={{ fontSize: 9, color: '#C21875', fontWeight: 600 }}>
-                        {flavor.count === 1 ? 'pos' : 'pos'}
+                        CR
                       </span>
                     </div>
                   </motion.div>
