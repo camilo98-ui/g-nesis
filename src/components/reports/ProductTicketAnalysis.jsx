@@ -101,18 +101,46 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
   const storeCode = useMemo(() => extractStoreCode(storeId), [storeId]);
 
   // Sales reports (participation data)
-  const { data: salesReports = [], isLoading: loadingReports } = useQuery({
+  const { data: reportData, isLoading: loadingReports } = useQuery({
     queryKey: ['salesReport', storeCode],
     queryFn: async () => {
-      if (!storeCode) return [];
+      if (!storeCode) return { reports: [], growthMap: {} };
       const all = await base44.entities.SalesReport.filter({ store_code: storeCode });
-      if (!all.length) return [];
+      if (!all.length) return { reports: [], growthMap: {} };
       const latestUploadedAt = all.reduce((max, r) => r.uploaded_at > max ? r.uploaded_at : max, '');
       const latestReportId = all.find((r) => r.uploaded_at === latestUploadedAt)?.report_id;
-      return latestReportId ? all.filter((r) => r.report_id === latestReportId) : all;
+      const current = latestReportId ? all.filter((r) => r.report_id === latestReportId) : all;
+
+      // Crecimiento vs mes anterior por producto
+      const currentMonth = current[0]?.month;
+      const currentYear = current[0]?.year;
+      let prevMonth = currentMonth - 1;
+      let prevYear = currentYear;
+      if (prevMonth === 0) { prevMonth = 12; prevYear = currentYear - 1; }
+      const prevRecords = all.filter((r) => r.month === prevMonth && r.year === prevYear);
+      const prevSalesMap = {};
+      prevRecords.forEach((r) => {
+        const key = r.product || r.section || '';
+        if (key) prevSalesMap[key] = (prevSalesMap[key] || 0) + (r.total_sales || 0);
+      });
+      const currSalesMap = {};
+      current.forEach((r) => {
+        const key = r.product || r.section || '';
+        if (key) currSalesMap[key] = (currSalesMap[key] || 0) + (r.total_sales || 0);
+      });
+      const growthMap = {};
+      Object.keys(currSalesMap).forEach((key) => {
+        const prev = prevSalesMap[key];
+        if (prev && prev > 0) {
+          growthMap[key] = ((currSalesMap[key] - prev) / prev) * 100;
+        }
+      });
+      return { reports: current, growthMap };
     },
     enabled: !!storeCode
   });
+  const salesReports = reportData?.reports || [];
+  const productGrowth = reportData?.growthMap || {};
 
   // Daily sales for ticket avg
   const { data: dailySales = [], isLoading: loadingDaily } = useQuery({
@@ -391,12 +419,23 @@ export default function ProductTicketAnalysis({ storeId, budget = [] }) {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
                             <span style={{ fontSize: 9, color: P.textSub, fontVariantNumeric: 'tabular-nums' }}>{fmt(p.totalSales)}</span>
                             <span style={{
-                                  fontSize: 9, fontWeight: 700, color: i < 2 ? P.magenta : P.textSub,
-                                  background: i < 2 ? 'rgba(216,27,96,0.08)' : 'rgba(143,122,134,0.07)',
-                                  padding: '0px 5px', borderRadius: 5, fontVariantNumeric: 'tabular-nums',
-                                  border: `1px solid ${i < 2 ? 'rgba(216,27,96,0.14)' : 'rgba(143,122,134,0.1)'}`
-                                }}>{p.participation.toFixed(1)}%</span>
-                          </div>
+                                 fontSize: 9, fontWeight: 700, color: i < 2 ? P.magenta : P.textSub,
+                                 background: i < 2 ? 'rgba(216,27,96,0.08)' : 'rgba(143,122,134,0.07)',
+                                 padding: '0px 5px', borderRadius: 5, fontVariantNumeric: 'tabular-nums',
+                                 border: `1px solid ${i < 2 ? 'rgba(216,27,96,0.14)' : 'rgba(143,122,134,0.1)'}`
+                               }}>{p.participation.toFixed(1)}%</span>
+                            {productGrowth[p.product] != null && (
+                             <span style={{
+                               fontSize: 8, fontWeight: 700,
+                               color: productGrowth[p.product] >= 0 ? '#10b981' : '#ef4444',
+                               background: productGrowth[p.product] >= 0 ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
+                               padding: '0px 4px', borderRadius: 4, fontVariantNumeric: 'tabular-nums',
+                               display: 'inline-flex', alignItems: 'center', gap: 1
+                             }}>
+                               {productGrowth[p.product] >= 0 ? '↑' : '↓'}{Math.abs(productGrowth[p.product]).toFixed(1)}%
+                             </span>
+                            )}
+                            </div>
                         </div>
                         <div style={{ height: 4, borderRadius: 9999, background: 'rgba(255,143,184,0.15)', overflow: 'hidden' }}>
                           <div style={{
