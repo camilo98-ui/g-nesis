@@ -7,7 +7,7 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
-export default function StockSummaryModal({ open, onClose, allSlots = [], storeName, totalCapacity = 0 }) {
+export default function StockSummaryModal({ open, onClose, allSlots = [], storeName }) {
   const { flavorCounts, totalFilled } = useMemo(() => {
     if (!allSlots || allSlots.length === 0) return { flavorCounts: [], totalFilled: 0 };
 
@@ -37,8 +37,8 @@ export default function StockSummaryModal({ open, onClose, allSlots = [], storeN
     return { flavorCounts: sorted, totalFilled: filled };
   }, [allSlots]);
 
-  const totalSlots = totalCapacity || allSlots.length;
-  const totalEmpty = Math.max(0, totalSlots - totalFilled);
+  const totalSlots = allSlots.length;
+  const totalEmpty = allSlots.filter((s) => s.is_empty || !s.flavor_name).length;
 
   if (!open) return null;
 
