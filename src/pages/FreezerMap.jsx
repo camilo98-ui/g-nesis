@@ -1989,7 +1989,11 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
         open={showStock}
         onClose={() => setShowStock(false)}
         allSlots={allFreezersSlotsQuery}
-        storeName={selectedStoreName} />
+        storeName={selectedStoreName}
+        totalCapacity={availableFreezers.reduce((acc, num) => {
+          const dims = freezerDimensions[num] || { rows: 7, cols: 5 };
+          return acc + (dims.rows * dims.cols * 2);
+        }, 0)} />
     </div>);
 
 }

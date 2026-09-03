@@ -7,9 +7,9 @@ import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
-export default function StockSummaryModal({ open, onClose, allSlots = [], storeName }) {
-  const { flavorCounts, totalFilled, totalSlots } = useMemo(() => {
-    if (!allSlots || allSlots.length === 0) return { flavorCounts: [], totalFilled: 0, totalSlots: 0 };
+export default function StockSummaryModal({ open, onClose, allSlots = [], storeName, totalCapacity = 0 }) {
+  const { flavorCounts, totalFilled } = useMemo(() => {
+    if (!allSlots || allSlots.length === 0) return { flavorCounts: [], totalFilled: 0 };
 
     const counts = {};
     let filled = 0;
@@ -34,8 +34,11 @@ export default function StockSummaryModal({ open, onClose, allSlots = [], storeN
     });
 
     const sorted = Object.values(counts).sort((a, b) => b.count - a.count);
-    return { flavorCounts: sorted, totalFilled: filled, totalSlots: allSlots.length };
+    return { flavorCounts: sorted, totalFilled: filled };
   }, [allSlots]);
+
+  const totalSlots = totalCapacity || allSlots.length;
+  const totalEmpty = Math.max(0, totalSlots - totalFilled);
 
   if (!open) return null;
 
@@ -113,7 +116,7 @@ export default function StockSummaryModal({ open, onClose, allSlots = [], storeN
             </div>
             <div style={{ flex: 1, padding: '10px 12px', borderRadius: 12, background: 'rgba(148,163,184,0.08)' }}>
               <p style={{ fontSize: 9, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Vacías</p>
-              <p style={{ fontSize: 20, fontWeight: 800, color: '#1e293b', marginTop: 2 }}>{totalSlots - totalFilled}</p>
+              <p style={{ fontSize: 20, fontWeight: 800, color: '#1e293b', marginTop: 2 }}>{totalEmpty}</p>
             </div>
           </div>
 
