@@ -12,6 +12,7 @@ import FreezerHistoryPanel from '@/components/freezer/FreezerHistoryPanel';
 import FreezerDimensionsEditor from '@/components/freezer/FreezerDimensionsEditor';
 import SmartOrderPrediction from '@/components/freezer/SmartOrderPrediction';
 import InventoryStatusOverview from '@/components/freezer/InventoryStatusOverview';
+import StockSummaryModal from '@/components/freezer/StockSummaryModal';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -251,6 +252,7 @@ export default function FreezerMap() {
   const [auditData, setAuditData] = useState(null);
   const [auditSlots, setAuditSlots] = useState([]);
   const [showInventory, setShowInventory] = useState(false);
+  const [showStock, setShowStock] = useState(false);
   const [undoStack, setUndoStack] = useState([]);
   const [savingSlot, setSavingSlot] = useState(null);
   const [draggedSlot, setDraggedSlot] = useState(null);
@@ -1414,6 +1416,11 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
                 <History className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Historial</span>
               </Button>
+
+              <Button size="sm" variant="outline" onClick={() => setShowStock(true)} title="Stock de Sabores" className="text-pink-600 hover:bg-pink-50">
+                <ClipboardList className="w-4 h-4 mr-1" />
+                <span className="hidden sm:inline">Stock</span>
+              </Button>
               
               <Button
               size="sm"
@@ -1976,6 +1983,13 @@ Devuelve un JSON con array de 42 objetos con: row (1-7), position (1-6), flavor_
       <AnimatePresence>
         {showHistory && <FreezerHistoryPanel history={history.map((h) => ({ ...h, filledSlots: h.filled_slots, changes: h.changes_count }))} onClose={() => setShowHistory(false)} onRestore={restoreFromHistory} isLoading={false} />}
       </AnimatePresence>
+
+      {/* Stock Summary Modal */}
+      <StockSummaryModal
+        open={showStock}
+        onClose={() => setShowStock(false)}
+        allSlots={allFreezersSlotsQuery}
+        storeName={selectedStoreName} />
     </div>);
 
 }
