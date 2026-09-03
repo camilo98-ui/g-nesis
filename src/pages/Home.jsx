@@ -712,7 +712,7 @@ export default function Home() {
                     y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                   }} />
                 
-                <h1 className="text-lg font-black text-rose-300 mb-0.5">Iniciar sesión</h1>
+                <h1 className="text-lg font-black mb-0.5" style={{ color: '#C21875' }}>Iniciar sesión</h1>
                 <p className="text-slate-600 text-[11px] font-medium">Selecciona tu rol y comienza</p>
               </div>
 
