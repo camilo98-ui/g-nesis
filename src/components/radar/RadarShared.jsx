@@ -56,27 +56,24 @@ export const CustomTooltip = ({ active, payload, label, formatter }) => {
   );
 };
 
-export function PremiumSection({ title, sub, tip, children, delay = 0, className = '', icon: Icon, right }) {
+export function PremiumSection({ title, sub, tip, children, delay = 0, className = '', icon: Icon }) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.5, ease: [0.23,1,0.32,1] }}
       className={`glass-card card-accent-top relative overflow-hidden ${className}`}>
       <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-40 pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.05) 0%, transparent 70%)' }}/>
       <div className="p-5 pb-0 relative">
-        <div className="flex items-center justify-between gap-2 mb-0.5">
-          <div className="flex items-center gap-2.5">
-            {Icon && (
-              <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.1), rgba(194,24,117,0.03))', border: '1px solid rgba(194,24,117,0.1)' }}>
-                <Icon className="w-3.5 h-3.5" style={{ color: '#C21875' }}/>
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <p className="text-[10px] font-black tracking-[0.16em] uppercase text-slate-500">{title}</p>
-              {tip && <InfoTooltip text={tip}/>}
+        <div className="flex items-center gap-2.5 mb-0.5">
+          {Icon && (
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.1), rgba(194,24,117,0.03))', border: '1px solid rgba(194,24,117,0.1)' }}>
+              <Icon className="w-3.5 h-3.5" style={{ color: '#C21875' }}/>
             </div>
+          )}
+          <div className="flex items-center gap-2">
+            <p className="text-[10px] font-black tracking-[0.16em] uppercase text-slate-500">{title}</p>
+            {tip && <InfoTooltip text={tip}/>}
           </div>
-          {right && <div className="flex-shrink-0">{right}</div>}
         </div>
         {sub && <p className="text-[11px] text-slate-400 ml-9">{sub}</p>}
       </div>
