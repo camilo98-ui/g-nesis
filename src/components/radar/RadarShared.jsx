@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Minus, TrendingUp, TrendingDown } from 'lucide-react';
 
-export const AUTO_COLORS = ['#e11d48','#C21875','#f43f5e','#fb7185','#ec4899','#f472b6','#db2777','#be185d','#fda4af','#f9a8d4'];
+export const AUTO_COLORS = ['#C21875','#3B82F6','#10B981','#F59E0B','#8B5CF6','#14B8A6','#EF4444','#EC4899','#6366F1','#0EA5E9'];
 export const SOFT_PINK = '#fff0f5';
 
 export function getInitial(name) { return name ? name.trim()[0].toUpperCase() : '?'; }

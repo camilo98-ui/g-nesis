@@ -1,5 +1,6 @@
-import { motion } from 'framer-motion';
-import { Activity, PieChart as PieIcon, TrendingUp, BarChart3 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Activity, PieChart as PieIcon, TrendingUp, BarChart3, ChevronDown, Check } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, LineChart, Line, ReferenceLine } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -7,23 +8,113 @@ import { PremiumSection, CustomTooltip } from './RadarShared';
 
 export function MonthlyEvolution({ brandStats, monthlyData }) {
   const Icon = Activity;
+  const [modeOpen, setModeOpen] = useState(false);
+  const [mode, setMode] = useState('mes');
+  const [brandsOpen, setBrandsOpen] = useState(false);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+
+  const tomasData = useMemo(() => {
+    const dates = {};
+    brandStats.forEach(b => b.txnSeries.forEach(r => {
+      if (!dates[r.date]) dates[r.date] = { month: format(parseISO(r.date), 'd MMM yy', { locale: es }) };
+      dates[r.date][b.brand] = (dates[r.date][b.brand] || 0) + r.txn;
+    }));
+    return Object.entries(dates).sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v);
+  }, [brandStats]);
+
+  const toggleBrand = (brand) =>
+    setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
+
+  const visibleBrands = selectedBrands.length ? brandStats.filter(b => selectedBrands.includes(b.brand)) : brandStats;
+  const chartData = mode === 'tomas' ? tomasData : monthlyData;
+  const enoughData = (mode === 'tomas' ? tomasData.length : monthlyData.length) > 1;
+  const modeLabel = mode === 'tomas' ? 'Por Tomas' : 'Por Mes';
+  const brandsLabel = selectedBrands.length
+    ? `${selectedBrands.length} ${selectedBrands.length === 1 ? 'marca' : 'marcas'}`
+    : 'Todos';
+  const subLabel = mode === 'tomas' ? `${tomasData.length} tomas registradas` : `${monthlyData.length} meses registrados`;
+
+  const dropdownStyle = {
+    background: 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)',
+    border: '1px solid rgba(194,24,117,0.12)', boxShadow: '0 12px 40px rgba(194,24,117,0.15)'
+  };
+
   return (
-    <PremiumSection title="Evolución Mensual de Transacciones" sub={`${monthlyData.length} meses registrados`}
-      tip="Evolución mes a mes de las transacciones por marca. Permite detectar marcas en aceleración o caída."
+    <PremiumSection title="Evolución Mensual de Transacciones" sub={subLabel}
+      tip="Evolución de las transacciones por marca, por mes o por cada toma. Selecciona las marcas que quieras comparar."
       delay={0.14} className="lg:col-span-3" icon={Icon}>
-      <div className="flex flex-wrap gap-3 mb-3">
-        {brandStats.map(b => (
-          <div key={b.brand} className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: `${b.color}08` }}>
-            <div className="w-2 h-2 rounded-full" style={{ background: b.color }}/>
-            <span className="text-[10px] font-semibold text-slate-500">{b.brand}</span>
-          </div>
-        ))}
+      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+        {/* Selector de modo: por mes / por tomas */}
+        <div className="relative">
+          <button onClick={() => { setModeOpen(o => !o); setBrandsOpen(false); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-600 hover:text-slate-800 transition-all glass-card">
+            {modeLabel}
+            <ChevronDown className="w-3.5 h-3.5 text-rose-400" style={{ transform: modeOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}/>
+          </button>
+          <AnimatePresence>
+            {modeOpen && (
+              <motion.div initial={{ opacity: 0, y: 6, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                transition={{ duration: 0.18 }} className="absolute top-full left-0 mt-2 z-50 w-40 rounded-2xl p-1.5" style={dropdownStyle}>
+                {['mes', 'tomas'].map(m => (
+                  <button key={m} onClick={() => { setMode(m); setModeOpen(false); }}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-rose-50/60 transition-all">
+                    {m === 'mes' ? 'Por Mes' : 'Por Tomas'}
+                    {mode === m && <Check className="w-3.5 h-3.5" style={{ color: '#C21875' }}/>}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Selector múltiple de marcas */}
+        <div className="relative">
+          <button onClick={() => { setBrandsOpen(o => !o); setModeOpen(false); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-600 hover:text-slate-800 transition-all glass-card">
+            {brandsLabel}
+            <ChevronDown className="w-3.5 h-3.5 text-rose-400" style={{ transform: brandsOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}/>
+          </button>
+          <AnimatePresence>
+            {brandsOpen && (
+              <motion.div initial={{ opacity: 0, y: 6, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                transition={{ duration: 0.18 }} className="absolute top-full right-0 mt-2 z-50 w-64 max-h-64 overflow-y-auto rounded-2xl p-1.5" style={dropdownStyle}>
+                <button onClick={() => { setSelectedBrands([]); }}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-rose-50/60 transition-all">
+                  Todas las marcas
+                  {!selectedBrands.length && <Check className="w-3.5 h-3.5" style={{ color: '#C21875' }}/>}
+                </button>
+                {brandStats.map(b => (
+                  <button key={b.brand} onClick={() => toggleBrand(b.brand)}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-semibold text-slate-600 hover:bg-rose-50/60 transition-all">
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: b.color }}/>
+                    <span className="flex-1 text-left truncate">{b.brand}</span>
+                    {selectedBrands.includes(b.brand) && <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#C21875' }}/>}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-      {monthlyData.length > 1 ? (
+
+      <div className="flex flex-wrap gap-3 mb-3">
+        {brandStats.map(b => {
+          const visible = !selectedBrands.length || selectedBrands.includes(b.brand);
+          return (
+            <button key={b.brand} onClick={() => toggleBrand(b.brand)}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all"
+              style={{ background: `${b.color}08`, opacity: visible ? 1 : 0.35 }}>
+              <div className="w-2 h-2 rounded-full" style={{ background: b.color }}/>
+              <span className="text-[10px] font-semibold text-slate-500">{b.brand}</span>
+            </button>
+          );
+        })}
+      </div>
+      {enoughData ? (
         <ResponsiveContainer width="100%" height={200}>
-          <AreaChart data={monthlyData} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
+          <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
             <defs>
-              {brandStats.map(b => (
+              {visibleBrands.map(b => (
                 <linearGradient key={b.brand} id={`ag_${b.brand.replace(/[^a-z0-9]/gi,'_')}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={b.color} stopOpacity={0.18}/>
                   <stop offset="100%" stopColor={b.color} stopOpacity={0}/>
@@ -34,7 +125,7 @@ export function MonthlyEvolution({ brandStats, monthlyData }) {
             <XAxis dataKey="month" tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 600 }} axisLine={false} tickLine={false}/>
             <YAxis tick={{ fill: '#cbd5e1', fontSize: 9 }} axisLine={false} tickLine={false} tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} width={28}/>
             <Tooltip content={<CustomTooltip/>}/>
-            {brandStats.map(b => (
+            {visibleBrands.map(b => (
               <Area key={b.brand} type="monotone" dataKey={b.brand} name={b.brand}
                 stroke={b.color} strokeWidth={2.5} fill={`url(#ag_${b.brand.replace(/[^a-z0-9]/gi,'_')})`}
                 dot={{ fill: b.color, r: 3, strokeWidth: 0 }} activeDot={{ r: 6, stroke: '#fff', strokeWidth: 2 }}/>
