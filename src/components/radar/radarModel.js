@@ -466,3 +466,62 @@ export function buildFallbackNarrative(m) {
 
   return { lectura: L.join(' '), recomendacion: R.join(' ') };
 }
+
+// ── Detección de tendencia (tomas o meses) ───────────────────
+// Clasifica la evolución de POPSY: growing / sustained / declining
+// y genera una narrativa determinista del cambio de tendencia.
+export function detectTrend(points, unit = 'tomas', threshold = 5) {
+  const clean = (points || []).filter((p) => p != null && p.value != null);
+  if (clean.length < 2) {
+    return {
+      status: 'insufficient', deltas: [], streak: 0, lastPct: null,
+      narrative: clean.length === 1
+        ? `Se necesita una segunda ${unit === 'tomas' ? 'toma' : 'medición mensual'} para interpretar la tendencia.`
+        : 'Aún no hay mediciones suficientes para interpretar la tendencia.',
+    };
+  }
+
+  const deltas = [];
+  for (let i = 1; i < clean.length; i++) {
+    const prev = clean[i - 1].value;
+    const cur = clean[i].value;
+    const pct = prev > 0 ? ((cur - prev) / prev) * 100 : null;
+    let dir = 'flat';
+    if (pct != null) {
+      if (pct > threshold) dir = 'up';
+      else if (pct < -threshold) dir = 'down';
+    }
+    deltas.push({ fromLabel: clean[i - 1].label, toLabel: clean[i].label, pct, dir });
+  }
+
+  const lastDelta = deltas[deltas.length - 1];
+  const lastDir = lastDelta.dir;
+  let streak = 0;
+  for (let i = deltas.length - 1; i >= 0; i--) { if (deltas[i].dir === lastDir) streak++; else break; }
+
+  const prevDir = deltas.length > 1 ? deltas[deltas.length - 2].dir : null;
+  const status = lastDir === 'up' ? 'growing' : lastDir === 'down' ? 'declining' : 'sustained';
+  const word = unit === 'tomas' ? 'tomas' : 'meses';
+  const lastTxt = lastDelta.pct != null ? ` (${fmtPct(lastDelta.pct)} en la última medición)` : '';
+  let narrative;
+
+  if (status === 'growing') {
+    narrative = streak >= 2
+      ? `POPSY viene creciendo durante ${streak + 1} ${word} consecutivas${lastTxt}.`
+      : prevDir === 'down'
+        ? `POPSY venía a la baja pero recuperó el ritmo en la última medición${lastDelta.pct != null ? ` (${fmtPct(lastDelta.pct)})` : ''}.`
+        : `POPSY cerró el periodo en ascenso${lastDelta.pct != null ? ` (${fmtPct(lastDelta.pct)} en la última medición)` : ''}.`;
+  } else if (status === 'declining') {
+    narrative = streak >= 2
+      ? `POPSY acumula ${streak + 1} ${word} consecutivas a la baja${lastTxt}.`
+      : prevDir === 'up'
+        ? `POPSY creció hasta ${clean[clean.length - 2].label}, pero cayó en la última medición${lastDelta.pct != null ? ` (${fmtPct(lastDelta.pct)})` : ''}.`
+        : `POPSY cayó en la última medición${lastDelta.pct != null ? ` (${fmtPct(lastDelta.pct)})` : ''}.`;
+  } else {
+    narrative = streak >= 2
+      ? `POPSY sostiene su ritmo: las últimas ${streak + 1} ${word} se mantienen dentro de ±${threshold}%.`
+      : `POPSY sostiene su ritmo, con variación dentro de ±${threshold}% en la última medición.`;
+  }
+
+  return { status, deltas, streak, lastPct: lastDelta.pct, narrative };
+}

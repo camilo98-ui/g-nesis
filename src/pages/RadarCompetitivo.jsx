@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
@@ -7,19 +7,14 @@ import { Link } from 'react-router-dom';
 import SidebarNav from '@/components/SidebarNav';
 import { NuevaTomaModal, HistorialModal } from '@/components/radar/RadarModals';
 import { AUTO_COLORS } from '@/components/radar/RadarShared';
-import RadarFilters from '@/components/radar/RadarFilters';
-import PositionHero from '@/components/radar/PositionHero';
-import TakesEvolution from '@/components/radar/TakesEvolution';
-import DuelsSection from '@/components/radar/DuelsSection';
+import CommandHeader from '@/components/radar/CommandHeader';
+import StoreStatusHero from '@/components/radar/StoreStatusHero';
+import TakesMainChart from '@/components/radar/TakesMainChart';
+import CompetitiveCompare from '@/components/radar/CompetitiveCompare';
 import ThreatRadar from '@/components/radar/ThreatRadar';
-import ShareSection from '@/components/radar/ShareSection';
-import StoreMatrix from '@/components/radar/StoreMatrix';
-import QuadrantMatrix from '@/components/radar/QuadrantMatrix';
-import ExecutivePanel from '@/components/radar/ExecutivePanel';
-import TakesDetailTable from '@/components/radar/TakesDetailTable';
-import {
-  buildReadings, buildFilterOptions, takesForFilters, computeDashboard,
-} from '@/components/radar/radarModel';
+import MonthlyEvolution from '@/components/radar/MonthlyEvolution';
+import AIInsight from '@/components/radar/AIInsight';
+import { buildReadings, buildFilterOptions, computeDashboard, detectTrend, POPSY_KEY } from '@/components/radar/radarModel';
 
 const Skeleton = ({ h = 180, className = '' }) => (
   <div className={`glass-card rounded-2xl overflow-hidden relative ${className}`}>
@@ -31,6 +26,7 @@ export default function RadarCompetitivo() {
   const [modalOpen, setModalOpen] = useState(false);
   const [historialOpen, setHistorialOpen] = useState(false);
   const [filtersOverride, setFiltersOverride] = useState(null);
+  const [view, setView] = useState('takes');
   const qc = useQueryClient();
 
   const session = (() => { try { return JSON.parse(localStorage.getItem('popsySession') || '{}'); } catch { return {}; } })();
@@ -53,33 +49,48 @@ export default function RadarCompetitivo() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['competitiveRecords'] }); setModalOpen(false); }
   });
 
-  // ── Modelo de análisis (lecturas normalizadas con transacciones por serial) ──
+  // ── Modelo de análisis (lecturas normalizadas, cálculos intactos) ──
   const readings = useMemo(() => buildReadings(allRecords), [allRecords]);
   const options = useMemo(() => buildFilterOptions(readings), [readings]);
 
   const defaultFilters = useMemo(() => {
-    const years = options.years;
-    const year = years[0] ?? new Date().getFullYear();
+    const year = options.years[0] ?? new Date().getFullYear();
     const months = [...new Set(readings.filter(r => r.year === year).map(r => r.month))].sort((a, b) => a - b);
-    const month = months.length ? months[months.length - 1] : 'ALL';
-    return { year, month, take: 'ALL', storeId: activeStore || 'ALL', city: 'ALL', brand: 'ALL' };
-  }, [options.years, readings, activeStore]);
+    return {
+      year,
+      month: months.length ? months[months.length - 1] : 'ALL',
+      take: 'ALL',
+      storeId: activeStore || options.stores[0] || 'ALL',
+      city: 'ALL',
+      brand: 'ALL',
+    };
+  }, [options, readings, activeStore]);
 
   const filters = filtersOverride || defaultFilters;
+  const setFilters = (patch) => setFiltersOverride({ ...filters, ...patch });
 
-  const setFilters = (patch) => {
-    const base = { ...filters, ...patch };
-    if (patch.year !== undefined && patch.year !== filters.year) {
-      const months = [...new Set(readings.filter(r => r.year === base.year).map(r => r.month))].sort((a, b) => a - b);
-      base.month = months.length ? months[months.length - 1] : 'ALL';
-      base.take = 'ALL';
+  // Meses con datos según año y tienda seleccionados
+  const monthsWithData = useMemo(() => [...new Set(readings
+    .filter(r => r.year === filters.year && (filters.storeId === 'ALL' || r.storeId === filters.storeId))
+    .map(r => r.month))].sort((a, b) => a - b), [readings, filters.year, filters.storeId]);
+
+  // Coherencia automática: mes válido y vista aplicable
+  useEffect(() => {
+    if (filters.month !== 'ALL' && monthsWithData.length > 0 && !monthsWithData.includes(filters.month)) {
+      setFiltersOverride(f => ({ ...(f || defaultFilters), month: monthsWithData[monthsWithData.length - 1] }));
     }
-    if (patch.month !== undefined || patch.storeId !== undefined || patch.city !== undefined) base.take = 'ALL';
-    setFiltersOverride(base);
-  };
+  }, [monthsWithData]);
 
-  const takes = useMemo(() => takesForFilters(readings, filters), [readings, filters]);
+  useEffect(() => {
+    if (filters.month === 'ALL' && view === 'takes') setView('monthly');
+  }, [filters.month, view]);
+
   const model = useMemo(() => computeDashboard(readings, filters), [readings, filters]);
+
+  // Tendencia de POPSY según la vista activa (tomas o mensual)
+  const trendPoints = useMemo(() => (view === 'takes' ? model.takesSeries : model.monthlySeries)
+    .map(e => ({ label: e.label, value: e[POPSY_KEY] })), [model, view]);
+  const trend = useMemo(() => detectTrend(trendPoints, view === 'takes' ? 'tomas' : 'meses'), [trendPoints, view]);
 
   const brands = useMemo(() => [...new Set(records.map(r => r.competition).filter(Boolean))], [records]);
   const brandMap = useMemo(() => {
@@ -93,7 +104,7 @@ export default function RadarCompetitivo() {
       <SidebarNav />
       <div className="flex-1 relative z-10 p-4 sm:p-6 lg:p-8 overflow-y-auto h-screen">
 
-        {/* ── HEADER ── */}
+        {/* ── ENCABEZADO ── */}
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
           className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
@@ -133,14 +144,13 @@ export default function RadarCompetitivo() {
 
         {isLoading ? (
           <div className="space-y-4">
-            <Skeleton h={72} />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <Skeleton h={210} />
-              <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
-                {[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} h={118} />)}
-              </div>
+            <Skeleton h={120} />
+            <Skeleton h={170} />
+            <Skeleton h={380} />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              <Skeleton h={280} />
+              <Skeleton h={280} />
             </div>
-            <Skeleton h={300} />
             <Skeleton h={240} />
           </div>
         ) : readings.length === 0 ? (
@@ -159,40 +169,32 @@ export default function RadarCompetitivo() {
           </motion.div>
         ) : (
           <>
-            {/* ── FILTROS GLOBALES ── */}
-            <RadarFilters filters={filters} setFilters={setFilters} options={options} takes={takes}
-              hasData={readings.length > 0} onReset={() => setFiltersOverride(null)} />
+            {/* 01 · ENCABEZADO DE COMANDO: tienda, mes, vista, competidores */}
+            <CommandHeader filters={filters} setFilters={setFilters} options={options} months={monthsWithData}
+              view={view} setView={setView}
+              onReset={() => { setFiltersOverride(null); setView('takes'); }} />
 
-            {/* 01-02 · POSICIÓN COMPETITIVA + KPIs */}
-            <PositionHero model={model} />
+            {/* 02 · ESTADO DE LA TIENDA */}
+            <StoreStatusHero model={model} trend={trend} view={view} />
 
-            {/* 03 · EVOLUCIÓN POR TOMAS / MENSUAL */}
+            {/* 03 · GRÁFICA PRINCIPAL — EVOLUCIÓN POR TOMA / MENSUAL */}
             <div className="mb-4">
-              <TakesEvolution model={model} />
+              <TakesMainChart model={model} trend={trend} view={view} />
             </div>
 
-            {/* 04 · DUELOS + 05 · RADAR DE AMENAZAS */}
+            {/* 04 · COMPARATIVO COMPETITIVO + 05 · RADAR DE AMENAZAS */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
-              <DuelsSection model={model} />
+              <CompetitiveCompare model={model} />
               <ThreatRadar model={model} />
             </div>
 
-            {/* 06 · PARTICIPACIÓN + 07 · MAPA POR TIENDA */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
-              <ShareSection model={model} />
-              <StoreMatrix model={model} />
-            </div>
-
-            {/* 08 · MATRIZ DE COMPETITIVIDAD */}
+            {/* 06 · EVOLUCIÓN MENSUAL */}
             <div className="mb-4">
-              <QuadrantMatrix model={model} />
+              <MonthlyEvolution model={model} mode={view === 'takes' ? 'chart' : 'detail'} />
             </div>
 
-            {/* 09-10 · LECTURA EJECUTIVA + RECOMENDACIÓN */}
-            <ExecutivePanel model={model} />
-
-            {/* 11 · DETALLE POR TOMAS */}
-            <TakesDetailTable model={model} />
+            {/* 07 · INSIGHT IA */}
+            <AIInsight model={model} trend={trend} />
           </>
         )}
 
