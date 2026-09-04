@@ -2,18 +2,21 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Zap, Activity, ChevronRight, ArrowLeft, History, Calendar, ChevronDown, Check } from 'lucide-react';
-import { format, parseISO, getISOWeek } from 'date-fns';
+import { Plus, Activity, History, Calendar, ChevronDown, Check } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import SidebarNav from '@/components/SidebarNav';
 import { AUTO_COLORS } from '@/components/radar/RadarShared';
 import { NuevaTomaModal, HistorialModal } from '@/components/radar/RadarModals';
-import RadarKPIs from '@/components/radar/RadarKPIs';
 import { MonthlyEvolution, MarketShareDonut } from '@/components/radar/RadarTrendCharts';
-import { LastReadingChart, VelocityRanking, ParticipationRanking } from '@/components/radar/RadarAnalysisCharts';
-import CompetitorCards from '@/components/radar/CompetitorCards';
-import { CompetitiveTable, RadarInsights } from '@/components/radar/RadarTableInsights';
+import { CompetitiveTable } from '@/components/radar/RadarTableInsights';
+import BrandSummaryCards from '@/components/radar/BrandSummaryCards';
+import GrowthVelocityCards from '@/components/radar/GrowthVelocityCards';
+import ParticipationColumnChart from '@/components/radar/ParticipationColumnChart';
+import RadarFooter from '@/components/radar/RadarFooter';
+
+const POPSY_LOGO = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69283c2afdca20b432943911/6a749247d_Capturadepantalla2025-11-251251441.png";
 
 export default function RadarCompetitivo() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -112,22 +115,6 @@ export default function RadarCompetitivo() {
     return Object.values(months).sort((a, b) => a.key.localeCompare(b.key)).slice(-8);
   }, [scopedStats]);
 
-  const velocityData = scopedStats.filter(b => b.growthSeries.length > 0).map(b => ({
-    brand: b.brand, color: b.color,
-    avg: b.growthSeries.length > 0 ? b.growthSeries.reduce((s, g) => s + g.pct, 0) / b.growthSeries.length : 0,
-    last: b.growth
-  }));
-
-  const topBrand = scopedStats[0];
-  const fastestGrowing = [...scopedStats].sort((a, b) => b.growth - a.growth)[0];
-  const insights = [
-    fastestGrowing?.growth > 5 && `${fastestGrowing.brand} incrementó su actividad ${fastestGrowing.growth.toFixed(0)}% en la última toma.`,
-    topBrand && `${topBrand.brand} lidera con ${topBrand.total.toLocaleString('es-CO')} transacciones estimadas.`,
-    scopedStats.some(b => b.growth < -10) && `${scopedStats.find(b => b.growth < -10)?.brand} presenta desaceleración comercial.`,
-    scopedStats.length >= 3 && 'Alta presión competitiva en el entorno.'
-  ].filter(Boolean);
-
-  const lastReadingData = scopedStats.filter(b => !b.onlyOneReading).map(b => ({ brand: b.brand, value: b.lastTxn, color: b.color }));
   const pieData = scopedStats.filter(b => b.total > 0).map(b => ({ name: b.brand, value: b.total, color: b.color }));
 
   return (
@@ -137,30 +124,31 @@ export default function RadarCompetitivo() {
 
         {/* ── PREMIUM HEADER ── */}
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.23,1,0.32,1] }}
-          className="flex items-center justify-between mb-6">
+          className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <Link to="/" className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all">
-              <ArrowLeft className="w-4 h-4"/>
+            <Link to="/"
+              className="w-11 h-11 rounded-2xl flex items-center justify-center transition-transform hover:scale-105"
+              style={{ background: '#ffffff', boxShadow: '0 4px 16px rgba(194,24,117,0.12)', border: '1px solid rgba(194,24,117,0.08)' }}>
+              <img src={POPSY_LOGO} alt="Popsy" className="w-9 h-9 object-contain"/>
             </Link>
             <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center"
-                  style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.12), rgba(194,24,117,0.04))', border: '1px solid rgba(194,24,117,0.1)' }}>
-                  <Activity className="w-3.5 h-3.5" style={{ color: '#C21875' }}/>
-                </div>
-                <p className="text-[9px] font-black tracking-[0.24em] uppercase text-slate-500">POPSY · INTEL COMERCIAL</p>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
-                Radar <span className="text-premium" style={{ background: 'linear-gradient(135deg, #C21875, #e11d48)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Competitivo</span>
-              </h1>
+              <p className="text-lg font-black text-slate-800 tracking-tight leading-none">Popsy</p>
+              <p className="text-[8px] font-bold tracking-[0.22em] uppercase text-rose-400 mt-1">El placer de hacer tu día</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="text-center flex-1 min-w-0 order-last xl:order-none">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Transacciones por Toma</h1>
+            <p className="text-[11px] text-slate-400 mt-0.5">Evolución, participación y crecimiento del mercado competitivo</p>
+            <p className="hidden xl:block italic text-[11px] text-rose-300 mt-1" style={{ fontFamily: 'Georgia, serif' }}>✦ Más momentos felices</p>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="relative">
               <button onClick={() => setMonthOpen(o => !o)}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all glass-card">
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all glass-card">
                 <Calendar className="w-3.5 h-3.5"/>
-                {selectedMonthKey ? availableMonths.find(m => m.key === selectedMonthKey)?.label : 'Todos los meses'}
+                <span className="capitalize">{selectedMonthKey ? availableMonths.find(m => m.key === selectedMonthKey)?.label : 'Todos los meses'}</span>
                 <ChevronDown className="w-3 h-3 text-rose-400" style={{ transform: monthOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}/>
               </button>
               <AnimatePresence>
@@ -175,7 +163,7 @@ export default function RadarCompetitivo() {
                     </button>
                     {availableMonths.map(m => (
                       <button key={m.key} onClick={() => { setSelectedMonthKey(m.key); setMonthOpen(false); }}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-rose-50/60 transition-all capitalize">
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-rose-50/60 capitalize">
                         {m.label}
                         {selectedMonthKey === m.key && <Check className="w-3.5 h-3.5" style={{ color: '#C21875' }}/>}
                       </button>
@@ -188,11 +176,6 @@ export default function RadarCompetitivo() {
               className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all glass-card">
               <History className="w-3.5 h-3.5"/> Historial
             </button>
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
-              style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.12)' }}>
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 live-dot"/>
-              <span className="text-[9px] font-bold text-emerald-600 tracking-wider">ACTIVO</span>
-            </div>
             <button onClick={() => setModalOpen(true)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 btn-glow"
               style={{ background: 'linear-gradient(135deg, #C21875, #e11d48)', boxShadow: '0 6px 20px rgba(194,24,117,0.3)' }}>
@@ -200,24 +183,6 @@ export default function RadarCompetitivo() {
             </button>
           </div>
         </motion.div>
-
-        {/* ── NOVA BANNER ── */}
-        {insights.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04, duration: 0.5 }}
-          className="mb-5 glass-card relative overflow-hidden rounded-2xl p-4 flex items-center gap-3">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-30 pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(194,24,117,0.06) 0%, transparent 70%)' }}/>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, rgba(194,24,117,0.12), rgba(194,24,117,0.04))', border: '1px solid rgba(194,24,117,0.1)' }}>
-              <Zap className="w-4 h-4" style={{ color: '#C21875' }}/>
-            </div>
-            <div className="flex-1 min-w-0 relative">
-              <p className="text-[8px] font-black tracking-widest uppercase mb-0.5 text-slate-400">NOVA AI · ANÁLISIS AUTOMÁTICO</p>
-              <p className="text-sm font-medium text-slate-600 truncate">{insights[0]}</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-rose-300 flex-shrink-0 relative"/>
-          </motion.div>
-        )}
 
         {records.length === 0 ? (
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}
@@ -235,32 +200,30 @@ export default function RadarCompetitivo() {
           </motion.div>
         ) : (
           <>
-            {/* ── KPI SUMMARY ── */}
-            <RadarKPIs brandStats={scopedStats} brands={scopedStats.map(b => b.brand)} records={scopedRecords} topBrand={topBrand} fastestGrowing={fastestGrowing} />
+            {/* ── ROW 1: BRAND SUMMARY CARDS ── */}
+            <BrandSummaryCards brandStats={scopedStats}/>
 
-            {/* ── ROW 2: MONTHLY EVOLUTION (FULL WIDTH) ── */}
-            <MonthlyEvolution brandStats={scopedStats} monthlyData={monthlyData} />
-
-            {/* ── ROW 3: COMPETITOR TABLE ── */}
-            <CompetitorCards brandStats={scopedStats} totalAll={totalAll} />
-
-            {/* ── ROW 4: MARKET SHARE + LAST READING ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-              <MarketShareDonut pieData={pieData} totalAll={totalAll} />
-              <LastReadingChart lastReadingData={lastReadingData} />
+            {/* ── ROW 2: EVOLUTION CHART + MARKET SHARE DONUT ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+              <div className="lg:col-span-2 min-w-0">
+                <MonthlyEvolution brandStats={scopedStats} monthlyData={monthlyData}/>
+              </div>
+              <MarketShareDonut pieData={pieData} totalAll={totalAll}/>
             </div>
 
-            {/* ── ROW 5: VELOCITY + PARTICIPATION ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-              <VelocityRanking velocityData={velocityData} />
-              <ParticipationRanking brandStats={scopedStats} totalAll={totalAll} />
+            {/* ── ROW 3: GROWTH VELOCITY CARDS + PARTICIPATION CHART ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+              <div className="lg:col-span-2 min-w-0">
+                <GrowthVelocityCards brandStats={scopedStats}/>
+              </div>
+              <ParticipationColumnChart brandStats={scopedStats} totalAll={totalAll}/>
             </div>
 
-            {/* ── ROW 6: COMPETITIVE TABLE ── */}
-            <CompetitiveTable brandStats={scopedStats} totalAll={totalAll} />
+            {/* ── ROW 4: COMPETITIVE TABLE ── */}
+            <CompetitiveTable brandStats={scopedStats} totalAll={totalAll}/>
 
-            {/* ── ROW 7: AI INSIGHTS ── */}
-            <RadarInsights insights={insights} />
+            {/* ── FOOTER ── */}
+            <RadarFooter/>
           </>
         )}
 
