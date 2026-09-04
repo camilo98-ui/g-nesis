@@ -238,17 +238,17 @@ export default function RadarCompetitivo() {
             {/* ── KPI SUMMARY ── */}
             <RadarKPIs brandStats={scopedStats} brands={scopedStats.map(b => b.brand)} records={scopedRecords} topBrand={topBrand} fastestGrowing={fastestGrowing} />
 
-            {/* ── ROW 2: MONTHLY EVOLUTION + MARKET SHARE ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
-              <MonthlyEvolution brandStats={scopedStats} monthlyData={monthlyData} />
-              <MarketShareDonut pieData={pieData} totalAll={totalAll} />
-            </div>
+            {/* ── ROW 2: MONTHLY EVOLUTION (FULL WIDTH) ── */}
+            <MonthlyEvolution brandStats={scopedStats} monthlyData={monthlyData} />
 
-            {/* ── ROW 3: COMPETITOR SNAPSHOT CARDS ── */}
+            {/* ── ROW 3: COMPETITOR TABLE ── */}
             <CompetitorCards brandStats={scopedStats} totalAll={totalAll} />
 
-            {/* ── ROW 4: LAST READING ── */}
-            <LastReadingChart lastReadingData={lastReadingData} />
+            {/* ── ROW 4: MARKET SHARE + LAST READING ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              <MarketShareDonut pieData={pieData} totalAll={totalAll} />
+              <LastReadingChart lastReadingData={lastReadingData} />
+            </div>
 
             {/* ── ROW 5: VELOCITY + PARTICIPATION ── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">

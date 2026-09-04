@@ -42,7 +42,7 @@ export function MonthlyEvolution({ brandStats, monthlyData }) {
   return (
     <PremiumSection title="Evolución Mensual de Transacciones" sub={subLabel}
       tip="Evolución de las transacciones por marca, por mes o por cada toma. Selecciona las marcas que quieras comparar."
-      delay={0.14} className="lg:col-span-3" icon={Icon}>
+      delay={0.14} className="mb-4" icon={Icon}>
       <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
         {/* Selector de modo: por mes / por tomas */}
         <div className="relative">
@@ -144,7 +144,7 @@ export function MonthlyEvolution({ brandStats, monthlyData }) {
 
 export function MarketShareDonut({ pieData, totalAll }) {
   return (
-    <PremiumSection title="Cuota de Mercado" tip="Participación % de cada marca sobre el total de transacciones estimadas." delay={0.18} className="lg:col-span-2" icon={PieIcon}>
+    <PremiumSection title="Cuota de Mercado" tip="Participación % de cada marca sobre el total de transacciones estimadas." delay={0.18} icon={PieIcon}>
       {pieData.length >= 2 ? (
         <>
           <div className="relative">
