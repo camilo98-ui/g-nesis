@@ -27,7 +27,7 @@ export function MonthlyEvolution({ brandStats, monthlyData }) {
 
   const visibleBrands = selectedBrands.length ? brandStats.filter(b => selectedBrands.includes(b.brand)) : brandStats;
   const chartData = mode === 'tomas' ? tomasData : monthlyData;
-  const enoughData = (mode === 'tomas' ? tomasData.length : monthlyData.length) > 1;
+  const enoughData = (mode === 'tomas' ? tomasData.length : monthlyData.length) >= 1;
   const modeLabel = mode === 'tomas' ? 'Por Tomas' : 'Por Mes';
   const brandsLabel = selectedBrands.length
     ? `${selectedBrands.length} ${selectedBrands.length === 1 ? 'marca' : 'marcas'}`

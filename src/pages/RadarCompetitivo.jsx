@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Zap, Activity, ChevronRight, ArrowLeft, History } from 'lucide-react';
+import { Plus, Zap, Activity, ChevronRight, ArrowLeft, History, Calendar, ChevronDown, Check } from 'lucide-react';
 import { format, parseISO, getISOWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
@@ -18,6 +18,8 @@ import { CompetitiveTable, RadarInsights } from '@/components/radar/RadarTableIn
 export default function RadarCompetitivo() {
   const [modalOpen, setModalOpen] = useState(false);
   const [historialOpen, setHistorialOpen] = useState(false);
+  const [monthOpen, setMonthOpen] = useState(false);
+  const [selectedMonthKey, setSelectedMonthKey] = useState(null);
   const qc = useQueryClient();
 
   const session = (() => { try { return JSON.parse(localStorage.getItem('popsySession') || '{}'); } catch { return {}; } })();
@@ -31,6 +33,18 @@ export default function RadarCompetitivo() {
   const records = activeStore
     ? allRecords.filter(r => !r.store_id || r.store_id === activeStore)
     : allRecords;
+
+  const availableMonths = useMemo(() => {
+    const set = new Set(records.map(r => (r.date || '').substring(0, 7)).filter(Boolean));
+    return [...set].sort().reverse().map(key => ({
+      key,
+      label: format(parseISO(`${key}-01`), 'MMMM yyyy', { locale: es })
+    }));
+  }, [allRecords, activeStore]);
+
+  const scopedRecords = useMemo(
+    () => selectedMonthKey ? records.filter(r => (r.date || '').substring(0, 7) === selectedMonthKey) : records,
+    [allRecords, activeStore, selectedMonthKey]);
 
   const remove = useMutation({ mutationFn: id => base44.entities.CompetitiveRecord.delete(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
   const update = useMutation({ mutationFn: ({ id, data }) => base44.entities.CompetitiveRecord.update(id, data), onSuccess: () => qc.invalidateQueries({ queryKey: ['competitiveRecords'] }) });
@@ -66,11 +80,28 @@ export default function RadarCompetitivo() {
     }).sort((a, b) => b.total - a.total);
   }, [records, brands, brandMap]);
 
-  const totalAll = Math.max(brandStats.reduce((s, b) => s + b.total, 0), 1);
+  const scopedStats = useMemo(() => {
+    if (!selectedMonthKey) return brandStats;
+    return brandStats.map(b => {
+      const txnSeries = b.txnSeries.filter(r => (r.date || '').substring(0, 7) === selectedMonthKey);
+      if (!txnSeries.length) return null;
+      const total = txnSeries.reduce((s, r) => s + r.txn, 0);
+      const lastTxn = txnSeries[txnSeries.length - 1]?.txn || 0;
+      const prevTxn = txnSeries[txnSeries.length - 2]?.txn || 0;
+      const growth = prevTxn > 0 ? ((lastTxn - prevTxn) / prevTxn) * 100 : 0;
+      const growthSeries = txnSeries.slice(1).map((r, i) => {
+        const prev = txnSeries[i].txn;
+        return { date: r.date, pct: prev > 0 ? ((r.txn - prev) / prev) * 100 : 0 };
+      });
+      return { ...b, txnSeries, total, lastTxn, growth, growthSeries, count: txnSeries.length };
+    }).filter(Boolean).sort((a, b) => b.total - a.total);
+  }, [brandStats, selectedMonthKey]);
+
+  const totalAll = Math.max(scopedStats.reduce((s, b) => s + b.total, 0), 1);
 
   const monthlyData = useMemo(() => {
     const months = {};
-    brandStats.forEach(b => {
+    scopedStats.forEach(b => {
       b.txnSeries.forEach(r => {
         const key = r.date.substring(0, 7);
         const label = format(parseISO(r.date), 'MMM yy', { locale: es });
@@ -79,25 +110,25 @@ export default function RadarCompetitivo() {
       });
     });
     return Object.values(months).sort((a, b) => a.key.localeCompare(b.key)).slice(-8);
-  }, [brandStats]);
+  }, [scopedStats]);
 
-  const velocityData = brandStats.filter(b => b.growthSeries.length > 0).map(b => ({
+  const velocityData = scopedStats.filter(b => b.growthSeries.length > 0).map(b => ({
     brand: b.brand, color: b.color,
     avg: b.growthSeries.length > 0 ? b.growthSeries.reduce((s, g) => s + g.pct, 0) / b.growthSeries.length : 0,
     last: b.growth
   }));
 
-  const topBrand = brandStats[0];
-  const fastestGrowing = [...brandStats].sort((a, b) => b.growth - a.growth)[0];
+  const topBrand = scopedStats[0];
+  const fastestGrowing = [...scopedStats].sort((a, b) => b.growth - a.growth)[0];
   const insights = [
     fastestGrowing?.growth > 5 && `${fastestGrowing.brand} incrementó su actividad ${fastestGrowing.growth.toFixed(0)}% en la última toma.`,
     topBrand && `${topBrand.brand} lidera con ${topBrand.total.toLocaleString('es-CO')} transacciones estimadas.`,
-    brandStats.some(b => b.growth < -10) && `${brandStats.find(b => b.growth < -10)?.brand} presenta desaceleración comercial.`,
-    brandStats.length >= 3 && 'Alta presión competitiva en el entorno.'
+    scopedStats.some(b => b.growth < -10) && `${scopedStats.find(b => b.growth < -10)?.brand} presenta desaceleración comercial.`,
+    scopedStats.length >= 3 && 'Alta presión competitiva en el entorno.'
   ].filter(Boolean);
 
-  const lastReadingData = brandStats.filter(b => !b.onlyOneReading).map(b => ({ brand: b.brand, value: b.lastTxn, color: b.color }));
-  const pieData = brandStats.filter(b => b.total > 0).map(b => ({ name: b.brand, value: b.total, color: b.color }));
+  const lastReadingData = scopedStats.filter(b => !b.onlyOneReading).map(b => ({ brand: b.brand, value: b.lastTxn, color: b.color }));
+  const pieData = scopedStats.filter(b => b.total > 0).map(b => ({ name: b.brand, value: b.total, color: b.color }));
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'transparent' }}>
@@ -125,6 +156,34 @@ export default function RadarCompetitivo() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <div className="relative">
+              <button onClick={() => setMonthOpen(o => !o)}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all glass-card">
+                <Calendar className="w-3.5 h-3.5"/>
+                {selectedMonthKey ? availableMonths.find(m => m.key === selectedMonthKey)?.label : 'Todos los meses'}
+                <ChevronDown className="w-3 h-3 text-rose-400" style={{ transform: monthOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}/>
+              </button>
+              <AnimatePresence>
+                {monthOpen && (
+                  <motion.div initial={{ opacity: 0, y: 6, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                    transition={{ duration: 0.18 }} className="absolute top-full right-0 mt-2 z-50 w-48 max-h-64 overflow-y-auto rounded-2xl p-1.5"
+                    style={{ background: 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)', border: '1px solid rgba(194,24,117,0.12)', boxShadow: '0 12px 40px rgba(194,24,117,0.15)' }}>
+                    <button onClick={() => { setSelectedMonthKey(null); setMonthOpen(false); }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-rose-50/60 transition-all">
+                      Todos los meses
+                      {!selectedMonthKey && <Check className="w-3.5 h-3.5" style={{ color: '#C21875' }}/>}
+                    </button>
+                    {availableMonths.map(m => (
+                      <button key={m.key} onClick={() => { setSelectedMonthKey(m.key); setMonthOpen(false); }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold text-slate-600 hover:bg-rose-50/60 transition-all capitalize">
+                        {m.label}
+                        {selectedMonthKey === m.key && <Check className="w-3.5 h-3.5" style={{ color: '#C21875' }}/>}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             <button onClick={() => setHistorialOpen(true)}
               className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 transition-all glass-card">
               <History className="w-3.5 h-3.5"/> Historial
@@ -177,16 +236,16 @@ export default function RadarCompetitivo() {
         ) : (
           <>
             {/* ── KPI SUMMARY ── */}
-            <RadarKPIs brandStats={brandStats} brands={brands} records={records} topBrand={topBrand} fastestGrowing={fastestGrowing} />
+            <RadarKPIs brandStats={scopedStats} brands={scopedStats.map(b => b.brand)} records={scopedRecords} topBrand={topBrand} fastestGrowing={fastestGrowing} />
 
             {/* ── ROW 2: MONTHLY EVOLUTION + MARKET SHARE ── */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
-              <MonthlyEvolution brandStats={brandStats} monthlyData={monthlyData} />
+              <MonthlyEvolution brandStats={scopedStats} monthlyData={monthlyData} />
               <MarketShareDonut pieData={pieData} totalAll={totalAll} />
             </div>
 
             {/* ── ROW 3: COMPETITOR SNAPSHOT CARDS ── */}
-            <CompetitorCards brandStats={brandStats} totalAll={totalAll} />
+            <CompetitorCards brandStats={scopedStats} totalAll={totalAll} />
 
             {/* ── ROW 4: LAST READING ── */}
             <LastReadingChart lastReadingData={lastReadingData} />
@@ -194,11 +253,11 @@ export default function RadarCompetitivo() {
             {/* ── ROW 5: VELOCITY + PARTICIPATION ── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
               <VelocityRanking velocityData={velocityData} />
-              <ParticipationRanking brandStats={brandStats} totalAll={totalAll} />
+              <ParticipationRanking brandStats={scopedStats} totalAll={totalAll} />
             </div>
 
             {/* ── ROW 6: COMPETITIVE TABLE ── */}
-            <CompetitiveTable brandStats={brandStats} totalAll={totalAll} />
+            <CompetitiveTable brandStats={scopedStats} totalAll={totalAll} />
 
             {/* ── ROW 7: AI INSIGHTS ── */}
             <RadarInsights insights={insights} />
