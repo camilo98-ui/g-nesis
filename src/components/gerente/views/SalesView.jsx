@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, TrendingUp, Receipt, DollarSign, CreditCard } from 'lucide-react';
-import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList, ComposedChart, Line, AreaChart, Area } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList, AreaChart, Area } from 'recharts';
 import SectionCard from '../SectionCard';
 import { fmtM, fmtInt, fmtCOP, TARGETS } from '../gerenteUtils';
 
@@ -58,9 +58,8 @@ export default function SalesView({ storeData, districtTotals, dailyTrend, mode 
 
   const chartData = useMemo(() => storeData.map(s => ({
     name: s.shortName,
-    value: s[activeMetric.dataKey] || 0,
+    value: metric === 'ventas' ? s.monthSales : (s[activeMetric.dataKey] || 0),
     budget: metric === 'ventas' && s.dailyBudgetAcc > 0 ? s.dailyBudgetAcc : s.monthlyBudget || 0,
-    projection: s.projection || 0,
     compliance: s.compliance,
     color: s.color,
   })), [storeData, activeMetric, metric]);
@@ -149,24 +148,21 @@ export default function SalesView({ storeData, districtTotals, dailyTrend, mode 
               color={activeMetric.color}
             >
               <ResponsiveContainer width="100%" height={340}>
-                <ComposedChart data={chartData} margin={{ top: 24, right: 12, left: 0, bottom: 0 }} barCategoryGap="24%">
+                <BarChart data={chartData} margin={{ top: 24, right: 12, left: 0, bottom: 0 }} barCategoryGap="24%">
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.04)" vertical={false} />
                   <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} angle={-15} textAnchor="end" height={50} />
                   <YAxis tickFormatter={activeMetric.fmt} tick={{ fontSize: 9, fill: '#94a3b8' }} axisLine={false} tickLine={false} width={52} />
                   <Tooltip content={<ChartTooltip fmt={activeMetric.fmt} />} cursor={{ fill: 'rgba(194,24,117,0.04)' }} />
                   {showPPT && (
-                    <Bar dataKey="budget" radius={[6, 6, 0, 0]} maxBarSize={24} name="PPT" barSize={24} fill="rgba(194,24,117,0.3)">
+                    <Bar dataKey="budget" radius={[6, 6, 0, 0]} maxBarSize={24} name="PPT Acum. Diario" barSize={24} fill="rgba(194,24,117,0.3)">
                       <LabelList dataKey="compliance" position="top" formatter={(v) => v != null ? `${v.toFixed(0)}%` : ''} style={{ fontSize: 9, fontWeight: 800, fill: '#94a3b8' }} />
                     </Bar>
                   )}
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={showPPT ? 24 : 56} name={activeMetric.label} barSize={showPPT ? 24 : 56} fill="#C21875">
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={showPPT ? 24 : 56} name={metric === 'ventas' ? 'Venta Acumulada' : activeMetric.label} barSize={showPPT ? 24 : 56} fill="#C21875">
                     {!showPPT && chartData.map((e, i) => <Cell key={i} fill={e.color} />)}
                     <LabelList dataKey="value" position="top" formatter={fullFmt} style={{ fontSize: 8, fontWeight: 700, fill: '#475569' }} />
                   </Bar>
-                  {metric === 'ventas' && (
-                    <Line dataKey="projection" name="Proyección" stroke="#10b981" strokeWidth={2} dot={{ r: 3, fill: '#10b981', stroke: '#fff', strokeWidth: 1.5 }} activeDot={{ r: 5 }} />
-                  )}
-                </ComposedChart>
+                </BarChart>
               </ResponsiveContainer>
             </SectionCard>
           )}
