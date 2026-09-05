@@ -47,6 +47,7 @@ export function useGerenteData(district, startDate, endDate) {
   const q6 = useQuery({ queryKey: ['gerente-hourly-tx', dc.currentMonth, dc.currentYear], queryFn: () => base44.entities.StoreTransactions.filter({ month: dc.currentMonth, year: dc.currentYear }), staleTime: 10 * 60 * 1000 });
   const q7 = useQuery({ queryKey: ['gerente-aggregators-all'], queryFn: () => base44.entities.AggregatorsData.list('-created_date', 2000), staleTime: 10 * 60 * 1000 });
   const q8 = useQuery({ queryKey: ['gerente-sales-reports', dc.currentMonth, dc.currentYear], queryFn: () => base44.entities.SalesReport.filter({ month: dc.currentMonth, year: dc.currentYear }), staleTime: 10 * 60 * 1000 });
+  const q9 = useQuery({ queryKey: ['gerente-daily-budgets'], queryFn: () => base44.entities.DailyBudget.list('-date', 5000), staleTime: 10 * 60 * 1000 });
 
   const allDailySales = q1.data || [];
   const allBudgets = q2.data || [];
@@ -56,14 +57,15 @@ export function useGerenteData(district, startDate, endDate) {
   const allHourlyTx = q6.data || [];
   const allAggregators = q7.data || [];
   const allSalesReports = q8.data || [];
+  const allDailyBudgets = q9.data || [];
 
   const isLoading = q1.isLoading || q4.isLoading;
 
   const refresh = useCallback(() => {
     q1.refetch(); q2.refetch(); q3.refetch(); q4.refetch();
-    q5.refetch(); q6.refetch(); q7.refetch(); q8.refetch();
+    q5.refetch(); q6.refetch(); q7.refetch(); q8.refetch(); q9.refetch();
     setLastUpdate(new Date());
-  }, [q1, q2, q3, q4, q5, q6, q7, q8]);
+  }, [q1, q2, q3, q4, q5, q6, q7, q8, q9]);
 
   /* ── Filter stores by district ── */
   const stores = useMemo(() => {
@@ -113,6 +115,16 @@ export function useGerenteData(district, startDate, endDate) {
     return map;
   }, [allDailySales]);
 
+  /* ── Group DailyBudget by store code ── */
+  const dailyBudgetsByCode = useMemo(() => {
+    const map = {};
+    allDailyBudgets.forEach(b => {
+      const k = (b.store_id || '').trim();
+      (map[k] = map[k] || []).push(b);
+    });
+    return map;
+  }, [allDailyBudgets]);
+
   /* ── Compute per-store data ── */
   const storeData = useMemo(() => {
     const rangeInterval = { start: startDate, end: endDate };
@@ -141,6 +153,10 @@ export function useGerenteData(district, startDate, endDate) {
       const monthSales = monthArr.reduce((s, d) => s + (d.total_sales || 0), 0);
 
       const monthlyBudget = lookups.budgetByCode[code]?.sales_budget || 0;
+      const accBudgetArr = (dailyBudgetsByCode[code] || []).filter(b => {
+        try { return isWithinInterval(parseISO(b.date), monthInterval); } catch { return false; }
+      });
+      const dailyBudgetAcc = accBudgetArr.reduce((s, b) => s + (b.budget_amount || 0), 0);
       const pyg = lookups.pygByCode[code] || null;
       const prevPyg = lookups.prevPygByCode[code] || null;
       const nps = lookups.currentNpsByCode[code] ?? null;
@@ -148,7 +164,8 @@ export function useGerenteData(district, startDate, endDate) {
 
       const avgDailyMonth = dc.daysElapsed > 0 ? monthSales / dc.daysElapsed : 0;
       const projection = monthSales + avgDailyMonth * (dc.daysInMonth - dc.daysElapsed);
-      const compliance = monthlyBudget > 0 ? (monthSales / monthlyBudget) * 100 : null;
+      const complianceBudget = dailyBudgetAcc > 0 ? dailyBudgetAcc : monthlyBudget;
+      const compliance = complianceBudget > 0 ? (monthSales / complianceBudget) * 100 : null;
       const projCompliance = monthlyBudget > 0 ? (projection / monthlyBudget) * 100 : null;
       const avgTicket = rangeTx > 0 ? rangeSales / rangeTx : 0;
       const prevAvgTicket = prevRangeTx > 0 ? prevRangeSales / prevRangeTx : 0;
@@ -172,7 +189,7 @@ export function useGerenteData(district, startDate, endDate) {
 
       return {
         code, name, shortName, color,
-        rangeSales, rangeTx, prevRangeSales, prevRangeTx, monthSales, monthlyBudget,
+        rangeSales, rangeTx, prevRangeSales, prevRangeTx, monthSales, monthlyBudget, dailyBudgetAcc, complianceBudget,
         projection, compliance, projCompliance, avgTicket,
         ebitda: pyg?.margen_ebitda != null ? pyg.margen_ebitda * 100 : null,
         pyg, nps, hasData, hasBudget, hasPYG, hasNPS,
@@ -195,18 +212,19 @@ export function useGerenteData(district, startDate, endDate) {
       const score = d.hasData ? calcPerformanceScore(d, districtAvg) : 0;
       return { ...d, performanceScore: score, score };
     });
-  }, [stores, salesByCode, lookups, startDate, endDate, daysInRange, dc.monthStart, dc.now, dc.daysElapsed, dc.daysInMonth]);
+  }, [stores, salesByCode, dailyBudgetsByCode, lookups, startDate, endDate, daysInRange, dc.monthStart, dc.now, dc.daysElapsed, dc.daysInMonth]);
 
   /* ── District totals ── */
   const districtTotals = useMemo(() => {
     const totalRangeSales = storeData.reduce((s, d) => s + d.rangeSales, 0);
     const totalMonthSales = storeData.reduce((s, d) => s + d.monthSales, 0);
     const totalBudget = storeData.reduce((s, d) => s + d.monthlyBudget, 0);
+    const totalAccumBudget = storeData.reduce((s, d) => s + (d.complianceBudget || 0), 0);
     const totalProjection = storeData.reduce((s, d) => s + d.projection, 0);
     const totalRangeTx = storeData.reduce((s, d) => s + d.rangeTx, 0);
     const prevTotalRangeSales = storeData.reduce((s, d) => s + d.prevRangeSales, 0);
     const prevTotalRangeTx = storeData.reduce((s, d) => s + d.prevRangeTx, 0);
-    const compliance = totalBudget > 0 ? (totalMonthSales / totalBudget) * 100 : null;
+    const compliance = totalAccumBudget > 0 ? (totalMonthSales / totalAccumBudget) * 100 : totalBudget > 0 ? (totalMonthSales / totalBudget) * 100 : null;
     const projCompliance = totalBudget > 0 ? (totalProjection / totalBudget) * 100 : null;
 
     let ebitdaNum = 0, ebitdaDen = 0;
@@ -221,7 +239,7 @@ export function useGerenteData(district, startDate, endDate) {
     const hasData = storeData.some(d => d.hasData);
 
     return {
-      totalRangeSales, totalMonthSales, totalBudget, totalProjection, totalRangeTx,
+      totalRangeSales, totalMonthSales, totalBudget, totalAccumBudget, totalProjection, totalRangeTx,
       prevTotalRangeSales, prevTotalRangeTx, compliance, projCompliance, ebitda, avgTicket, avgNPS, hasData,
       storesCount: storeData.length,
     };
