@@ -29,7 +29,7 @@ import ProductTicketAnalysis from '@/components/reports/ProductTicketAnalysis';
 import WeeklyComparison from './WeeklyComparison';
 import TakeawayCard from './TakeawayCard';
 import DailyTrendChart from './DailyTrendChart';
-import NovaInsightStrip from './NovaInsightStrip';
+import ExecutiveSummaryStrip from './ExecutiveSummaryStrip';
 import GerenteDashboard from './GerenteDashboard';
 import DistrictParticipationView from './DistrictParticipationView';
 import AggregatorsModal from '@/components/reports/AggregatorsModal';
@@ -1092,7 +1092,7 @@ export default function HomeWorkspace({
               }} />
 
               <div className="relative z-10 flex items-center px-6 py-5 gap-4">
-                <NovaInsightStrip dailySales={filteredSales} budget={budgetData} latestWeather={latestWeather} />
+                <ExecutiveSummaryStrip dailySales={filteredSales} budget={budgetData} weather={latestWeather} />
               </div>
             </motion.div>
 
