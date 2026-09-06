@@ -2,22 +2,26 @@
  * ExecutiveSummaryStrip
  * ────────────────────────────────────────────────────────────────────────────
  * Resumen ejecutivo narrado para la tarjeta hero del Home.
- * Genera un párrafo tipo consultor con datos reales: venta hoy vs PPT,
- * brecha acumulada del mes, proyección de cierre y ritmo diario requerido.
+ * Auto-obtiene sus propios datos (DailySales + Budget activo) para la tienda
+ * seleccionada, independiente del filtro de fechas del dashboard, y construye
+ * un párrafo tipo consultor: venta hoy vs PPT, brecha acumulada, proyección
+ * de cierre y ritmo diario requerido.
  * ────────────────────────────────────────────────────────────────────────────
  */
 import React, { useMemo, useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
+import { base44 } from '@/api/base44Client';
+import { calculateBudgetData } from '@/lib/budgetCalculations';
 import { Sparkles, TrendingUp, TrendingDown, Target } from 'lucide-react';
 
 const MASCOT_IMG = "https://media.base44.com/images/public/69283c2afdca20b432943911/6c55eb1bb_generated_image.png";
 
 const fmtCOP = (n) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(n || 0));
-
 const fmtPct = (n) => `${(n || 0).toFixed(0)}%`;
 
-export default function ExecutiveSummaryStrip({ dailySales = [], budget = null, weather = null }) {
+export default function ExecutiveSummaryStrip({ storeCode, district }) {
   const [imgUrl, setImgUrl] = useState(null);
 
   // ── Nova avatar (fondo blanco removido) ──
@@ -48,22 +52,62 @@ export default function ExecutiveSummaryStrip({ dailySales = [], budget = null, 
     img.src = MASCOT_IMG;
   }, []);
 
+  // ── Datos propios: DailySales + Budget + DailyBudget de la tienda ──
+  const { data: dailySales = [] } = useQuery({
+    queryKey: ['exec-summary-daily', storeCode],
+    queryFn: () => base44.entities.DailySales.filter({ store_id: storeCode }, '-date', 60),
+    enabled: !!storeCode,
+    staleTime: 60 * 1000,
+  });
+
+  const { data: budgets = [] } = useQuery({
+    queryKey: ['exec-summary-budget', storeCode],
+    queryFn: () => base44.entities.Budget.filter({ store_id: storeCode }),
+    enabled: !!storeCode,
+    staleTime: 60 * 1000,
+  });
+
+  const { data: dailyBudgets = [] } = useQuery({
+    queryKey: ['exec-summary-dailybudget', storeCode],
+    queryFn: () => base44.entities.DailyBudget.filter({ store_id: storeCode }),
+    enabled: !!storeCode,
+    staleTime: 60 * 1000,
+  });
+
+  // Budget activo del mes actual
+  const activeBudget = useMemo(() => {
+    if (!budgets.length) return null;
+    const now = new Date();
+    const m = now.getMonth() + 1, y = now.getFullYear();
+    return budgets.find((b) => b.month === m && b.year === y && b.is_active)
+      || budgets.find((b) => b.month === m && b.year === y)
+      || budgets.find((b) => b.is_active)
+      || budgets[0];
+  }, [budgets]);
+
+  const budgetData = useMemo(() => {
+    if (!activeBudget?.sales_budget) return null;
+    return calculateBudgetData(activeBudget, dailySales, dailyBudgets, storeCode);
+  }, [activeBudget, dailySales, dailyBudgets, storeCode]);
+
   const summary = useMemo(() => {
     const sorted = [...dailySales].sort((a, b) => new Date(b.date) - new Date(a.date));
     const latest = sorted[0];
     const todaySales = latest?.total_sales || 0;
     const todayTxn = latest?.total_transactions || 0;
     const todayTicket = todayTxn > 0 ? todaySales / todayTxn : 0;
+    const lastDate = latest?.date;
 
-    const pptHoy = budget?.excelBudgetForToday || (budget?.monthlyBudget ? budget.monthlyBudget / 30 : 0);
-    const monthlyBudget = budget?.monthlyBudget || 0;
-    const salesAcum = budget?.salesUntilYesterday || 0;
-    const budgetAcum = budget?.budgetUntilYesterday || 0;
+    const pptHoy = budgetData?.excelBudgetForToday || (budgetData?.monthlyBudget ? budgetData.monthlyBudget / 30 : 0);
+    const monthlyBudget = budgetData?.monthlyBudget || 0;
+    const salesAcum = budgetData?.salesUntilYesterday || 0;
+    const budgetAcum = budgetData?.budgetUntilYesterday || 0;
     const gap = salesAcum - budgetAcum;
-    const projPct = budget?.monthProjectionCompliance ?? 0;
-    const projCierre = budget?.monthProjection || 0;
-    const dailyReq = budget?.dailyRequiredSales || 0;
-    const remainingDays = budget?.remainingDays ?? 0;
+    const projPct = budgetData?.monthProjectionCompliance ?? 0;
+    const projCierre = budgetData?.monthProjection || 0;
+    const remainingDays = budgetData?.remainingDays ?? 0;
+    const remainingBudget = budgetData?.remainingBudget ?? 0;
+    const dailyReq = remainingDays > 0 ? remainingBudget / remainingDays : 0;
 
     const dailyCompliance = pptHoy > 0 ? (todaySales / pptHoy * 100) : 0;
     const isPos = gap >= 0;
@@ -74,42 +118,39 @@ export default function ExecutiveSummaryStrip({ dailySales = [], budget = null, 
     let status = 'neutral';
 
     if (!dailySales.length) {
-      headline = 'Sin datos operativos cargados aún.';
-      body = 'Registra la venta del día para activar el resumen ejecutivo en vivo.';
+      headline = 'Sin datos de venta diaria registrados para esta tienda.';
+      body = 'Carga el reporte de ventas del día para activar el resumen ejecutivo en vivo.';
       status = 'critical';
+    } else if (!budgetData || monthlyBudget === 0) {
+      // Hay ventas pero no hay presupuesto definido
+      const prev = sorted[1];
+      const vsAyer = prev ? ((todaySales - (prev.total_sales || 0)) / (prev.total_sales || 1) * 100) : 0;
+      headline = `Hoy ${lastDate ? `(${lastDate}) ` : ''}vendiste ${fmtCOP(todaySales)} en ${todayTxn} transacciones${prev ? ` (${vsAyer >= 0 ? '+' : ''}${fmtPct(vsAyer)} vs ayer)` : ''}.`;
+      status = vsAyer >= 0 ? 'positive' : 'critical';
+      body = `Sin presupuesto mensual definido — carga el PPT para activar la proyección de cumplimiento y la brecha del mes. Ticket promedio: ${fmtCOP(todayTicket)}.`;
     } else {
-      // Titular: venta hoy vs PPT
-      const diffHoy = todaySales - pptHoy;
-      headline = `Hoy vas ${fmtCOP(todaySales)} vs meta diaria ${fmtCOP(pptHoy)} (${fmtPct(dailyCompliance)} de cumplimiento).`;
+      headline = `Hoy ${lastDate ? `(${lastDate}) ` : ''}vendiste ${fmtCOP(todaySales)} vs meta diaria ${fmtCOP(pptHoy)} (${fmtPct(dailyCompliance)} de cumplimiento).`;
       status = dailyCompliance >= 100 ? 'positive' : dailyCompliance >= 85 ? 'neutral' : 'critical';
 
-      // Brecha del mes
       const gapTxt = isPos
         ? `Vas ${fmtCOP(Math.abs(gap))} sobre la meta acumulada del mes`
         : `Brecha acumulada del mes: ${fmtCOP(Math.abs(gap))} bajo la meta`;
 
-      // Proyección
       const projTxt = monthlyBudget > 0
         ? `Proyectas cerrar el mes en ${fmtPct(projPct)} de cumplimiento (${fmtCOP(projCierre)} de ${fmtCOP(monthlyBudget)})`
         : 'Sin presupuesto mensual definido para proyectar';
 
-      // Ritmo requerido
       const reqTxt = (remainingDays > 0 && dailyReq > 0)
-        ? `· necesitas ${fmtCOP(dailyReq)}/día durante los ${remainingDays} días restantes para alcanzar la meta`
+        ? ` · necesitas ${fmtCOP(dailyReq)}/día durante los ${remainingDays} días restantes para alcanzar la meta`
         : '';
 
-      // Clima (opcional)
-      const weatherTxt = weather?.precipitation > 5
-        ? ' · la lluvia del día podría impactar el tráfico.'
-        : weather?.temperature_mean > 26
-          ? ' · clima caluroso favorable para helados.'
-          : '';
+      const ticketTxt = todayTicket > 0 ? ` · ticket promedio ${fmtCOP(todayTicket)} en ${todayTxn} transacciones` : '';
 
-      body = `${gapTxt}. ${projTxt}${reqTxt}${weatherTxt}`;
+      body = `${gapTxt}. ${projTxt}${reqTxt}${ticketTxt}`;
     }
 
-    return { headline, body, status, todayTicket, todayTxn };
-  }, [dailySales, budget, weather]);
+    return { headline, body, status, todayTicket, todayTxn, lastDate };
+  }, [dailySales, budgetData]);
 
   const mood = {
     critical: { dot: 'rgba(239,68,68,0.8)', ring: 'rgba(239,68,68,0.15)', label: 'atención', icon: TrendingDown, color: '#dc2626' },

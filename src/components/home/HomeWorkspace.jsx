@@ -1092,7 +1092,7 @@ export default function HomeWorkspace({
               }} />
 
               <div className="relative z-10 flex items-center px-6 py-5 gap-4">
-                <ExecutiveSummaryStrip dailySales={filteredSales} budget={budgetData} weather={latestWeather} />
+                <ExecutiveSummaryStrip storeCode={selectedStore} district={selectedDistrict} />
               </div>
             </motion.div>
 
