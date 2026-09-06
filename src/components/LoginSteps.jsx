@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Lock, Eye, EyeOff, AlertTriangle, Check, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import DistrictPicker from '@/components/DistrictPicker';
 import StoreSelector from '@/components/StoreSelector';
 
 function StepLabel({ num, children, done }) {
@@ -30,29 +29,23 @@ export default function LoginSteps({
 
   return (
     <div className="space-y-4">
-      {/* 01 Distrito */}
-      <div>
-        <StepLabel num="01" done={!!selectedDistrict}>Distrito</StepLabel>
-        <DistrictPicker selectedDistrict={selectedDistrict} onDistrictChange={onDistrictChange} />
-      </div>
-
-      {/* 02 Tienda (oculto para gerente) */}
+      {/* 01 Tienda (oculto para gerente) */}
       {!isGerente && (
         <div>
-          <StepLabel num="02" done={!!pendingStore}>Tienda</StepLabel>
+          <StepLabel num="01" done={!!pendingStore}>Tienda</StepLabel>
           <StoreSelector
             selectedStore={pendingStore}
             onStoreChange={onStoreChange}
             selectedDistrict={selectedDistrict}
             disabled={storeDisabled}
-            placeholder={selectedDistrict ? 'Selecciona una tienda' : 'Primero selecciona un distrito'}
+            placeholder="Selecciona una tienda"
           />
         </div>
       )}
 
-      {/* 03 Contraseña */}
+      {/* 02 Contraseña */}
       <div>
-        <StepLabel num={isGerente ? '02' : '03'} done={!!loginPassword}>Contraseña</StepLabel>
+        <StepLabel num="02" done={!!loginPassword}>Contraseña</StepLabel>
         <div className="relative">
           <Lock className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${passwordDisabled ? 'text-slate-300' : 'text-rose-400'}`} />
           <input

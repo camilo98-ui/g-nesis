@@ -230,7 +230,7 @@ const MENU_ITEMS = [
 
 export default function Home() {
   const [selectedStore, setSelectedStore] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('BOGOTA NOROCCIDENTE');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStory, setShowStory] = useState(false);
   const [showDirectory, setShowDirectory] = useState(false);
@@ -422,7 +422,7 @@ export default function Home() {
       const session = JSON.parse(savedSession);
       setSelectedStore(session.store);
       setSelectedRole(session.role || 'lider');
-      setSelectedDistrict(session.district || '');
+      setSelectedDistrict(session.district || 'BOGOTA NOROCCIDENTE');
       setIsLoggedIn(true);
     }
 
