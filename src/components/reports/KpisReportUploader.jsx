@@ -148,6 +148,20 @@ function parseKpisExcel(rows, monthNum, yearNum) {
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
+// Reintenta una operación que falla por rate limit con backoff exponencial
+async function withRetry(fn, baseDelay = 1500, maxRetries = 6) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const isRateLimit = err?.message?.toLowerCase().includes('rate limit') || err?.status === 429;
+      if (!isRateLimit || attempt === maxRetries) throw err;
+      const wait = baseDelay * Math.pow(2, attempt);
+      await new Promise(r => setTimeout(r, wait));
+    }
+  }
+}
+
 export default function KpisReportUploader({ onClose, onSuccess }) {
   const now = new Date();
   const [file, setFile] = useState(null);
@@ -200,11 +214,11 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
     try {
       let hasMore = true;
       while (hasMore) {
-        const result = await base44.entities.SalesReport.deleteMany({
-          month: period.month, year: period.year
-        });
+        const result = await withRetry(() =>
+          base44.entities.SalesReport.deleteMany({ month: period.month, year: period.year })
+        );
         hasMore = result?.has_more === true;
-        if (hasMore) await new Promise(r => setTimeout(r, 300));
+        if (hasMore) await new Promise(r => setTimeout(r, 1200));
       }
       await fetchHistory();
       onSuccess?.();
@@ -266,28 +280,30 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
         setMessage(`Eliminando registros anteriores del período...`);
         let deletedCount = 0;
         let hasMore = true;
+        let deletePass = 0;
         while (hasMore) {
-          const result = await base44.entities.SalesReport.deleteMany({
-            month: selectedMonth, year: selectedYear
-          });
+          const result = await withRetry(() =>
+            base44.entities.SalesReport.deleteMany({ month: selectedMonth, year: selectedYear })
+          );
           deletedCount += (result?.deleted_count || 0);
           hasMore = result?.has_more === true;
-          if (hasMore) await new Promise(r => setTimeout(r, 300));
+          deletePass++;
+          if (hasMore) await new Promise(r => setTimeout(r, 1200 + deletePass * 500));
         }
         if (deletedCount > 0) {
           setMessage(`Eliminados ${deletedCount} registros anteriores. Subiendo nuevos...`);
         }
 
-        // 2. Insertar de a 1 registro por vez con pausa (más lento pero sin rate limit)
+        // 2. Insertar en lotes pequeños con pausa y reintento ante rate limit
         let totalInserted = 0;
-        const chunkSize = 20;
+        const chunkSize = 10;
         for (let i = 0; i < records.length; i += chunkSize) {
           const chunk = records.slice(i, i + chunkSize);
-          await base44.entities.SalesReport.bulkCreate(chunk);
+          await withRetry(() => base44.entities.SalesReport.bulkCreate(chunk));
           totalInserted += chunk.length;
           setProgress({ current: totalInserted, total: records.length });
           setMessage(`Subiendo... ${totalInserted}/${records.length} registros`);
-          await new Promise(r => setTimeout(r, 600));
+          await new Promise(r => setTimeout(r, 1200));
         }
         setStatus('success');
         setMessage(`✅ ${totalInserted} productos cargados correctamente.`);
