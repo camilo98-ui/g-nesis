@@ -178,21 +178,27 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
   const fetchHistory = useCallback(async () => {
     setHistoryLoading(true);
     try {
-      // Traer registros recientes y deduplicar por periodo mes/año
-      const records = await base44.entities.SalesReport.list('-uploaded_date', 200);
-      const seen = new Set();
+      // Recorrer los últimos 36 meses consultando si hay registros cargados
+      const now = new Date();
       const periods = [];
-      for (const r of (records || [])) {
-        if (!r.month || !r.year) continue;
-        const key = `${r.year}-${r.month}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        periods.push({
-          month: r.month,
-          year: r.year,
-          uploadedAt: r.uploaded_at || r.created_date,
-          reportId: r.report_id,
-        });
+      for (let i = 0; i < 36; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const m = d.getMonth() + 1;
+        const y = d.getFullYear();
+        try {
+          const sample = await withRetry(() =>
+            base44.entities.SalesReport.filter({ month: m, year: y }, '-uploaded_date', 1)
+          );
+          if (Array.isArray(sample) && sample.length > 0) {
+            periods.push({
+              month: m,
+              year: y,
+              uploadedAt: sample[0].uploaded_at || sample[0].created_date,
+              reportId: sample[0].report_id,
+            });
+          }
+        } catch (e) { /* continuar con el siguiente mes */ }
+        await new Promise(r => setTimeout(r, 350));
       }
       // Ordenar por periodo descendente
       periods.sort((a, b) => (b.year - a.year) || (b.month - a.month));
