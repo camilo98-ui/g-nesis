@@ -21,6 +21,11 @@ const BASE_STORES = [
   { code: "BTA 71", name: "CC CASA BLANCA",        displayName: "BOGOTA 71 (CC CASABLANCA)" },
   { code: "BTA 78", name: "CC PLAZA IMPERIAL 2",  displayName: "BOGOTA 78 (CC PLAZA IMPERIAL 2)" },
   { code: "BTA 85", name: "MANSION CAJICA",       displayName: "BOGOTA 85 (MANSIÓN CAJICÁ)" },
+  { code: "BTA 11", name: "CC PALATINO",          displayName: "BOGOTA 11 (CC PALATINO)" },
+  { code: "BTA 16", name: "CC SAN RAFAEL",        displayName: "BOGOTA 16 (CC SAN RAFAEL)" },
+  { code: "BTA 42", name: "CC BULEVAR NIZA",      displayName: "BOGOTA 42 (CC BULEVAR NIZA)" },
+  { code: "BTA 49", name: "HOMECENTER CEDRITOS",  displayName: "BOGOTA 49 (HOMECENTER CEDRITOS)" },
+  { code: "BTA 92", name: "CC CEDRITOS",          displayName: "BOGOTA 92 (CC CEDRITOS)" },
   { code: "TUNJA 1", name: "CC UNICENTRO",        displayName: "TUNJA 1 (CC UNICENTRO)" },
   { code: "TUNJA 2", name: "CC VIVA TUNJA",       displayName: "TUNJA 2 (CC VIVA TUNJA)" },
 ];

@@ -322,7 +322,12 @@ const LEADERS = {
   'TUNJA 2': 'Moni',
   'BTA 85': 'Edna',
   'BTA 56': 'Cris',
-  'BTA 27': 'Caro'
+  'BTA 27': 'Caro',
+  'BTA 92': 'Yaritza',
+  'BTA 42': 'Rudy',
+  'BTA 49': 'Alejandro',
+  'BTA 16': 'Rene',
+  'BTA 11': 'Andres'
 };
 
 // ── MAIN COMPONENT ───────────────────────────────────────────────────────────
