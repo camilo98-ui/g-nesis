@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import { Upload, X, CheckCircle, AlertCircle, Loader2, BarChart3 } from 'lucide-react';
+import { Upload, X, CheckCircle, AlertCircle, Loader2, BarChart3, Trash2, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 // xlsx imported dynamically to avoid React conflicts
 
@@ -156,7 +156,64 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [deletingPeriod, setDeletingPeriod] = useState(null);
   const fileRef = useRef();
+
+  const fetchHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      // Traer registros recientes y deduplicar por periodo mes/año
+      const records = await base44.entities.SalesReport.list('-uploaded_date', 200);
+      const seen = new Set();
+      const periods = [];
+      for (const r of (records || [])) {
+        if (!r.month || !r.year) continue;
+        const key = `${r.year}-${r.month}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        periods.push({
+          month: r.month,
+          year: r.year,
+          uploadedAt: r.uploaded_at || r.created_date,
+          reportId: r.report_id,
+        });
+      }
+      // Ordenar por periodo descendente
+      periods.sort((a, b) => (b.year - a.year) || (b.month - a.month));
+      setHistory(periods);
+    } catch (err) {
+      console.error('Error cargando historial:', err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
+
+  const handleDeletePeriod = async (period) => {
+    if (!window.confirm(`¿Eliminar todos los registros de ${MONTHS[period.month - 1]} ${period.year}? Podrás volver a subir un archivo para este mes.`)) return;
+    setDeletingPeriod(period);
+    try {
+      let hasMore = true;
+      while (hasMore) {
+        const result = await base44.entities.SalesReport.deleteMany({
+          month: period.month, year: period.year
+        });
+        hasMore = result?.has_more === true;
+        if (hasMore) await new Promise(r => setTimeout(r, 300));
+      }
+      await fetchHistory();
+      onSuccess?.();
+    } catch (err) {
+      alert(`Error al eliminar: ${err.message}`);
+    } finally {
+      setDeletingPeriod(null);
+    }
+  };
 
   const handleFileChange = (e) => {
     const f = e.target.files?.[0];
@@ -234,6 +291,7 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
         }
         setStatus('success');
         setMessage(`✅ ${totalInserted} productos cargados correctamente.`);
+        fetchHistory();
         onSuccess?.();
       } catch (err) {
         setStatus('error');
@@ -318,6 +376,40 @@ export default function KpisReportUploader({ onClose, onSuccess }) {
               </select>
             </div>
             <p className="text-[10px] text-indigo-500">Columnas: Departamento · Sección · Descripción · Tienda · Participación · Venta</p>
+          </div>
+
+          {/* Historial de meses cargados */}
+          <div className="border border-slate-200 rounded-xl overflow-hidden">
+            <div className="bg-slate-50 px-4 py-2 flex items-center gap-2 border-b border-slate-200">
+              <History className="w-4 h-4 text-slate-600" />
+              <p className="text-xs font-bold text-slate-700">Historial de meses cargados</p>
+              {historyLoading && <Loader2 className="w-3 h-3 animate-spin text-slate-400 ml-auto" />}
+            </div>
+            <div className="max-h-40 overflow-y-auto divide-y divide-slate-100">
+              {history.length === 0 && !historyLoading ? (
+                <p className="px-4 py-3 text-xs text-slate-400 text-center">Sin reportes cargados todavía</p>
+              ) : (
+                history.map((p) => {
+                  const isDeleting = deletingPeriod?.month === p.month && deletingPeriod?.year === p.year;
+                  return (
+                    <div key={`${p.year}-${p.month}`} className="px-4 py-2 flex items-center justify-between hover:bg-slate-50">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-700">{MONTHS[p.month - 1]} {p.year}</p>
+                        <p className="text-[10px] text-slate-400">{new Date(p.uploadedAt).toLocaleDateString('es-CO')}</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeletePeriod(p)}
+                        disabled={isDeleting || status === 'uploading'}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors disabled:opacity-50"
+                        title="Eliminar este mes"
+                      >
+                        {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
 
           {message && (
