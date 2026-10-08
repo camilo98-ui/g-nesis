@@ -28,6 +28,7 @@ import { useNova } from '@/components/NovaContext';
 import ProductTicketAnalysis from '@/components/reports/ProductTicketAnalysis';
 import WeeklyComparison from './WeeklyComparison';
 import TakeawayCard from './TakeawayCard';
+import MonthlySalesBudgetCard from './MonthlySalesBudgetCard';
 import DailyTrendChart from './DailyTrendChart';
 import ExecutiveSummaryStrip from './ExecutiveSummaryStrip';
 import GerenteDashboard from './GerenteDashboard';
@@ -1486,16 +1487,14 @@ export default function HomeWorkspace({
             </motion.div>
             }
 
-            {/* ── TAKEAWAY CARD ── */}
+            {/* ── CUMPLIMIENTO PPT VENTA DEL MES ── */}
             {!isGerente &&
-            <TakeawayCard
+            <MonthlySalesBudgetCard
               dailySales={todaySales}
-              budget={takeawayBudgetOverride ?? activeBudget?.takeaway_budget ?? 0}
-              storeBudget={activeBudget?.sales_budget ?? 0}
+              budget={activeBudget?.sales_budget ?? 0}
               onBudgetChange={async (val) => {
-                setTakeawayBudgetOverride(val);
                 if (activeBudget?.id) {
-                  await base44.entities.Budget.update(activeBudget.id, { takeaway_budget: val });
+                  await base44.entities.Budget.update(activeBudget.id, { sales_budget: val });
                 }
               }} />
 
