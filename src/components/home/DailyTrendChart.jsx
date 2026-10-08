@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip, Legend } from 'recharts';
 import { TrendingUp, Check, X as XIcon } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -19,9 +19,13 @@ const fmtFull = (n) => {
   return `${sign}$ ${Math.abs(n).toLocaleString('es-CO')}`;
 };
 
+const POPSY_MAGENTA = '#C21875';
+const PPT_COLOR = 'rgba(148, 163, 184, 0.45)'; // gris translúcido
+
 function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
-  const d = payload[0].payload;
+  const d = payload[0]?.payload;
+  if (!d) return null;
   const met = d.ventas >= d.ppt;
   const pct = d.ppt > 0 ? Math.round(d.ventas / d.ppt * 100) : 0;
   const diff = d.ventas - d.ppt;
@@ -38,13 +42,13 @@ function CustomTooltip({ active, payload }) {
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-3" style={{ minWidth: 180 }}>
       <p className="text-[11px] font-bold text-slate-800 mb-2 capitalize">{label}</p>
       <div className="flex items-center gap-2 mb-1">
-        <TrendingUp className="w-3 h-3 text-slate-400" />
+        <div className="w-3 h-3 rounded-sm" style={{ background: POPSY_MAGENTA }} />
         <span className="text-[10px] text-slate-500">Venta:</span>
         <span className="text-[10px] font-bold text-slate-800 ml-auto">{fmtFull(d.ventas)}</span>
       </div>
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-3 h-3 rounded-sm" style={{ background: '#6366f1' }} />
-        <span className="text-[10px] text-slate-500">Meta:</span>
+        <div className="w-3 h-3 rounded-sm" style={{ background: '#94a3b8' }} />
+        <span className="text-[10px] text-slate-500">PPT:</span>
         <span className="text-[10px] font-bold text-slate-800 ml-auto">{fmtFull(d.ppt)}</span>
       </div>
       <div className="border-t border-slate-100 my-2" />
@@ -66,22 +70,18 @@ export default function DailyTrendChart({ data = [] }) {
     return <div className="h-40 flex items-center justify-center text-[11px] text-slate-300">Sin datos del mes actual</div>;
   }
 
-  const maxVal = Math.max(...data.map(d => d.brecha || 0), 0);
-  const minVal = Math.min(...data.map(d => d.brecha || 0), 0);
-  const domain = [
-    Math.min(minVal * 1.15, 0),
-    Math.max(maxVal * 1.15, 0)
-  ];
+  const maxVal = Math.max(...data.map(d => Math.max(d.ventas || 0, d.ppt || 0), 0));
+  const domain = [0, Math.max(maxVal * 1.12, 0)];
 
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
         <TrendingUp className="w-3.5 h-3.5 text-slate-400" />
-        <p className="text-[11px] font-bold text-slate-700">Tendencia Diaria del Período</p>
+        <p className="text-[11px] font-bold text-slate-700">Ventas vs PPT del Día</p>
       </div>
 
       <ResponsiveContainer width="100%" height={180}>
-        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }} barGap={1} barCategoryGap="18%">
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
           <XAxis dataKey="day" tick={{ fontSize: 8, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
           <YAxis
@@ -92,11 +92,12 @@ export default function DailyTrendChart({ data = [] }) {
             tickFormatter={(v) => fmt(v)}
             width={40}
           />
-          <ReferenceLine y={0} stroke="#cbd5e1" strokeDasharray="4 4" />
+          <ReferenceLine y={0} stroke="#cbd5e1" />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
-          <Bar dataKey="brecha" radius={[4, 4, 4, 4]} maxBarSize={28}>
+          <Bar dataKey="ppt" name="PPT" fill={PPT_COLOR} radius={[3, 3, 0, 0]} maxBarSize={14} />
+          <Bar dataKey="ventas" name="Ventas" radius={[3, 3, 0, 0]} maxBarSize={14}>
             {data.map((entry, i) => (
-              <Cell key={i} fill={entry.brecha >= 0 ? '#b2f5ea' : '#feb2b2'} />
+              <Cell key={i} fill={entry.ventas >= entry.ppt ? POPSY_MAGENTA : '#f9a8d4'} />
             ))}
           </Bar>
         </BarChart>
@@ -104,12 +105,12 @@ export default function DailyTrendChart({ data = [] }) {
 
       <div className="flex items-center justify-center gap-4 mt-2">
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#b2f5ea' }} />
-          <span className="text-[9px] text-slate-500 font-medium">Meta superada</span>
+          <div className="w-2.5 h-2.5 rounded-sm" style={{ background: POPSY_MAGENTA }} />
+          <span className="text-[9px] text-slate-500 font-medium">Ventas</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#feb2b2' }} />
-          <span className="text-[9px] text-slate-500 font-medium">Meta no alcanzada</span>
+          <div className="w-2.5 h-2.5 rounded-sm" style={{ background: '#94a3b8', opacity: 0.5 }} />
+          <span className="text-[9px] text-slate-500 font-medium">PPT (Excel)</span>
         </div>
       </div>
     </div>
