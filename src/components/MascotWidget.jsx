@@ -612,57 +612,31 @@ ${newMessages.map(m => `${m.role === 'user' ? 'Usuario' : 'Nova'}: ${m.content}`
 Analyze now. Think like a business analyst. Ground every statement in data. Explain reasoning. Identify patterns. Provide recommendations. Be intelligent, professional, and precise.`;
 
     try {
-      // Detect if query is analytical/business question
-      const analyticalTerms = ['análisis', 'tendencia', 'proyección', 'brecha', 'cumplimiento', 'ebitda', 'margen', 'riesgo', 'anomalía', 'comparar', 'vs', 'vs.', 'impacto', 'estrategia', 'recomendación', 'diagnóstico', 'forecast', 'variación', 'cambio', 'crecimiento', 'caída', 'rendimiento'];
-      const isAnalyticalQuery = analyticalTerms.some(term => userText.toLowerCase().includes(term));
-
       let enrichedPrompt = contextPrompt;
-      let response;
 
-      // Always use advanced intelligence function with full platform data access
-      if (pageData?.storeCode) {
-        try {
-          const intelligenceRes = await base44.functions.invoke('novaIntelligence', {
-            userQuery: userText,
-            storeCode: pageData.storeCode,
-            pageData,
-            businessContext: { messages: newMessages }
-          });
+      // Enriquecer con productos si la consulta menciona un producto/categoría
+      if (pageData?.products && pageData.products.length > 0) {
+        const searchLower = userText.toLowerCase();
+        const matchedProducts = pageData.products.filter(p =>
+          p.name?.toLowerCase().includes(searchLower) ||
+          p.section?.toLowerCase().includes(searchLower) ||
+          p.department?.toLowerCase().includes(searchLower)
+        );
 
-          if (intelligenceRes.data?.analysis) {
-            response = intelligenceRes.data.analysis;
-          } else {
-            response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt, model: 'claude_sonnet_4_6' });
-          }
-        } catch (analyzeErr) {
-          // Fallback: still use advanced model for comprehensive analysis
-          response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt, model: 'claude_sonnet_4_6' });
-        }
-      } else {
-        // For product/section queries, use standard approach
-        if (pageData?.products && pageData.products.length > 0) {
-          const searchLower = userText.toLowerCase();
-          const matchedProducts = pageData.products.filter(p => 
-            p.name?.toLowerCase().includes(searchLower) ||
-            p.section?.toLowerCase().includes(searchLower) ||
-            p.department?.toLowerCase().includes(searchLower)
+        if (matchedProducts.length > 0) {
+          const productsInfo = matchedProducts.slice(0, 5).map(p => {
+            return `PRODUCTO: ${p.name} (${p.department} › ${p.section}) → Venta: ${fmt(p.sales)} | Participación: ${p.participation?.toFixed(2)}% | Unidades: ${p.units || 0}`;
+          }).join('\n');
+
+          enrichedPrompt = contextPrompt.replace(
+            'CONVERSATION:',
+            `PRODUCTOS ENCONTRADOS:\n${productsInfo}\n\nCONVERSATION:`
           );
-          
-          if (matchedProducts.length > 0) {
-            const productsInfo = matchedProducts.slice(0, 5).map(p => {
-              const fmt = (n) => n ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Math.round(n)) : '$0';
-              return `PRODUCTO: ${p.name} (${p.department} › ${p.section}) → Venta: ${fmt(p.sales)} | Participación: ${p.participation?.toFixed(2)}% | Unidades: ${p.units || 0}`;
-            }).join('\n');
-            
-            enrichedPrompt = contextPrompt.replace(
-              'CONVERSACIÓN:',
-              `PRODUCTOS ENCONTRADOS:\n${productsInfo}\n\nCONVERSACIÓN:`
-            );
-          }
         }
-
-        response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt, model: 'claude_sonnet_4_6' });
       }
+
+      // Usar InvokeLLM directamente (siempre disponible, sin depender de backend functions)
+      const response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt });
 
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch {
