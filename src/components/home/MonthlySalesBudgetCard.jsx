@@ -198,7 +198,8 @@ export default function MonthlySalesBudgetCard({ dailySales = [], budget = 0, on
     }));
 
     const dailyMeta = budget > 0 ? budget / daysInMonth : 0;
-    const dailyAvg = daysWithData > 0 ? totalSold / daysWithData : 0;
+    // Promedio real basado en días calendario transcurridos (igual que budgetCalculations.js)
+    const dailyAvg = dayOfMonth > 0 ? totalSold / dayOfMonth : 0;
     const projection = totalSold + dailyAvg * daysRemaining;
 
     const compliance = budget > 0 ? (totalSold / budget) * 100 : null;

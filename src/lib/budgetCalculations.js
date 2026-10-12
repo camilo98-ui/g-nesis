@@ -145,7 +145,9 @@ export function calculateBudgetData(activeBudget, dailySales, dailyBudgets = [],
     const excelRec = dailyBudgets?.find((db) => (db.date?.split('T')[0] || db.date) === dayStr);
     return sum + (excelRec?.budget_amount > 0 ? excelRec.budget_amount : getDailyBudget(day));
   }, 0);
-  const monthProjection = totalMonthSales + remainingExcelBudget;
+  // Proyección de cierre = ritmo actual (promedio real diario × días restantes)
+  // Fórmula unificada con MonthlySalesBudgetCard para que todas las vistas coincidan
+  const monthProjection = totalMonthSales + monthAvgDailySales * daysRemainingMonth;
   const monthProjectionCompliance = adjustedMonthlyBudget > 0 ? monthProjection / adjustedMonthlyBudget * 100 : 0;
 
   return {
