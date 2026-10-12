@@ -639,8 +639,12 @@ Analyze now. Think like a business analyst. Ground every statement in data. Expl
       const response = await base44.integrations.Core.InvokeLLM({ prompt: enrichedPrompt });
 
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Error de análisis. Reintenta con otra pregunta.' }]);
+    } catch (err) {
+      const isLimit = err?.message?.includes('limit of integrations') || err?.message?.includes('upgrade your plan');
+      const msg = isLimit
+        ? 'Se agotaron los créditos de IA del mes. Para seguir conversando, subí el plan o esperá al reinicio del ciclo mensual.'
+        : 'Error de análisis. Reintenta con otra pregunta.';
+      setMessages(prev => [...prev, { role: 'assistant', content: msg }]);
     } finally {
       setIsLoading(false);
     }
