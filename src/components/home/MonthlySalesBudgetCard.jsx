@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, ChevronDown, ChevronUp, Check, X, Pencil, CalendarDays, TrendingUp, Trophy, Zap } from 'lucide-react';
+import { Target, ChevronDown, ChevronUp, CalendarDays, TrendingUp, Trophy, Zap } from 'lucide-react';
 import { startOfMonth, endOfMonth, format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -165,10 +165,8 @@ function DailyComplianceChart({ dailyData, dailyMeta, daysInMonth, today }) {
 }
 
 // ════════════════════════════════════════
-export default function MonthlySalesBudgetCard({ dailySales = [], budget = 0, onBudgetChange }) {
+export default function MonthlySalesBudgetCard({ dailySales = [], budget = 0 }) {
   const [expanded, setExpanded] = useState(false);
-  const [editingBudget, setEditingBudget] = useState(false);
-  const [budgetInput, setBudgetInput] = useState('');
 
   const analysis = useMemo(() => {
     const now = new Date();
@@ -283,30 +281,11 @@ export default function MonthlySalesBudgetCard({ dailySales = [], budget = 0, on
 
           {/* Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {editingBudget ?
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} onClick={(e) => e.stopPropagation()}>
-                <input autoFocus type="number" value={budgetInput}
-                  onChange={(e) => setBudgetInput(e.target.value)}
-                  placeholder="PPT..."
-                  style={{ width: 82, fontSize: 10, border: `1px solid ${PINK_MID}`, borderRadius: 6, padding: '3px 6px', outline: 'none', color: '#374151' }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') { onBudgetChange?.(Number(budgetInput)); setEditingBudget(false); }
-                    if (e.key === 'Escape') setEditingBudget(false);
-                  }} />
-                <button onClick={() => { onBudgetChange?.(Number(budgetInput)); setEditingBudget(false); }} style={{ color: GREEN }}>
-                  <Check style={{ width: 12, height: 12 }} />
-                </button>
-                <button onClick={() => setEditingBudget(false)} style={{ color: '#94a3b8' }}>
-                  <X style={{ width: 12, height: 12 }} />
-                </button>
-              </div> :
-              <button
-                onClick={() => { setBudgetInput(budget > 0 ? String(budget) : ''); setEditingBudget(true); }}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 9, color: '#94a3b8', fontWeight: 600, letterSpacing: '0.05em', cursor: 'pointer',
-                  padding: '4px 10px', borderRadius: 8, border: `1px solid ${PINK_MID}`, background: PINK_LIGHT }}>
-                {budget > 0 ? `PPT ${fmt(budget)}` : 'Agregar PPT'}
-                <Pencil style={{ width: 9, height: 9 }} />
-              </button>
+            {budget > 0 &&
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 9, color: '#94a3b8', fontWeight: 600, letterSpacing: '0.05em',
+                padding: '4px 10px', borderRadius: 8, border: `1px solid ${PINK_MID}`, background: PINK_LIGHT }}>
+                PPT {fmt(budget)}
+              </span>
             }
             <button onClick={(e) => { e.stopPropagation(); setExpanded((e) => !e); }} style={{ color: '#cbd5e1', cursor: 'pointer', padding: 2 }}>
               {expanded ? <ChevronUp style={{ width: 16, height: 16 }} /> : <ChevronDown style={{ width: 16, height: 16 }} />}
