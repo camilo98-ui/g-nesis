@@ -29,7 +29,6 @@ import ProductTicketAnalysis from '@/components/reports/ProductTicketAnalysis';
 import WeeklyComparison from './WeeklyComparison';
 import TakeawayCard from './TakeawayCard';
 import MonthlySalesBudgetCard from './MonthlySalesBudgetCard';
-import SalesVsBudgetCurve from './SalesVsBudgetCurve';
 import DailyTrendChart from './DailyTrendChart';
 import ExecutiveSummaryStrip from './ExecutiveSummaryStrip';
 import GerenteDashboard from './GerenteDashboard';
@@ -1499,14 +1498,6 @@ export default function HomeWorkspace({
                 }
               }} />
 
-            }
-
-            {/* ── CURVA REAL VS PRESUPUESTO ACUMULADO ── */}
-            {!isGerente && selectedStore &&
-            <SalesVsBudgetCurve
-              dailySales={todaySales}
-              dailyBudgets={dailyBudgets}
-              budget={activeBudget?.sales_budget ?? 0} />
             }
 
             {/* ── PRODUCT × TICKET ANALYSIS ── */}
